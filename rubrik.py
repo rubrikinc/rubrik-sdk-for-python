@@ -16,9 +16,7 @@ class api:
         self.password = password
 
     def _authorization_header(self):
-        """Takes a username and password and returns a value suitable for
-        using as value of an Authorization header to do basic auth.
-        """
+        """Create the authorization header used in the API calls."""
 
         credentials = '{}:{}'.format(self.username, self.password)
 
@@ -36,11 +34,14 @@ class api:
         return authorization_header
 
     def _api_validation(self, api_version, api_endpoint):
+        "Validate the API Version and API Endpoint provided by the end user"
         valid_api_versions = ['v1', 'internal']
 
+        # Validate the API Version
         if api_version not in valid_api_versions:
             sys.exit("Error: Enter a valid API version {}.".format(valid_api_versions))
 
+        # Validate the API Endpoint Syntax
         if type(api_endpoint) is not str:
             sys.exit("Error: The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
@@ -49,7 +50,15 @@ class api:
             sys.exit("Error: The API Endpoint should not end with '/'. (ex. /cluster/me)")
 
     def get(self, api_version, api_endpoint):
-        """ Connect to a Rubrik Cluster and perform a GET operation """
+        """Connect to a Rubrik Cluster and perform a GET operation.
+
+        Arguments:
+            api_version {str} -- The version of the Rubrik CDM API to call.
+            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+
+        Returns:
+            json -- The response body of the API call.
+        """
 
         self._api_validation(api_version, api_endpoint)
 
@@ -70,25 +79,17 @@ class api:
 
         return response_body
 
-    def job_status(self, url):
-        '''Get the status of a Rubrik job '''
-
-        header = self._authorization_header()
-
-        try:
-            api_request = requests.get(url, verify=False, headers=header)
-            # Raise an error if they request was not successful
-            api_request.raise_for_status()
-        except requests.exceptions.RequestException as error_message:
-            print(error_message)
-            sys.exit(1)
-
-        response_body = api_request.json()
-
-        return response_body
-
     def post(self, api_version, api_endpoint, config):
-        """ Connect to a Rubrik Cluster and perform a POST operation """
+        """Connect to a Rubrik Cluster and perform a POST operation.
+
+        Arguments:
+            api_version {str} -- The version of the Rubrik CDM API to call.
+            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+            config {[type]} -- description
+
+        Returns:
+            json -- The response body of the API call.
+        """
 
         self._api_validation(api_version, api_endpoint)
 
@@ -103,15 +104,23 @@ class api:
             # Raise an error if they request was not successful
             api_request.raise_for_status()
         except requests.exceptions.RequestException as error_message:
-            print(error_message)
-            sys.exit(1)
+            sys.exit(error_message)
 
         response_body = api_request.json()
 
         return response_body
 
     def patch(self, api_version, api_endpoint, config):
-        """ Connect to a Rubrik Cluster and perform a POST operation """
+        """Connect to a Rubrik Cluster and perform a PATCH operation.
+
+        Arguments:
+            api_version {str} -- The version of the Rubrik CDM API to call.
+            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+            config {[type]} -- description
+
+        Returns:
+            json -- The response body of the API call.
+        """
 
         self._api_validation(api_version, api_endpoint)
 
@@ -126,15 +135,23 @@ class api:
             # Raise an error if they request was not successful
             api_request.raise_for_status()
         except requests.exceptions.RequestException as error_message:
-            print(error_message)
-            sys.exit(1)
+            sys.exit(error_message)
 
         response_body = api_request.json()
 
         return response_body
 
-    def delete(self, api_version, api_endpoint):
-        """ Connect to a Rubrik Cluster and perform a DELETE operation """
+    def delete(self, api_version, api_endpoint, config):
+        """Connect to a Rubrik Cluster and perform a DELETE operation.
+
+        Arguments:
+            api_version {str} -- The version of the Rubrik CDM API to call.
+            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+            config {[type]} -- description
+
+        Returns:
+            json -- The response body of the API call.
+        """
 
         self._api_validation(api_version, api_endpoint)
 
@@ -149,8 +166,30 @@ class api:
             # Raise an error if they request was not successful
             api_request.raise_for_status()
         except requests.exceptions.RequestException as error_message:
-            print(error_message)
-            sys.exit(1)
+            sys.exit(error_message)
+
+        response_body = api_request.json()
+
+        return response_body
+
+    def job_status(self, url):
+        """Connect to the Rubrik Cluster and get the status of a particular job.
+
+        Arguments:
+            url {str} -- The job status URL provided by a previous API call.
+
+        Returns:
+            json -- The response body of the API call.
+        """
+
+        header = self._authorization_header()
+
+        try:
+            api_request = requests.get(url, verify=False, headers=header)
+            # Raise an error if they request was not successful
+            api_request.raise_for_status()
+        except requests.exceptions.RequestException as error_message:
+            sys.exit(error_message)
 
         response_body = api_request.json()
 
