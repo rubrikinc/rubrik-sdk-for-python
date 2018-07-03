@@ -16,7 +16,12 @@ class api:
         self.password = password
 
     def _authorization_header(self):
-        """Create the authorization header used in the API calls."""
+        """Create the authorization header used in the API calls.
+
+
+        Returns:
+            dict -- The authorization header that utilizes Basic authentication.
+        """
 
         credentials = '{}:{}'.format(self.username, self.password)
 
@@ -34,7 +39,13 @@ class api:
         return authorization_header
 
     def _api_validation(self, api_version, api_endpoint):
-        "Validate the API Version and API Endpoint provided by the end user"
+        """Validate the API Version and API Endpoint provided by the end user
+
+        Arguments:
+            api_version {str} -- The version of the Rubrik CDM API to call.
+            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+        """
+
         valid_api_versions = ['v1', 'internal']
 
         # Validate the API Version
@@ -72,8 +83,7 @@ class api:
             # Raise an error if they request was not successful
             api_request.raise_for_status()
         except requests.exceptions.RequestException as error_message:
-            print(error_message)
-            sys.exit(1)
+            sys.exit(error_message)
 
         response_body = api_request.json()
 
@@ -116,7 +126,7 @@ class api:
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call.
             api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
-            config {[type]} -- description
+            config {dict} -- description
 
         Returns:
             json -- The response body of the API call.
@@ -141,7 +151,7 @@ class api:
 
         return response_body
 
-    def delete(self, api_version, api_endpoint, config):
+    def delete(self, api_version, api_endpoint):
         """Connect to a Rubrik Cluster and perform a DELETE operation.
 
         Arguments:
@@ -155,14 +165,12 @@ class api:
 
         self._api_validation(api_version, api_endpoint)
 
-        config = json.dumps(config)
-
         request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
 
         header = self._authorization_header()
 
         try:
-            api_request = requests.delete(request_url, data=config, verify=False, headers=header)
+            api_request = requests.delete(request_url, verify=False, headers=header)
             # Raise an error if they request was not successful
             api_request.raise_for_status()
         except requests.exceptions.RequestException as error_message:
