@@ -157,10 +157,7 @@ class api:
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call.
             api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
-            config {[type]} -- description
 
-        Returns:
-            json -- The response body of the API call.
         """
 
         self._api_validation(api_version, api_endpoint)
