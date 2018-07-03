@@ -1,4 +1,4 @@
-# Rubrik CDM SDK for Python
+# Rubrik Cloud Data Management SDK
 
 This project provies a Python package that makes it easy to interfact with the Rubrik CDM API.
 
@@ -9,7 +9,7 @@ The SDK supports Python 2.7, 3.4, 3.5, and 3.6.
 Install via [pip](https://pip.pypa.io/en/stable/):
 
 ```
-$ pip install boto
+$ pip install rubrik
 ```
 Install from source:
 ```
