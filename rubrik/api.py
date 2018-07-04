@@ -23,7 +23,7 @@ class api():
             api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
 
         Returns:
-            json -- The response body of the API call.
+            dict -- The response body of the API call.
         """
 
         self._api_validation(api_version, api_endpoint)
@@ -53,7 +53,7 @@ class api():
             config {[type]} -- description
 
         Returns:
-            json -- The response body of the API call.
+            dict -- The response body of the API call.
         """
 
         self._api_validation(api_version, api_endpoint)
@@ -84,7 +84,7 @@ class api():
             config {dict} -- description
 
         Returns:
-            json -- The response body of the API call.
+            dict -- The response body of the API call.
         """
 
         self._api_validation(api_version, api_endpoint)
@@ -112,7 +112,6 @@ class api():
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call.
             api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
-
         """
 
         self._api_validation(api_version, api_endpoint)
@@ -139,7 +138,7 @@ class api():
             url {str} -- The job status URL provided by a previous API call.
 
         Returns:
-            json -- The response body of the API call.
+            dict -- The response body of the API call.
         """
 
         header = self._authorization_header()
