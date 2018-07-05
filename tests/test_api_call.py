@@ -69,8 +69,14 @@ def test_patch_call(rubrik_init):
     url = "https://{}/api/{}{}".format(rubrik.node_ip, api_version, api_endpoint)
 
     config = {
-        "hostname": "string",
-        "hasAgent": True
+        "name": "string",
+        "timezone": {
+            "timezone": "America/Anchorage"
+        },
+        "geolocation": {
+            "address": "string"
+        },
+        "acceptedEulaVersion": "string"
     }
 
     response_body = {
