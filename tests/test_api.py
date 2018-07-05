@@ -3,8 +3,8 @@ import responses
 
 
 @responses.activate
-def test_get_call(rubrik_init):
-    rubrik = rubrik_init
+def test_get_call(rubrik_connect):
+    rubrik = rubrik_connect
 
     api_version = 'v1'
     api_endpoint = '/cluster/me'
@@ -25,8 +25,8 @@ def test_get_call(rubrik_init):
 
 
 @responses.activate
-def test_post_call(rubrik_init):
-    rubrik = rubrik_init
+def test_post_call(rubrik_connect):
+    rubrik = rubrik_connect
 
     api_version = 'v1'
     api_endpoint = '/host'
@@ -60,8 +60,8 @@ def test_post_call(rubrik_init):
 
 
 @responses.activate
-def test_patch_call(rubrik_init):
-    rubrik = rubrik_init
+def test_patch_call(rubrik_connect):
+    rubrik = rubrik_connect
 
     api_version = 'v1'
     api_endpoint = '/cluster/me'
@@ -105,8 +105,8 @@ def test_patch_call(rubrik_init):
 
 
 @responses.activate
-def test_delete_call(rubrik_init):
-    rubrik = rubrik_init
+def test_delete_call(rubrik_connect):
+    rubrik = rubrik_connect
 
     api_version = 'v1'
     api_endpoint = '/sla_domain/1a98504e-ppd1-411d-e235-814dc045ab87'
@@ -128,8 +128,8 @@ def test_delete_call(rubrik_init):
 
 
 @responses.activate
-def test_job_status(rubrik_init):
-    rubrik = rubrik_init
+def test_job_status(rubrik_connect):
+    rubrik = rubrik_connect
 
     url = "https://172.21.8.90/api/v1/vmware/vm/request/CREATE_VMWARE_SNAPSHOT_1f51-9520-1231-a68c-6fe1448-vm-5008_ecd2-4765-49fa-81f2-19ba417:::0"
 

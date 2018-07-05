@@ -3,8 +3,8 @@ import responses
 
 
 @responses.activate
-def test_cluster_version(rubrik_init):
-    rubrik = rubrik_init
+def test_cluster_version(rubrik_connect):
+    rubrik = rubrik_connect
 
     api_version = 'v1'
     api_endpoint = '/cluster/me/version'

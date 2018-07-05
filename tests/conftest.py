@@ -3,7 +3,7 @@ import rubrik.rubrik
 
 
 @pytest.fixture(scope='module')
-def rubrik_init():
+def rubrik_connect():
     node_ip = "172.21.8.90"
     username = "pythonsdk@rangers.lab"
     password = "DummyPassword!"
