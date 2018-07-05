@@ -24,7 +24,7 @@ class Connect(_API, _CORE):
         self.password = password
 
     def _authorization_header(self):
-        """Create the authorization header used in the API calls.
+        """Internal method used to create the authorization header used in the API calls.
 
 
         Returns:
@@ -48,7 +48,7 @@ class Connect(_API, _CORE):
 
     @staticmethod
     def _api_validation(api_version, api_endpoint):
-        """Validate the API Version and API Endpoint provided by the end user
+        """Internal method used to validate the API Version and API Endpoint provided by the end user
 
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call.
