@@ -5,6 +5,16 @@ def test_valid_url(rubrik_init):
 
     rubrik = rubrik_init
 
+    test_header = {'Content-Type': 'application/json', 'Accept': 'application/json',
+                   'Authorization': 'Basic cHl0aG9uc2RrQHJhbmdlcnMubGFiOkR1bW15UGFzc3dvcmQh'}
+
+    assert rubrik._authorization_header() == test_header
+
+
+def test_valid_url(rubrik_init):
+
+    rubrik = rubrik_init
+
     assert rubrik._api_validation('v1', '/cluster/me') == None
     assert rubrik._api_validation('internal', '/cluster/me') == None
 
