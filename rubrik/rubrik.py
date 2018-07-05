@@ -3,14 +3,14 @@ import requests
 import sys
 
 
-from rubrik.api import api
-from rubrik.core import core
+from rubrik.api import Api
+from rubrik.core import Core
 
-_API = api
-_CORE = core
+_API = Api
+_CORE = Core
 
 
-class connect(_API, _CORE):
+class Connect(_API, _CORE):
     """[summary]
 
     Arguments:

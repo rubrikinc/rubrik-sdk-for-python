@@ -1,4 +1,4 @@
-class core():
+class Core():
     """[summary]
 
     """

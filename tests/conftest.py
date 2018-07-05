@@ -8,4 +8,4 @@ def rubrik_init():
     username = "pythonsdk@rangers.lab"
     password = "DummyPassword!"
 
-    return rubrik.connect(node_ip, username, password)
+    return rubrik.Connect(node_ip, username, password)

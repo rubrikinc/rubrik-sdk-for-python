@@ -7,7 +7,7 @@ except ImportError:
     from urllib.parse import quote  # Python 3+
 
 
-class api():
+class Api():
     """[summary]
 
     """
