@@ -3,8 +3,9 @@ import requests
 import sys
 
 
-from rubrik.api import Api
-from rubrik.core import Core
+from .api import Api
+from .core import Core
+
 
 _API = Api
 _CORE = Core
@@ -25,7 +26,6 @@ class Connect(_API, _CORE):
 
     def _authorization_header(self):
         """Internal method used to create the authorization header used in the API calls.
-
 
         Returns:
             dict -- The authorization header that utilizes Basic authentication.
