@@ -3,8 +3,8 @@ import requests
 import sys
 
 
-from api import api
-from core import core
+from rubrik.api import api
+from rubrik.core import core
 
 _API = api
 _CORE = core

@@ -1,5 +1,5 @@
 import pytest
-import rubrik
+import rubrik.rubrik
 
 
 @pytest.fixture(scope='module')
@@ -8,4 +8,4 @@ def rubrik_init():
     username = "pythonsdk@rangers.lab"
     password = "DummyPassword!"
 
-    return rubrik.api(node_ip, username, password)
+    return rubrik.connect(node_ip, username, password)
