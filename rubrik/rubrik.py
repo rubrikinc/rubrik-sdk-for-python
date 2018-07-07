@@ -4,14 +4,14 @@ import sys
 
 
 from .api import Api
-from .core import Core
+from .cluster import Cluster
 
 
 _API = Api
-_CORE = Core
+_CLUSTER = Cluster
 
 
-class Connect(_API, _CORE):
+class Connect(_API, _CLUSTER):
     """[summary]
 
     Arguments:

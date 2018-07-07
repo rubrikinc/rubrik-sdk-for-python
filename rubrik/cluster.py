@@ -1,4 +1,4 @@
-class Core():
+class Cluster():
     """[summary]
 
     """
