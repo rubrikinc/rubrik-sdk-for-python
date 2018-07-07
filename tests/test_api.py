@@ -22,13 +22,30 @@ def test_get_call(rubrik_connect):
         'latestEulaVersion': '1.0'
     }
 
-    responses.add(responses.GET, url, json=response_body, status=200)
-    responses.add(responses.GET, url, status=500)
+    error_message = {
+        'errorType': 'user_error',
+        'message': 'Incorrect username/password',
+        'code': 'invalid_authentication_credentials',
+        'cause': None
+    }
 
+    # Test 1 - Successful Request
+    responses.add(responses.GET, url, json=response_body, status=200)
+    # Test 2 - Invalid Request
+    responses.add(responses.GET, url, status=500)
+    # Test 3 - Invalid Request (Rubrik provided error message)
+    responses.add(responses.GET, url, json=error_message, status=422)
+
+    # Test 1 - Successful Request
     resp = rubrik.get(api_version, api_endpoint)
     assert resp == response_body
 
+    # Test 2 - Invalid Request
     with pytest.raises(SystemExit, match="500 Server Error: Internal Server Error for url"):
+        resp = rubrik.get(api_version, api_endpoint)
+
+    # Test 3 - Invalid Request (Rubrik provided error message)
+    with pytest.raises(SystemExit, match="Error: Incorrect username/password"):
         resp = rubrik.get(api_version, api_endpoint)
 
 
@@ -57,13 +74,30 @@ def test_post_call(rubrik_connect):
         "compressionEnabled": True
     }
 
-    responses.add(responses.POST, url, json=response_body, status=200)
-    responses.add(responses.POST, url, status=500)
+    error_message = {
+        'errorType': 'user_error',
+        'message': 'Incorrect username/password',
+        'code': 'invalid_authentication_credentials',
+        'cause': None
+    }
 
+    # Test 1 - Successful Request
+    responses.add(responses.POST, url, json=response_body, status=200)
+    # Test 2 - Invalid Request
+    responses.add(responses.POST, url, status=500)
+    # Test 3 - Invalid Request (Rubrik provided error message)
+    responses.add(responses.POST, url, json=error_message, status=422)
+
+    # Test 1 - Successful Request
     resp = rubrik.post(api_version, api_endpoint, config)
     assert resp == response_body
 
+    # Test 2 - Invalid Request
     with pytest.raises(SystemExit, match="500 Server Error: Internal Server Error for url"):
+        resp = rubrik.post(api_version, api_endpoint, config)
+
+    # Test 3 - Invalid Request (Rubrik provided error message)
+    with pytest.raises(SystemExit, match="Error: Incorrect username/password"):
         resp = rubrik.post(api_version, api_endpoint, config)
 
 
@@ -102,13 +136,30 @@ def test_patch_call(rubrik_connect):
         "latestEulaVersion": "string"
     }
 
-    responses.add(responses.PATCH, url, json=response_body, status=200)
-    responses.add(responses.PATCH, url, status=500)
+    error_message = {
+        'errorType': 'user_error',
+        'message': 'Incorrect username/password',
+        'code': 'invalid_authentication_credentials',
+        'cause': None
+    }
 
+    # Test 1 - Successful Request
+    responses.add(responses.PATCH, url, json=response_body, status=200)
+    # Test 2 - Invalid Request
+    responses.add(responses.PATCH, url, status=500)
+    # Test 3 - Invalid Request (Rubrik provided error message)
+    responses.add(responses.PATCH, url, json=error_message, status=422)
+
+    # Test 1 - Successful Request
     resp = rubrik.patch(api_version, api_endpoint, config)
     assert resp == response_body
 
+    # Test 2 - Invalid Request
     with pytest.raises(SystemExit, match="500 Server Error: Internal Server Error for url"):
+        resp = rubrik.patch(api_version, api_endpoint, config)
+
+    # Test 3 - Invalid Request (Rubrik provided error message)
+    with pytest.raises(SystemExit, match="Error: Incorrect username/password"):
         resp = rubrik.patch(api_version, api_endpoint, config)
 
 
@@ -125,13 +176,30 @@ def test_delete_call(rubrik_connect):
         "response": "none"
     }
 
-    responses.add(responses.DELETE, url, json=response_body, status=204)
-    responses.add(responses.DELETE, url, status=500)
+    error_message = {
+        'errorType': 'user_error',
+        'message': 'Incorrect username/password',
+        'code': 'invalid_authentication_credentials',
+        'cause': None
+    }
 
+    # Test 1 - Successful Request
+    responses.add(responses.DELETE, url, json=response_body, status=200)
+    # Test 2 - Invalid Request
+    responses.add(responses.DELETE, url, status=500)
+    # Test 3 - Invalid Request (Rubrik provided error message)
+    responses.add(responses.DELETE, url, json=error_message, status=422)
+
+    # Test 1 - Successful Request
     resp = rubrik.delete(api_version, api_endpoint)
     assert resp == response_body
 
+    # Test 2 - Invalid Request
     with pytest.raises(SystemExit, match="500 Server Error: Internal Server Error for url"):
+        resp = rubrik.delete(api_version, api_endpoint)
+
+    # Test 3 - Invalid Request (Rubrik provided error message)
+    with pytest.raises(SystemExit, match="Error: Incorrect username/password"):
         resp = rubrik.delete(api_version, api_endpoint)
 
 
@@ -145,11 +213,28 @@ def test_job_status(rubrik_connect):
         "response": "none"
     }
 
-    responses.add(responses.GET, url, json=response_body, status=204)
-    responses.add(responses.GET, url, status=500)
+    error_message = {
+        'errorType': 'user_error',
+        'message': 'Incorrect username/password',
+        'code': 'invalid_authentication_credentials',
+        'cause': None
+    }
 
+    # Test 1 - Successful Request
+    responses.add(responses.GET, url, json=response_body, status=200)
+    # Test 2 - Invalid Request
+    responses.add(responses.GET, url, status=500)
+    # Test 3 - Invalid Request (Rubrik provided error message)
+    responses.add(responses.GET, url, json=error_message, status=422)
+
+    # Test 1 - Successful Request
     resp = rubrik.job_status(url)
     assert resp == response_body
 
+    # Test 2 - Invalid Request
     with pytest.raises(SystemExit, match="500 Server Error: Internal Server Error for url"):
+        resp = rubrik.job_status(url)
+
+    # Test 3 - Invalid Request (Rubrik provided error message)
+    with pytest.raises(SystemExit, match="Error: Incorrect username/password"):
         resp = rubrik.job_status(url)
