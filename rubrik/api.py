@@ -47,12 +47,14 @@ class Api():
                         api_request.raise_for_status()
             except:
                 api_request.raise_for_status()
-
+        except requests.exceptions.ConnectTimeout:
+            sys.exit('Error: Unable to establish a connection to the Rubrik Cluster.')
         except requests.exceptions.RequestException as error:
             # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
             try:
                 error_message
             except NameError:
+                print("Regular")
                 sys.exit(error)
             else:
                 sys.exit('Error: ' + error_message)
@@ -94,7 +96,8 @@ class Api():
                         api_request.raise_for_status()
             except:
                 api_request.raise_for_status()
-
+        except requests.exceptions.ConnectTimeout:
+            sys.exit('Error: Unable to establish a connection to the Rubrik Cluster.')
         except requests.exceptions.RequestException as error:
             # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
             try:
@@ -141,7 +144,8 @@ class Api():
                         api_request.raise_for_status()
             except:
                 api_request.raise_for_status()
-
+        except requests.exceptions.ConnectTimeout:
+            sys.exit('Error: Unable to establish a connection to the Rubrik Cluster.')
         except requests.exceptions.RequestException as error:
             # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
             try:
@@ -181,6 +185,8 @@ class Api():
                         api_request.raise_for_status()
             except:
                 api_request.raise_for_status()
+        except requests.exceptions.ConnectTimeout:
+            sys.exit('Error: Unable to establish a connection to the Rubrik Cluster.')
         except requests.exceptions.RequestException as error:
             # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
             try:
@@ -219,7 +225,8 @@ class Api():
                         api_request.raise_for_status()
             except:
                 api_request.raise_for_status()
-
+        except requests.exceptions.ConnectTimeout:
+            sys.exit('Error: Unable to establish a connection to the Rubrik Cluster.')
         except requests.exceptions.RequestException as error:
             # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
             try:
