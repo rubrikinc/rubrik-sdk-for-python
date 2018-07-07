@@ -35,14 +35,26 @@ class Api():
 
         try:
             api_request = requests.get(request_url, verify=False, headers=header)
-            # Raise an error if they request was not successful
-            api_request.raise_for_status()
-        except requests.exceptions.RequestException as error_message:
-            sys.exit(error_message)
+            try:
+                api_response = api_request.json()
+                # Check to see if an error message has been provided by Rubrik
+                for key, value in api_response.items():
+                    if key == "errorType":
+                        error_message = api_response['message']
+                        api_request.raise_for_status()
+            except:
+                api_request.raise_for_status()
 
-        response_body = api_request.json()
+        except requests.exceptions.RequestException as error:
+            # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
+            try:
+                error_message
+            except NameError:
+                sys.exit(error)
+            else:
+                sys.exit('Error: ' + error_message)
 
-        return response_body
+        return api_request.json()
 
     def post(self, api_version, api_endpoint, config):
         """Connect to a Rubrik Cluster and perform a POST operation.
@@ -65,15 +77,28 @@ class Api():
         header = self._authorization_header()
 
         try:
-            api_request = requests.post(request_url, data=config, verify=False, headers=header)
-            # Raise an error if they request was not successful
-            api_request.raise_for_status()
-        except requests.exceptions.RequestException as error_message:
-            sys.exit(error_message)
+            api_request = requests.post(request_url, verify=False, headers=header)
 
-        response_body = api_request.json()
+            try:
+                api_response = api_request.json()
+                # Check to see if an error message has been provided by Rubrik
+                for key, value in api_response.items():
+                    if key == "errorType":
+                        error_message = api_response['message']
+                        api_request.raise_for_status()
+            except:
+                api_request.raise_for_status()
 
-        return response_body
+        except requests.exceptions.RequestException as error:
+            # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
+            try:
+                error_message
+            except NameError:
+                sys.exit(error)
+            else:
+                sys.exit('Error: ' + error_message)
+
+        return api_request.json()
 
     def patch(self, api_version, api_endpoint, config):
         """Connect to a Rubrik Cluster and perform a PATCH operation.
@@ -96,15 +121,28 @@ class Api():
         header = self._authorization_header()
 
         try:
-            api_request = requests.patch(request_url, data=config, verify=False, headers=header)
-            # Raise an error if they request was not successful
-            api_request.raise_for_status()
-        except requests.exceptions.RequestException as error_message:
-            sys.exit(error_message)
+            api_request = requests.patch(request_url, verify=False, headers=header)
 
-        response_body = api_request.json()
+            try:
+                api_response = api_request.json()
+                # Check to see if an error message has been provided by Rubrik
+                for key, value in api_response.items():
+                    if key == "errorType":
+                        error_message = api_response['message']
+                        api_request.raise_for_status()
+            except:
+                api_request.raise_for_status()
 
-        return response_body
+        except requests.exceptions.RequestException as error:
+            # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
+            try:
+                error_message
+            except NameError:
+                sys.exit(error)
+            else:
+                sys.exit('Error: ' + error_message)
+
+        return api_request.json()
 
     def delete(self, api_version, api_endpoint):
         """Connect to a Rubrik Cluster and perform a DELETE operation.
@@ -122,14 +160,25 @@ class Api():
 
         try:
             api_request = requests.delete(request_url, verify=False, headers=header)
-            # Raise an error if they request was not successful
-            api_request.raise_for_status()
-        except requests.exceptions.RequestException as error_message:
-            sys.exit(error_message)
+            try:
+                api_response = api_request.json()
+                # Check to see if an error message has been provided by Rubrik
+                for key, value in api_response.items():
+                    if key == "errorType":
+                        error_message = api_response['message']
+                        api_request.raise_for_status()
+            except:
+                api_request.raise_for_status()
+        except requests.exceptions.RequestException as error:
+            # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
+            try:
+                error_message
+            except NameError:
+                sys.exit(error)
+            else:
+                sys.exit('Error: ' + error_message)
 
-        response_body = api_request.json()
-
-        return response_body
+        return api_request.json()
 
     def job_status(self, url):
         """Connect to the Rubrik Cluster and get the status of a particular job.
@@ -145,11 +194,24 @@ class Api():
 
         try:
             api_request = requests.get(url, verify=False, headers=header)
-            # Raise an error if they request was not successful
-            api_request.raise_for_status()
-        except requests.exceptions.RequestException as error_message:
-            sys.exit(error_message)
 
-        response_body = api_request.json()
+            try:
+                api_response = api_request.json()
+                # Check to see if an error message has been provided by Rubrik
+                for key, value in api_response.items():
+                    if key == "errorType":
+                        error_message = api_response['message']
+                        api_request.raise_for_status()
+            except:
+                api_request.raise_for_status()
 
-        return response_body
+        except requests.exceptions.RequestException as error:
+            # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
+            try:
+                error_message
+            except NameError:
+                sys.exit(error)
+            else:
+                sys.exit('Error: ' + error_message)
+
+        return api_request.json()
