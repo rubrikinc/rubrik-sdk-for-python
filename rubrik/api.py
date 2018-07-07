@@ -54,7 +54,6 @@ class Api():
             try:
                 error_message
             except NameError:
-                print("Regular")
                 sys.exit(error)
             else:
                 sys.exit('Error: ' + error_message)
