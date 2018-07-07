@@ -11,11 +11,19 @@ def test_get_call(rubrik_connect):
 
     url = "https://{}/api/{}{}".format(rubrik.node_ip, api_version, api_endpoint)
 
-    response_body = {'id': '89fc0e90-6f1c-8393-efas-90c7qee0e6299', 'version': '4.1.1', 'apiVersion': '1', 'name': 'RubrikAPICluster',
-                     'timezone': {'timezone': 'America/Los_Angeles'}, 'acceptedEulaVersion': '1.0', 'latestEulaVersion': '1.0'}
+    response_body = {
+        'id': '89fc0e90-6f1c-8393-efas-90c7qee0e6299',
+        'version': '4.1.1',
+        'apiVersion': '1',
+        'name': 'RubrikAPICluster',
+        'timezone':
+            {'timezone': 'America/Los_Angeles'},
+        'acceptedEulaVersion': '1.0',
+        'latestEulaVersion': '1.0'
+    }
 
     responses.add(responses.GET, url, json=response_body, status=200)
-    responses.add(responses.GET, url, json=response_body, status=500)
+    responses.add(responses.GET, url, status=500)
 
     resp = rubrik.get(api_version, api_endpoint)
     assert resp == response_body
