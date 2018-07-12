@@ -29,7 +29,7 @@ username = "sdk@rangers.lab"
 password = "RubrikPythonSDK"
 
 # Connect to the Rubrik Cluster.
-rubrik = rubrik.api(node_ip, username, password)
+rubrik = rubrik.Connect(node_ip, username, password)
 
 # Function Parameters
 # api_version: v1 or internal
