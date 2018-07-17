@@ -6,11 +6,7 @@ The SDK supports Python 2.7, 3.4, 3.5, and 3.6.
 
 ## INSTALLATION
 
-Install via [pip](https://pip.pypa.io/en/stable/):
 
-```
-$ pip install rubrik
-```
 Install from source:
 ```
 $ git clone https://github.com/rubrik-devops/rubrik-sdk-for-python
