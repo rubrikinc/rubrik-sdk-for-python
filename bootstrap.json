@@ -1,4 +1,0 @@
-{
-    'status': 'IN_PROGRESS', 
-    'startServices': 'NOT_STARTED', 'setupEncryptionAtRest': 'NOT_STARTED', 'configAdminUser': 'NOT_STARTED', 'ipConfig': 'SUCCESS', 'setupLoopDevices': 'SUCCESS', 'setupOsAndMetadataPartitions': 'SUCCESS', 'installSchema': 'SUCCESS', 'setupDisks': 'SUCCESS', 'resetNodes': 'NOT_STARTED', 'createTopLevelFilesystemDirs': 'SUCCESS', 'message': '', 'cassandraSetup': 'SUCCESS', 'ipmiConfig': 'SUCCESS'
-}
