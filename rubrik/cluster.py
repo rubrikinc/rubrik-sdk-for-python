@@ -88,13 +88,10 @@ class Cluster():
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
 
-        bootstrap_config = json.dumps(bootstrap_config)
+        api_request = self.post(bootstrap_api_version, bootstrap_api_endpoint,
+                                bootstrap_config, timeout=10, authorize=False)
 
-        print(bootstrap_config)
-
-        # api_request = self.post(bootstrap_api_version, bootstrap_api_endpoint, bootstrap_config)
-
-        # return api_request
+        return api_request
 
         ########### DO NOT MODIFY THESE VALUES - USED IN UNIT TESTS ONLY #########
         assert bootstrap_api_version == 'internal'
@@ -106,11 +103,11 @@ class Cluster():
         bootstrap_status_api_version = 'internal'
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(request_id)
 
-        api_request = self.get(bootstrap_status_api_version, bootstrap_status_api_endpoint)
+        api_request = self.get(bootstrap_status_api_version, bootstrap_status_api_endpoint, authorize=False)
 
         ########### DO NOT MODIFY THESE VALUES - USED IN UNIT TESTS ONLY #########
-        assert bootstrap_status_api_version == 'v1'
-        assert bootstrap_status_api_endpoint == '/cluster/me/version'
+        assert bootstrap_status_api_version == 'internal'
+        assert bootstrap_status_api_endpoint == '/cluster/me/bootstrap?request_id={}'.format(request_id)
         ##########################################################################
 
         return api_request
