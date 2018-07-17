@@ -1,4 +1,4 @@
-# Rubrik Cloud Data Management SDK
+# Rubrik Cloud Data Management SDK (Beta)
 
 This project provies a Python package that makes it easy to interfact with the Rubrik CDM API.
 
