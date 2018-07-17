@@ -15,7 +15,7 @@ class Api():
     def __init__(self, node_ip, username, password):
         super().__init__(node_ip, username, password)
 
-    def get(self, api_version, api_endpoint, timeout=5, authorize=True):
+    def get(self, api_version, api_endpoint, timeout=5, authentication=True):
         """Connect to a Rubrik Cluster and perform a GET operation.
 
         Arguments:
@@ -65,7 +65,7 @@ class Api():
 
         return api_request.json()
 
-    def post(self, api_version, api_endpoint, config, timeout=5, authorize=True):
+    def post(self, api_version, api_endpoint, config, timeout=5, authentication=True):
         """Connect to a Rubrik Cluster and perform a POST operation.
 
         Arguments:
