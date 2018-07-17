@@ -83,10 +83,8 @@ class Api():
         self._api_validation(api_version, api_endpoint)
 
         config = json.dumps(config)
-        print(config)
 
         request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
-        print(request_url)
 
         if authentication == True:
             header = self._authorization_header()
