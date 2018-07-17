@@ -46,6 +46,20 @@ class Connect(_API, _CLUSTER):
 
         return authorization_header
 
+    def _header(self):
+        """Internal method used to create the a header without authorization used in the API calls.
+
+        Returns:
+            dict -- The header that does not include any authorization.
+        """
+
+        header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+
+        return header
+
     @staticmethod
     def _api_validation(api_version, api_endpoint):
         """Internal method used to validate the API Version and API Endpoint provided by the end user

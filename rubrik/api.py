@@ -15,7 +15,7 @@ class Api():
     def __init__(self, node_ip, username, password):
         super().__init__(node_ip, username, password)
 
-    def get(self, api_version, api_endpoint, timeout=5):
+    def get(self, api_version, api_endpoint, timeout=5, authorize=True):
         """Connect to a Rubrik Cluster and perform a GET operation.
 
         Arguments:
@@ -34,7 +34,12 @@ class Api():
         request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
         request_url = quote(request_url, '://?=&')
 
-        header = self._authorization_header()
+        if authorize == True:
+            header = self._authorization_header()
+        elif authorize == False:
+            header = self._header()
+        else:
+            sys.exit('Error: "authorize" must be either True or False')
 
         try:
             api_request = requests.get(request_url, verify=False, headers=header, timeout=timeout)
@@ -60,7 +65,7 @@ class Api():
 
         return api_request.json()
 
-    def post(self, api_version, api_endpoint, config, timeout=5):
+    def post(self, api_version, api_endpoint, config, timeout=5, authorize=True):
         """Connect to a Rubrik Cluster and perform a POST operation.
 
         Arguments:
@@ -78,13 +83,20 @@ class Api():
         self._api_validation(api_version, api_endpoint)
 
         config = json.dumps(config)
+        print(config)
 
         request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
+        print(request_url)
 
-        header = self._authorization_header()
+        if authorize == True:
+            header = self._authorization_header()
+        elif authorize == False:
+            header = self._header()
+        else:
+            sys.exit('Error: "authorize" must be either True or False')
 
         try:
-            api_request = requests.post(request_url, verify=False, headers=header, timeout=timeout)
+            api_request = requests.post(request_url, verify=False, headers=header, data=config, timeout=timeout)
 
             try:
                 api_response = api_request.json()
@@ -132,7 +144,7 @@ class Api():
         header = self._authorization_header()
 
         try:
-            api_request = requests.patch(request_url, verify=False, headers=header, timeout=timeout)
+            api_request = requests.patch(request_url, verify=False, headers=header, data=config, timeout=timeout)
 
             try:
                 api_response = api_request.json()
