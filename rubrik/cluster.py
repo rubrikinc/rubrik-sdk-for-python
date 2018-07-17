@@ -99,6 +99,14 @@ class Cluster():
         ##########################################################################
 
     def bootstrap_status(self, request_id="1"):
+        """Retrieves status of in progress bootstrap requests
+
+        Keyword Arguments:
+            request_id {str} -- Id of the bootstrap request (default: {"1"})
+
+        Returns:
+            dict -- The response returned by the API call.
+        """
 
         bootstrap_status_api_version = 'internal'
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(request_id)
