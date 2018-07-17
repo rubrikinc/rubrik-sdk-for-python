@@ -46,7 +46,8 @@ class Connect(_API, _CLUSTER):
 
         return authorization_header
 
-    def _header(self):
+    @staticmethod
+    def _header():
         """Internal method used to create the a header without authorization used in the API calls.
 
         Returns:
