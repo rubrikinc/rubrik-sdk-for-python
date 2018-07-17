@@ -34,9 +34,9 @@ class Api():
         request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
         request_url = quote(request_url, '://?=&')
 
-        if authorize == True:
+        if authentication == True:
             header = self._authorization_header()
-        elif authorize == False:
+        elif authentication == False:
             header = self._header()
         else:
             sys.exit('Error: "authorize" must be either True or False')
@@ -88,9 +88,9 @@ class Api():
         request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
         print(request_url)
 
-        if authorize == True:
+        if authentication == True:
             header = self._authorization_header()
-        elif authorize == False:
+        elif authentication == False:
             header = self._header()
         else:
             sys.exit('Error: "authorize" must be either True or False')
