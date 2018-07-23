@@ -39,7 +39,7 @@ class Api():
         elif authentication == False:
             header = self._header()
         else:
-            sys.exit('Error: "authorize" must be either True or False')
+            sys.exit('Error: "authentication" must be either True or False')
 
         try:
             api_request = requests.get(request_url, verify=False, headers=header, timeout=timeout)
@@ -91,7 +91,7 @@ class Api():
         elif authentication == False:
             header = self._header()
         else:
-            sys.exit('Error: "authorize" must be either True or False')
+            sys.exit('Error: "authentication" must be either True or False')
 
         try:
             api_request = requests.post(request_url, verify=False, headers=header, data=config, timeout=timeout)
