@@ -62,7 +62,8 @@ class Connect(_API, _CLUSTER):
         self._log("Username: {}".format(self.username))
         self._log("Password: {}\n".format(self.password))
 
-    def _log(self, log_message):
+    @staticmethod
+    def _log(log_message):
         """Internal method used for debug log messages.
 
         Arguments:
