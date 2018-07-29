@@ -3,6 +3,7 @@ import requests
 import sys
 import os
 import logging
+from random import choice
 
 
 from .api import Api
@@ -58,9 +59,12 @@ class Connect(_API, _CLUSTER):
             else:
                 self.password = password
 
-        self._log("Node IP: {}".format(self.node_ip))
+        self._log("User Provided Node IP: {}".format(self.node_ip))
         self._log("Username: {}".format(self.username))
         self._log("Password: *******\n")
+
+        self._log("Generating list of all Cluster Node IPs.")
+        self.node_ip = self.cluster_node_ip()
 
     @staticmethod
     def _log(log_message):

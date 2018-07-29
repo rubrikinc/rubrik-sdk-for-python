@@ -26,6 +26,25 @@ class Cluster():
 
         return api_request
 
+    def cluster_node_ip(self):
+        """Retrive the IP Address for each node in the Rubrik Cluster.
+
+        Returns:
+            list -- A list that contains the IP Address for each node in the Rubrik Cluster.
+        """
+
+        cluster_version_api_version = 'internal'
+        cluster_version_api_endpoint = '/cluster/me/node'
+
+        api_request = self.get(cluster_version_api_version, cluster_version_api_endpoint)
+
+        node_ip_list = []
+
+        for node in api_request['data']:
+            node_ip_list.append(node["ipAddress"])
+
+        return node_ip_list
+
     def bootstrap(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, enable_encryption=True, node_config=None, dns_search_domains=None, dns_nameservers=None, ntp_servers=None):
         """Issues a bootstrap request to a specified Rubrik cluster
 
