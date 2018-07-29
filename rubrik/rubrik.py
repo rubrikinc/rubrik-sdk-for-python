@@ -60,7 +60,7 @@ class Connect(_API, _CLUSTER):
 
         self._log("Node IP: {}".format(self.node_ip))
         self._log("Username: {}".format(self.username))
-        self._log("Password: {}\n".format(self.password))
+        self._log("Password: *******\n")
 
     @staticmethod
     def _log(log_message):
