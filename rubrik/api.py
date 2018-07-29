@@ -34,6 +34,8 @@ class Api():
         request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
         request_url = quote(request_url, '://?=&')
 
+        self._log('GET {}'.format(request_url))
+
         if authentication == True:
             header = self._authorization_header()
         elif authentication == False:
@@ -43,6 +45,7 @@ class Api():
 
         try:
             api_request = requests.get(request_url, verify=False, headers=header, timeout=timeout)
+            self._log(str(api_request) + "\n")
             try:
                 api_response = api_request.json()
                 # Check to see if an error message has been provided by Rubrik
@@ -86,6 +89,9 @@ class Api():
 
         request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
 
+        self._log('POST {}'.format(request_url))
+        self._log('Config: {}'.format(config))
+
         if authentication == True:
             header = self._authorization_header()
         elif authentication == False:
@@ -95,7 +101,7 @@ class Api():
 
         try:
             api_request = requests.post(request_url, verify=False, headers=header, data=config, timeout=timeout)
-
+            self._log(str(api_request) + "\n")
             try:
                 api_response = api_request.json()
                 # Check to see if an error message has been provided by Rubrik
@@ -139,11 +145,14 @@ class Api():
 
         request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
 
+        self._log('PATCH {}'.format(request_url))
+        self._log('Config: {}'.format(config))
+
         header = self._authorization_header()
 
         try:
             api_request = requests.patch(request_url, verify=False, headers=header, data=config, timeout=timeout)
-
+            self._log(str(api_request) + "\n")
             try:
                 api_response = api_request.json()
                 # Check to see if an error message has been provided by Rubrik
@@ -181,10 +190,13 @@ class Api():
 
         request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
 
+        self._log('DELETE {}'.format(request_url))
+
         header = self._authorization_header()
 
         try:
             api_request = requests.delete(request_url, verify=False, headers=header, timeout=timeout)
+            self._log(str(api_request) + "\n")
             try:
                 api_response = api_request.json()
                 # Check to see if an error message has been provided by Rubrik
@@ -222,9 +234,13 @@ class Api():
 
         header = self._authorization_header()
 
+        self._log('Job Status {}'.format(url))
+
+        header = self._authorization_header()
+
         try:
             api_request = requests.get(url, verify=False, headers=header, timeout=timeout)
-
+            self._log(str(api_request) + "\n")
             try:
                 api_response = api_request.json()
                 # Check to see if an error message has been provided by Rubrik
