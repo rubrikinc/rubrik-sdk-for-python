@@ -16,9 +16,17 @@ $ python setup.py install
 
 ## USAGE
 
-```python
-import rubrik
+### Connecting to the Rubrik Cluster
 
+By default, the Rubrik SDK will attempt to read the the Rubrik Cluster credentials from the following environment variables:
+
+* `rubrik_cdm_node_ip`
+* `rubrik_cdm_username`
+* `rubrik_cdm_password`
+
+While not recommended, the credentials may also be passed in manually.
+
+```python
 # Define the Login Credentials
 node_ip = "172.21.8.90"
 username = "sdk@rangers.lab"
@@ -26,6 +34,15 @@ password = "RubrikPythonSDK"
 
 # Connect to the Rubrik Cluster.
 rubrik = rubrik.Connect(node_ip, username, password)
+```
+
+### Example Function Calls
+
+```python
+import rubrik
+
+# Connect to the Rubrik Cluster.
+rubrik = rubrik.Connect()
 
 # Function Parameters
 # api_version: v1 or internal
