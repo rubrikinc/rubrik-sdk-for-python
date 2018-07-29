@@ -1,10 +1,21 @@
 import base64
 import requests
 import sys
+import os
+import logging
 
 
 from .api import Api
 from .cluster import Cluster
+
+# Define the logging params
+log = logging.getLogger(__name__)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter(
+    "[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)s] --- %(message)s")
+ch.setFormatter(formatter)
+log.addHandler(ch)
 
 
 _API = Api
@@ -19,10 +30,38 @@ class Connect(_API, _CLUSTER):
         _CORE {class} -- [description]
     """
 
-    def __init__(self, node_ip, username, password):
-        self.node_ip = node_ip
-        self.username = username
-        self.password = password
+    def __init__(self, node_ip=None, username=None, password=None):
+
+        if node_ip is not None:
+            self.node_ip = node_ip
+        else:
+            node_ip = os.environ.get('rubrik_cdm_node_ip')
+            if node_ip is None:
+                sys.exit("Error: The Rubrik CDM Node IP has not been provided.")
+            else:
+                self.node_ip = node_ip
+
+        if username is not None:
+            self.username = username
+        else:
+            username = os.environ.get('rubrik_cdm_username')
+            if username is None:
+                sys.exit("Error: The Rubrik CDM Username has not been provided.")
+            else:
+                self.username = username
+
+        if password is not None:
+            self.password = password
+        else:
+            password = os.environ.get('rubrik_cdm_password')
+            if password is None:
+                sys.exit("Error: The Rubrik CDM Password has not been provided.")
+            else:
+                self.password = password
+
+        log.debug("Node IP: {}".format(self.node_ip))
+        log.debug("Username: {}".format(self.username))
+        log.debug("Password: {}".format(self.password))
 
     def _authorization_header(self):
         """Internal method used to create the authorization header used in the API calls.
