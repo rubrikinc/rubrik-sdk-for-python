@@ -10,7 +10,7 @@ from .cluster import Cluster
 
 # Define the logging params
 console_output_handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)s] --- %(message)s")
+formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] -- %(message)s")
 console_output_handler.setFormatter(formatter)
 
 log = logging.getLogger(__name__)
@@ -58,9 +58,17 @@ class Connect(_API, _CLUSTER):
             else:
                 self.password = password
 
-        log.debug("Node IP: {}".format(self.node_ip))
-        log.debug("Username: {}".format(self.username))
-        log.debug("Password: {}\n".format(self.password))
+        self._log("Node IP: {}".format(self.node_ip))
+        self._log("Username: {}".format(self.username))
+        self._log("Password: {}\n".format(self.password))
+
+    def _log(self, log_message):
+        """Internal method used for debug log messages.
+
+        Arguments:
+            log_message {str} -- The message to pass to the debug log.
+        """
+        log.debug(log_message)
 
     def _authorization_header(self):
         """Internal method used to create the authorization header used in the API calls.
