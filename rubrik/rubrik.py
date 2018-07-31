@@ -8,6 +8,7 @@ from random import choice
 
 from .api import Api
 from .cluster import Cluster
+from .data_management import Data_Management
 
 # Define the logging params
 console_output_handler = logging.StreamHandler()
@@ -20,9 +21,10 @@ log.addHandler(console_output_handler)
 
 _API = Api
 _CLUSTER = Cluster
+_DATA_MANAGEMENT = Data_Management
 
 
-class Connect(_API, _CLUSTER):
+class Connect(_API, _CLUSTER, _DATA_MANAGEMENT):
     """[summary]
 
     Arguments:
@@ -59,15 +61,15 @@ class Connect(_API, _CLUSTER):
             else:
                 self.password = password
 
-        self._log("User Provided Node IP: {}".format(self.node_ip))
-        self._log("Username: {}".format(self.username))
-        self._log("Password: *******\n")
+        self.log("User Provided Node IP: {}".format(self.node_ip))
+        self.log("Username: {}".format(self.username))
+        self.log("Password: *******\n")
 
-        self._log("Generating list of all Cluster Node IPs.")
+        self.log("Generating a list of all Cluster Node IPs.")
         self.node_ip = self.cluster_node_ip()
 
     @staticmethod
-    def _log(log_message):
+    def log(log_message):
         """Internal method used for debug log messages.
 
         Arguments:
