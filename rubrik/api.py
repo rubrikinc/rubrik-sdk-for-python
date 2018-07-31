@@ -28,22 +28,22 @@ class Api():
         if call_type is 'GET':
             request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
             request_url = quote(request_url, '://?=&')
-            self._log('GET {}'.format(request_url))
+            self.log('GET {}'.format(request_url))
         elif call_type is 'POST':
             config = json.dumps(config)
             request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
-            self._log('POST {}'.format(request_url))
-            self._log('Config: {}'.format(config))
+            self.log('POST {}'.format(request_url))
+            self.log('Config: {}'.format(config))
         elif call_type is 'PATCH':
             config = json.dumps(config)
             request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
-            self._log('PATCH {}'.format(request_url))
-            self._log('Config: {}'.format(config))
+            self.log('PATCH {}'.format(request_url))
+            self.log('Config: {}'.format(config))
         elif call_type is 'DELETE':
             request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
-            self._log('DELETE {}'.format(request_url))
+            self.log('DELETE {}'.format(request_url))
         elif call_type is 'JOB_STATUS':
-            self._log('Job Status {}'.format(job_status_url))
+            self.log('Job Status {}'.format(job_status_url))
 
         if authentication == True:
             header = self._authorization_header()
@@ -64,7 +64,7 @@ class Api():
             elif call_type is 'JOB_STATUS':
                 api_request = requests.get(job_status_url, verify=False, headers=header, timeout=timeout)
 
-            self._log(str(api_request) + "\n")
+            self.log(str(api_request) + "\n")
             try:
                 api_response = api_request.json()
                 # Check to see if an error message has been provided by Rubrik
