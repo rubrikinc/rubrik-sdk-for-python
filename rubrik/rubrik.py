@@ -66,7 +66,7 @@ class Connect(_API, _CLUSTER, _DATA_MANAGEMENT):
         self.log("Password: *******\n")
 
         self.log("Generating a list of all Cluster Node IPs.")
-        self.node_ip = self.cluster_node_ip()
+        self.node_ip = self.cluster_node_ip(timeout=5)
 
     @staticmethod
     def log(log_message):
