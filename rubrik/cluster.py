@@ -7,27 +7,28 @@ class Cluster():
 
     """
 
-    def cluster_version(self):
-        """Retrieves software version of the Rubrik cluster
+    def cluster_version(self, timeout=15):
+        """Retrieves software version of the Rubrik Cluster.
+
+        Keyword Arguments:
+            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
 
         Returns:
-            dict -- Software version running on the cluster
+            dict -- Software version running on the Rubrik Cluster
         """
 
         cluster_version_api_version = 'v1'
         cluster_version_api_endpoint = '/cluster/me/version'
 
-        api_request = self.get(cluster_version_api_version, cluster_version_api_endpoint)
-
-        ########### DO NOT MODIFY THESE VALUES - USED IN UNIT TESTS ONLY #########
-        assert cluster_version_api_version == 'v1'
-        assert cluster_version_api_endpoint == '/cluster/me/version'
-        ##########################################################################
+        api_request = self.get(cluster_version_api_version, cluster_version_api_endpoint, timeout=timeout)
 
         return api_request
 
-    def cluster_node_ip(self):
+    def cluster_node_ip(self, timeout=15):
         """Retrive the IP Address for each node in the Rubrik Cluster.
+
+        Keyword Arguments:
+            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
 
         Returns:
             list -- A list that contains the IP Address for each node in the Rubrik Cluster.
@@ -36,7 +37,7 @@ class Cluster():
         cluster_version_api_version = 'internal'
         cluster_version_api_endpoint = '/cluster/me/node'
 
-        api_request = self.get(cluster_version_api_version, cluster_version_api_endpoint)
+        api_request = self.get(cluster_version_api_version, cluster_version_api_endpoint, timeout=timeout)
 
         node_ip_list = []
 
@@ -45,7 +46,7 @@ class Cluster():
 
         return node_ip_list
 
-    def bootstrap(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, enable_encryption=True, node_config=None, dns_search_domains=None, dns_nameservers=None, ntp_servers=None):
+    def bootstrap(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, enable_encryption=True, node_config=None, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, timeout=15):
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
@@ -61,6 +62,7 @@ class Cluster():
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
             dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {None})
             ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {None})
+            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
 
         Returns:
             dict -- The response returned by the API call.
@@ -108,20 +110,16 @@ class Cluster():
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
 
         api_request = self.post(bootstrap_api_version, bootstrap_api_endpoint,
-                                bootstrap_config, timeout=10, authentication=False)
+                                bootstrap_config, timeout=timeout, authentication=False)
 
         return api_request
 
-        ########### DO NOT MODIFY THESE VALUES - USED IN UNIT TESTS ONLY #########
-        assert bootstrap_api_version == 'internal'
-        assert bootstrap_api_endpoint == '/cluster/me/bootstrap'
-        ##########################################################################
-
-    def bootstrap_status(self, request_id="1"):
+    def bootstrap_status(self, request_id="1", timeout=15):
         """Retrieves status of in progress bootstrap requests
 
         Keyword Arguments:
             request_id {str} -- Id of the bootstrap request (default: {"1"})
+            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
 
         Returns:
             dict -- The response returned by the API call.
@@ -130,11 +128,7 @@ class Cluster():
         bootstrap_status_api_version = 'internal'
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(request_id)
 
-        api_request = self.get(bootstrap_status_api_version, bootstrap_status_api_endpoint, authentication=False)
-
-        ########### DO NOT MODIFY THESE VALUES - USED IN UNIT TESTS ONLY #########
-        assert bootstrap_status_api_version == 'internal'
-        assert bootstrap_status_api_endpoint == '/cluster/me/bootstrap?request_id={}'.format(request_id)
-        ##########################################################################
+        api_request = self.get(bootstrap_status_api_version, bootstrap_status_api_endpoint,
+                               timeout=timeout, authentication=False)
 
         return api_request
