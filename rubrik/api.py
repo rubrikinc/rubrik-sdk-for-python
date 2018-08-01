@@ -101,7 +101,7 @@ class Api():
             dict -- The response body of the API call.
         """
         api_call = self._common_api('GET', api_version, api_endpoint, config=None,
-                                    job_status_url=None, timeout=15, authentication=True)
+                                    job_status_url=None, timeout=timeout, authentication=True)
 
         return api_call
 
