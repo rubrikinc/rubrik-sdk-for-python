@@ -86,6 +86,7 @@ class Api():
         else:
             sys.exit('Error: "authentication" must be either True or False')
 
+        # Determine if authentication should be sent as part of the API Header
         if authentication == True:
             header = self._authorization_header()
         elif authentication == False:
