@@ -18,6 +18,7 @@ This module contains the Rubrik SDK API class.
 import requests
 import json
 import sys
+import time
 try:
     from urllib import quote  # Python 2.X
 except ImportError:
@@ -26,7 +27,7 @@ from random import choice
 
 
 class Api():
-    """This class contains the base API methods that can be called independeintly or internally 
+    """This class contains the base API methods that can be called independeintly or internally
     in standalone functions.
     """
 
@@ -50,8 +51,8 @@ class Api():
         Returns:
             dict -- The API call response.
         """
-
-        self._api_validation(api_version, api_endpoint)
+        if call_type is not 'JOB_STATUS':
+            self._api_validation(api_version, api_endpoint)
 
         """In order to dynamically select a node to interact with, the SDK will first use the node ip provided
         by the user to get a list of all node ips in the cluster. This code will determine if the SDK has gathered
@@ -82,7 +83,7 @@ class Api():
             request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
             self.log('DELETE {}'.format(request_url))
         elif call_type is 'JOB_STATUS':
-            self.log('Job Status {}'.format(job_status_url))
+            self.log('JOB STATUS for {}'.format(job_status_url))
         else:
             sys.exit('Error: "authentication" must be either True or False')
 
@@ -210,7 +211,7 @@ class Api():
 
         return api_call
 
-    def job_status(self, url, timeout=15):
+    def job_status(self, url, wait_for_completion=True, timeout=15):
         """Connect to the Rubrik Cluster and get the status of a particular job.
 
         Arguments:
@@ -218,12 +219,39 @@ class Api():
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {15})
+            wait_for_completion {bool} -- Flag that determines if the method should wait for the job to complete before exiting. (default: {True})
 
         Returns:
             dict -- The response body of the API call.
         """
 
-        api_call = self._common_api('JOB_STATUS', api_version=None, api_endpoint=None,
-                                    config=None, job_status_url=url, timeout=timeout)
+        if not isinstance(wait_for_completion, bool):
+            sys.exit('Error: The job_status() wait_for_completion argument must be True or False')
+
+        if wait_for_completion:
+            self.log('Job Status: Waiting for the job to complete.')
+            api_call = self._common_api('JOB_STATUS', api_version=None, api_endpoint=None,
+                                        config=None, job_status_url=url, timeout=timeout)
+            while True:
+                api_call = self._common_api('JOB_STATUS', api_version=None, api_endpoint=None,
+                                            config=None, job_status_url=url, timeout=timeout)
+
+                job_status = api_call['status']
+
+                if job_status == "SUCCEEDED":
+                    self.log('Job Progress 100%\n')
+                    job_status = api_call['status']
+                    break
+                elif job_status == "QUEUED" or "RUNNING":
+                    self.log('Job Progress {}%\n'.format(api_call['progress']))
+                    job_status = api_call['status']
+                    time.sleep(10)
+                    continue
+                else:
+                    sys.exit('Error: {}'.format(str(api_call)))
+
+        else:
+            api_call = self._common_api('JOB_STATUS', api_version=None, api_endpoint=None,
+                                        config=None, job_status_url=url, timeout=timeout)
 
         return api_call
