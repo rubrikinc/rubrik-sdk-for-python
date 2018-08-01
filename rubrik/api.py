@@ -16,7 +16,7 @@ class Api():
     def __init__(self, node_ip):
         super().__init__(node_ip)
 
-    def _common_api(self, call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=5, authentication=True):
+    def _common_api(self, call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=15, authentication=True):
 
         self._api_validation(api_version, api_endpoint)
 
@@ -87,7 +87,7 @@ class Api():
 
         return api_request.json()
 
-    def get(self, api_version, api_endpoint, timeout=5, authentication=True):
+    def get(self, api_version, api_endpoint, timeout=15, authentication=True):
         """Connect to a Rubrik Cluster and perform a GET operation.
 
         Arguments:
@@ -101,11 +101,11 @@ class Api():
             dict -- The response body of the API call.
         """
         api_call = self._common_api('GET', api_version, api_endpoint, config=None,
-                                    job_status_url=None, timeout=5, authentication=True)
+                                    job_status_url=None, timeout=15, authentication=True)
 
         return api_call
 
-    def post(self, api_version, api_endpoint, config, timeout=5, authentication=True):
+    def post(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Connect to a Rubrik Cluster and perform a POST operation.
 
         Arguments:
@@ -125,7 +125,7 @@ class Api():
 
         return api_call
 
-    def patch(self, api_version, api_endpoint, config, timeout=5):
+    def patch(self, api_version, api_endpoint, config, timeout=15):
         """Connect to a Rubrik Cluster and perform a PATCH operation.
 
         Arguments:
@@ -145,7 +145,7 @@ class Api():
 
         return api_call
 
-    def delete(self, api_version, api_endpoint, timeout=5):
+    def delete(self, api_version, api_endpoint, timeout=15):
         """Connect to a Rubrik Cluster and perform a DELETE operation.
 
         Arguments:
@@ -161,7 +161,7 @@ class Api():
 
         return api_call
 
-    def job_status(self, url, timeout=5):
+    def job_status(self, url, timeout=15):
         """Connect to the Rubrik Cluster and get the status of a particular job.
 
         Arguments:
