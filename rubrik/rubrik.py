@@ -22,14 +22,6 @@ from random import choice
 from .cluster import Cluster
 from .data_management import Data_Management
 
-# Define the logging params
-console_output_handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] -- %(message)s")
-console_output_handler.setFormatter(formatter)
-
-log = logging.getLogger(__name__)
-log.addHandler(console_output_handler)
-
 
 _CLUSTER = Cluster
 _DATA_MANAGEMENT = Data_Management
@@ -86,6 +78,7 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT):
         Arguments:
             log_message {str} -- The message to pass to the debug log.
         """
+        log = logging.getLogger(__name__)
         log.debug(log_message)
 
     def _authorization_header(self):
