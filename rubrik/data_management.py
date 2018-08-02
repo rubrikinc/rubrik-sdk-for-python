@@ -1,7 +1,23 @@
+# Copyright 2018 Rubrik, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License prop
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import sys
+from .api import Api
+
+_API = Api
 
 
-class Data_Management():
+class Data_Management(_API):
     """[summary]
 
     """
@@ -23,7 +39,7 @@ class Data_Management():
         valid_object_type = ['vmware']
 
         if object_type not in valid_object_type:
-            sys.exit("Error: The on_demand_snapshot() object_type argument must be one of the following {}.".format(valid_object_type))
+            sys.exit("Error: The on_demand_snapshot() object_type argument must be one of the following: {}.".format(valid_object_type))
 
         if object_type is 'vmware':
             self.log("On-Demand vSphere Snapshot: Searching the Rubrik Cluster for the VM '{}'.".format(object_name))
