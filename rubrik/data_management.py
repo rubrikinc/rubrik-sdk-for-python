@@ -49,9 +49,8 @@ class Data_Management(_API):
                 self.log(
                     "On-Demand vSphere Snapshot: Searching the Rubrik Cluster for the SLA Domain assigned to the VM '{}'.".format(object_name))
 
-                vm_summary_api_version = 'v1'
                 vm_summary_api_endpoint = '/vmware/vm/{}'.format(vm_id)
-                vm_summary = self.get(vm_summary_api_version, vm_summary_api_endpoint)
+                vm_summary = self.get('v1', vm_summary_api_endpoint)
 
                 sla_id = vm_summary['effectiveSlaDomainId']
             elif sla_name is not 'current':
@@ -62,9 +61,8 @@ class Data_Management(_API):
             snapshot_config['slaId'] = sla_id
 
             self.log("On-Demand vSphere Snapshot: Initiating snapshot for the VM '{}'.".format(object_name))
-            vsphere_vm_snapshot_api_version = 'v1'
             vsphere_vm_snapshot_api_endpoint = '/vmware/vm/{}/snapshot'.format(vm_id)
-            api_request = self.post(vsphere_vm_snapshot_api_version, vsphere_vm_snapshot_api_endpoint, snapshot_config)
+            api_request = self.post('v1', vsphere_vm_snapshot_api_endpoint, snapshot_config)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -83,15 +81,13 @@ class Data_Management(_API):
             [str] -- The ID of the provided object.
         """
 
-        object_summary_api_version = 'v1'
-
         if object_type is 'vmware':
             object_summary_api_endpoint = '/vmware/vm?primary_cluster_id=local&is_relic=false&name={}'.format(
                 object_name)
         elif object_type is 'sla':
             object_summary_api_endpoint = '/sla_domain?primary_cluster_id=local&name={}'.format(object_name)
 
-        api_request = self.get(object_summary_api_version, object_summary_api_endpoint)
+        api_request = self.get('v1', object_summary_api_endpoint)
 
         if api_request['total'] == 0:
             sys.exit("Error: The {} object '{}' was not found on the Rubrik Cluster.".format(object_type, object_name))

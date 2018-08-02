@@ -35,10 +35,7 @@ class Cluster(_API):
             dict -- Software version running on the Rubrik Cluster
         """
 
-        cluster_version_api_version = 'v1'
-        cluster_version_api_endpoint = '/cluster/me/version'
-
-        api_request = self.get(cluster_version_api_version, cluster_version_api_endpoint, timeout=timeout)
+        api_request = self.get('v1', '/cluster/me/version', timeout)
 
         return api_request
 
@@ -52,10 +49,7 @@ class Cluster(_API):
             list -- A list that contains the IP Address for each node in the Rubrik Cluster.
         """
 
-        cluster_version_api_version = 'internal'
-        cluster_version_api_endpoint = '/cluster/me/node'
-
-        api_request = self.get(cluster_version_api_version, cluster_version_api_endpoint, timeout=timeout)
+        api_request = self.get('internal', '/cluster/me/node', timeout)
 
         node_ip_list = []
 
@@ -104,9 +98,6 @@ class Cluster(_API):
         elif isinstance(ntp_servers, dict) is not True:
             sys.exit('Error: You must provide a valid list for "ntp_servers".')
 
-        bootstrap_api_version = 'internal'
-        bootstrap_api_endpoint = '/cluster/me/bootstrap'
-
         bootstrap_config = {}
         bootstrap_config["enableSoftwareEncryptionAtRest"] = enable_encryption
         bootstrap_config["name"] = cluster_name
@@ -127,8 +118,7 @@ class Cluster(_API):
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
 
-        api_request = self.post(bootstrap_api_version, bootstrap_api_endpoint,
-                                bootstrap_config, timeout=timeout, authentication=False)
+        api_request = self.post('internal', '/cluster/me/bootstrap', bootstrap_config, timeout, authentication=False)
 
         return api_request
 
@@ -143,10 +133,8 @@ class Cluster(_API):
             dict -- The response returned by the API call.
         """
 
-        bootstrap_status_api_version = 'internal'
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(request_id)
 
-        api_request = self.get(bootstrap_status_api_version, bootstrap_status_api_endpoint,
-                               timeout=timeout, authentication=False)
+        api_request = self.get('internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
 
         return api_request
