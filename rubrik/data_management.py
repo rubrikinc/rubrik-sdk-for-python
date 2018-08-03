@@ -87,7 +87,7 @@ class Data_Management(_API):
         elif object_type is 'sla':
             object_summary_api_endpoint = '/sla_domain?primary_cluster_id=local&name={}'.format(object_name)
 
-        self.log("Object ID: Getting the object id for the {} object '{}'".format(object_type, object_name))
+        self.log("object_id: Getting the object id for the {} object '{}'".format(object_type, object_name))
         api_request = self.get('v1', object_summary_api_endpoint)
 
         if api_request['total'] == 0:
