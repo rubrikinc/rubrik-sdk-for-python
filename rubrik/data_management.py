@@ -11,6 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+This module contains the Rubrik SDK Data_Management class.
+"""
+
 import sys
 from .api import Api
 
@@ -18,8 +22,7 @@ _API = Api
 
 
 class Data_Management(_API):
-    """[summary]
-
+    """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik Cluster.
     """
 
     def on_demand_snapshot(self, object_name, object_type=None, sla_name='current'):
