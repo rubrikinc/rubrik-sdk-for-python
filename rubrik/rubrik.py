@@ -42,32 +42,32 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT):
 
     def __init__(self, node_ip=None, username=None, password=None):
 
-        if node_ip is not None:
-            self.node_ip = node_ip
-        else:
+        if node_ip is None:
             node_ip = os.environ.get('rubrik_cdm_node_ip')
             if node_ip is None:
                 sys.exit("Error: The Rubrik CDM Node IP has not been provided.")
             else:
                 self.node_ip = node_ip
-
-        if username is not None:
-            self.username = username
         else:
+            self.node_ip = node_ip
+
+        if username is None:
             username = os.environ.get('rubrik_cdm_username')
             if username is None:
                 sys.exit("Error: The Rubrik CDM Username has not been provided.")
             else:
                 self.username = username
-
-        if password is not None:
-            self.password = password
         else:
+            self.username = username
+
+        if password is None:
             password = os.environ.get('rubrik_cdm_password')
             if password is None:
                 sys.exit("Error: The Rubrik CDM Password has not been provided.")
             else:
                 self.password = password
+        else:
+            self.password = password
 
         self.log("User Provided Node IP: {}".format(self.node_ip))
         self.log("Username: {}".format(self.username))
