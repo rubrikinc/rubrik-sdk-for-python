@@ -11,6 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+This module contains the Rubrik SDK Connect class.
+"""
+
 import base64
 import requests
 import sys
@@ -28,7 +32,8 @@ _DATA_MANAGEMENT = Data_Management
 
 
 class Connect(_CLUSTER, _DATA_MANAGEMENT):
-    """[summary]
+    """This class acts as the base class for the Rubrik SDK and serves as the main interaction point 
+    for its end users. It also contains various helper functions used through the SDK.
 
     Arguments:
         _CLUSTER {class} -- This class contains methods related to the managment of the Rubrik Cluster itself.
@@ -73,7 +78,7 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT):
 
     @staticmethod
     def log(log_message):
-        """Internal method used for debug log messages.
+        """Create properly formatted debug log messages.
 
         Arguments:
             log_message {str} -- The message to pass to the debug log.
