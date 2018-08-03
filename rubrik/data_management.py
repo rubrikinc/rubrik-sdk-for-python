@@ -42,25 +42,25 @@ class Data_Management(_API):
             sys.exit("Error: The on_demand_snapshot() object_type argument must be one of the following: {}.".format(valid_object_type))
 
         if object_type is 'vmware':
-            self.log("On-Demand vSphere Snapshot: Searching the Rubrik Cluster for the VM '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type)
 
             if sla_name is 'current':
                 self.log(
-                    "On-Demand vSphere Snapshot: Searching the Rubrik Cluster for the SLA Domain assigned to the VM '{}'.".format(object_name))
+                    "on_demand_snapshot: Searching the Rubrik Cluster for the SLA Domain assigned to the vSphere VM '{}'.".format(object_name))
 
                 vm_summary_api_endpoint = '/vmware/vm/{}'.format(vm_id)
                 vm_summary = self.get('v1', vm_summary_api_endpoint)
 
                 sla_id = vm_summary['effectiveSlaDomainId']
             elif sla_name is not 'current':
-                self.log("On-Demand vSphere Snapshot: Searching the Rubrik Cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log("on_demand_snapshot: Searching the Rubrik Cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla')
 
             snapshot_config = {}
             snapshot_config['slaId'] = sla_id
 
-            self.log("On-Demand vSphere Snapshot: Initiating snapshot for the VM '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Initiating snapshot for the vSphere VM '{}'.".format(object_name))
             vsphere_vm_snapshot_api_endpoint = '/vmware/vm/{}/snapshot'.format(vm_id)
             api_request = self.post('v1', vsphere_vm_snapshot_api_endpoint, snapshot_config)
 
@@ -87,6 +87,7 @@ class Data_Management(_API):
         elif object_type is 'sla':
             object_summary_api_endpoint = '/sla_domain?primary_cluster_id=local&name={}'.format(object_name)
 
+        self.log("Object ID: Getting the object id for the {} object '{}'".format(object_type, object_name))
         api_request = self.get('v1', object_summary_api_endpoint)
 
         if api_request['total'] == 0:

@@ -34,9 +34,8 @@ class Cluster(_API):
         Returns:
             dict -- Software version running on the Rubrik Cluster
         """
-
+        self.log('cluster_version: Getting the software version of the Rubrik Cluster.')
         api_request = self.get('v1', '/cluster/me/version', timeout)
-
         return api_request
 
     def cluster_node_ip(self, timeout=15):
@@ -49,6 +48,7 @@ class Cluster(_API):
             list -- A list that contains the IP Address for each node in the Rubrik Cluster.
         """
 
+        self.log('cluster_node_ip: Generating a list of all Cluster Node IPs.')
         api_request = self.get('internal', '/cluster/me/node', timeout)
 
         node_ip_list = []
@@ -118,6 +118,7 @@ class Cluster(_API):
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
 
+        self.log('bootstrap: Starting the bootstrap process.')
         api_request = self.post('internal', '/cluster/me/bootstrap', bootstrap_config, timeout, authentication=False)
 
         return api_request
@@ -135,6 +136,7 @@ class Cluster(_API):
 
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(request_id)
 
+        self.log('bootstrap_status: Getting the status of the Rubrik Cluster bootstrap.')
         api_request = self.get('internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
 
         return api_request

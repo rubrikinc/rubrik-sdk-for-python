@@ -73,7 +73,6 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT):
         self.log("Username: {}".format(self.username))
         self.log("Password: *******\n")
 
-        self.log("Generating a list of all Cluster Node IPs.")
         self.node_ip = self.cluster_node_ip(timeout=5)
 
     @staticmethod
