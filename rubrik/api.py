@@ -27,7 +27,7 @@ from random import choice
 
 
 class Api():
-    """This class contains the base API methods that can be called independeintly or internally
+    """This class contains the base API methods that can be called independently or internally
     in standalone functions.
     """
 
