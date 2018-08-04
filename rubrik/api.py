@@ -62,31 +62,6 @@ class Api():
         else:
             node_ip = choice(self.node_ip)
 
-        valid_call_type = ['GET', 'POST', 'PATCH', 'DELETE', 'JOB_STATUS']
-
-        # Determine which call type is being used and then set the relevant variables for that call type
-        if call_type is 'GET':
-            request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
-            request_url = quote(request_url, '://?=&')
-            self.log('GET {}'.format(request_url))
-        elif call_type is 'POST':
-            config = json.dumps(config)
-            request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
-            self.log('POST {}'.format(request_url))
-            self.log('Config: {}'.format(config))
-        elif call_type is 'PATCH':
-            config = json.dumps(config)
-            request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
-            self.log('PATCH {}'.format(request_url))
-            self.log('Config: {}'.format(config))
-        elif call_type is 'DELETE':
-            request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
-            self.log('DELETE {}'.format(request_url))
-        elif call_type is 'JOB_STATUS':
-            self.log('JOB STATUS for {}'.format(job_status_url))
-        else:
-            sys.exit('Error: the _common_api() call_type must be one of the following: {}'.format(valid_call_type))
-
         # Determine if authentication should be sent as part of the API Header
         if authentication == True:
             header = self._authorization_header()
@@ -95,17 +70,35 @@ class Api():
         else:
             sys.exit('Error: "authentication" must be either True or False')
 
+        valid_call_type = ['GET', 'POST', 'PATCH', 'DELETE', 'JOB_STATUS']
         try:
+            # Determine which call type is being used and then set the relevant variables for that call type
             if call_type is 'GET':
+                request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
+                request_url = quote(request_url, '://?=&')
+                self.log('GET {}'.format(request_url))
                 api_request = requests.get(request_url, verify=False, headers=header, timeout=timeout)
             elif call_type is 'POST':
+                config = json.dumps(config)
+                request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
+                self.log('POST {}'.format(request_url))
+                self.log('Config: {}'.format(config))
                 api_request = requests.post(request_url, verify=False, headers=header, data=config, timeout=timeout)
             elif call_type is 'PATCH':
+                config = json.dumps(config)
+                request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
+                self.log('PATCH {}'.format(request_url))
+                self.log('Config: {}'.format(config))
                 api_request = requests.patch(request_url, verify=False, headers=header, data=config, timeout=timeout)
             elif call_type is 'DELETE':
+                request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
+                self.log('DELETE {}'.format(request_url))
                 api_request = requests.delete(request_url, verify=False, headers=header, timeout=timeout)
             elif call_type is 'JOB_STATUS':
+                self.log('JOB STATUS for {}'.format(job_status_url))
                 api_request = requests.get(job_status_url, verify=False, headers=header, timeout=timeout)
+            else:
+                sys.exit('Error: the _common_api() call_type must be one of the following: {}'.format(valid_call_type))
 
             self.log(str(api_request) + "\n")
             try:
