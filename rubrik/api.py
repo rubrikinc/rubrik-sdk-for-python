@@ -85,7 +85,7 @@ class Api():
         elif call_type is 'JOB_STATUS':
             self.log('JOB STATUS for {}'.format(job_status_url))
         else:
-            sys.exit('Error: "authentication" must be either True or False')
+            sys.exit('Error: the _common_api() call_type must be one of the following: {}'.format(valid_call_type))
 
         # Determine if authentication should be sent as part of the API Header
         if authentication == True:
@@ -93,7 +93,7 @@ class Api():
         elif authentication == False:
             header = self._header()
         else:
-            sys.exit('Error: the _common_api() call_type must be one of the following: {}'.format(valid_call_type))
+            sys.exit('Error: "authentication" must be either True or False')
 
         try:
             if call_type is 'GET':
