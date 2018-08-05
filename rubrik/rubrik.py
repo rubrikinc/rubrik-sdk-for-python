@@ -32,7 +32,7 @@ _DATA_MANAGEMENT = Data_Management
 
 
 class Connect(_CLUSTER, _DATA_MANAGEMENT):
-    """This class acts as the base class for the Rubrik SDK and serves as the main interaction point 
+    """This class acts as the base class for the Rubrik SDK and serves as the main interaction point
     for its end users. It also contains various helper functions used throughout the SDK.
 
     Arguments:
@@ -40,8 +40,7 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT):
         _DATA_MANAGEMENT {class} - This class contains methods related to backup and restore operations for the various objects managed by the Rubrik Cluster.
     """
 
-    def __init__(self, node_ip=None, username=None, password=None):
-
+    def __init__(self, node_ip=None, username=None, password=None, enable_logging=False):
         if node_ip is None:
             node_ip = os.environ.get('rubrik_cdm_node_ip')
             if node_ip is None:
@@ -69,21 +68,14 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT):
         else:
             self.password = password
 
+        if enable_logging is True:
+            logging.getLogger().setLevel(logging.DEBUG)
+
         self.log("User Provided Node IP: {}".format(self.node_ip))
         self.log("Username: {}".format(self.username))
         self.log("Password: *******\n")
 
         self.node_ip = self.cluster_node_ip(timeout=5)
-
-    @staticmethod
-    def enable_logging():
-        """Enable debug level logging.
-
-        Returns:
-            NoneType -- Code that sets the logging level to debug.
-        """
-
-        return logging.getLogger().setLevel(logging.DEBUG)
 
     @staticmethod
     def log(log_message):
