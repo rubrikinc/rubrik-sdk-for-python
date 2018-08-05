@@ -76,6 +76,16 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT):
         self.node_ip = self.cluster_node_ip(timeout=5)
 
     @staticmethod
+    def enable_logging():
+        """Enable debug level logging.
+
+        Returns:
+            NoneType -- Code that sets the logging level to debug.
+        """
+
+        return logging.getLogger().setLevel(logging.DEBUG)
+
+    @staticmethod
     def log(log_message):
         """Create properly formatted debug log messages.
 
