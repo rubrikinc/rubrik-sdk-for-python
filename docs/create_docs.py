@@ -75,18 +75,12 @@ for function_name, function_doc_string in function_documentation.items():
 
         if arguments:
             markdown.write('## Arguments\n')
-            markdown.write('```\n')
             print_doc_string(arguments)
-            markdown.write('```')
 
         if keyword_arguments:
             markdown.write('\n## Keyword Arguments\n')
-            markdown.write('```\n')
             print_doc_string(keyword_arguments)
-            markdown.write('```')
 
         if returns:
             markdown.write('\n## Returns\n')
-            markdown.write('```\n')
             print_doc_string(returns)
-            markdown.write('```')
