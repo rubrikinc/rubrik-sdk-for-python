@@ -19,7 +19,7 @@ Before you being to use the Rubrik Python SDK, you should first setup your auten
 
 ## Usage
 
-To use the SDK, you must first instantiate a new variable, in thise case, `rubrik` to connect to the Rubrik Cluster
+To use the SDK, you must first instantiate a new variable, in thise case `rubrik`, to connect to the Rubrik Cluster.
 
 ```py
 import rubrik
