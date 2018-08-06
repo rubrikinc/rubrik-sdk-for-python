@@ -148,7 +148,8 @@ markdown.write('* [Quick Start](README.md)\n\n')
 
 markdown.write('### Base API Calls\n')
 for function in base_api_functions:
-    markdown.write('* [{}]({}.md)\n'.format(function, function))
+    if function[0] is not '_':
+        markdown.write('* [{}]({}.md)\n'.format(function, function))
 
 markdown.write('\n### Cluster Functions\n')
 for function in cluster_functions:
@@ -160,6 +161,7 @@ for function in data_management_functions:
 
 markdown.write('\n### Connect Functions\n')
 for function in connect_functions:
-    markdown.write('* [{}]({}.md)\n'.format(function, function))
+    if function[0] is not '_':
+        markdown.write('* [{}]({}.md)\n'.format(function, function))
 
 markdown.close()

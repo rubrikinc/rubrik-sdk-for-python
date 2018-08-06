@@ -5,7 +5,6 @@
 * [Quick Start](README.md)
 
 ### Base API Calls
-* [_common_api](_common_api.md)
 * [delete](delete.md)
 * [get](get.md)
 * [job_status](job_status.md)
@@ -23,7 +22,4 @@
 * [on_demand_snapshot](on_demand_snapshot.md)
 
 ### Connect Functions
-* [_api_validation](_api_validation.md)
-* [_authorization_header](_authorization_header.md)
-* [_header](_header.md)
 * [log](log.md)
