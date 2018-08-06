@@ -126,6 +126,9 @@ class Cluster(_API):
     def bootstrap_status(self, request_id="1", timeout=15):
         """Retrieves status of in progress bootstrap requests
 
+        Arguments:
+
+
         Keyword Arguments:
             request_id {str} -- Id of the bootstrap request (default: {"1"})
             timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})

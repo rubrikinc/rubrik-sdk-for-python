@@ -1,4 +1,4 @@
-# on_demand_snapshot()
+# on_demand_snapshot
 
 Initiate an on-demand snapshot.
 

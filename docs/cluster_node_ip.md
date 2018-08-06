@@ -1,4 +1,4 @@
-# cluster_node_ip()
+# cluster_node_ip
 
 Retrive the IP Address for each node in the Rubrik Cluster.
 

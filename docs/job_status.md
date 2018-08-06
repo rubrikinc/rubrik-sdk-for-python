@@ -1,4 +1,4 @@
-# job_status()
+# job_status
 
 Connect to the Rubrik Cluster and get the status of a particular job.
 

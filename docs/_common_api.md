@@ -1,4 +1,4 @@
-# _common_api()
+# _common_api
 
 Internal method that consolidates the base API functions
 

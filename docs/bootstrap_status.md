@@ -1,4 +1,4 @@
-# bootstrap_status()
+# bootstrap_status
 
 Retrieves status of in progress bootstrap requests
 

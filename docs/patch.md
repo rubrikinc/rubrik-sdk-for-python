@@ -1,4 +1,4 @@
-# patch()
+# patch
 
 Connect to a Rubrik Cluster and perform a PATCH operation.
 

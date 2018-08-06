@@ -1,4 +1,4 @@
-# post()
+# post
 
 Connect to a Rubrik Cluster and perform a POST operation.
 

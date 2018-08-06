@@ -1,4 +1,4 @@
-# bootstrap()
+# bootstrap
 
 Issues a bootstrap request to a specified Rubrik cluster
 

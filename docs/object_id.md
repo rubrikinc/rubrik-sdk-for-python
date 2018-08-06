@@ -1,4 +1,4 @@
-# object_id()
+# object_id
 
 Get the ID of a provided object (ex. VM, SLA, etc.) by providing its name.
 

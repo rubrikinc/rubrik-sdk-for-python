@@ -1,4 +1,4 @@
-# get()
+# get
 
 Connect to a Rubrik Cluster and perform a GET operation.
 

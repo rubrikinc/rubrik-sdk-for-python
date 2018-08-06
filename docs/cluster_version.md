@@ -1,4 +1,4 @@
-# cluster_version()
+# cluster_version
 
 Retrieves the software version of the Rubrik Cluster.
 

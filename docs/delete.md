@@ -1,4 +1,4 @@
-# delete()
+# delete
 
 Connect to a Rubrik Cluster and perform a DELETE operation.
 
