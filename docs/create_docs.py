@@ -130,18 +130,36 @@ for function in data_management_functions:
     if function[0] is '_':
         data_management_functions.remove(function)
 
+combined_function_list = base_api_functions + cluster_functions + data_management_functions
+
+connect_functions_search = inspect.getmembers(rubrik.rubrik.Connect, inspect.isfunction)
+connect_functions = []
+for function in connect_functions_search:
+    if function[0] not in combined_function_list:
+        connect_functions.append(function[0])
+del connect_functions[0]
+
 
 markdown = open('SUMMARY.md', 'w')
 markdown.write('# Summary\n\n')
+
 markdown.write('### Getting Started\n\n')
 markdown.write('* [Quick Start](README.md)\n\n')
+
 markdown.write('### Base API Calls\n')
 for function in base_api_functions:
     markdown.write('* [{}]({}.md)\n'.format(function, function))
+
 markdown.write('\n### Cluster Functions\n')
 for function in cluster_functions:
     markdown.write('* [{}]({}.md)\n'.format(function, function))
+
 markdown.write('\n### Data Management Functions\n')
 for function in data_management_functions:
     markdown.write('* [{}]({}.md)\n'.format(function, function))
+
+markdown.write('\n### Connect Functions\n')
+for function in connect_functions:
+    markdown.write('* [{}]({}.md)\n'.format(function, function))
+
 markdown.close()

@@ -21,3 +21,9 @@
 ### Data Management Functions
 * [object_id](object_id.md)
 * [on_demand_snapshot](on_demand_snapshot.md)
+
+### Connect Functions
+* [_api_validation](_api_validation.md)
+* [_authorization_header](_authorization_header.md)
+* [_header](_header.md)
+* [log](log.md)
