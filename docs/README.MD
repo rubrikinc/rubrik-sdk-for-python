@@ -11,7 +11,7 @@ $ python setup.py install
 
 ## Configuration
 
-Before you being to use the Rubrik Python SDK, you should first setup your autentication credentials. By default, the SDK will attempt to read the the Rubrik Cluster credentials from the following environment variables:
+Before you begin to use the Rubrik Python SDK, you should first setup your autentication credentials. By default, the SDK will attempt to read the the Rubrik Cluster credentials from the following environment variables:
 
 * `rubrik_cdm_node_ip`
 * `rubrik_cdm_username`
@@ -29,3 +29,15 @@ rubrik = rubrik.Connect()
 {% hint style="info" %}
 Note: You may use any variable name to connect to the Rubrik Cluster.
 {% endhint %}
+
+If you have not configured the correct environment variables you may also manually pass in the required authentication credentials.
+
+```py
+import rubrik
+
+node_ip = "172.21.8.90"
+username = "sdk@rangers.lab"
+password = "RubrikPythonSDK"
+
+rubrik = rubrik.Connect(node_ip, username, password)
+```
