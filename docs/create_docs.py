@@ -101,3 +101,47 @@ for function_name, function_doc_string in function_documentation.items():
         if returns:
             markdown.write('\n## Returns\n')
             print_doc_string(returns)
+
+        markdown.close()
+
+
+base_api_functions_search = inspect.getmembers(rubrik.api.Api, inspect.isfunction)
+base_api_functions = []
+for function in base_api_functions_search:
+    # If first character of the function name...
+    base_api_functions.append(function[0])
+del base_api_functions[0]
+
+cluster_functions_search = inspect.getmembers(rubrik.cluster.Cluster, inspect.isfunction)
+cluster_functions = []
+for function in cluster_functions_search:
+    if function[0] not in base_api_functions:
+        cluster_functions.append(function[0])
+for function in cluster_functions:
+    if function[0] is '_':
+        cluster_functions.remove(function)
+
+data_management_search = inspect.getmembers(rubrik.data_management.Data_Management, inspect.isfunction)
+data_management_functions = []
+for function in data_management_search:
+    if function[0] not in base_api_functions:
+        data_management_functions.append(function[0])
+for function in data_management_functions:
+    if function[0] is '_':
+        data_management_functions.remove(function)
+
+
+markdown = open('SUMMARY.md', 'w')
+markdown.write('# Summary\n\n')
+markdown.write('### Getting Started\n\n')
+markdown.write('* [Quick Start](README.md)\n\n')
+markdown.write('### Base API Calls\n')
+for function in base_api_functions:
+    markdown.write('* [{}]({}.md)\n'.format(function, function))
+markdown.write('\n### Cluster Functions\n')
+for function in cluster_functions:
+    markdown.write('* [{}]({}.md)\n'.format(function, function))
+markdown.write('\n### Data Management Functions\n')
+for function in data_management_functions:
+    markdown.write('* [{}]({}.md)\n'.format(function, function))
+markdown.close()
