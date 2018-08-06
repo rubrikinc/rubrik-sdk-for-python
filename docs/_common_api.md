@@ -1,10 +1,10 @@
 # _common_api()
 
+Internal method that consolidates the base API functions
+
 ```py
 def _common_api(call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=15, authentication=True)
 ```
-
-Internal method that consolidates the base API functions
 
 ## Arguments
 call_type {str} -- The type of API call you wish to make. Valid choices are 'GET', 'POST', 'PATCH', 'DELETE', and 'JOB_STATUS'.

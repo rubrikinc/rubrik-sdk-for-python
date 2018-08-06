@@ -1,10 +1,10 @@
 # patch()
 
+Connect to a Rubrik Cluster and perform a PATCH operation.
+
 ```py
 def patch(api_version, api_endpoint, config, timeout=15, authentication=True)
 ```
-
-Connect to a Rubrik Cluster and perform a PATCH operation.
 
 ## Arguments
 api_version {str} -- The version of the Rubrik CDM API to call.

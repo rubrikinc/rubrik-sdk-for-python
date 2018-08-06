@@ -1,10 +1,10 @@
 # on_demand_snapshot()
 
+Initiate an on-demand snapshot.
+
 ```py
 def on_demand_snapshot(object_name, object_type=None, sla_name='current')
 ```
-
-Initiate an on-demand snapshot.
 
 ## Arguments
 object_name {str} -- The name of object (i.e vSphere VM, Fileset, etc.) to take a Snapshot of.

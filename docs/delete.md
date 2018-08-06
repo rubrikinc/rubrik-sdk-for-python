@@ -1,10 +1,10 @@
 # delete()
 
+Connect to a Rubrik Cluster and perform a DELETE operation.
+
 ```py
 def delete(api_version, api_endpoint, timeout=15, authentication=True)
 ```
-
-Connect to a Rubrik Cluster and perform a DELETE operation.
 
 ## Arguments
 api_version {str} -- The version of the Rubrik CDM API to call.

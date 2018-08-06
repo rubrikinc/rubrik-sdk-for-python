@@ -1,10 +1,10 @@
 # get()
 
+Connect to a Rubrik Cluster and perform a GET operation.
+
 ```py
 def get(api_version, api_endpoint, timeout=15, authentication=True)
 ```
-
-Connect to a Rubrik Cluster and perform a GET operation.
 
 ## Arguments
 api_version {str} -- The version of the Rubrik CDM API to call.

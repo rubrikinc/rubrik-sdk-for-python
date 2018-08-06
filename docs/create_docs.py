@@ -29,11 +29,6 @@ for function_name, function_doc_string in function_documentation.items():
     if 'init' not in function_name:
         markdown = open('{}.md'.format(function_name), 'w')
         markdown.write('# {}()\n\n'.format(function_name))
-        for function, function_code_example in function_examples.items():
-            if function_name is function:
-                markdown.write('```py\n')
-                markdown.write(function_code_example)
-                markdown.write('\n```\n\n')
 
         doc_string = function_documentation[function_name]
         doc_string = doc_string.splitlines()
@@ -88,6 +83,12 @@ for function_name, function_doc_string in function_documentation.items():
         # print(index, line)
         if desctiption:
             print_doc_string(desctiption)
+
+        for function, function_code_example in function_examples.items():
+            if function_name is function:
+                markdown.write('```py\n')
+                markdown.write(function_code_example)
+                markdown.write('\n```\n\n')
 
         if arguments:
             markdown.write('## Arguments\n')
