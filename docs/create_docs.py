@@ -1,11 +1,11 @@
 import inspect
 import rubrik
-import sys
+import os
 
 
 def print_doc_string(doc_string):
     for line in doc_string:
-        print(line.strip())
+        markdown.write(line.strip() + '\n\n')
 
 
 rubrk_sdk_functions = inspect.getmembers(rubrik.Connect, inspect.isfunction)
@@ -16,7 +16,8 @@ for function in rubrk_sdk_functions:
 
 for function_name, function_doc_string in function_documentation.items():
     if 'init' not in function_name:
-        print('******************** Function Name: {} ********************'.format(function_name))
+        markdown = open('{}.md'.format(function_name), 'w')
+        markdown.write('# {}()\n\n'.format(function_name))
 
         doc_string = function_documentation[function_name]
         doc_string = doc_string.splitlines()
@@ -70,17 +71,16 @@ for function_name, function_doc_string in function_documentation.items():
 
         # print(index, line)
         if desctiption:
-            print('Description:\n')
             print_doc_string(desctiption)
 
         if arguments:
-            print('\nArguments:\n')
+            markdown.write('## Arguments\n')
             print_doc_string(arguments)
 
         if keyword_arguments:
-            print('\nKeyword Arguments:\n')
+            markdown.write('\n## Keyword Arguments\n')
             print_doc_string(keyword_arguments)
 
         if returns:
-            print('\nReturn:\n')
+            markdown.write('\n## Returns\n')
             print_doc_string(returns)
