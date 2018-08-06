@@ -1,5 +1,9 @@
 # on_demand_snapshot()
 
+```py
+def on_demand_snapshot(object_name, object_type=None, sla_name='current')
+```
+
 Initiate an on-demand snapshot.
 
 ## Arguments

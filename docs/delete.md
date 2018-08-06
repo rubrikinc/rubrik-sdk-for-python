@@ -1,5 +1,9 @@
 # delete()
 
+```py
+def delete(api_version, api_endpoint, timeout=15, authentication=True)
+```
+
 Connect to a Rubrik Cluster and perform a DELETE operation.
 
 ## Arguments

@@ -1,5 +1,9 @@
 # object_id()
 
+```py
+def object_id(object_name, object_type=None)
+```
+
 Get the ID of a provided object (ex. VM, SLA, etc.) by providing its name.
 
 ## Arguments

@@ -1,5 +1,9 @@
 # bootstrap_status()
 
+```py
+def bootstrap_status(request_id="1", timeout=15)
+```
+
 Retrieves status of in progress bootstrap requests
 
 ## Arguments

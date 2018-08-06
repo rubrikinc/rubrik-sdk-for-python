@@ -1,5 +1,9 @@
 # job_status()
 
+```py
+def job_status(url, wait_for_completion=True, timeout=15)
+```
+
 Connect to the Rubrik Cluster and get the status of a particular job.
 
 ## Arguments

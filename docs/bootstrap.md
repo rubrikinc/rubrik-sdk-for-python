@@ -1,5 +1,9 @@
 # bootstrap()
 
+```py
+def bootstrap(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, enable_encryption=True, node_config=None, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, timeout=15)
+```
+
 Issues a bootstrap request to a specified Rubrik cluster
 
 ## Arguments

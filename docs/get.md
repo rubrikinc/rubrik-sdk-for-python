@@ -1,5 +1,9 @@
 # get()
 
+```py
+def get(api_version, api_endpoint, timeout=15, authentication=True)
+```
+
 Connect to a Rubrik Cluster and perform a GET operation.
 
 ## Arguments

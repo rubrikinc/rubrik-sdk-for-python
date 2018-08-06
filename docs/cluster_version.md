@@ -1,5 +1,9 @@
 # cluster_version()
 
+```py
+def cluster_version(timeout=15)
+```
+
 Retrieves the software version of the Rubrik Cluster.
 
 ## Arguments
