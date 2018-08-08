@@ -6,3 +6,8 @@ Internal method used to create the a header without authorization used in the AP
 def _header()
 ```
 
+## Arguments
+dict -- The header that does not include any authorization.
+
+
+

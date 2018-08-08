@@ -6,3 +6,8 @@ Create properly formatted debug log messages.
 def log(log_message)
 ```
 
+## Arguments
+log_message {str} -- The message to pass to the debug log.
+
+
+

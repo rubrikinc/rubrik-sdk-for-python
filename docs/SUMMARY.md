@@ -21,5 +21,5 @@
 * [object_id](object_id.md)
 * [on_demand_snapshot](on_demand_snapshot.md)
 
-### Connect Functions
+### SDK Helper Functions
 * [log](log.md)

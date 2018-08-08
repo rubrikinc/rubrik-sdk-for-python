@@ -1,6 +1,6 @@
 # patch
 
-Connect to a Rubrik Cluster and perform a PATCH operation.
+Send a PATCH request to the provided Rubrik API endpoint.
 
 ```py
 def patch(api_version, api_endpoint, config, timeout=15, authentication=True)

@@ -1,6 +1,6 @@
 # post
 
-Connect to a Rubrik Cluster and perform a POST operation.
+Send a POST request to the provided Rubrik API endpoint.
 
 ```py
 def post(api_version, api_endpoint, config, timeout=15, authentication=True)

@@ -1,6 +1,6 @@
 # get
 
-Connect to a Rubrik Cluster and perform a GET operation.
+IDK GET Send a GET request to the provided Rubrik API endpoint.
 
 ```py
 def get(api_version, api_endpoint, timeout=15, authentication=True)

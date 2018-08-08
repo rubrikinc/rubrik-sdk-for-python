@@ -1,6 +1,6 @@
 # _common_api
 
-Internal method that consolidates the base API functions
+Internal method that consolidates the base API functions.
 
 ```py
 def _common_api(call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=15, authentication=True)

@@ -6,13 +6,14 @@ Retrieves status of in progress bootstrap requests
 def bootstrap_status(request_id="1", timeout=15)
 ```
 
-## Arguments
+
+## Keyword Arguments
 request_id {str} -- Id of the bootstrap request (default: {"1"})
 
 timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
 
 
-## Keyword Arguments
+## Returns
 dict -- The response returned by the API call.
 
 
