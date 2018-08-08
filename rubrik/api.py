@@ -35,7 +35,7 @@ class Api():
         super().__init__(node_ip)
 
     def _common_api(self, call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=15, authentication=True):
-        """Internal method that consolidates the base API functions
+        """Internal method that consolidates the base API functions.
 
         Arguments:
             call_type {str} -- The type of API call you wish to make. Valid choices are 'GET', 'POST', 'PATCH', 'DELETE', and 'JOB_STATUS'.
@@ -124,7 +124,7 @@ class Api():
         return api_request.json()
 
     def get(self, api_version, api_endpoint, timeout=15, authentication=True):
-        """Connect to a Rubrik Cluster and perform a GET operation.
+        """Send a GET request to the provided Rubrik API endpoint.
 
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call.
@@ -144,7 +144,7 @@ class Api():
         return api_call
 
     def post(self, api_version, api_endpoint, config, timeout=15, authentication=True):
-        """Connect to a Rubrik Cluster and perform a POST operation.
+        """Send a POST request to the provided Rubrik API endpoint.
 
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call.
@@ -165,7 +165,7 @@ class Api():
         return api_call
 
     def patch(self, api_version, api_endpoint, config, timeout=15, authentication=True):
-        """Connect to a Rubrik Cluster and perform a PATCH operation.
+        """Send a PATCH request to the provided Rubrik API endpoint.
 
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call.
@@ -186,7 +186,8 @@ class Api():
         return api_call
 
     def delete(self, api_version, api_endpoint, timeout=15, authentication=True):
-        """Connect to a Rubrik Cluster and perform a DELETE operation.
+        """Send a DELETE request to the provided Rubrik API endpoint.
+
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call.
             api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
@@ -205,7 +206,9 @@ class Api():
         return api_call
 
     def job_status(self, url, wait_for_completion=True, timeout=15):
-        """Connect to the Rubrik Cluster and get the status of a particular job.
+        """Certain Rubrik operations may not complete instantaneously (ex. on-demand snapshots, live mounts). In those cases we have the ability to monitor the status of the 
+        job through a job status url provided in the actions API response body. This function will perform a GET operation on the provided url
+        and return the jobs status. 
 
         Arguments:
             url {str} -- The job status URL provided by a previous API call.
