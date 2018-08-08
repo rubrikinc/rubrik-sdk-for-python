@@ -1,10 +1,6 @@
 # job_status
 
-Certain Rubrik operations may not complete instantaneously (ex. on-demand snapshots, live mounts). In those cases we have the ability to monitor the status of the
-
-job through a job status url provided in the actions API response body. This function will perform a GET operation on the provided url
-
-and return the jobs status.
+Certain Rubrik operations may not complete instantaneously (ex. on-demand snapshots, live mounts). In those cases we have the ability to monitor the status of the job through a job status url provided in the actions API response body. This function will perform a GET operation on the provided url and return the jobs status.
 
 ```py
 def job_status(url, wait_for_completion=True, timeout=15)

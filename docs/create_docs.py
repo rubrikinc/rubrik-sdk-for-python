@@ -5,6 +5,7 @@ import sys
 
 
 def print_doc_string(doc_string):
+
     for line in doc_string:
         markdown.write(line.strip() + '\n\n')
 
@@ -63,7 +64,7 @@ for function_name, function_doc_string in function_documentation.items():
             if len(filter_lines) >= 0:
                 if index < arguments_start:
                     if len(line) is not 0:
-                        desctiption.append(line)
+                        desctiption.append(line.replace('\n', ''))
 
             # Parse the function arguments
             if len(filter_lines) >= 1:
@@ -89,6 +90,12 @@ for function_name, function_doc_string in function_documentation.items():
 
         # print(index, line)
         if desctiption:
+            if len(desctiption) > 1:
+                # Combine the multi-line description into a single line
+                parse_desctiption = ''.join(desctiption).split()
+                parse_desctiption = ' '.join(parse_desctiption)
+                desctiption = []
+                desctiption.append(parse_desctiption)
             print_doc_string(desctiption)
 
         for function, function_code_example in function_examples.items():
