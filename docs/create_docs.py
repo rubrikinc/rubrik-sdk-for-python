@@ -1,6 +1,7 @@
 import inspect
 import rubrik
 import os
+import sys
 
 
 def print_doc_string(doc_string):
@@ -16,9 +17,12 @@ for function in rubrk_sdk_functions:
     function_documentation[function[0]] = function[1].__doc__
     function_code = inspect.getsource(function[1])
     if '@staticmethod' in function_code:
-        function_code = function_code.splitlines()[1].replace(
+        function_code = function_code.replace('@staticmethod\n', '')
+        function_code = function_code.splitlines()[0].replace(
             'self, ', '').replace('self', '').replace(':', '').strip()
+
     else:
+
         function_code = function_code.splitlines()[0].replace(
             'self, ', '').replace('self', '').replace(':', '').strip()
 
@@ -41,8 +45,6 @@ for function_name, function_doc_string in function_documentation.items():
             if 'Returns' in line:
                 filter_lines.append(index)
 
-            # print(index, line)
-
         arguments = []
         keyword_arguments = []
         returns = []
@@ -54,6 +56,7 @@ for function_name, function_doc_string in function_documentation.items():
             returns_start = filter_lines[2]
         except:
             pass
+
         # Doc Sring Returns
         for index, line in enumerate(doc_string):
             # Parse the function description
@@ -63,8 +66,12 @@ for function_name, function_doc_string in function_documentation.items():
                         desctiption.append(line)
 
             # Parse the function arguments
-            if len(filter_lines) > 1:
-                if arguments_start + 1 <= index <= keyword_arguments_start - 1:
+            if len(filter_lines) >= 1:
+                try:
+                    if arguments_start + 1 <= index <= keyword_arguments_start - 1:
+                        if len(line) is not 0:
+                            arguments.append(line)
+                except:
                     if len(line) is not 0:
                         arguments.append(line)
 
@@ -159,7 +166,7 @@ markdown.write('\n### Data Management Functions\n')
 for function in data_management_functions:
     markdown.write('* [{}]({}.md)\n'.format(function, function))
 
-markdown.write('\n### Connect Functions\n')
+markdown.write('\n### SDK Helper Functions\n')
 for function in connect_functions:
     if function[0] is not '_':
         markdown.write('* [{}]({}.md)\n'.format(function, function))
