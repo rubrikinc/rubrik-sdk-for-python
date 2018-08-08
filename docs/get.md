@@ -1,6 +1,6 @@
 # get
 
-IDK GET Send a GET request to the provided Rubrik API endpoint.
+Send a GET request to the provided Rubrik API endpoint.
 
 ```py
 def get(api_version, api_endpoint, timeout=15, authentication=True)
