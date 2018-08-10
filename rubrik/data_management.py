@@ -114,6 +114,19 @@ class Data_Management(_API):
             sys.exit("Error: The {} object '{}' was not found on the Rubrik Cluster.".format(object_type, object_name))
 
     def assign_sla(self, object_name, sla_name, object_type=None):
+        """Assign a Rubrik object to an SLA Domain.
+
+        Arguments:
+            object_name {str} -- The name of an object (ex. vSphere VM) you wish to assign to an SLA Domain.
+            sla_name {str} -- The name of the SLA Domain you wish to assign an object to.
+
+        Keyword Arguments:
+            object_type {str} -- The type of object (ex. vmware) you are assigning to the SLA Domain. (default: {None}) (choices: {vmware})
+
+        Returns:
+            str -- If the object is already assigned to the SLA Domain a message to that effect will be retuned.
+            dict -- The full API reponse of the SLA assignment API call.
+        """
 
         valid_object_type = ['vmware']
 
@@ -140,7 +153,22 @@ class Data_Management(_API):
                 update_sla = self.patch('v1', '/vmware/vm/{}'.format(vm_id), config)
                 return update_sla
 
-    def live_mount_vsphere(self, object_name, date, time, host='current', remove_network_devices=False, power_on=True):
+    def live_mount_vsphere(self, vm_name, date, time, host='current', remove_network_devices=False, power_on=True):
+        """Create a request to Live Mount a vSphere VM from a specified Snapshot.
+
+        Arguments:
+            vm_name {str} -- The name of the VM to Live Mount.
+            date {str} -- The date of the Snapshot you wish to Live Mount formated as Month-Day-Year. Example: 1/15/2014
+            time {str} -- The time of the Snapshot you wish to Live Mount formated formated as Hour:Minute AM/PM. Example: 1:30 AM
+
+        Keyword Arguments:
+            host {str} -- The hostname or IP address of the ESXi host to Live Mount the VM on. By default the VM will be Live Mounted to the host it is currently on. (default: {'current'})
+            remove_network_devices {bool} -- Determines whether to remove the network interfaces from the Live Mounted VM. Set to 'True' to remove all network interfaces. (default: {False})
+            power_on {bool} -- Determines whether the VM should be powered on after Live Mount. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on. (default: {True})
+
+        Returns:
+            dict -- The full response of the Live Mount API call.
+        """
 
         if isinstance(remove_network_devices, bool) is False:
             sys.exit("Error: The 'remove_network_devices' argument must be True or False.")
@@ -150,10 +178,10 @@ class Data_Management(_API):
         self.log("live_mount_vsphere: Converting the provided date/time into UTC.")
         snapshot_date_time = self._date_time_conversion(date, time)
 
-        self.log("live_mount_vsphere: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
-        vm_id = self.object_id(object_name, 'vmware')
+        self.log("live_mount_vsphere: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(vm_name))
+        vm_id = self.object_id(vm_name, 'vmware')
 
-        self.log("live_mount_vsphere: Getting a list of all Snapshots for vSphere VM '{}'.".format(object_name))
+        self.log("live_mount_vsphere: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
         vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
 
         current_snapshots = {}
@@ -169,7 +197,7 @@ class Data_Management(_API):
         try:
             snapshot_id
         except NameError:
-            sys.exit("Error: The vSphere VM '{}' does not have a Snapshot taken on {} at {}.".format(object_name, date, time))
+            sys.exit("Error: The vSphere VM '{}' does not have a Snapshot taken on {} at {}.".format(vm_name, date, time))
         else:
             if host is 'current':
                 host_id = vm_summary['hostId']
@@ -182,12 +210,24 @@ class Data_Management(_API):
             config['powerOn'] = power_on
 
             self.log("live_mount_vsphere: Live Mounting the Snapshot taken on {} at {} for vSphere VM '{}'.".format(
-                date, time, object_name))
+                date, time, vm_name))
             live_mount = self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config)
 
             return live_mount
 
     def _date_time_conversion(self, date, time):
+        """All date values returned by the Rubrik API are stored in Coordinated Universal Time (UTC) 
+        and need to be converted to the timezone configured on the Rubrik Cluster in order to match 
+        the values provided by the end user in various functions. This internal function will handle that
+        conversion process.
+
+        Arguments:
+            date {str} -- A date value formated as Month-Day-Year. Example: 1/15/2014
+            time {str} -- A time value formated as Hour:Minute AM/PM. Example: 1:30 AM
+
+        Returns:
+            str -- A combined date/time value formated as Year-Month-DayTHour:Minute. Where Hour:Minute is on the 24-hour clock. Example: 2014-1-15T01:30
+        """
 
         from datetime import datetime
         import pytz
@@ -223,5 +263,4 @@ class Data_Management(_API):
         snapshot_datetime = snapshot_datetime.astimezone(utc_timezone)
 
         snapshot_datetime = snapshot_datetime.strftime('%Y-%m-%dT%H:%M')
-
         return snapshot_datetime
