@@ -154,20 +154,20 @@ class Data_Management(_API):
                 return update_sla
 
     def live_mount_vsphere(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True):
-        """Create a request to Live Mount a vSphere VM from a specified Snapshot. If a specific date and time is not provided the last Snapshot taken will be selected.
+        """Create a request to Instantly Recover a vSphere VM from a specified Snapshot. If a specific date and time is not provided the last Snapshot taken will be selected.
 
         Arguments:
-            vm_name {str} -- The name of the VM to Live Mount.
+            vm_name {str} -- The name of the VM to Instantly Recover.
 
         Keyword Arguments:
-            date {str} -- The date of the Snapshot you wish to Live Mount formated as Month-Day-Year. Example: 1/15/2014. If latest is specified the last Snapshot taken will be Live Mounted. (default: {'latest'})
-            time {str} -- The time of the Snapshot you wish to Live Mount formated formated as Hour:Minute AM/PM. Example: 1:30 AM. If latest is specified the last Snapshot taken will be Live Mounted. (default: {'latest'})
-            host {str} -- The hostname or IP address of the ESXi host to Live Mount the VM on. By default the VM will be Live Mounted to the host it is currently on. (default: {'current'})
-            remove_network_devices {bool} -- Determines whether to remove the network interfaces from the Live Mounted VM. Set to 'True' to remove all network interfaces. (default: {False})
-            power_on {bool} -- Determines whether the VM should be powered on after Live Mount. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on. (default: {True})
+            date {str} -- The date of the Snapshot you wish to Instantly Recover formated as Month-Day-Year. Example: 1-15-2014. If latest is specified the last Snapshot taken will be Instantly Recovered. (default: {'latest'})
+            time {str} -- The time of the Snapshot you wish to Instantly Recover formated formated as Hour:Minute AM/PM. Example: 1:30 AM. If latest is specified the last Snapshot taken will be Instantly Recovered. (default: {'latest'})
+            host {str} -- The hostname or IP address of the ESXi host to Instantly Recover the VM on. By default the VM will be Instantly Recovered to the host it is currently on. (default: {'current'})
+            remove_network_devices {bool} -- Determines whether to remove the network interfaces from the Instantly Recovered VM. Set to 'True' to remove all network interfaces. (default: {False})
+            power_on {bool} -- Determines whether the VM should be powered on after Instantly Recover. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on. (default: {True})
 
         Returns:
-            dict -- The full response of the Live Mount API call.
+            dict -- The full response of the Instantly Recover API call.
         """
 
         if isinstance(remove_network_devices, bool) is False:
@@ -216,12 +216,94 @@ class Data_Management(_API):
             config['removeNetworkDevices'] = remove_network_devices
             config['powerOn'] = power_on
 
-            self.log("live_mount_vsphere: Live Mounting the Snapshot taken on {} at {} for vSphere VM '{}'.".format(
+            self.log("live_mount_vsphere: Instantly Recovering the Snapshot taken on {} at {} for vSphere VM '{}'.".format(
                 date, time, vm_name))
 
             live_mount = self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config)
 
             return live_mount
+
+    def instant_recovery_vsphere(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False):
+        """Instantly recovery a virtual machine from a snapshot. If a specific date and time is not provided the last Snapshot taken will be selected.
+
+        Arguments:
+            vm_name {str} -- The name of the VM to Instantly Recover.
+
+        Keyword Arguments:
+            date {str} -- The date of the Snapshot you wish to Instantly Recover formated as Month-Day-Year. Example: 1-15-2014. If 'latest' is specified the last Snapshot taken will be Instantly Recovered. (default: {'latest'})
+            time {str} -- The time of the Snapshot you wish to Instantly Recover formated formated as Hour:Minute AM/PM. Example: 1:30 AM. If 'latest' is specified the last Snapshot taken will be Instantly Recovered. (default: {'latest'})
+            host {str} -- The hostname or IP address of the ESXi host to Instantly Recover the VM on. By default the VM will be Instantly Recovered to the host it is currently on. (default: {'current'})
+            remove_network_devices {bool} -- Determines whether to remove the network interfaces from the Instantly Recovered VM. Set to 'True' to remove all network interfaces. (default: {False})
+            power_on {bool} -- Determines whether the VM should be powered on after Instant Recovery. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on. (default: {True})
+            disable_network {bool} -- Sets the state of the network interfaces when the VM is mounted. Use 'False' to enable the network interfaces. Use 'True' to disable the network interfaces. Disabling the interfaces can prevent IP conflicts. (default: {False})
+            keep_mac_addresses {bool} -- Determines whether the MAC addresses of the network interfaces on the source VM are assigned to the new VM. Set to 'True' to assign the original MAC addresses to the new VM. Set to 'False' to assign new MAC addresses. When 'remove_network_devices' is set to 'True', this property is ignored. (default: {False})
+            preserve_moid {bool} -- Determines whether to preserve the MOID of the source VM in a restore operation. Use 'True' to keep the MOID of the source. Use 'False' to assign a new moid. (default: {False})
+
+        Returns:
+            dict -- The full response of the Instantly Recover API call.
+        """
+
+        if isinstance(remove_network_devices, bool) is False:
+            sys.exit("Error: The 'remove_network_devices' argument must be True or False.")
+        elif isinstance(power_on, bool) is False:
+            sys.exit("Error: The 'power_on' argument must be True or False.")
+        elif isinstance(disable_network, bool) is False:
+            sys.exit("Error: The 'disable_network' argument must be True or False.")
+        elif isinstance(keep_mac_addresses, bool) is False:
+            sys.exit("Error: The 'keep_mac_addresses' argument must be True or False.")
+        elif isinstance(preserve_moid, bool) is False:
+            sys.exit("Error: The 'preserve_moid' argument must be True or False.")
+        elif date is not 'latest' and time is 'latest' or date is 'latest' and time is not 'latest':
+            sys.exit("Error: The date and time arguments most both be 'latest' or a specific date and time.")
+
+        self.log("instant_recovery_vsphere: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(vm_name))
+        vm_id = self.object_id(vm_name, 'vmware')
+
+        self.log("instant_recovery_vsphere: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
+        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+
+        if date is 'latest' and time is 'latest':
+            number_of_snapshots = len(vm_summary['snapshots'])
+            snapshot_id = vm_summary['snapshots'][number_of_snapshots - 1]['id']
+        else:
+
+            self.log("instant_recovery_vsphere: Converting the provided date/time into UTC.")
+            snapshot_date_time = self._date_time_conversion(date, time)
+
+            current_snapshots = {}
+
+            for snapshot in vm_summary['snapshots']:
+                current_snapshots[snapshot['id']] = snapshot['date']
+
+            self.log("instant_recovery_vsphere: Searching for the provided Snapshot.")
+            for id, date_time in current_snapshots.items():
+                if snapshot_date_time in date_time:
+                    snapshot_id = id
+
+        try:
+            snapshot_id
+        except NameError:
+            sys.exit("Error: The vSphere VM '{}' does not have a Snapshot taken on {} at {}.".format(vm_name, date, time))
+        else:
+            if host is 'current':
+                host_id = vm_summary['hostId']
+            else:
+                host_id = self.object_id(host, 'vmware_host')
+
+            config = {}
+            config['hostId'] = host_id
+            config['removeNetworkDevices'] = remove_network_devices
+            config['powerOn'] = power_on
+            config['disableNetwork'] = disable_network
+            config['keepMacAddresses'] = keep_mac_addresses
+            config['preserveMoid'] = preserve_moid
+
+            self.log("instant_recovery_vsphere: Instantly Recovering the Snapshot taken on {} at {} for vSphere VM '{}'.".format(
+                date, time, vm_name))
+
+            instant_recovery = self.post('v1', '/vmware/vm/snapshot/{}/instant_recover'.format(snapshot_id), config)
+
+            return instant_recovery
 
     def _date_time_conversion(self, date, time):
         """All date values returned by the Rubrik API are stored in Coordinated Universal Time (UTC) 
