@@ -153,15 +153,15 @@ class Data_Management(_API):
                 update_sla = self.patch('v1', '/vmware/vm/{}'.format(vm_id), config)
                 return update_sla
 
-    def live_mount_vsphere(self, vm_name, date, time, host='current', remove_network_devices=False, power_on=True):
-        """Create a request to Live Mount a vSphere VM from a specified Snapshot.
+    def live_mount_vsphere(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True):
+        """Create a request to Live Mount a vSphere VM from a specified Snapshot. If a specific date and time is not provided the last Snapshot taken will be selected.
 
         Arguments:
             vm_name {str} -- The name of the VM to Live Mount.
-            date {str} -- The date of the Snapshot you wish to Live Mount formated as Month-Day-Year. Example: 1/15/2014
-            time {str} -- The time of the Snapshot you wish to Live Mount formated formated as Hour:Minute AM/PM. Example: 1:30 AM
 
         Keyword Arguments:
+            date {str} -- The date of the Snapshot you wish to Live Mount formated as Month-Day-Year. Example: 1/15/2014. If latest is specified the last Snapshot taken will be Live Mounted. (default: {'latest'})
+            time {str} -- The time of the Snapshot you wish to Live Mount formated formated as Hour:Minute AM/PM. Example: 1:30 AM. If latest is specified the last Snapshot taken will be Live Mounted. (default: {'latest'})
             host {str} -- The hostname or IP address of the ESXi host to Live Mount the VM on. By default the VM will be Live Mounted to the host it is currently on. (default: {'current'})
             remove_network_devices {bool} -- Determines whether to remove the network interfaces from the Live Mounted VM. Set to 'True' to remove all network interfaces. (default: {False})
             power_on {bool} -- Determines whether the VM should be powered on after Live Mount. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on. (default: {True})
@@ -174,9 +174,8 @@ class Data_Management(_API):
             sys.exit("Error: The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
             sys.exit("Error: The 'power_on' argument must be True or False.")
-
-        self.log("live_mount_vsphere: Converting the provided date/time into UTC.")
-        snapshot_date_time = self._date_time_conversion(date, time)
+        elif date is not 'latest' and time is 'latest' or date is 'latest' and time is not 'latest':
+            sys.exit("Error: The date and time arguments most both be 'latest' or a specific date and time.")
 
         self.log("live_mount_vsphere: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware')
@@ -184,15 +183,23 @@ class Data_Management(_API):
         self.log("live_mount_vsphere: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
         vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
 
-        current_snapshots = {}
+        if date is 'latest' and time is 'latest':
+            number_of_snapshots = len(vm_summary['snapshots'])
+            snapshot_id = vm_summary['snapshots'][number_of_snapshots - 1]['id']
+        else:
 
-        for snapshot in vm_summary['snapshots']:
-            current_snapshots[snapshot['id']] = snapshot['date']
+            self.log("live_mount_vsphere: Converting the provided date/time into UTC.")
+            snapshot_date_time = self._date_time_conversion(date, time)
 
-        self.log("live_mount_vsphere: Searching for the provided Snapshot.")
-        for id, date_time in current_snapshots.items():
-            if snapshot_date_time in date_time:
-                snapshot_id = id
+            current_snapshots = {}
+
+            for snapshot in vm_summary['snapshots']:
+                current_snapshots[snapshot['id']] = snapshot['date']
+
+            self.log("live_mount_vsphere: Searching for the provided Snapshot.")
+            for id, date_time in current_snapshots.items():
+                if snapshot_date_time in date_time:
+                    snapshot_id = id
 
         try:
             snapshot_id
@@ -211,6 +218,7 @@ class Data_Management(_API):
 
             self.log("live_mount_vsphere: Live Mounting the Snapshot taken on {} at {} for vSphere VM '{}'.".format(
                 date, time, vm_name))
+
             live_mount = self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config)
 
             return live_mount
