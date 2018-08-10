@@ -84,11 +84,18 @@ class Data_Management(_API):
             [str] -- The ID of the provided object.
         """
 
+        valid_object_type = ['vmware', 'sla', 'vmware_host']
+
+        if object_type not in valid_object_type:
+            sys.exit("Error: The object_id() object_type argument must be one of the following: {}.".format(valid_object_type))
+
         if object_type is 'vmware':
             object_summary_api_endpoint = '/vmware/vm?primary_cluster_id=local&is_relic=false&name={}'.format(
                 object_name)
         elif object_type is 'sla':
             object_summary_api_endpoint = '/sla_domain?primary_cluster_id=local&name={}'.format(object_name)
+        elif object_type is 'vmware_host':
+            object_summary_api_endpoint = '/vmware/host?primary_cluster_id=local'
 
         self.log("object_id: Getting the object id for the {} object '{}'".format(object_type, object_name))
         api_request = self.get('v1', object_summary_api_endpoint)
@@ -105,3 +112,116 @@ class Data_Management(_API):
 
         if object_type_present:
             sys.exit("Error: The {} object '{}' was not found on the Rubrik Cluster.".format(object_type, object_name))
+
+    def assign_sla(self, object_name, sla_name, object_type=None):
+
+        valid_object_type = ['vmware']
+
+        if object_type not in valid_object_type:
+            sys.exit("Error: The assign_sla() object_type argument must be one of the following: {}.".format(valid_object_type))
+
+        self.log("assign_sla: Searching the Rubrik Cluster for the SLA Domain '{}'.".format(sla_name))
+        sla_id = self.object_id(sla_name, 'sla')
+
+        if object_type is 'vmware':
+            self.log("assign_sla: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
+            vm_id = self.object_id(object_name, object_type)
+
+            self.log("assign_sla: Determing the SLA Domain currently assigned to the vSphere VM '{}'.".format(object_name))
+            vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+            current_sla_id = vm_summary['effectiveSlaDomainId']
+
+            if sla_id == current_sla_id:
+                return "The vSphere VM '{}' is already assigned to the '{}' SLA Domain.".format(object_name, sla_name)
+            else:
+                self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+                config = {}
+                config['configuredSlaDomainId'] = sla_id
+                update_sla = self.patch('v1', '/vmware/vm/{}'.format(vm_id), config)
+                return update_sla
+
+    def live_mount_vsphere(self, object_name, date, time, host='current', remove_network_devices=False, power_on=True):
+
+        if isinstance(remove_network_devices, bool) is False:
+            sys.exit("Error: The 'remove_network_devices' argument must be True or False.")
+        elif isinstance(power_on, bool) is False:
+            sys.exit("Error: The 'power_on' argument must be True or False.")
+
+        self.log("live_mount_vsphere: Converting the provided date/time into UTC.")
+        snapshot_date_time = self._date_time_conversion(date, time)
+
+        self.log("live_mount_vsphere: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
+        vm_id = self.object_id(object_name, 'vmware')
+
+        self.log("live_mount_vsphere: Getting a list of all Snapshots for vSphere VM '{}'.".format(object_name))
+        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+
+        current_snapshots = {}
+
+        for snapshot in vm_summary['snapshots']:
+            current_snapshots[snapshot['id']] = snapshot['date']
+
+        self.log("live_mount_vsphere: Searching for the provided Snapshot.")
+        for id, date_time in current_snapshots.items():
+            if snapshot_date_time in date_time:
+                snapshot_id = id
+
+        try:
+            snapshot_id
+        except NameError:
+            sys.exit("Error: The vSphere VM '{}' does not have a Snapshot taken on {} at {}.".format(object_name, date, time))
+        else:
+            if host is 'current':
+                host_id = vm_summary['hostId']
+            else:
+                host_id = self.object_id(host, 'vmware_host')
+
+            config = {}
+            config['hostId'] = host_id
+            config['removeNetworkDevices'] = remove_network_devices
+            config['powerOn'] = power_on
+
+            self.log("live_mount_vsphere: Live Mounting the Snapshot taken on {} at {} for vSphere VM '{}'.".format(
+                date, time, object_name))
+            live_mount = self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config)
+
+            return live_mount
+
+    def _date_time_conversion(self, date, time):
+
+        from datetime import datetime
+        import pytz
+
+        # Validate the Date formating
+        try:
+            snapshot_date = datetime.strptime(date, '%m-%d-%Y')
+        except ValueError:
+            sys.exit("Error: The date argument '{}' must be formatd as 'Month-Date-Year'. Example: 8-9-2018.".format(date))
+
+        # Validate the Time formating
+        try:
+            snapshot_time = datetime.strptime(time, '%I:%M %p')
+        except ValueError:
+            sys.exit("Error: The time argument '{}' must be formatd as 'Hour:Minute AM/PM' . Example: 2:57 AM.".format(time))
+
+        self.log("_date_time_conversion: Getting the Rubrik Cluster timezone.")
+        cluster_summary = self.get('v1', '/cluster/me')
+        cluster_timezone = cluster_summary['timezone']['timezone']
+
+        self.log("_date_time_conversion: Converting the provided time to the 24-hour clock.")
+        snapshot_time_24_hour_clock = datetime.strftime(snapshot_time, "%H:%M")
+
+        self.log("_date_time_conversion: Creating a combined date/time variable.")
+        snapshot_datetime = datetime.strptime('{} {}'.format(date, snapshot_time_24_hour_clock), '%m-%d-%Y %H:%M')
+
+        # Add Timezone to snapshot_datetime Variable
+        timezone = pytz.timezone(cluster_timezone)
+        snapshot_datetime = timezone.localize(snapshot_datetime)
+
+        self.log("_date_time_conversion: Converting the time to UTC.\n")
+        utc_timezone = pytz.UTC
+        snapshot_datetime = snapshot_datetime.astimezone(utc_timezone)
+
+        snapshot_datetime = snapshot_datetime.strftime('%Y-%m-%dT%H:%M')
+
+        return snapshot_datetime
