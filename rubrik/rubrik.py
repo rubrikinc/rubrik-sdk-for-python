@@ -25,19 +25,22 @@ from random import choice
 
 from .cluster import Cluster
 from .data_management import Data_Management
+from .physical import Physical
 
 
 _CLUSTER = Cluster
 _DATA_MANAGEMENT = Data_Management
+_PHYSICAL = Physical
 
 
-class Connect(_CLUSTER, _DATA_MANAGEMENT):
+class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL):
     """This class acts as the base class for the Rubrik SDK and serves as the main interaction point
     for its end users. It also contains various helper functions used throughout the SDK.
 
     Arguments:
         _CLUSTER {class} -- This class contains methods related to the managment of the Rubrik Cluster itself.
         _DATA_MANAGEMENT {class} - This class contains methods related to backup and restore operations for the various objects managed by the Rubrik Cluster.
+        _PHYSICAL {class} - This class contains methods related to the managment of the Physical objects in the Rubrik Cluster.
     """
 
     def __init__(self, node_ip=None, username=None, password=None, enable_logging=False):

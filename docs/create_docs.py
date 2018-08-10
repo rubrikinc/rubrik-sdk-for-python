@@ -143,10 +143,18 @@ data_management_functions = []
 for function in data_management_search:
     if function[0] not in base_api_functions:
         data_management_functions.append(function[0])
-
 for function in data_management_functions:
     if function[0] is '_':
         data_management_functions.remove(function)
+
+physical_search = inspect.getmembers(rubrik.physical.Physical, inspect.isfunction)
+physical_functions = []
+for function in physical_search:
+    if function[0] not in base_api_functions:
+        physical_functions.append(function[0])
+for function in physical_functions:
+    if function[0] is '_':
+        physical_functions.remove(function)
 
 
 combined_function_list = base_api_functions + cluster_functions + data_management_functions
@@ -176,6 +184,11 @@ for function in cluster_functions:
 
 markdown.write('\n### Data Management Functions\n')
 for function in data_management_functions:
+    if function[0] is not '_':
+        markdown.write('* [{}]({}.md)\n'.format(function, function))
+
+markdown.write('\n### Physical Host Functions\n')
+for function in physical_functions:
     if function[0] is not '_':
         markdown.write('* [{}]({}.md)\n'.format(function, function))
 

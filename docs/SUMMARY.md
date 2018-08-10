@@ -24,5 +24,11 @@
 * [object_id](object_id.md)
 * [on_demand_snapshot](on_demand_snapshot.md)
 
+### Physical Host Functions
+* [add_physical_host](add_physical_host.md)
+* [delete_physical_host](delete_physical_host.md)
+
 ### SDK Helper Functions
+* [add_physical_host](add_physical_host.md)
+* [delete_physical_host](delete_physical_host.md)
 * [log](log.md)
