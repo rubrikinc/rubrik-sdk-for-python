@@ -105,9 +105,10 @@ class Api():
                 api_response = api_request.json()
                 # Check to see if an error message has been provided by Rubrik
                 for key, value in api_response.items():
-                    if key == "errorType":
+                    if key == "errorType" or key == 'message':
                         error_message = api_response['message']
                         api_request.raise_for_status()
+
             except:
                 api_request.raise_for_status()
         except requests.exceptions.ConnectTimeout:
@@ -120,8 +121,10 @@ class Api():
                 sys.exit(error)
             else:
                 sys.exit('Error: ' + error_message)
-
-        return api_request.json()
+        if call_type is 'DELETE':
+            return {'status_code': api_request.status_code}
+        else:
+            return api_request.json()
 
     def get(self, api_version, api_endpoint, timeout=15, authentication=True):
         """Send a GET request to the provided Rubrik API endpoint.
