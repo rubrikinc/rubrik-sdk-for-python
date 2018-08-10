@@ -157,7 +157,7 @@ for function in physical_functions:
         physical_functions.remove(function)
 
 
-combined_function_list = base_api_functions + cluster_functions + data_management_functions
+combined_function_list = base_api_functions + cluster_functions + data_management_functions + physical_functions
 
 connect_functions_search = inspect.getmembers(rubrik.rubrik.Connect, inspect.isfunction)
 connect_functions = []
