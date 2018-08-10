@@ -14,9 +14,12 @@ rubrk_sdk_functions = inspect.getmembers(rubrik.Connect, inspect.isfunction)
 
 function_examples = {}
 function_documentation = {}
+
 for function in rubrk_sdk_functions:
     function_documentation[function[0]] = function[1].__doc__
+
     function_code = inspect.getsource(function[1])
+
     if '@staticmethod' in function_code:
         function_code = function_code.replace('@staticmethod\n', '')
         function_code = function_code.splitlines()[0].replace(
@@ -140,9 +143,11 @@ data_management_functions = []
 for function in data_management_search:
     if function[0] not in base_api_functions:
         data_management_functions.append(function[0])
+
 for function in data_management_functions:
     if function[0] is '_':
         data_management_functions.remove(function)
+
 
 combined_function_list = base_api_functions + cluster_functions + data_management_functions
 
@@ -171,7 +176,8 @@ for function in cluster_functions:
 
 markdown.write('\n### Data Management Functions\n')
 for function in data_management_functions:
-    markdown.write('* [{}]({}.md)\n'.format(function, function))
+    if function[0] is not '_':
+        markdown.write('* [{}]({}.md)\n'.format(function, function))
 
 markdown.write('\n### SDK Helper Functions\n')
 for function in connect_functions:

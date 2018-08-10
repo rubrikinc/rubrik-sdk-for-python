@@ -18,7 +18,6 @@
 * [cluster_version](cluster_version.md)
 
 ### Data Management Functions
-* [_date_time_conversion](_date_time_conversion.md)
 * [assign_sla](assign_sla.md)
 * [instant_recovery_vsphere](instant_recovery_vsphere.md)
 * [live_mount_vsphere](live_mount_vsphere.md)
