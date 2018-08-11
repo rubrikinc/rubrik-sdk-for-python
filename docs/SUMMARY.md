@@ -30,3 +30,10 @@
 
 ### SDK Helper Functions
 * [log](log.md)
+
+### Internal Functions
+* [_api_validation](_api_validation.md)
+* [_authorization_header](_authorization_header.md)
+* [_header](_header.md)
+* [_common_api](_common_api.md)
+* [_date_time_conversion](_date_time_conversion.md)

@@ -197,4 +197,12 @@ for function in connect_functions:
     if function[0] is not '_':
         markdown.write('* [{}]({}.md)\n'.format(function, function))
 
+markdown.write('\n### Internal Functions\n')
+for function in connect_functions:
+    if function[0] is '_':
+        markdown.write('* [{}]({}.md)\n'.format(function, function))
+for function in combined_function_list:
+    if function[0] is '_':
+        markdown.write('* [{}]({}.md)\n'.format(function, function))
+
 markdown.close()
