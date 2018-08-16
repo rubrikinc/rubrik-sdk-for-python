@@ -97,7 +97,7 @@ class Data_Management(_API):
         elif object_type is 'vmware_host':
             object_summary_api_endpoint = '/vmware/host?primary_cluster_id=local'
 
-        self.log("object_id: Getting the object id for the {} object '{}'".format(object_type, object_name))
+        self.log("object_id: Getting the object id for the {} object '{}'.".format(object_type, object_name))
         api_request = self.get('v1', object_summary_api_endpoint)
 
         if api_request['total'] == 0:
