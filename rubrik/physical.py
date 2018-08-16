@@ -94,7 +94,7 @@ class Physical(_API):
         valid_operating_system = ['Linux', 'Windows']
 
         if operating_system not in valid_operating_system:
-            sys.exit("Error: The create_fileset() operating_system argument must be one of the following: {}.".format(
+            sys.exit("Error: The create_physical_fileset() operating_system argument must be one of the following: {}.".format(
                 valid_operating_system))
 
         if isinstance(follow_network_shares, bool) is False:
@@ -117,7 +117,7 @@ class Physical(_API):
 
         self.log("create_fileset: Searching the Rubrik Cluster for all current {} Filesets.".format(operating_system))
         current_filesets = self.get(
-            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(operating_system, name), timeout=timeout)
+            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(operating_system, name), timeout)
 
         current_config = {}
         if current_filesets['data']:
@@ -137,7 +137,6 @@ class Physical(_API):
         model.append(config)
 
         self.log("create_fileset: Creating the '{}' Fileset.".format(name))
-        return self.post('internal', '/fileset_template/bulk', model, timeout=timeout)
 
     def create_nas_fileset(self, name, share_type, include, exclude, exclude_exception, follow_network_shares=False, timeout=15):
 
@@ -183,3 +182,87 @@ class Physical(_API):
 
         self.log("create_fileset: Creating the '{}' Fileset.".format(name))
         return self.post('internal', '/fileset_template/bulk', model, timeout=timeout)
+
+    def manage_physical_host_protection(self, hostname, fileset_name, operating_system, sla_name, timeout=15):
+
+        # TODO: Add the ability to specify all parms of a fileset in case there are identically named Filesets on the Cluster
+
+        valid_operating_system = ['Linux', 'Windows']
+
+        if operating_system not in valid_operating_system:
+            sys.exit("Error: The create_physical_fileset() operating_system argument must be one of the following: {}.".format(
+                valid_operating_system))
+
+        self.log("manage_physical_host_protection: Searching the Rubrik Cluster for the {} physical host {}.".format(
+            operating_system, hostname))
+        current_hosts = self.get(
+            'v1', '/host?operating_system_type={}&primary_cluster_id=local&hostname={}'.format(operating_system, hostname), timeout)
+
+        if current_hosts['total'] >= 1:
+            for host in current_hosts['data']:
+                if host['hostname'] == hostname:
+                    host_id = host['id']
+                    break
+        try:
+            host_id
+        except NameError:
+            sys.exit("Error: The Rubrik Cluster is not connected to a {} physical host named '{}'.".format(
+                operating_system, hostname))
+
+        self.log("manage_physical_host_protection: Searching the Rubrik Cluster for all current {} Filesets.".format(
+            operating_system))
+        current_filesets_templates = self.get('v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
+            operating_system, fileset_name), timeout)
+
+        number_of_matches = 0
+        if current_filesets_templates['total'] == 0:
+            sys.exit("Error: The Rubrik Cluster does not have a {} Fileset named '{}'.".format(operating_system, fileset_name))
+        elif current_filesets_templates['total'] > 1:
+            for fileset in current_filesets_templates['data']:
+                if fileset['name'] == fileset_name:
+                    number_of_matches += 1
+
+            if number_of_matches > 1:
+                sys.exit(
+                    "Error: The Rubrik Cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(operating_system, fileset_name))
+
+        if current_filesets_templates['total'] == 1 or number_of_matches == 1:
+            for template in current_filesets_templates['data']:
+                if template['name'] == fileset_name:
+                    fileset_template_id = template['id']
+
+        self.log("manage_physical_host_protection: Searching the Rubrik Cluster for the SLA Domain '{}'.".format(sla_name))
+        sla_id = self.object_id(sla_name, 'sla')
+
+        self.log("manage_physical_host_protection: Getting the properties of the {} Fileset.".format(fileset_name))
+        current_fileset = self.get(
+            'v1', '/fileset?primary_cluster_id=local&host_id={}&template_id={}'.format(host_id, fileset_template_id), timeout)
+
+        if current_fileset['total'] == 0:
+            self.log("manage_physical_host_protection: Assigning the '{}' Fileset to the {} physical host '{}'.".format(
+                fileset_name, operating_system, hostname))
+
+            config = {}
+            config['hostId'] = host_id
+            config['templateId'] = fileset_template_id
+
+            create_fileset = self.post('v1', '/fileset', config, timeout)
+            fileset_id = create_fileset['id']
+
+            config = {}
+            config['configuredSlaDomainId'] = sla_id
+            assign_sla = self.patch('v1', '/fileset/{}'.format(fileset_id), config, timeout)
+
+            return (create_fileset, assign_sla)
+        elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] != sla_id:
+            self.log("manage_physical_host_protection: Assigning the '{}' SLA Domain to the '{}' Fileset attached to the {} physical host '{}'.".format(
+                sla_name, fileset_name, operating_system, hostname))
+            fileset_id = current_fileset['data'][0]['id']
+            config = {}
+            config['configuredSlaDomainId'] = sla_id
+            assign_sla = self.patch('v1', '/fileset/{}'.format(fileset_id), config, timeout)
+
+            return assign_sla
+
+        elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] == sla_id:
+            return "The {} Fileset '{}' is already assigned to the SLA Domain '{}' on the physical host '{}'.".format(operating_system, fileset_name, sla_name, hostname)
