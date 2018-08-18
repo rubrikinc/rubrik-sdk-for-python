@@ -16,6 +16,7 @@ This module contains the Rubrik SDK Data_Management class.
 """
 
 import sys
+import re
 from .api import Api
 
 _API = Api
@@ -113,11 +114,11 @@ class Data_Management(_API):
         if object_type_present:
             sys.exit("Error: The {} object '{}' was not found on the Rubrik Cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type=None):
+    def assign_sla(self, object_name, sla_name, object_type=None, timeout=30):
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
-            object_name {str} -- The name of an object (ex. vSphere VM) you wish to assign to an SLA Domain.
+            object_name {str} -- The name of an object (ex. vSphere VM) you wish to assign to an SLA Domain. To exclude the object from all SLA assignments use 'do not protect' as the 'sla_name'. To assign the selected object to the SLA of the next higher level object use 'clear' as the 'sla_name'.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to.
 
         Keyword Arguments:
@@ -133,8 +134,17 @@ class Data_Management(_API):
         if object_type not in valid_object_type:
             sys.exit("Error: The assign_sla() object_type argument must be one of the following: {}.".format(valid_object_type))
 
-        self.log("assign_sla: Searching the Rubrik Cluster for the SLA Domain '{}'.".format(sla_name))
-        sla_id = self.object_id(sla_name, 'sla')
+        # Determine if 'do not protect' or 'clear' are the SLA Domain Name
+        do_not_protect_regex = re.findall('\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
+        clear_regex = re.findall('\\bclear\\b', sla_name, flags=re.IGNORECASE)
+
+        if len(do_not_protect_regex) > 0:
+            sla_id = "UNPROTECTED"
+        elif len(clear_regex) > 0:
+            sla_id = 'INHERIT'
+        else:
+            self.log("assign_sla: Searching the Rubrik Cluster for the SLA Domain '{}'.".format(sla_name))
+            sla_id = self.object_id(sla_name, 'sla')
 
         if object_type is 'vmware':
             self.log("assign_sla: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
@@ -142,16 +152,19 @@ class Data_Management(_API):
 
             self.log("assign_sla: Determing the SLA Domain currently assigned to the vSphere VM '{}'.".format(object_name))
             vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
-            current_sla_id = vm_summary['effectiveSlaDomainId']
+            if sla_id is "INHERIT":
+                current_sla_id = vm_summary['configuredSlaDomainId']
+            else:
+                current_sla_id = vm_summary['effectiveSlaDomainId']
 
             if sla_id == current_sla_id:
                 return "The vSphere VM '{}' is already assigned to the '{}' SLA Domain.".format(object_name, sla_name)
             else:
                 self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
                 config = {}
-                config['configuredSlaDomainId'] = sla_id
-                update_sla = self.patch('v1', '/vmware/vm/{}'.format(vm_id), config)
-                return update_sla
+                config['managedIds'] = [vm_id]
+                assign_sla = self.post('internal', '/sla_domain/{}/assign'.format(sla_id), config, timeout)
+                return assign_sla
 
     def live_mount_vsphere(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True):
         """Create a request to Instantly Recover a vSphere VM from a specified Snapshot. If a specific date and time is not provided the last Snapshot taken will be selected.
