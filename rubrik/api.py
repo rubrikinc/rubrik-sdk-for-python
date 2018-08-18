@@ -121,10 +121,11 @@ class Api():
                 sys.exit(error)
             else:
                 sys.exit('Error: ' + error_message)
-        if call_type is 'DELETE':
-            return {'status_code': api_request.status_code}
         else:
-            return api_request.json()
+            try:
+                return api_request.json()
+            except:
+                return {'status_code': api_request.status_code}
 
     def get(self, api_version, api_endpoint, timeout=15, authentication=True):
         """Send a GET request to the provided Rubrik API endpoint.
