@@ -319,8 +319,8 @@ class Data_Management(_API):
             return instant_recovery
 
     def _date_time_conversion(self, date, time):
-        """All date values returned by the Rubrik API are stored in Coordinated Universal Time (UTC) 
-        and need to be converted to the timezone configured on the Rubrik Cluster in order to match 
+        """All date values returned by the Rubrik API are stored in Coordinated Universal Time (UTC)
+        and need to be converted to the timezone configured on the Rubrik Cluster in order to match
         the values provided by the end user in various functions. This internal function will handle that
         conversion process.
 
@@ -367,3 +367,68 @@ class Data_Management(_API):
 
         snapshot_datetime = snapshot_datetime.strftime('%Y-%m-%dT%H:%M')
         return snapshot_datetime
+
+    def pause_snapshots(self, object_name, object_type, timeout=180):
+        """Pause all Snapshot activity for the provided object.
+
+        Arguments:
+            object_name {str} -- The name of object (i.e vSphere VM) to pause Snaphots on.
+
+        Keyword Arguments:
+            object_type {str} -- The Rubrik object type you wish to pause Snaphots on. 'vmware' is currently the only supported option. (default: {vmware})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {180})
+
+        Returns:
+            str -- If the object is currently paused the following will be returned: The vSphere VM '{object_name}' is already paused.
+            dict -- The full response of the Instantly Recover API call.
+        """
+
+        self.log("pause_snapshots: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
+        vm_id = self.object_id(object_name, object_type)
+
+        self.log("pause_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
+        api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+
+        if api_request['blackoutWindowStatus']['isSnappableBlackoutActive'] is True:
+            return "The vSphere VM '{}' is already paused.".format(object_name)
+        else:
+            self.log("pause_snapshots: Pausing Snaphots for the vSphere VM '{}'.".format(object_name))
+            config = {}
+            config['isVmPaused'] = True
+            api_request = self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
+            return api_request
+
+    def resume_snapshots(self, object_name, object_type='vmware', timeout=180):
+        """Resume all Snapshot activity for the provided object.
+
+        Arguments:
+            object_name {str} -- The name of object (i.e vSphere VM) to resume Snaphots on.
+
+        Keyword Arguments:
+            object_type {str} -- The Rubrik object type you wish to resume Snaphots on. 'vmware' is currently the only supported option. (default: {vmware})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {180})
+
+        Returns:
+            str -- If the object is not currently paused the following will be returned: The vSphere VM '{object_name}' is currently not paused.
+            dict -- The full response of the Instantly Recover API call.
+        """
+
+        valid_object_type = ['vmware']
+
+        if object_type not in valid_object_type:
+            sys.exit("Error: The resume_snapshots() object_type argument must be one of the following: {}.".format(valid_object_type))
+
+        self.log("resume_snapshots: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
+        vm_id = self.object_id(object_name, object_type)
+
+        self.log("resume_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
+        api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+
+        if api_request['blackoutWindowStatus']['isSnappableBlackoutActive'] is False:
+            return "The vSphere VM '{}' is currently not paused.".format(object_name)
+        else:
+            self.log("resume_snapshots: Resuming Snaphots for the vSphere VM '{}'.".format(object_name))
+            config = {}
+            config['isVmPaused'] = False
+            api_request = self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
+            return api_request
