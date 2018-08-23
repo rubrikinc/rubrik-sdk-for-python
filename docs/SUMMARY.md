@@ -23,10 +23,15 @@
 * [live_mount_vsphere](live_mount_vsphere.md)
 * [object_id](object_id.md)
 * [on_demand_snapshot](on_demand_snapshot.md)
+* [pause_snapshots](pause_snapshots.md)
+* [resume_snapshots](resume_snapshots.md)
 
 ### Physical Host Functions
 * [add_physical_host](add_physical_host.md)
+* [create_nas_fileset](create_nas_fileset.md)
+* [create_physical_fileset](create_physical_fileset.md)
 * [delete_physical_host](delete_physical_host.md)
+* [manage_physical_host_protection](manage_physical_host_protection.md)
 
 ### SDK Helper Functions
 * [log](log.md)
