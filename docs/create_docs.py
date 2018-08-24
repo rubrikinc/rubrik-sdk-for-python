@@ -117,6 +117,7 @@ for function_name, function_doc_string in function_documentation.items():
         keyword_argument_start = None
         return_start = None
         arguments_present = False
+        arguments_present = False
 
         markdown = open('{}.md'.format(function_name), 'w')
         markdown.write('# {}\n\n'.format(function_name))
@@ -192,15 +193,13 @@ for function_name, function_doc_string in function_documentation.items():
                 markdown.write(function_code_example)
                 markdown.write('\n```\n\n')
 
-        if arguments_present is True:
+        if arguments:
             markdown.write('## Arguments\n')
 
             markdown.write(
                 '| Name        | Type | Description                                                                 | Choices |\n')
             markdown.write(
                 '|-------------|------|-----------------------------------------------------------------------------|---------|\n')
-
-        if arguments:
             print_doc_string(arguments, 'arguments')
 
         if keyword_arguments:

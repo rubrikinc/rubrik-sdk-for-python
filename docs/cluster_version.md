@@ -5,9 +5,6 @@ Retrieves the software version of the Rubrik Cluster.
 def cluster_version(timeout=15)
 ```
 
-## Arguments
-| Name        | Type | Description                                                                 | Choices |
-|-------------|------|-----------------------------------------------------------------------------|---------|
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|

@@ -5,9 +5,6 @@ Retrive the IP Address for each node in the Rubrik Cluster.
 def cluster_node_ip(timeout=15)
 ```
 
-## Arguments
-| Name        | Type | Description                                                                 | Choices |
-|-------------|------|-----------------------------------------------------------------------------|---------|
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
