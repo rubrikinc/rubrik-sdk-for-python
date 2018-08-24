@@ -6,9 +6,12 @@ def on_demand_snapshot(object_name, object_type=None, sla_name='current')
 ```
 
 ## Arguments
+| Name        | Type | Description                                                                 | Choices |
+|-------------|------|-----------------------------------------------------------------------------|---------|
+| object_name  | str  | The name of object (i.e vSphere VM, Fileset, etc.) to take a Snapshot of. |         |
+## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| object_name  | str  | The name of object (i.e vSphere VM, Fileset, etc.) to take a Snapshot of. |         |         |
 | object_type  | str  | The Rubrik object type you wish to backup. vmware is currently the only supported option. (default: {None}) |         |    None     |
 | sla_name  | str  | The SLA Domain name you to assign the snapshot to. By default the currently assigne SLA Domain will be used. (default: {'current'}) |         |    'current'     |
 

@@ -6,7 +6,7 @@ def _api_validation(api_version, api_endpoint)
 ```
 
 ## Arguments
-| Name        | Type | Description                                                                 | Choices | Default |
-|-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| api_version  | str  | The version of the Rubrik CDM API to call. |         |         |
-| api_endpoint  | str  | The endpoint (ex. cluster/me) of the Rubrik CDM API to call. |         |         |
+| Name        | Type | Description                                                                 | Choices |
+|-------------|------|-----------------------------------------------------------------------------|---------|
+| api_version  | str  | The version of the Rubrik CDM API to call. |         |
+| api_endpoint  | str  | The endpoint (ex. cluster/me) of the Rubrik CDM API to call. |         |

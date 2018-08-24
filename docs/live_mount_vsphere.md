@@ -6,9 +6,12 @@ def live_mount_vsphere(vm_name, date='latest', time='latest', host='current', re
 ```
 
 ## Arguments
+| Name        | Type | Description                                                                 | Choices |
+|-------------|------|-----------------------------------------------------------------------------|---------|
+| vm_name  | str  | The name of the VM to Instantly Recover. |         |
+## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| vm_name  | str  | The name of the VM to Instantly Recover. |         |         |
 | date  | str  | The date of the Snapshot you wish to Instantly Recover formated as Month-Day-Year. Example: 1-15-2014. If latest is specified the last Snapshot taken will be Instantly Recovered. (default: {'latest'}) |         |    'latest'     |
 | time  | str  | The time of the Snapshot you wish to Instantly Recover formated formated as Hour:Minute AM/PM. Example: 1:30 AM. If latest is specified the last Snapshot taken will be Instantly Recovered. (default: {'latest'}) |         |    'latest'     |
 | host  | str  | The hostname or IP address of the ESXi host to Instantly Recover the VM on. By default the VM will be Instantly Recovered to the host it is currently on. (default: {'current'}) |         |    'current'     |

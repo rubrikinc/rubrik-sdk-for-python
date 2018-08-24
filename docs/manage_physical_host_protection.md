@@ -6,12 +6,15 @@ def manage_physical_host_protection(hostname, fileset_name, operating_system, sl
 ```
 
 ## Arguments
+| Name        | Type | Description                                                                 | Choices |
+|-------------|------|-----------------------------------------------------------------------------|---------|
+| hostname  | [type]  | [description] |         |
+| fileset_name  | [type]  | [description] |         |
+| operating_system  | [type]  | [description] |         |
+| sla_name  | [type]  | [description] |         |
+## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| hostname  | [type]  | [description] |         |         |
-| fileset_name  | [type]  | [description] |         |         |
-| operating_system  | [type]  | [description] |         |         |
-| sla_name  | [type]  | [description] |         |         |
 | timeout  | int  | [description] (default: {15}) |         |    15     |
 
 ## Returns

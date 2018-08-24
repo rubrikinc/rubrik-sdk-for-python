@@ -6,9 +6,12 @@ def object_id(object_name, object_type=None)
 ```
 
 ## Arguments
+| Name        | Type | Description                                                                 | Choices |
+|-------------|------|-----------------------------------------------------------------------------|---------|
+| object_name  | str  | The name of the object whose ID you wish to lookup. |         |
+## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| object_name  | str  | The name of the object whose ID you wish to lookup. |         |         |
 | object_type  | str  | The object type you wish to look up. Valid options are vmware and sla. (default: {None}) |         |    None     |
 
 ## Returns

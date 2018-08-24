@@ -6,6 +6,9 @@ def bootstrap_status(request_id="1", timeout=15)
 ```
 
 ## Arguments
+| Name        | Type | Description                                                                 | Choices |
+|-------------|------|-----------------------------------------------------------------------------|---------|
+## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
 | request_id  | str  | Id of the bootstrap request (default: {"1"}) |         |    "1"     |

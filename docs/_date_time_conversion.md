@@ -6,10 +6,10 @@ def _date_time_conversion(date, time)
 ```
 
 ## Arguments
-| Name        | Type | Description                                                                 | Choices | Default |
-|-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| date  | str  | A date value formated as Month-Day-Year. Example: 1/15/2014 |         |         |
-| time  | str  | A time value formated as Hour:Minute AM/PM. Example: 1:30 AM |         |         |
+| Name        | Type | Description                                                                 | Choices |
+|-------------|------|-----------------------------------------------------------------------------|---------|
+| date  | str  | A date value formated as Month-Day-Year. Example: 1/15/2014 |         |
+| time  | str  | A time value formated as Hour:Minute AM/PM. Example: 1:30 AM |         |
 
 ## Returns
 | Type | Description                                                                                   |

@@ -5,10 +5,27 @@ import sys
 import reprlib
 
 
-def print_doc_string(doc_string, section='argument'):
+def print_doc_string(doc_string, section):
 
-    if section is 'argument':
+    if section is 'arguments':
+        for line in doc_string:
+            line = line.replace(' -- ', '').strip().split('}', 1)
+            value_type = line[0].split('{', 1)
+            if value_type[0] is not '':
+                name = value_type[0]
+                python_type = value_type[1]
+                description = line[1]
+                # Name | Type | Description | Choices |
+                if '(choices: {' in description:
+                    choices = description.split("(choices: {")
+                    choices = choices[1].replace("})", "").strip()
 
+                else:
+                    choices = ''
+                markdown.write('| {} | {}  | {} |    {}     |\n'.format(
+                    name, python_type, description, choices))
+
+    elif section is 'keyword_arguments':
         for line in doc_string:
             line = line.replace(' -- ', '').strip().split('}', 1)
             value_type = line[0].split('{', 1)
@@ -26,7 +43,7 @@ def print_doc_string(doc_string, section='argument'):
                     default = ''
                 if '(choices: {' in description:
                     choices = description.split("(choices: {")
-                    choices = default[1].replace("})", "").strip()
+                    choices = choices[1].replace("})", "").strip()
 
                 else:
                     choices = ''
@@ -76,6 +93,7 @@ function_examples = {}
 function_documentation = {}
 
 for function in rubrk_sdk_functions:
+
     function_documentation[function[0]] = function[1].__doc__
 
     function_code = inspect.getsource(function[1])
@@ -86,7 +104,6 @@ for function in rubrk_sdk_functions:
             'self, ', '').replace('self', '').replace(':', '').strip()
 
     else:
-
         function_code = function_code.splitlines()[0].replace(
             'self, ', '').replace('self', '').replace(':', '').strip()
 
@@ -179,15 +196,21 @@ for function_name, function_doc_string in function_documentation.items():
             markdown.write('## Arguments\n')
 
             markdown.write(
+                '| Name        | Type | Description                                                                 | Choices |\n')
+            markdown.write(
+                '|-------------|------|-----------------------------------------------------------------------------|---------|\n')
+
+        if arguments:
+            print_doc_string(arguments, 'arguments')
+
+        if keyword_arguments:
+            markdown.write('## Keyword Arguments\n')
+
+            markdown.write(
                 '| Name        | Type | Description                                                                 | Choices | Default |\n')
             markdown.write(
                 '|-------------|------|-----------------------------------------------------------------------------|---------|---------|\n')
-
-        if arguments:
-            print_doc_string(arguments)
-
-        if keyword_arguments:
-            print_doc_string(keyword_arguments)
+            print_doc_string(keyword_arguments, 'keyword_arguments')
 
         if returns:
             markdown.write('\n## Returns\n')
