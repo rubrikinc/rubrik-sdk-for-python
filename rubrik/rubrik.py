@@ -78,7 +78,10 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL):
         self.log("Username: {}".format(self.username))
         self.log("Password: *******\n")
 
-        self.node_ip = self.cluster_node_ip(timeout=5)
+        try:
+            self.node_ip = self.cluster_node_ip(timeout=5)
+        except:
+            node_ip = [self.node_ip]
 
     @staticmethod
     def log(log_message):
