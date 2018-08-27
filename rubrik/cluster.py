@@ -85,17 +85,17 @@ class Cluster(_API):
 
         if dns_search_domains is None:
             dns_search_domains = []
-        elif isinstance(dns_search_domains, dict) is not True:
+        elif isinstance(dns_search_domains, list) is not True:
             sys.exit('Error: You must provide a valid list for "dns_search_domains".')
 
         if dns_nameservers is None:
             dns_nameservers = ['8.8.8.8']
-        elif isinstance(dns_nameservers, dict) is not True:
+        elif isinstance(dns_nameservers, list) is not True:
             sys.exit('Error: You must provide a valid list for "dns_nameservers".')
 
         if ntp_servers is None:
             ntp_servers = ['pool.ntp.org']
-        elif isinstance(ntp_servers, dict) is not True:
+        elif isinstance(ntp_servers, list) is not True:
             sys.exit('Error: You must provide a valid list for "ntp_servers".')
 
         bootstrap_config = {}
@@ -143,3 +143,18 @@ class Cluster(_API):
         api_request = self.get('internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
 
         return api_request
+
+    def end_user_authorization(self, object_name, end_user, object_type='vmware', timeout=15):
+
+        valid_object_type = ['vmware']
+
+        if object_type not in valid_object_type:
+            sys.exit("Error: The end_user_authorization() object_type argument must be one of the following: {}.".format(
+                valid_object_type))
+
+        self.log("end_user_authorization: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
+        vm_id = self.object_id(object_name, object_type)
+
+        self.log("end_user_authorization: Searching the Rubrik Cluster for the End User '{}'.".format(end_user))
+        user_id = self.get('internal', '/user?username={}'.format(end_user))
+        print(user_id)
