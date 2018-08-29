@@ -188,7 +188,7 @@ class Bootstrap(_API):
         Keyword Arguments:
             timeout {int} -- [description] (default: {15})
             enable_logging {bool} -- [description] (default: {False})
-            enable_encryption {bool} -- Enable software data encryption at rest. (default: {True})
+            enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
             node_config {dict} -- [description] (default: {None})
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
             dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {None})
