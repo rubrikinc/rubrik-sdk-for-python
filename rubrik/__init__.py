@@ -1,6 +1,8 @@
 "rubrik: A Python package for interacting with the Rubrik CDM API."
 
 from .rubrik import Connect
+from .rubrik import Bootstrap
+
 import logging
 
 # Define the logging params

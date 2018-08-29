@@ -21,8 +21,9 @@ import sys
 import os
 import logging
 from random import choice
+import time
 
-
+from .api import Api
 from .cluster import Cluster
 from .data_management import Data_Management
 from .physical import Physical
@@ -31,6 +32,7 @@ from .physical import Physical
 _CLUSTER = Cluster
 _DATA_MANAGEMENT = Data_Management
 _PHYSICAL = Physical
+_API = Api
 
 
 class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL):
@@ -44,6 +46,15 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL):
     """
 
     def __init__(self, node_ip=None, username=None, password=None, enable_logging=False):
+        """Constructor for the Connect class which is used to initialize the class variables.
+
+        Keyword Arguments:
+            node_ip {str} -- The Hostname or IP Address of a node in the Rubrik Cluster you wish to connect to. If a value is not provided we will check for a `rubrik_cdm_node_ip` environment variable. (default: {None})
+            username {str} -- The Username you wish to use to connect to the Rubrik Cluster.. If a value is not provided we will check for a `rubrik_cdm_username` environment variable. (default: {None})
+            password {str} -- The Password you wish to use to connect to the Rubrik Cluster.. If a value is not provided we will check for a `rubrik_cdm_password` environment variable. (default: {None})
+            enable_logging {bool} -- Flag to determine if logging will be enabled for the SDK. (default: {False})
+        """
+
         if node_ip is None:
             node_ip = os.environ.get('rubrik_cdm_node_ip')
             if node_ip is None:
@@ -81,6 +92,7 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL):
         try:
             self.node_ip = self.cluster_node_ip(timeout=5)
         except:
+            self.log("Unable to generate a list of all Cluster Node IPs. Using {}.".format(self.node_ip))
             node_ip = [self.node_ip]
 
     @staticmethod
@@ -114,6 +126,193 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL):
         }
 
         return authorization_header
+
+    @staticmethod
+    def _header():
+        """Internal method used to create the a header without authorization used in the API calls.
+
+        Returns:
+            dict -- The header that does not include any authorization.
+        """
+
+        header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+
+        return header
+
+    @staticmethod
+    def _api_validation(api_version, api_endpoint):
+        """Internal method used to validate the API Version and API Endpoint provided by the end user
+
+        Arguments:
+            api_version {str} -- The version of the Rubrik CDM API to call.
+            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+        """
+
+        valid_api_versions = ['v1', 'internal']
+
+        # Validate the API Version
+        if api_version not in valid_api_versions:
+            sys.exit("Error: Enter a valid API version {}.".format(valid_api_versions))
+
+        # Validate the API Endpoint Syntax
+        if type(api_endpoint) is not str:
+            sys.exit("Error: The API Endpoint must be a string.")
+        elif api_endpoint[0] != "/":
+            sys.exit("Error: The API Endpoint should begin with '/'. (ex: /cluster/me)")
+        elif api_endpoint[-1] == "/":
+            sys.exit("Error: The API Endpoint should not end with '/'. (ex. /cluster/me)")
+
+
+class Bootstrap(_API):
+    """This class contains all functions related to the Bootstrapping of a Rubrik Cluster. 
+
+    Arguments:
+        _API {class} - This class contains the base API methods that can be called independently or internally in standalone functions.
+    """
+
+    def __init__(self, node_ip, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=15, enable_logging=False):
+        """Constructor for the Bootstrap class which is used to initialize the class variables.
+
+        Arguments:
+            node_ip {str} -- The IP address of a node in the Cluster you wish to bootstrap.
+            cluster_name {str} -- Unique name to assign to the Rubrik cluster.
+            admin_email {str} -- The Rubrik cluster sends messages for the admin account to this email address.
+            admin_password {str} --  Password for the admin account.
+            management_gateway {str} --  IP address assigned to the management network gateway
+            management_subnet_mask {str} -- Subnet mask assigned to the management network.
+
+
+        Keyword Arguments:
+            timeout {int} -- [description] (default: {15})
+            enable_logging {bool} -- [description] (default: {False})
+            enable_encryption {bool} -- Enable software data encryption at rest. (default: {True})
+            node_config {dict} -- [description] (default: {None})
+            dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
+            dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {None})
+            ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {None})
+            wait_for_completion {bool} -- Flag to determine if the function should wait for the bootstrap process to complete. (default: {True})
+            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
+        """
+
+        if enable_logging is True:
+            logging.getLogger().setLevel(logging.DEBUG)
+
+        self.node_ip = node_ip
+        self.log("User Provided Node IP: {}".format(self.node_ip))
+
+        node_ip = [self.node_ip]
+
+        bootstrap, bootstrap_id = self._bootstrap(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask,
+                                                  node_config=node_config, enable_encryption=enable_encryption, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, timeout=15)
+
+        if wait_for_completion == True:
+            while True:
+                status = self.status(bootstrap_id)
+
+                if status['status'] == 'IN_PROGRESS':
+                    self.log("status(): {}\n".format(status))
+                    time.sleep(30)
+                    continue
+                elif status['status'] == 'FAILURE':
+                    sys.exit("Error: {}".format(status['message']))
+                else:
+                    self.log("{}".format(status))
+                    return(status)
+
+    def _bootstrap(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, timeout=15):
+        """Issues a bootstrap request to a specified Rubrik cluster
+
+        Arguments:
+            cluster_name {str} -- Unique name to assign to the Rubrik cluster.
+            admin_email {str} -- The Rubrik cluster sends messages for the admin account to this email address.
+            admin_password {str} --  Password for the admin account.
+            management_gateway {str} --  IP address assigned to the management network gateway
+            management_subnet_mask {str} -- Subnet mask assigned to the management network.
+
+        Keyword Arguments:
+            enable_encryption {bool} -- Enable software data encryption at rest. (default: {True})
+            node_config {dict} -- [description] (default: {None})
+            dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
+            dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {['8.8.8.8']})
+            ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {['pool.ntp.org']})
+            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
+
+        Returns:
+            dict -- The response returned by the API call.
+        """
+
+        if node_config is None or isinstance(node_config, dict) is not True:
+            sys.exit('Error: You must provide a valid dictionary for "node_config".')
+
+        if dns_search_domains is None:
+            dns_search_domains = []
+        elif isinstance(dns_search_domains, list) is not True:
+            sys.exit('Error: You must provide a valid list for "dns_search_domains".')
+
+        if dns_nameservers is None:
+            dns_nameservers = ['8.8.8.8']
+        elif isinstance(dns_nameservers, list) is not True:
+            sys.exit('Error: You must provide a valid list for "dns_nameservers".')
+
+        if ntp_servers is None:
+            ntp_servers = ['pool.ntp.org']
+        elif isinstance(ntp_servers, list) is not True:
+            sys.exit('Error: You must provide a valid list for "ntp_servers".')
+
+        bootstrap_config = {}
+        bootstrap_config["enableSoftwareEncryptionAtRest"] = enable_encryption
+        bootstrap_config["name"] = cluster_name
+        bootstrap_config["dnsNameservers"] = dns_nameservers
+        bootstrap_config["dnsSearchDomains"] = dns_search_domains
+        bootstrap_config["ntpServers"] = ntp_servers
+
+        bootstrap_config["adminUserInfo"] = {}
+        bootstrap_config["adminUserInfo"]['password'] = admin_password
+        bootstrap_config["adminUserInfo"]['emailAddress'] = admin_email
+        bootstrap_config["adminUserInfo"]['id'] = "admin"
+
+        bootstrap_config["nodeConfigs"] = {}
+        for node_name, node_ip in node_config.items():
+            bootstrap_config["nodeConfigs"][node_name] = {}
+            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig'] = {}
+            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['netmask'] = management_subnet_mask
+            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
+            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
+
+        self.log('bootstrap: Starting the bootstrap process.')
+        api_request = self.post('internal', '/cluster/me/bootstrap', bootstrap_config, timeout, authentication=False)
+
+        return api_request, api_request['id']
+
+    def status(self, request_id="1", timeout=15):
+        """Retrieves status of in progress bootstrap requests
+
+        Keyword Arguments:
+            request_id {str} -- Id of the bootstrap request (default: {"1"})
+            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
+
+        Returns:
+            dict -- The response returned by the API call.
+        """
+
+        self.log('status: Getting the status of the Rubrik Cluster bootstrap.')
+        bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(request_id)
+        api_request = self.get('internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
+
+        return api_request
+
+    @staticmethod
+    def log(log_message):
+        """Create properly formatted debug log messages.
+
+        Arguments:
+            log_message {str} -- The message to pass to the debug log.
+        """
+        log = logging.getLogger(__name__)
+        log.debug(log_message)
 
     @staticmethod
     def _header():
