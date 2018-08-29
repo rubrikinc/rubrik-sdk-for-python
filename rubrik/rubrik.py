@@ -89,11 +89,7 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL):
         self.log("Username: {}".format(self.username))
         self.log("Password: *******\n")
 
-        try:
-            self.node_ip = self.cluster_node_ip(timeout=5)
-        except:
-            self.log("Unable to generate a list of all Cluster Node IPs. Using {}.".format(self.node_ip))
-            node_ip = [self.node_ip]
+        self.node_ip = self.cluster_node_ip(timeout=5)
 
     @staticmethod
     def log(log_message):
