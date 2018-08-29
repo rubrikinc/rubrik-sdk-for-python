@@ -90,6 +90,24 @@ class Physical(_API):
         return delete_host
 
     def create_physical_fileset(self, name, operating_system, include, exclude, exclude_exception, follow_network_shares=False, backup_hidden_folders=False, timeout=15):
+        """Create a Fileset for a Linux or Windows machine.
+
+        Arguments:
+            name {str} -- The name of the Fileset you wish to create.
+            operating_system {str} -- The Operating system type of Fileset you are created. (choices: {Linux, Windows.})
+            include {list} -- The full paths or wildcards that define the objects to include in the Fileset backup. Example: ['/usr/local', '*.pdf']
+            exclude {[type]} -- The full paths or wildcards that define the objects to exclude from the Fileset backup. Example: ['/user/local/temp', '*.mov', '*.mp3']
+            exclude_exception {list} -- The full paths or wildcards that define the objects that are exempt from the `excludes` variables.  Example: ['/company/*.mp4']
+
+        Keyword Arguments:
+            follow_network_shares {bool} -- Include or exclude locally-mounted remote file systems from backups. (default: {False}) 
+            backup_hidden_folders {bool} -- Include or exclude hidden folders inside locally-mounted remote file systems from backups. (default: {False})
+            timeout {int} -- The timeout value for the API call that creates the Fileset. (default: {15})
+
+        Returns:
+            str -- If the Fileset is already present on the Rubrik Cluster the following is returned: The Rubrik Cluster already has a {`operating_system`} Fileset named '{`name`}' configured with the provided variables.
+            dict -- The full response for the `/internal/fileset_template/bulk` API endpoint.
+        """
 
         valid_operating_system = ['Linux', 'Windows']
 
@@ -105,14 +123,16 @@ class Physical(_API):
             sys.exit("Error: The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
             sys.exit("Error: The 'exclude' argument must be a list object.")
+        elif isinstance(exclude_exception, list) is False:
+            sys.exit("Error: The 'exclude_exception' argument must be a list object.")
 
         config = {}
         config['name'] = name
         config['includes'] = sorted(include)
         config['excludes'] = sorted(exclude)
         config['exceptions'] = sorted(exclude_exception)
-        config['allowBackupHiddenFoldersInNetworkMounts'] = follow_network_shares
-        config['allowBackupNetworkMounts'] = backup_hidden_folders
+        config['allowBackupHiddenFoldersInNetworkMounts'] = backup_hidden_folders
+        config['allowBackupNetworkMounts'] = follow_network_shares
         config['operatingSystemType'] = operating_system
 
         self.log("create_fileset: Searching the Rubrik Cluster for all current {} Filesets.".format(operating_system))
@@ -137,8 +157,26 @@ class Physical(_API):
         model.append(config)
 
         self.log("create_fileset: Creating the '{}' Fileset.".format(name))
+        return self.post('internal', '/fileset_template/bulk', model, timeout=timeout)
 
     def create_nas_fileset(self, name, share_type, include, exclude, exclude_exception, follow_network_shares=False, timeout=15):
+        """Create a NAS Fileset.
+
+        Arguments:
+            name {str} -- The name of the Fileset you wish to create.
+            share_type {str} -- The type of NAS Share you wish to backup. (choices: {NFS, SMB})
+            include {list} -- The full paths or wildcards that define the objects to include in the Fileset backup.
+            exclude {[type]} -- The full paths or wildcards that define the objects to exclude from the Fileset backup.
+            exclude_exception {[type]} -- The full paths or wildcards that define the objects that are exempt from the `excludes` variables.
+
+        Keyword Arguments:
+            follow_network_shares {bool} -- Include or exclude locally-mounted remote file systems from backups. (default: {False}) 
+            timeout {int} -- The timeout value for the API call that creates the Fileset. (default: {15})
+
+        Returns:
+            str -- If the Fileset is already present on the Rubrik Cluster the following is returned: The Rubrik Cluster already has a NAS Fileset named '{`name`}' configured with the provided variables.
+            dict -- The full response for the `/internal/fileset_template/bulk` API endpoint.
+        """
 
         valid_share_type = ['NFS', 'SMB']
 
@@ -183,15 +221,53 @@ class Physical(_API):
         self.log("create_fileset: Creating the '{}' Fileset.".format(name))
         return self.post('internal', '/fileset_template/bulk', model, timeout=timeout)
 
-    def manage_physical_host_protection(self, hostname, fileset_name, operating_system, sla_name, timeout=15):
+    def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None, exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):
+        """Assign a Fileset to a Linux or Windows machine. If you have multiple Filesets with identical names, you will need to populate the Filesets properties (i.e this functions keyword arguments) 
+        to find a specific match. Filesets with identical names and properties are not supported.
 
-        # TODO: Add the ability to specify all parms of a fileset in case there are identically named Filesets on the Cluster
+        Arguments:
+            hostname {str} -- The hostname or IP Address of the physical host you wish to associate to the Fileset.
+            fileset_name {str} -- The name of the Fileset you wish to assign to the Linux or Windows host.
+            operating_system {str} -- The operating system of the physical host you are assigning a Fileset to. (Choices: {Linux, Windows})
+            sla_name {str} -- The name of the SLA Domain to associate with the Fileset.
+
+        Keyword Arguments:
+            include {list} -- The full paths or wildcards that define the objects to include in the Fileset backup. Example: ['/usr/local', '*.pdf'] (default: {None})
+            exclude {[type]} -- The full paths or wildcards that define the objects to exclude from the Fileset backup. Example: ['/user/local/temp', '*.mov', '*.mp3'] (default: {None})
+            exclude_exception {list} -- The full paths or wildcards that define the objects that are exempt from the `excludes` variables.  Example: ['/company/*.mp4'] (default: {None})
+            follow_network_shares {bool} -- Include or exclude locally-mounted remote file systems from backups. (default: {False})
+            backup_hidden_folders {bool} -- Include or exclude hidden folders inside locally-mounted remote file systems from backups. (default: {False})
+            timeout {int} -- The timeout value for the API call that creates that assigns the Fileset. (default: {30})
+
+        Returns:
+            tuple -- When a new Fileset is created the following tuple will be returned: (Full API response from `POST /v1/fileset`, Full API response from `POST /v1/fileset/{id}`)
+            dict -- When the Fileset already exsits but is assigned to the wrong the SLA the Full API response from `POST `v1/fileset/{id}` is returned.
+            str --  When the Fileset already exsits on the Rubrik Cluster the following will be returned: The {`operating_system`} Fileset '{`fileset_name`}' is already assigned to the SLA Domain '{`sla_name`}' on the physical host '{`hostname`}'.
+        """
 
         valid_operating_system = ['Linux', 'Windows']
 
         if operating_system not in valid_operating_system:
             sys.exit("Error: The create_physical_fileset() operating_system argument must be one of the following: {}.".format(
                 valid_operating_system))
+
+        if include == None:
+            include = []
+
+        if exclude == None:
+            exclude = []
+
+        if exclude_exception == None:
+            exclude_exception = []
+
+        if isinstance(follow_network_shares, bool) is False:
+            sys.exit("Error: The 'follow_network_shares' argument must be True or False.")
+        elif isinstance(backup_hidden_folders, bool) is False:
+            sys.exit("Error: The 'backup_hidden_folders' argument must be True or False.")
+        elif isinstance(include, list) is False:
+            sys.exit("Error: The 'include' argument must be a list object.")
+        elif isinstance(exclude, list) is False:
+            sys.exit("Error: The 'exclude' argument must be a list object.")
 
         self.log("manage_physical_host_protection: Searching the Rubrik Cluster for the {} physical host {}.".format(
             operating_system, hostname))
@@ -218,25 +294,53 @@ class Physical(_API):
         if current_filesets_templates['total'] == 0:
             sys.exit("Error: The Rubrik Cluster does not have a {} Fileset named '{}'.".format(operating_system, fileset_name))
         elif current_filesets_templates['total'] > 1:
-            for fileset in current_filesets_templates['data']:
-                if fileset['name'] == fileset_name:
+            for fileset_template in current_filesets_templates['data']:
+                if fileset_template['name'] == fileset_name:
                     number_of_matches += 1
 
             if number_of_matches > 1:
-                sys.exit(
-                    "Error: The Rubrik Cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(operating_system, fileset_name))
+                # If there are multiple Filesets with the same name us all of the possible config values to try and find the correct Fileset
+                number_of_matches = 0
+                for fileset_template in current_filesets_templates['data']:
+                    if fileset_template['name'] == fileset_name \
+                            and fileset_template['includes'] == include \
+                            and fileset_template['excludes'] == exclude \
+                            and fileset_template['exceptions'] == exclude_exception \
+                            and fileset_template['allowBackupHiddenFoldersInNetworkMounts'] == follow_network_shares \
+                            and fileset_template['allowBackupNetworkMounts'] == backup_hidden_folders:
+                        fileset_template_id = fileset_template['id']
+                        number_of_matches = 1
+
+                try:
+                    fileset_template_id
+                except NameError:
+                    if number_of_matches > 0:
+                        # If no unique matches are found provide an error message
+                        if include != [] \
+                                or exclude != [] \
+                                or exclude_exception != [] \
+                                or follow_network_shares != False \
+                                or backup_hidden_folders != False:
+                            # Error message that first checks to see if any of the extra variables are populated with anything besides the default (aka the user tried to be as unique as possible)
+                            sys.exit("Error: The Rubrik Cluster contains multiple {} Filesets named '{}' that match all of the populate function arguments. Please use a unique Fileset.".format(
+                                operating_system, fileset_name))
+                        else:
+                            sys.exit("Error: The Rubrik Cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(
+                                operating_system, fileset_name))
+                    sys.exit("Error: The Rubrik Cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(
+                        operating_system, fileset_name))
 
         if current_filesets_templates['total'] == 1 or number_of_matches == 1:
-            for template in current_filesets_templates['data']:
-                if template['name'] == fileset_name:
-                    fileset_template_id = template['id']
+            for fileset_temmplate in current_filesets_templates['data']:
+                if fileset_temmplate['name'] == fileset_name:
+                    fileset_template_id = fileset_temmplate['id']
 
         self.log("manage_physical_host_protection: Searching the Rubrik Cluster for the SLA Domain '{}'.".format(sla_name))
         sla_id = self.object_id(sla_name, 'sla')
 
         self.log("manage_physical_host_protection: Getting the properties of the {} Fileset.".format(fileset_name))
         current_fileset = self.get(
-            'v1', '/fileset?primary_cluster_id=local&host_id={}&template_id={}'.format(host_id, fileset_template_id), timeout)
+            'v1', '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id, fileset_template_id), timeout)
 
         if current_fileset['total'] == 0:
             self.log("manage_physical_host_protection: Assigning the '{}' Fileset to the {} physical host '{}'.".format(
@@ -255,14 +359,13 @@ class Physical(_API):
 
             return (create_fileset, assign_sla)
         elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] != sla_id:
+
             self.log("manage_physical_host_protection: Assigning the '{}' SLA Domain to the '{}' Fileset attached to the {} physical host '{}'.".format(
                 sla_name, fileset_name, operating_system, hostname))
             fileset_id = current_fileset['data'][0]['id']
             config = {}
             config['configuredSlaDomainId'] = sla_id
-            assign_sla = self.patch('v1', '/fileset/{}'.format(fileset_id), config, timeout)
-
-            return assign_sla
+            return self.patch('v1', '/fileset/{}'.format(fileset_id), config, timeout)
 
         elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] == sla_id:
             return "The {} Fileset '{}' is already assigned to the SLA Domain '{}' on the physical host '{}'.".format(operating_system, fileset_name, sla_name, hostname)

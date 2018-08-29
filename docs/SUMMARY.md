@@ -12,10 +12,9 @@
 * [post](post.md)
 
 ### Cluster Functions
-* [bootstrap](bootstrap.md)
-* [bootstrap_status](bootstrap_status.md)
 * [cluster_node_ip](cluster_node_ip.md)
 * [cluster_version](cluster_version.md)
+* [end_user_authorization](end_user_authorization.md)
 
 ### Data Management Functions
 * [assign_sla](assign_sla.md)
@@ -28,10 +27,10 @@
 
 ### Physical Host Functions
 * [add_physical_host](add_physical_host.md)
+* [assign_physical_host_fileset](assign_physical_host_fileset.md)
 * [create_nas_fileset](create_nas_fileset.md)
 * [create_physical_fileset](create_physical_fileset.md)
 * [delete_physical_host](delete_physical_host.md)
-* [manage_physical_host_protection](manage_physical_host_protection.md)
 
 ### SDK Helper Functions
 * [log](log.md)
