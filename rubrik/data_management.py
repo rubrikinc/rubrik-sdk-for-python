@@ -91,15 +91,18 @@ class Data_Management(_API):
             sys.exit("Error: The object_id() object_type argument must be one of the following: {}.".format(valid_object_type))
 
         if object_type is 'vmware':
+            object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/vmware/vm?primary_cluster_id=local&is_relic=false&name={}'.format(
                 object_name)
         elif object_type is 'sla':
+            object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/sla_domain?primary_cluster_id=local&name={}'.format(object_name)
         elif object_type is 'vmware_host':
+            object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/vmware/host?primary_cluster_id=local'
 
         self.log("object_id: Getting the object id for the {} object '{}'.".format(object_type, object_name))
-        api_request = self.get('v1', object_summary_api_endpoint)
+        api_request = self.get(object_summary_api_version, object_summary_api_endpoint)
 
         if api_request['total'] == 0:
             sys.exit("Error: The {} object '{}' was not found on the Rubrik Cluster.".format(object_type, object_name))
