@@ -106,7 +106,7 @@ class Cluster(_API):
 
             return self.post('internal', '/authorization/role/end_user', config, timeout=timeout)
 
-    def add_aws_s3_archive(self, aws_bucket_name, aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, name='default', storage_class='standard', vpc_id=None, subnet_id=None, security_group_id=None):
+    def add_archive_aws_s3(self, aws_bucket_name, aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, name='default', storage_class='standard', vpc_id=None, subnet_id=None, security_group_id=None):
         """Add a new AWS S3 archive target to the Rubrik Cluster and optionally configure the required Cloud On options.
 
         Arguments:
@@ -125,7 +125,7 @@ class Cluster(_API):
             security_group_id {str} -- The Security Group Id used for Cloud On. When a value has been provided you must also provide a value for `vpc_id` and `subnet_id` (default: {None})
 
         Returns:
-            str -- No change required. The '{`name`}' Archival location is already configured on the Rubrik Cluster.
+            str -- No change required. The '`name`' archival location is already configured on the Rubrik Cluster.
             dict -- The full API response for `POST /internal/archive/object_store'.
         """
 
@@ -159,7 +159,7 @@ class Cluster(_API):
             sys.exit('Error: The `aws_region` must be one of the following: {}'.format(valid_aws_regions))
 
         if storage_class not in valid_storage_classes:
-            sys.exit('Error: The `storage` class must be one of the following: {}'.format(valid_storage_classes))
+            sys.exit('Error: The `storage_class` must be one of the following: {}'.format(valid_storage_classes))
         else:
             storage_class = storage_class.upper()
 
@@ -171,6 +171,7 @@ class Cluster(_API):
         elif kms_master_key_id is not None and rsa_key is not None:
             sys.exit("Error: Both `kms_master_key_id` or `rsa_key` have been populated. You may only use one.")
 
+        self.log("add_aws_s3_archive: Searching the Rubrik Cluster for archival locations.")
         current_s3_archive = self.get('internal', '/archive/object_store')
 
         config = {}
@@ -207,10 +208,125 @@ class Cluster(_API):
 
         for archive in current_s3_archive['data']:
             if archive['definition'] == user_archive_definition:
-                return "No change required. The '{}' Archival location is already configured on the Rubrik Cluster.".format(name)
+                return "No change required. The '{}' archival location is already configured on the Rubrik Cluster.".format(name)
             if archive['definition']['objectStoreType'] == 'S3' and archive['definition']['name'] == name:
                 sys.exit("Error: Archival location with name '{}' already exists. Please enter a unique `name`.".format(name))
 
-        add_aws_s3 = self.post('internal', '/archive/object_store', config)
+        self.log("add_aws_s3_archive: Creating the AWS S3 archive location.")
+        return self.post('internal', '/archive/object_store', config)
 
-        return add_aws_s3
+    def add_archive_azure(self, container, azure_access_key, storage_account_name, rsa_key, application_id=None, application_key=None, tenant_id=None, region=None, virtual_network_id=None, subnet_name=None, security_group_id=None, name='default', instance_type='default'):
+        """Add a new Azure archive target to the Rubrik Cluster and optionally configure the required Cloud On options.
+
+        Arguments:
+            container {str} -- The name of the Azure storage container you wish to use as an archive.
+            azure_access_key {str} -- The access key for the storage account.
+            storage_account_name {str} -- The name of the Storage Account that the `container` belongs to.
+            rsa_key {str} -- The RSA key that will be used to encrypt the archive data. A key can be generated through `openssl genrsa -out rubrik_encryption_key.pem 2048`.
+
+        Keyword Arguments:
+            name {str} -- The name of the archive location used in the Rubrik GUI. If set to default the following naming convention will be used: Azure:`container` (default: {'default'}) (default: {'default'})
+            instance_type {str} -- The Cloud Platform type of the archival location. (default: {'default'}) (choices: {'default', 'china', 'germany', 'government'})
+            application_id {str} -- The Id of the application registered in Azure Active Directory. Only required when configuring Cloud On. (default: {None})
+            application_key {str} -- The key of the application registered in Azure Active Directory. Only required when configuring Cloud On. (default: {None})
+            tenant_id {str} -- The tenant Id, also known as the directory Id found under the Azure Active Directory properties. Only required when configuring Cloud On. (default: {None})
+            region {str} -- The name of the Azure region where the `container` is located. Only required when configuring Cloud On. (default: {None}) (choices: {"westus", "westus2", "centralus", "eastus", "eastus2", "northcentralus", "southcentralus", "westcentralus", "canadacentral", "canadaeast", "brazilsouth", "northeurope", "westeurope", "uksouth", "ukwest", "eastasia", "southeastasia", "japaneast", "japanwest", "australiaeast", "australiasoutheast", "centralindia", "southindia", "westindia", "koreacentral", "koreasouth"})
+            virtual_network_id {str} -- The virtual network Id used for Cloud On. (default: {None})
+            subnet_name {str} -- The subnet name used for Cloud On. (default: {None})
+            security_group_id {str} -- The security group Id used for Cloud On. (default: {None})
+
+        Returns:
+            str -- No change required. The '`name`' archival location is already configured on the Rubrik Cluster."
+            dict -- The full API response for `POST /internal/archive/object_store'.
+        """
+
+        container = container.lower()
+
+        valid_instance_types = ['default', 'china', 'germany', 'government']
+
+        valid_regions = ["westus", "westus2", "centralus", "eastus", "eastus2", "northcentralus", "southcentralus", "westcentralus", "canadacentral", "canadaeast", "brazilsouth", "northeurope", "westeurope",
+                         "uksouth", "ukwest", "eastasia", "southeastasia", "japaneast", "japanwest", "australiaeast", "australiasoutheast", "centralindia", "southindia", "westindia", "koreacentral", "koreasouth"]
+
+        cloud_on_properties = [application_id, application_key, tenant_id,
+                               region, virtual_network_id, subnet_name, security_group_id]
+
+        if region not in valid_regions:
+            sys.exit('Error: The `region` must be one of the following: {}'.format(valid_regions))
+
+        if all(cloud_on_properties) == False and any(cloud_on_properties) == True:
+            sys.exit("Error: You must populate a value for each of the following keyword arguments or leave them as the default `None` value: application_id, application_key, tenant_id, subscription, region, virtual_network_id, subnet_name, security_group_id")
+
+        if instance_type not in valid_instance_types:
+            sys.exit('Error: The `instance_type` argument must be one of the following: {}'.format(valid_instance_types))
+
+        if re.compile(r'[_\/*?%.:|<>]').findall(container):
+            sys.exit("Error: The `container` may not contain any of the following characters: _\/*?%.:|<>")
+
+        if name == 'default':
+            name = 'Azure:{}'.format(container)
+
+        self.log("add_azure_archive: Searching the Rubrik Cluster for archival locations.")
+        current_s3_archive = self.get('internal', '/archive/object_store')
+
+        config = {}
+        config['name'] = name
+        config['bucket'] = container
+        config['accessKey'] = storage_account_name
+        config['secretKey'] = azure_access_key
+        config['pemFileContent'] = rsa_key
+        config['objectStoreType'] = 'Azure'
+        if instance_type == 'government':
+            config['endpoint'] = 'core.usgovcloudapi.net'
+        elif instance_type == 'germany':
+            config['endpoint'] = 'core.cloudapi.de'
+        elif instance_type == 'china':
+            config['endpoint'] = 'core.chinacloudapi.cn'
+        if all(cloud_on_properties):
+            config['isComputeEnabled'] = True
+            config['azureComputeSummary'] = {}
+            config['azureComputeSummary']["tenantId"] = tenant_id
+            config['azureComputeSummary']["subscriptionId"] = virtual_network_id.split("/")[2]
+            config['azureComputeSummary']["clientId"] = application_id
+            config['azureComputeSummary']["region"] = region
+            config['azureComputeSummary']["generalPurposeStorageAccountName"] = storage_account_name
+            config['azureComputeSummary']["containerName"] = container
+            config['azureComputeSecret'] = {}
+            config['azureComputeSecret']["clientSecret"] = application_key
+            config['defaultComputeNetworkConfig'] = {}
+            config['defaultComputeNetworkConfig']['subnetId'] = subnet_name
+            config['defaultComputeNetworkConfig']['vNetId'] = virtual_network_id
+            config['defaultComputeNetworkConfig']['securityGroupId'] = security_group_id
+
+        user_archive_definition = {}
+        user_archive_definition['objectStoreType'] = 'Azure'
+        user_archive_definition['name'] = name
+        user_archive_definition['accessKey'] = storage_account_name
+        user_archive_definition['bucket'] = container
+        if instance_type == 'government':
+            user_archive_definition['endpoint'] = 'core.usgovcloudapi.net'
+        elif instance_type == 'germany':
+            user_archive_definition['endpoint'] = 'core.cloudapi.de'
+        elif instance_type == 'china':
+            user_archive_definition['endpoint'] = 'core.chinacloudapi.cn'
+        if all(cloud_on_properties):
+            user_archive_definition['isComputeEnabled'] = True
+            user_archive_definition['azureComputeSummary'] = {}
+            user_archive_definition['azureComputeSummary']["tenantId"] = tenant_id
+            user_archive_definition['azureComputeSummary']["subscriptionId"] = virtual_network_id.split("/")[2]
+            user_archive_definition['azureComputeSummary']["clientId"] = application_id
+            user_archive_definition['azureComputeSummary']["region"] = region
+            user_archive_definition['azureComputeSummary']["generalPurposeStorageAccountName"] = storage_account_name
+            user_archive_definition['azureComputeSummary']["containerName"] = container
+            user_archive_definition['defaultComputeNetworkConfig'] = {}
+            user_archive_definition['defaultComputeNetworkConfig']['subnetId'] = subnet_name
+            user_archive_definition['defaultComputeNetworkConfig']['vNetId'] = virtual_network_id
+            user_archive_definition['defaultComputeNetworkConfig']['securityGroupId'] = security_group_id
+
+        for archive in current_s3_archive['data']:
+            if archive['definition'] == user_archive_definition:
+                return "No change required. The '{}' archival location is already configured on the Rubrik Cluster.".format(name)
+            if archive['definition']['objectStoreType'] == 'Azure' and archive['definition']['name'] == name:
+                sys.exit("Error: Archival location with name '{}' already exists. Please enter a unique `name`.".format(name))
+
+        self.log("add_azure_archive: Creating the Azure archive location.")
+        return self.post('internal', '/archive/object_store', config)

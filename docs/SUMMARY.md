@@ -12,7 +12,8 @@
 * [post](post.md)
 
 ### Cluster Functions
-* [add_aws_s3_archive](add_aws_s3_archive.md)
+* [add_archive_aws_s3](add_archive_aws_s3.md)
+* [add_archive_azure](add_archive_azure.md)
 * [cluster_node_ip](cluster_node_ip.md)
 * [cluster_version](cluster_version.md)
 * [end_user_authorization](end_user_authorization.md)
