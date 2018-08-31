@@ -1,8 +1,8 @@
-# add_aws_s3_archive
+# add_archive_aws_s3
 
 Add a new AWS S3 archive target to the Rubrik Cluster and optionally configure the required Cloud On options.
 ```py
-def add_aws_s3_archive(aws_bucket_name, aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, name='default', storage_class='standard', vpc_id=None, subnet_id=None, security_group_id=None)
+def add_archive_aws_s3(aws_bucket_name, aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, name='default', storage_class='standard', vpc_id=None, subnet_id=None, security_group_id=None)
 ```
 
 ## Arguments
@@ -26,5 +26,5 @@ def add_aws_s3_archive(aws_bucket_name, aws_region=None, aws_access_key=None, aw
 ## Returns
 | Type | Description                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| str  | No change required. The '{`name`}' Archival location is already configured on the Rubrik Cluster. |
+| str  | No change required. The '`name`' archival location is already configured on the Rubrik Cluster. |
 | dict  | The full API response for `POST /internal/archive/object_store'. |
