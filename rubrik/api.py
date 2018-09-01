@@ -27,9 +27,7 @@ from random import choice
 
 
 class Api():
-    """This class contains the base API methods that can be called independently or internally
-    in standalone functions.
-    """
+    """This class contains the base API methods that can be called independently or internally in standalone functions."""
 
     def __init__(self, node_ip):
         super().__init__(node_ip)
@@ -54,9 +52,9 @@ class Api():
         if call_type is not 'JOB_STATUS':
             self._api_validation(api_version, api_endpoint)
 
-        """In order to dynamically select a node to interact with, the SDK will first use the node ip provided
-        by the user to get a list of all node ips in the cluster. This code will determine if the SDK has gathered
-        that list yet or not. If it has it will randomly select a node ip from the list to interact with."""
+        """In order to dynamically select a node to interact with, the SDK will first use the node IP provided
+        by the end user to get a list of all node IPs in the Rubrik cluster. This code will determine if the SDK has gathered
+        that list yet and if it has will randomly select a node IP from the list to interact with."""
         if isinstance(self.node_ip, str):
             node_ip = self.node_ip
         else:
@@ -70,7 +68,6 @@ class Api():
         else:
             sys.exit('Error: "authentication" must be either True or False')
 
-        valid_call_type = ['GET', 'POST', 'PATCH', 'DELETE', 'JOB_STATUS']
         try:
             # Determine which call type is being used and then set the relevant variables for that call type
             if call_type is 'GET':
@@ -98,7 +95,8 @@ class Api():
                 self.log('JOB STATUS for {}'.format(job_status_url))
                 api_request = requests.get(job_status_url, verify=False, headers=header, timeout=timeout)
             else:
-                sys.exit('Error: the _common_api() call_type must be one of the following: {}'.format(valid_call_type))
+                sys.exit('Error: the _common_api() call_type must be one of the following: {}'.format(
+                    ['GET', 'POST', 'PATCH', 'DELETE', 'JOB_STATUS']))
 
             self.log(str(api_request) + "\n")
             try:
@@ -142,10 +140,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
-        api_call = self._common_api('GET', api_version, api_endpoint, config=None,
-                                    job_status_url=None, timeout=timeout, authentication=authentication)
-
-        return api_call
+        return self._common_api('GET', api_version, api_endpoint, config=None,
+                                job_status_url=None, timeout=timeout, authentication=authentication)
 
     def post(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Send a POST request to the provided Rubrik API endpoint.
@@ -163,10 +159,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
-        api_call = self._common_api('POST', api_version, api_endpoint, config=config,
-                                    job_status_url=None, timeout=timeout, authentication=authentication)
-
-        return api_call
+        return self._common_api('POST', api_version, api_endpoint, config=config,
+                                job_status_url=None, timeout=timeout, authentication=authentication)
 
     def patch(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Send a PATCH request to the provided Rubrik API endpoint.
@@ -184,10 +178,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
-        api_call = self._common_api('PATCH', api_version, api_endpoint, config=config,
-                                    job_status_url=None, timeout=timeout, authentication=authentication)
-
-        return api_call
+        return self._common_api('PATCH', api_version, api_endpoint, config=config,
+                                job_status_url=None, timeout=timeout, authentication=authentication)
 
     def delete(self, api_version, api_endpoint, timeout=15, authentication=True):
         """Send a DELETE request to the provided Rubrik API endpoint.
@@ -204,15 +196,13 @@ class Api():
             dict -- The response body of the API call.
         """
 
-        api_call = self._common_api('DELETE', api_version, api_endpoint, config=None,
-                                    job_status_url=None, timeout=timeout, authentication=authentication)
-
-        return api_call
+        return self._common_api('DELETE', api_version, api_endpoint, config=None,
+                                job_status_url=None, timeout=timeout, authentication=authentication)
 
     def job_status(self, url, wait_for_completion=True, timeout=15):
-        """Certain Rubrik operations (on-demand snapshots, live mounts, etc.) may not complete instantaneously. In those cases we have the ability to monitor the status of the 
+        """Certain Rubrik operations (on-demand snapshots, live mounts, etc.) may not complete instantaneously. In those cases we have the ability to monitor the status of the
         job through a job status url provided in the actions API response body. This function will perform a GET operation on the provided url
-        and return the jobs status. 
+        and return the jobs status.
 
         Arguments:
             url {str} -- The job status URL provided by a previous API call.
@@ -226,13 +216,15 @@ class Api():
         """
 
         if not isinstance(wait_for_completion, bool):
-            sys.exit('Error: The job_status() wait_for_completion argument must be True or False')
+            sys.exit('Error: The job_status() wait_for_completion argument must be True or False.')
 
         if wait_for_completion:
             self.log('Job Status: Waiting for the job to complete.')
             api_call = self._common_api('JOB_STATUS', api_version=None, api_endpoint=None,
                                         config=None, job_status_url=url, timeout=timeout)
+
             while True:
+
                 api_call = self._common_api('JOB_STATUS', api_version=None, api_endpoint=None,
                                             config=None, job_status_url=url, timeout=timeout)
 
