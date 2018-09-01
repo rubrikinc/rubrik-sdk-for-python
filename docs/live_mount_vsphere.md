@@ -19,6 +19,6 @@ def live_mount_vsphere(vm_name, date='latest', time='latest', host='current', re
 | power_on  | bool  | Determines whether the VM should be powered on after Instantly Recover. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on.  |         |    True     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | dict  | The full response of the Instantly Recover API call. |

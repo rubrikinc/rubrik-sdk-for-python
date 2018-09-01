@@ -22,6 +22,6 @@ def instant_recovery_vsphere(vm_name, date='latest', time='latest', host='curren
 | preserve_moid  | bool  | Determines whether to preserve the MOID of the source VM in a restore operation. Use 'True' to keep the MOID of the source. Use 'False' to assign a new moid.  |         |    False     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | dict  | The full response of the Instantly Recover API call. |

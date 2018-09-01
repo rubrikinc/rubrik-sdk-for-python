@@ -21,7 +21,7 @@ def azure_cloudon(archive_name, container, storage_account_name, application_id,
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30}) |         |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The '`archive_name`' archival location is already configured for CloudOn. |
 | dict  | The full API response for `PATCH /internal/archive/object_store/{id}`. |

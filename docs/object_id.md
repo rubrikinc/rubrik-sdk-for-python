@@ -15,6 +15,6 @@ def object_id(object_name, object_type=None)
 | object_type  | str  | The object type you wish to look up. Valid options are vmware and sla.  |         |    None     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | [str]  | The ID of the provided object. |

@@ -16,7 +16,7 @@ def resume_snapshots(object_name, object_type='vmware', timeout=180)
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik Cluster.  |         |    180     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | If the object is not currently paused the following will be returned: The vSphere VM '{object_name}' is currently not paused. |
 | dict  | The full response of the Instantly Recover API call. |

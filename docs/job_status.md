@@ -16,6 +16,6 @@ def job_status(url, wait_for_completion=True, timeout=15)
 | wait_for_completion  | bool  | Flag that determines if the method should wait for the job to complete before exiting.  |         |    True     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | dict  | The response body of the API call. |

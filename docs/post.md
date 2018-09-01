@@ -18,6 +18,6 @@ def post(api_version, api_endpoint, config, timeout=15, authentication=True)
 | authentication  | bool  | Flag that specifies whether or not to utilize authentication when making the API call.  |         |    True     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | dict  | The response body of the API call. |

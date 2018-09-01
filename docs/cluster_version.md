@@ -11,6 +11,6 @@ def cluster_version(timeout=15)
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | dict  | The API response from `GET /v1/cluster/me/version`. |

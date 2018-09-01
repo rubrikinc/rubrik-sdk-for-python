@@ -20,6 +20,6 @@ def _common_api(call_type, api_version, api_endpoint, config=None, job_status_ur
 | authentication  | bool  | Flag that specifies whether or not to utilize authentication when making the API call.  |         |    True     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | dict  | The full API call response for the provided endpoint. |

@@ -16,7 +16,7 @@ def assign_sla(object_name, sla_name, object_type=None, timeout=30)
 | object_type  | str  | The type of object (ex. vmware) you are assigning to the SLA Domain.  |    vmware     |    None      |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | If the object is already assigned to the SLA Domain a message to that effect will be retuned. |
 | dict  | The full API reponse of the SLA assignment API call. |

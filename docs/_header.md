@@ -7,6 +7,6 @@ def _header()
 
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | dict  | The header that does not include any authorization. |

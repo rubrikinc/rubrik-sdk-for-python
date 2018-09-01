@@ -22,7 +22,7 @@ def aws_s3_cloudout(aws_bucket_name, archive_name='default', aws_region=None, aw
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    30     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The '`name`' archival location is already configured on the Rubrik cluster. |
 | dict  | The full API response for `POST /internal/archive/object_store'`. |

@@ -23,7 +23,7 @@ def assign_physical_host_fileset(hostname, fileset_name, operating_system, sla_n
 | timeout  | int  | The timeout value for the API call that creates that assigns the Fileset.  |         |    30     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | tuple  | When a new Fileset is created the following tuple will be returned: (Full API response from `POST /v1/fileset`, Full API response from `POST /v1/fileset/{id}`) |
 | dict  | When the Fileset already exsits but is assigned to the wrong the SLA the Full API response from `POST `v1/fileset/{id}` is returned. |

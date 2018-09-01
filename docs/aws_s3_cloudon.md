@@ -18,7 +18,7 @@ def aws_s3_cloudon(archive_name, vpc_id, subnet_id, security_group_id, timeout=3
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    30     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The '`name`' archival location is already configured on the Rubrik cluster. |
 | dict  | The full API response for `PATCH /internal/archive/object_store/{id}`. |

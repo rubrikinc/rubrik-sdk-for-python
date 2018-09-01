@@ -21,7 +21,7 @@ def create_physical_fileset(name, operating_system, include, exclude, exclude_ex
 | timeout  | int  | The timeout value for the API call that creates the Fileset.  |         |    15     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | If the Fileset is already present on the Rubrik Cluster the following is returned: The Rubrik Cluster already has a {`operating_system`} Fileset named '{`name`}' configured with the provided variables. |
 | dict  | The full response for the `/internal/fileset_template/bulk` API endpoint. |

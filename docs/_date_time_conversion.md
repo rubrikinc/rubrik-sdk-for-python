@@ -12,6 +12,6 @@ def _date_time_conversion(date, time)
 | time  | str  | A time value formated as Hour:Minute AM/PM. Example: 1:30 AM |         |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | A combined date/time value formated as Year-Month-DayTHour:Minute. Where Hour:Minute is on the 24-hour clock. Example: 2014-1-15T01:30 |

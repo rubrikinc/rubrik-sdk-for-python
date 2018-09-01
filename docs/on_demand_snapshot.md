@@ -16,6 +16,6 @@ def on_demand_snapshot(object_name, object_type=None, sla_name='current')
 | sla_name  | str  | The SLA Domain name you to assign the snapshot to. By default the currently assigne SLA Domain will be used.  |         |    current     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | tuple  | The full API response and the job status URL which can be used to monitor progress of the Snapshot. (api_response, job_status_url) |

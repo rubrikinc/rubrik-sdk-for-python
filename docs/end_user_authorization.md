@@ -17,7 +17,7 @@ def end_user_authorization(object_name, end_user, object_type='vmware', timeout=
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The End User "`end_user`" is already authorized to interact with the "`object_name`" VM. |
 | dict  | The API response from `POST /internal/authorization/role/end_user`. |

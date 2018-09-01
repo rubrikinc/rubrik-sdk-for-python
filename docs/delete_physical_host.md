@@ -15,7 +15,7 @@ def delete_physical_host(hostname, timeout=120)
 | timeout  | int  | The timeout value for the API call that deletes the physical host from the Rubrik Cluster.  |         |    120     |
 
 ## Returns
-| Type | Description                                                                                   |
+| Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | If the physical host is not present on the Rubrik Cluster, a message to that effect will be retuned. |
 | dict  | The response returned by the API call. |

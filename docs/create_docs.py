@@ -73,7 +73,7 @@ def print_doc_string(doc_string, section):
         markdown.write('\n')
     elif section is 'returns':
         markdown.write(
-            '| Type | Description                                                                                   |\n')
+            '| Type | Return Value                                                                                   |\n')
         markdown.write(
             '|------|-----------------------------------------------------------------------------------------------|\n')
         for line in doc_string:
