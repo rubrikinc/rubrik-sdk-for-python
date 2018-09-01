@@ -70,8 +70,7 @@ class Cluster(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            str -- 'No change required. The End User "`end_user`" is already authorized to interact with the "`object_name`" VM.'.format(end_user, object_name)
-            dict -- dict -- The API response from `POST /internal/authorization/role/end_user`.
+            str -- No change required. The End User "`end_user`" is already authorized to interact with the "`object_name`" VM.
         """
 
         valid_object_type = ['vmware']
