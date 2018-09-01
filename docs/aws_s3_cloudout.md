@@ -17,7 +17,7 @@ def aws_s3_cloudout(aws_bucket_name, archive_name='default', aws_region=None, aw
 | aws_secret_key  | str  | The secret key of a AWS account with the required permissions. If set to the default `None` keyword argument, we will look for a `AWS_SECRET_ACCESS_KEY` environment variable to pull the value from.  |         |    None     |
 | kms_master_key_id  | str  | The AWS KMS master key ID that will be used to encrypt the archive data. If set to the default `None` keyword argument, you will need to provide a `rsa_key` instead.  |         |    None     |
 | rsa_key  | str  | The RSA key that will be used to encrypt the archive data. A key can be generated through `openssl genrsa -out rubrik_encryption_key.pem 2048`. If set to the default `None` keyword argument, you will need to provide a `kms_master_key_id` instead.   |         |    None     |
-| archive_name  | str  | The name of the archive location used in the Rubrik GUI. If set to 'default' the following naming convention will be used: AWS:S3:`aws_bucket_name`  |         |    default     |
+| archive_name  | str  | The name of the archive location used in the Rubrik GUI. If set to 'default' the following naming convention will be used: "AWS:S3:`aws_bucket_name`"  |         |    default     |
 | storage_class  | str  | The AWS storage class you wish to use.  |    standard, standard_ia, reduced_redundancy     |    standard      |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    30     |
 

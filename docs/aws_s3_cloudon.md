@@ -12,9 +12,9 @@ def aws_s3_cloudon(archive_name, vpc_id, subnet_id, security_group_id, timeout=3
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| vpc_id  | str  | The VPC ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. |         |         |
-| subnet_id  | str  | The Subnet ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. |         |         |
-| security_group_id  | str  | The Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. |         |         |
+| vpc_id  | str  | The AWS VPC ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. |         |         |
+| subnet_id  | str  | The AWS Subnet ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. |         |         |
+| security_group_id  | str  | The AWS Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. |         |         |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    30     |
 
 ## Returns

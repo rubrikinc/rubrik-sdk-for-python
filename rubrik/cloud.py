@@ -38,7 +38,7 @@ class Cloud(_API):
             aws_secret_key {str} -- The secret key of a AWS account with the required permissions. If set to the default `None` keyword argument, we will look for a `AWS_SECRET_ACCESS_KEY` environment variable to pull the value from. (default: {None})
             kms_master_key_id {str} -- The AWS KMS master key ID that will be used to encrypt the archive data. If set to the default `None` keyword argument, you will need to provide a `rsa_key` instead. (default: {None})
             rsa_key {str} -- The RSA key that will be used to encrypt the archive data. A key can be generated through `openssl genrsa -out rubrik_encryption_key.pem 2048`. If set to the default `None` keyword argument, you will need to provide a `kms_master_key_id` instead.  (default: {None})
-            archive_name {str} -- The name of the archive location used in the Rubrik GUI. If set to 'default' the following naming convention will be used: AWS:S3:`aws_bucket_name` (default: {'default'})
+            archive_name {str} -- The name of the archive location used in the Rubrik GUI. If set to 'default' the following naming convention will be used: "AWS:S3:`aws_bucket_name`" (default: {'default'})
             storage_class {str} -- The AWS storage class you wish to use. (default: {'standard'}) (choices: {standard, 'standard_ia, reduced_redundancy})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
@@ -135,9 +135,9 @@ class Cloud(_API):
             archive_name {str} -- The name of the archive location used in the Rubrik GUI.
 
         Keyword Arguments:
-            vpc_id {str} -- The VPC ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation.
-            subnet_id {str} -- The Subnet ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation.
-            security_group_id {str} -- The Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation.
+            vpc_id {str} -- The AWS VPC ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation.
+            subnet_id {str} -- The AWS Subnet ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation.
+            security_group_id {str} -- The AWS Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
@@ -176,13 +176,13 @@ class Cloud(_API):
             rsa_key {str} -- The RSA key that will be used to encrypt the archive data. A key can be generated through `openssl genrsa -out rubrik_encryption_key.pem 2048`.
 
         Keyword Arguments:
-            archive_name {str} -- The name of the archive location used in the Rubrik GUI. If set to `default`, the following naming convention will be used: Azure:`container` (default: {'default'})
+            archive_name {str} -- The name of the archive location used in the Rubrik GUI. If set to `default`, the following naming convention will be used: "Azure:`container`" (default: {'default'})
             instance_type {str} -- The Cloud Platform type of the archival location. (default: {'default'}) (choices: {'default', 'china', 'germany', 'government'})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
             str -- No change required. The '`name`' archival location is already configured on the Rubrik cluster."
-            dict -- The full API response for `POST /internal/archive/object_store'`.
+            dict -- The full API response for `POST /internal/archive/object_store`.
         """
 
         container = container.lower()
@@ -256,7 +256,7 @@ class Cloud(_API):
             application_id {str} -- The ID of the application registered in Azure Active Directory.
             application_key {str} -- The key of the application registered in Azure Active Directory.
             tenant_id {str} -- The tenant ID, also known as the directory ID, found under the Azure Active Directory properties.
-            region {str} -- The name of the Azure region where the `container` is located. (choices: {westus, westus2, centralus, eastus, eastus2, northcentralus, southcentralus, westcentralus, canadacentral, canadaeast, brazilsouth, northeurope, westeurope, uksouth, ukwest, eastasia, southeastasia, japaneast, japanwest, australiaeast australiasoutheast, centralindia, southindia, westindia, koreacentral, koreasouth)
+            region {str} -- The name of the Azure region where the `container` is located. (choices: {westus, westus2, centralus, eastus, eastus2, northcentralus, southcentralus, westcentralus, canadacentral, canadaeast, brazilsouth, northeurope, westeurope, uksouth, ukwest, eastasia, southeastasia, japaneast, japanwest, australiaeast australiasoutheast, centralindia, southindia, westindia, koreacentral, koreasouth})
             virtual_network_id {str} -- The Azure virtual network ID used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation.
             subnet_name {str} -- The Azure subnet name used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation.
             security_group_id {str} -- The Azure Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation.

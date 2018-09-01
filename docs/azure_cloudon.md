@@ -14,7 +14,7 @@ def azure_cloudon(archive_name, container, storage_account_name, application_id,
 | application_id  | str  | The ID of the application registered in Azure Active Directory. |         |
 | application_key  | str  | The key of the application registered in Azure Active Directory. |         |
 | tenant_id  | str  | The tenant ID, also known as the directory ID, found under the Azure Active Directory properties. |         |
-| region  | str  | The name of the Azure region where the `container` is located.  |    westus, westus2, centralus, eastus, eastus2, northcentralus, southcentralus, westcentralus, canadacentral, canadaeast, brazilsouth, northeurope, westeurope, uksouth, ukwest, eastasia, southeastasia, japaneast, japanwest, australiaeast australiasoutheast, centralindia, southindia, westindia, koreacentral, koreasouth)     |
+| region  | str  | The name of the Azure region where the `container` is located.  |    westus, westus2, centralus, eastus, eastus2, northcentralus, southcentralus, westcentralus, canadacentral, canadaeast, brazilsouth, northeurope, westeurope, uksouth, ukwest, eastasia, southeastasia, japaneast, japanwest, australiaeast australiasoutheast, centralindia, southindia, westindia, koreacentral, koreasouth     |
 | virtual_network_id  | str  | The Azure virtual network ID used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation. |         |
 | subnet_name  | str  | The Azure subnet name used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation. |         |
 | security_group_id  | str  | The Azure Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation. |         |
