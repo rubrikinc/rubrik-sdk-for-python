@@ -21,4 +21,4 @@ def vsphere_live_mount(vm_name, date='latest', time='latest', host='current', re
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| dict  | The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount'. |
+| dict  | The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount`. |

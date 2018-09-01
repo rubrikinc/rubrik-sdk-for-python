@@ -20,4 +20,4 @@ def assign_sla(object_name, sla_name, object_type, timeout=30)
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain. |
-| dict  | The full API reponse for `POST /internal/sla_domain/{`sla_id`}/assign`. |
+| dict  | The full API reponse for `POST /internal/sla_domain/{sla_id}/assign`. |

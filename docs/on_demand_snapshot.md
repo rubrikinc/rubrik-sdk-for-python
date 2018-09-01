@@ -2,17 +2,17 @@
 
 Initiate an on-demand snapshot.
 ```py
-def on_demand_snapshot(object_name, object_type=None, sla_name='current')
+def on_demand_snapshot(object_name, object_type, sla_name='current')
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | object_name  | str  | The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to take a on-demand snapshot of. |         |
+| object_type  | str  | The Rubrik object type you want to backup.  |    vmware     |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| object_type  | str  | The Rubrik object type you want to backup.  |    vmware     |    None      |
 | sla_name  | str  | The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used.  |         |    current     |
 
 ## Returns

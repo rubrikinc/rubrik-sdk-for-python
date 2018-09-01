@@ -19,4 +19,4 @@ def pause_snapshots(object_name, object_type, timeout=180)
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The vSphere VM '`object_name`' is already paused. |
-| dict  | The full API response for `PATCH /v1/vmware/vm/{vm_id}'. |
+| dict  | The full API response for `PATCH /v1/vmware/vm/{vm_id}`. |

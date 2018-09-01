@@ -25,14 +25,14 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type=None, sla_name='current'):
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current'):
         """Initiate an on-demand snapshot.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to take a on-demand snapshot of.
+            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware})
 
         Keyword Arguments:
-            object_type {str} -- The Rubrik object type you want to backup. (default: {None}) (choices: {vmware})
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
 
         Returns:
@@ -122,8 +122,7 @@ class Data_Management(_API):
 
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
-            dict -- The full API reponse for `POST /internal/sla_domain/{`sla_id`}/assign`.
-
+            dict -- The full API reponse for `POST /internal/sla_domain/{sla_id}/assign`.
         """
 
         valid_object_type = ['vmware']
@@ -178,7 +177,7 @@ class Data_Management(_API):
             power_on {bool} -- Flag that determines whether the VM should be powered on after the Live Mount. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on. (default: {True})
 
         Returns:
-            dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount'.
+            dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount`.
         """
 
         if isinstance(remove_network_devices, bool) is False:
@@ -370,7 +369,7 @@ class Data_Management(_API):
 
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already paused.
-            dict -- The full API response for `PATCH /v1/vmware/vm/{vm_id}'.
+            dict -- The full API response for `PATCH /v1/vmware/vm/{vm_id}`.
         """
 
         valid_object_type = ['vmware']
