@@ -38,18 +38,18 @@ class Api():
         """Internal method that consolidates the base API functions.
 
         Arguments:
-            call_type {str} -- The type of API call you wish to make. Valid choices are 'GET', 'POST', 'PATCH', 'DELETE', and 'JOB_STATUS'.
-            api_version {str} -- The version of the Rubrik CDM API to call.
-            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+            call_type {str} -- The HTTP Method for the type of RESTful API call being made. (choices: {'GET', 'POST', 'PATCH', 'DELETE', and 'JOB_STATUS'.})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal}) (choices: {v1, internal})
+            api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
-            config {dict} -- The specified data to send with POST and PATCH API calls. (default: {None})
+            config {dict} -- The specified data to send with `POST` and `PATCH` API calls. (default: {None})
             job_status_url {str} -- The job status URL provided by a previous API call. (default: {None})
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {15})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
         Returns:
-            dict -- The API call response.
+            dict -- The full API call response for the provided endpoint.
         """
         if call_type is not 'JOB_STATUS':
             self._api_validation(api_version, api_endpoint)
@@ -112,7 +112,7 @@ class Api():
             except:
                 api_request.raise_for_status()
         except requests.exceptions.ConnectTimeout:
-            sys.exit('Error: Unable to establish a connection to the Rubrik Cluster.')
+            sys.exit('Error: Unable to establish a connection to the Rubrik cluster.')
         except requests.exceptions.RequestException as error:
             # If "error_message" has be defined sys.exit that message else sys.exit the request exception error
             try:
@@ -131,11 +131,11 @@ class Api():
         """Send a GET request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call.
-            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {15})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
         Returns:
@@ -151,12 +151,12 @@ class Api():
         """Send a POST request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call.
-            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
             config {dict} -- The specified data to send with the API call.
 
         Keyword Arguments:
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {15})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
         Returns:
@@ -172,12 +172,12 @@ class Api():
         """Send a PATCH request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call.
-            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
             config {dict} -- The specified data to send with the API call.
 
         Keyword Arguments:
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {15})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
         Returns:
@@ -193,11 +193,11 @@ class Api():
         """Send a DELETE request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call.
-            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {15})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
         Returns:
@@ -210,7 +210,7 @@ class Api():
         return api_call
 
     def job_status(self, url, wait_for_completion=True, timeout=15):
-        """Certain Rubrik operations may not complete instantaneously (ex. on-demand snapshots, live mounts). In those cases we have the ability to monitor the status of the 
+        """Certain Rubrik operations (on-demand snapshots, live mounts, etc.) may not complete instantaneously. In those cases we have the ability to monitor the status of the 
         job through a job status url provided in the actions API response body. This function will perform a GET operation on the provided url
         and return the jobs status. 
 
@@ -218,7 +218,7 @@ class Api():
             url {str} -- The job status URL provided by a previous API call.
 
         Keyword Arguments:
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {15})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             wait_for_completion {bool} -- Flag that determines if the method should wait for the job to complete before exiting. (default: {True})
 
         Returns:
