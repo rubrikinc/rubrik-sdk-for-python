@@ -20,3 +20,4 @@ def end_user_authorization(object_name, end_user, object_type='vmware', timeout=
 | Type | Description                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The End User "`end_user`" is already authorized to interact with the "`object_name`" VM. |
+| dict  | The API response from `POST /internal/authorization/role/end_user`. |
