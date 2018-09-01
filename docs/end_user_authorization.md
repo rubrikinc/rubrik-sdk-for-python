@@ -8,7 +8,7 @@ def end_user_authorization(object_name, end_user, object_type='vmware', timeout=
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| object_name  | str  | The name of the object you wish to grant the `end_ser` authorization to. |         |
+| object_name  | str  | The name of the object you wish to grant the `end_user` authorization to. |         |
 | end_user  | str  | The name of the end user you wish to grant authorization to. |         |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |

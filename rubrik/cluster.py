@@ -62,7 +62,7 @@ class Cluster(_API):
         """Grant an End User authorization to the provided object.
 
         Arguments:
-            object_name {str} -- The name of the object you wish to grant the `end_ser` authorization to.
+            object_name {str} -- The name of the object you wish to grant the `end_user` authorization to.
             end_user {str} -- The name of the end user you wish to grant authorization to.
 
         Keyword Arguments:
