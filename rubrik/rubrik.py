@@ -27,15 +27,17 @@ from .api import Api
 from .cluster import Cluster
 from .data_management import Data_Management
 from .physical import Physical
+from .cloud import Cloud
 
 
 _CLUSTER = Cluster
 _DATA_MANAGEMENT = Data_Management
 _PHYSICAL = Physical
 _API = Api
+_CLOUD = Cloud
 
 
-class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL):
+class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
     """This class acts as the base class for the Rubrik SDK and serves as the main interaction point
     for its end users. It also contains various helper functions used throughout the SDK.
 

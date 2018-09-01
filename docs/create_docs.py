@@ -252,8 +252,18 @@ for function in physical_functions:
     if function[0] is '_':
         physical_functions.remove(function)
 
+cloud_search = inspect.getmembers(rubrik.cloud.Cloud, inspect.isfunction)
+cloud_functions = []
+for function in cloud_search:
+    if function[0] not in base_api_functions:
+        cloud_functions.append(function[0])
+for function in cloud_functions:
+    if function[0] is '_':
+        cloud_functions.remove(function)
 
-combined_function_list = base_api_functions + cluster_functions + data_management_functions + physical_functions
+
+combined_function_list = base_api_functions + cluster_functions + \
+    data_management_functions + physical_functions + cloud_functions
 
 connect_functions_search = inspect.getmembers(rubrik.rubrik.Connect, inspect.isfunction)
 connect_functions = []
@@ -262,7 +272,7 @@ for function in connect_functions_search:
         connect_functions.append(function[0])
 del connect_functions[0]
 
-
+print(cloud_functions)
 # Create the SUMMARY (side navigation) Document
 markdown = open('SUMMARY.md', 'w')
 markdown.write('# Summary\n\n')
@@ -277,6 +287,10 @@ for function in base_api_functions:
 
 markdown.write('\n### Cluster Functions\n')
 for function in cluster_functions:
+    markdown.write('* [{}]({}.md)\n'.format(function, function))
+
+markdown.write('\n### Cloud Functions\n')
+for function in cloud_functions:
     markdown.write('* [{}]({}.md)\n'.format(function, function))
 
 markdown.write('\n### Data Management Functions\n')

@@ -12,11 +12,15 @@
 * [post](post.md)
 
 ### Cluster Functions
-* [add_archive_aws_s3](add_archive_aws_s3.md)
-* [add_archive_azure](add_archive_azure.md)
 * [cluster_node_ip](cluster_node_ip.md)
 * [cluster_version](cluster_version.md)
 * [end_user_authorization](end_user_authorization.md)
+
+### Cloud Functions
+* [aws_s3_cloudon](aws_s3_cloudon.md)
+* [aws_s3_cloudout](aws_s3_cloudout.md)
+* [azure_cloudon](azure_cloudon.md)
+* [azure_cloudout](azure_cloudout.md)
 
 ### Data Management Functions
 * [assign_sla](assign_sla.md)
