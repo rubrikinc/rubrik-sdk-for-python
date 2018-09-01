@@ -12,8 +12,8 @@ def resume_snapshots(object_name, object_type='vmware', timeout=180)
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| object_type  | str  | The Rubrik object type you wish to resume Snaphots on. 'vmware' is currently the only supported option. (default: {vmware}) |         |    vmware     |
-| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {180}) |         |    180     |
+| object_type  | str  | The Rubrik object type you wish to resume Snaphots on. 'vmware' is currently the only supported option.  |         |    vmware     |
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik Cluster.  |         |    180     |
 
 ## Returns
 | Type | Description                                                                                   |

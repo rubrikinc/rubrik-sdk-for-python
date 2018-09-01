@@ -13,8 +13,8 @@ def end_user_authorization(object_name, end_user, object_type='vmware', timeout=
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| object_type  | str  | The Rubrik object type you wish to backup. `vmware` is currently the only supported option. (choices: {vmware}) (default: {vmware}) |    vmware (default: {vmware     |    vmware     |
-| timeout  | int  | The timeout value for the API call that grants the End User authoriauthorizationation. (default: {15}) |         |    15     |
+| object_type  | str  | The Rubrik object type you wish to backup. `vmware` is currently the only supported option. (choices: {vmware})  |    vmware (default: {vmware     |    vmware     |
+| timeout  | int  | The timeout value for the API call that grants the End User authoriauthorizationation.  |         |    15     |
 
 ## Returns
 | Type | Description                                                                                   |

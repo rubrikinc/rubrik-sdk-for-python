@@ -15,12 +15,12 @@ def assign_physical_host_fileset(hostname, fileset_name, operating_system, sla_n
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| include  | list  | The full paths or wildcards that define the objects to include in the Fileset backup. Example: ['/usr/local', '*.pdf'] (default: {None}) |         |    None     |
-| exclude  | [type]  | The full paths or wildcards that define the objects to exclude from the Fileset backup. Example: ['/user/local/temp', '*.mov', '*.mp3'] (default: {None}) |         |    None     |
-| exclude_exception  | list  | The full paths or wildcards that define the objects that are exempt from the `excludes` variables.  Example: ['/company/*.mp4'] (default: {None}) |         |    None     |
-| follow_network_shares  | bool  | Include or exclude locally-mounted remote file systems from backups. (default: {False}) |         |    False     |
-| backup_hidden_folders  | bool  | Include or exclude hidden folders inside locally-mounted remote file systems from backups. (default: {False}) |         |    False     |
-| timeout  | int  | The timeout value for the API call that creates that assigns the Fileset. (default: {30}) |         |    30     |
+| include  | list  | The full paths or wildcards that define the objects to include in the Fileset backup. Example: ['/usr/local', '*.pdf']  |         |    None     |
+| exclude  | [type]  | The full paths or wildcards that define the objects to exclude from the Fileset backup. Example: ['/user/local/temp', '*.mov', '*.mp3']  |         |    None     |
+| exclude_exception  | list  | The full paths or wildcards that define the objects that are exempt from the `excludes` variables.  Example: ['/company/*.mp4']  |         |    None     |
+| follow_network_shares  | bool  | Include or exclude locally-mounted remote file systems from backups.  |         |    False     |
+| backup_hidden_folders  | bool  | Include or exclude hidden folders inside locally-mounted remote file systems from backups.  |         |    False     |
+| timeout  | int  | The timeout value for the API call that creates that assigns the Fileset.  |         |    30     |
 
 ## Returns
 | Type | Description                                                                                   |

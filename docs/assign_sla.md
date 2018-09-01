@@ -13,7 +13,7 @@ def assign_sla(object_name, sla_name, object_type=None, timeout=30)
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| object_type  | str  | The type of object (ex. vmware) you are assigning to the SLA Domain. (default: {None}) (choices: {vmware}) |    vmware     |    None (choices: {vmware     |
+| object_type  | str  | The type of object (ex. vmware) you are assigning to the SLA Domain.  |    vmware     |    None      |
 
 ## Returns
 | Type | Description                                                                                   |

@@ -14,8 +14,8 @@ def post(api_version, api_endpoint, config, timeout=15, authentication=True)
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {15}) |         |    15     |
-| authentication  | bool  | Flag that specifies whether or not to utilize authentication when making the API call. (default: {True}) |         |    True     |
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik Cluster.  |         |    15     |
+| authentication  | bool  | Flag that specifies whether or not to utilize authentication when making the API call.  |         |    True     |
 
 ## Returns
 | Type | Description                                                                                   |

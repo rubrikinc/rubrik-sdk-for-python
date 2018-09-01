@@ -12,7 +12,7 @@ def print_doc_string(doc_string, section):
             line = line.replace(' -- ', '').strip().split('}', 1)
             value_type = line[0].split('{', 1)
             if value_type[0] is not '':
-                name = value_type[0]
+                function_name = value_type[0]
                 python_type = value_type[1]
                 description = line[1]
                 # Name | Type | Description | Choices |
@@ -20,10 +20,13 @@ def print_doc_string(doc_string, section):
                     choices = description.split("(choices: {")
                     choices = choices[1].replace("})", "").strip()
 
+                    description = description.split("(choices: {")
+                    description = description[0]
+
                 else:
                     choices = ''
                 markdown.write('| {} | {}  | {} |    {}     |\n'.format(
-                    name, python_type, description, choices))
+                    function_name, python_type, description, choices))
 
     elif section is 'keyword_arguments':
         for line in doc_string:
@@ -36,17 +39,31 @@ def print_doc_string(doc_string, section):
                 # Name | Type | Description | Choices | Default
                 # (default: {'latest'})
                 if '(default: {' in description:
+
                     default = description.split("(default: {")
+
                     default = default[1].replace("})", "").strip()
+                    if "(choices:" in default:
+                        default = default.split('(choices')
+                        default = default[0]
+
+                    default = default.replace("'", "").replace('"', '')
 
                 else:
                     default = ''
+
                 if '(choices: {' in description:
                     choices = description.split("(choices: {")
                     choices = choices[1].replace("})", "").strip()
+                    choices = choices.replace("'", "").replace('"', '')
 
                 else:
                     choices = ''
+
+                if '(default: {' in description:
+                    description = description.split("(default: {")
+                    description = description[0]
+
                 markdown.write('| {} | {}  | {} |    {}     |    {}     |\n'.format(
                     name, python_type, description, choices, default))
 
@@ -111,6 +128,9 @@ for function in rubrk_sdk_functions:
 
 
 for function_name, function_doc_string in function_documentation.items():
+
+    # if function_name == "aws_s3_cloudout":
+    print(function_name)
 
     if 'init' not in function_name:
         arguments_start = None
@@ -272,7 +292,6 @@ for function in connect_functions_search:
         connect_functions.append(function[0])
 del connect_functions[0]
 
-print(cloud_functions)
 # Create the SUMMARY (side navigation) Document
 markdown = open('SUMMARY.md', 'w')
 markdown.write('# Summary\n\n')

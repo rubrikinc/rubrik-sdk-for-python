@@ -12,7 +12,7 @@ def object_id(object_name, object_type=None)
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| object_type  | str  | The object type you wish to look up. Valid options are vmware and sla. (default: {None}) |         |    None     |
+| object_type  | str  | The object type you wish to look up. Valid options are vmware and sla.  |         |    None     |
 
 ## Returns
 | Type | Description                                                                                   |

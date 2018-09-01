@@ -8,7 +8,7 @@ def cluster_version(timeout=15)
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| timeout  | int  | The response timeout value, in seconds, of the API call. (default: {15}) |         |    15     |
+| timeout  | int  | The response timeout value, in seconds, of the API call.  |         |    15     |
 
 ## Returns
 | Type | Description                                                                                   |

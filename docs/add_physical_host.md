@@ -12,7 +12,7 @@ def add_physical_host(hostname, timeout=60)
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| timeout  | int  | The timeout value for the API call that adds the physical host to the Rubrik Cluster. (default: {60}) |         |    60     |
+| timeout  | int  | The timeout value for the API call that adds the physical host to the Rubrik Cluster.  |         |    60     |
 
 ## Returns
 | Type | Description                                                                                   |

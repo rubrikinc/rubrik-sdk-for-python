@@ -12,10 +12,10 @@ def aws_s3_cloudon(archive_name, vpc_id, subnet_id, security_group_id, timeout=3
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| vpc_id  | str  | The VPC ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. When a value has been provided you must also provide a value for `subnet_id` and `security_group_id` (default: {None}) |         |    None     |
-| subnet_id  | str  | The Subnet ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. When a value has been provided you must also provide a value for `vpc_id` and `security_group_id` (default: {None}) |         |    None     |
-| security_group_id  | str  | The Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. When a value has been provided you must also provide a value for `vpc_id` and `subnet_id` (default: {None}) |         |    None     |
-| timeout  | int  | The timeout value for the API call that configures the CloudOn instantiation configs. (default: {30}) |         |    30     |
+| vpc_id  | str  | The VPC ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. When a value has been provided you must also provide a value for `subnet_id` and `security_group_id`  |         |    None     |
+| subnet_id  | str  | The Subnet ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. When a value has been provided you must also provide a value for `vpc_id` and `security_group_id`  |         |    None     |
+| security_group_id  | str  | The Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation. When a value has been provided you must also provide a value for `vpc_id` and `subnet_id`  |         |    None     |
+| timeout  | int  | The timeout value for the API call that configures the CloudOn instantiation configs.  |         |    30     |
 
 ## Returns
 | Type | Description                                                                                   |

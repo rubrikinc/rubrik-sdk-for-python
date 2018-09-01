@@ -15,9 +15,9 @@ def azure_cloudout(container, azure_access_key, storage_account_name, rsa_key, a
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| archive_name  | str  | The name of the archive location used in the Rubrik GUI. If set to default the following naming convention will be used: Azure:`container` (default: {'default'}) (default: {'default'}) |         |    'default'     |
-| instance_type  | str  | The Cloud Platform type of the archival location. (default: {'default'}) (choices: {'default', 'china', 'germany', 'government'}) |    'default', 'china', 'germany', 'government'     |    'default' (choices: {'default', 'china', 'germany', 'government'     |
-| timeout  | int  | The timeout value for the API call that creates a new Azure archival location on the Rubrik cluster. (default: {30}) |         |    30     |
+| archive_name  | str  | The name of the archive location used in the Rubrik GUI. If set to default the following naming convention will be used: Azure:`container`  |         |    default     |
+| instance_type  | str  | The Cloud Platform type of the archival location.  |    default, china, germany, government     |    default      |
+| timeout  | int  | The timeout value for the API call that creates a new Azure archival location on the Rubrik cluster.  |         |    30     |
 
 ## Returns
 | Type | Description                                                                                   |

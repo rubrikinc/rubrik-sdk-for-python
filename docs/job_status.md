@@ -12,8 +12,8 @@ def job_status(url, wait_for_completion=True, timeout=15)
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {15}) |         |    15     |
-| wait_for_completion  | bool  | Flag that determines if the method should wait for the job to complete before exiting. (default: {True}) |         |    True     |
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik Cluster.  |         |    15     |
+| wait_for_completion  | bool  | Flag that determines if the method should wait for the job to complete before exiting.  |         |    True     |
 
 ## Returns
 | Type | Description                                                                                   |
