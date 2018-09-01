@@ -1,22 +1,22 @@
 # resume_snapshots
 
-Resume all Snapshot activity for the provided object.
+Resume all snapshot activity for the provided object.
 ```py
-def resume_snapshots(object_name, object_type='vmware', timeout=180)
+def resume_snapshots(object_name, object_type, timeout=180)
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| object_name  | str  | The name of object (i.e vSphere VM) to resume Snaphots on. |         |
+| object_name  | str  | The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to resume snapshots for. |         |
+| object_type  | str  | The Rubrik object type you wish to resume Snaphots on.  |    vmware     |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| object_type  | str  | The Rubrik object type you wish to resume Snaphots on. 'vmware' is currently the only supported option.  |         |    vmware     |
-| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik Cluster.  |         |    180     |
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster.  |         |    180     |
 
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| str  | If the object is not currently paused the following will be returned: The vSphere VM '{object_name}' is currently not paused. |
-| dict  | The full response of the Instantly Recover API call. |
+| str  | No change required. The 'object_type' object 'object_name' is currently not paused. |
+| dict  | The full response for `PATCH /v1/vmware/vm/{vm_id}`. |

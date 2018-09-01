@@ -24,12 +24,12 @@
 
 ### Data Management Functions
 * [assign_sla](assign_sla.md)
-* [instant_recovery_vsphere](instant_recovery_vsphere.md)
-* [live_mount_vsphere](live_mount_vsphere.md)
 * [object_id](object_id.md)
 * [on_demand_snapshot](on_demand_snapshot.md)
 * [pause_snapshots](pause_snapshots.md)
 * [resume_snapshots](resume_snapshots.md)
+* [vsphere_instant_recovery](vsphere_instant_recovery.md)
+* [vsphere_live_mount](vsphere_live_mount.md)
 
 ### Physical Host Functions
 * [add_physical_host](add_physical_host.md)

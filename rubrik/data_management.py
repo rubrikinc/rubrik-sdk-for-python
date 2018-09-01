@@ -23,21 +23,20 @@ _API = Api
 
 
 class Data_Management(_API):
-    """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik Cluster.
-    """
+    """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
     def on_demand_snapshot(self, object_name, object_type=None, sla_name='current'):
         """Initiate an on-demand snapshot.
 
         Arguments:
-            object_name {str} -- The name of object (i.e vSphere VM, Fileset, etc.) to take a Snapshot of.
+            object_name {str} -- The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to take a on-demand snapshot of.
 
         Keyword Arguments:
-            object_type {str} -- The Rubrik object type you wish to backup. vmware is currently the only supported option. (default: {None})
-            sla_name {str} -- The SLA Domain name you to assign the snapshot to. By default the currently assigne SLA Domain will be used. (default: {'current'})
+            object_type {str} -- The Rubrik object type you want to backup. (default: {None}) (choices: {vmware})
+            sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
 
         Returns:
-            tuple -- The full API response and the job status URL which can be used to monitor progress of the Snapshot. (api_response, job_status_url)
+            tuple -- The full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
         """
 
         valid_object_type = ['vmware']
@@ -46,43 +45,39 @@ class Data_Management(_API):
             sys.exit("Error: The on_demand_snapshot() object_type argument must be one of the following: {}.".format(valid_object_type))
 
         if object_type is 'vmware':
-            self.log("on_demand_snapshot: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type)
 
             if sla_name is 'current':
                 self.log(
-                    "on_demand_snapshot: Searching the Rubrik Cluster for the SLA Domain assigned to the vSphere VM '{}'.".format(object_name))
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the vSphere VM '{}'.".format(object_name))
 
-                vm_summary_api_endpoint = '/vmware/vm/{}'.format(vm_id)
-                vm_summary = self.get('v1', vm_summary_api_endpoint)
-
+                vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
                 sla_id = vm_summary['effectiveSlaDomainId']
+
             elif sla_name is not 'current':
-                self.log("on_demand_snapshot: Searching the Rubrik Cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla')
 
-            snapshot_config = {}
-            snapshot_config['slaId'] = sla_id
+            config = {}
+            config['slaId'] = sla_id
 
             self.log("on_demand_snapshot: Initiating snapshot for the vSphere VM '{}'.".format(object_name))
-            vsphere_vm_snapshot_api_endpoint = '/vmware/vm/{}/snapshot'.format(vm_id)
-            api_request = self.post('v1', vsphere_vm_snapshot_api_endpoint, snapshot_config)
+            api_request = self.post('v1', '/vmware/vm/{}/snapshot'.format(vm_id), config)
 
             snapshot_status_url = api_request['links'][0]['href']
 
         return (api_request, snapshot_status_url)
 
-    def object_id(self, object_name, object_type=None):
-        """Get the ID of a provided object (ex. VM, SLA, etc.) by providing its name.
+    def object_id(self, object_name, object_type):
+        """Get the ID of a Rubrik object (ex. VM, SLA, etc.) by providing its name.
 
         Arguments:
-            object_name {str} -- The name of the object whose ID you wish to lookup.
-
-        Keyword Arguments:
-            object_type {str} -- The object type you wish to look up. Valid options are vmware and sla. (default: {None})
+            object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host})
 
         Returns:
-            [str] -- The ID of the provided object.
+            str -- The ID of the provided Rubrik object.
         """
 
         valid_object_type = ['vmware', 'sla', 'vmware_host']
@@ -105,31 +100,30 @@ class Data_Management(_API):
         api_request = self.get(object_summary_api_version, object_summary_api_endpoint)
 
         if api_request['total'] == 0:
-            sys.exit("Error: The {} object '{}' was not found on the Rubrik Cluster.".format(object_type, object_name))
+            sys.exit("Error: The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
         elif api_request['total'] > 0:
-            object_type_present = True
             for item in api_request['data']:
                 if item['name'] == object_name:
-                    object_type = False
                     object_id = item['id']
                     return object_id
 
-        if object_type_present:
-            sys.exit("Error: The {} object '{}' was not found on the Rubrik Cluster.".format(object_type, object_name))
+            sys.exit("Error: The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type=None, timeout=30):
+    def assign_sla(self, object_name, sla_name, object_type, timeout=30):
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
-            object_name {str} -- The name of an object (ex. vSphere VM) you wish to assign to an SLA Domain. To exclude the object from all SLA assignments use 'do not protect' as the 'sla_name'. To assign the selected object to the SLA of the next higher level object use 'clear' as the 'sla_name'.
+            object_name {str} -- The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) you wish to assign to an SLA Domain. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to.
+            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware})
 
         Keyword Arguments:
-            object_type {str} -- The type of object (ex. vmware) you are assigning to the SLA Domain. (default: {None}) (choices: {vmware})
+            timeout {str} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
-            str -- If the object is already assigned to the SLA Domain a message to that effect will be retuned.
-            dict -- The full API reponse of the SLA assignment API call.
+            str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
+            dict -- The full API reponse for `POST /internal/sla_domain/{`sla_id`}/assign`.
+
         """
 
         valid_object_type = ['vmware']
@@ -146,11 +140,11 @@ class Data_Management(_API):
         elif len(clear_regex) > 0:
             sla_id = 'INHERIT'
         else:
-            self.log("assign_sla: Searching the Rubrik Cluster for the SLA Domain '{}'.".format(sla_name))
+            self.log("assign_sla: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
             sla_id = self.object_id(sla_name, 'sla')
 
         if object_type is 'vmware':
-            self.log("assign_sla: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
+            self.log("assign_sla: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type)
 
             self.log("assign_sla: Determing the SLA Domain currently assigned to the vSphere VM '{}'.".format(object_name))
@@ -161,29 +155,30 @@ class Data_Management(_API):
                 current_sla_id = vm_summary['effectiveSlaDomainId']
 
             if sla_id == current_sla_id:
-                return "The vSphere VM '{}' is already assigned to the '{}' SLA Domain.".format(object_name, sla_name)
+                return "No change required. The vSphere VM '{}' is already assigned to the '{}' SLA Domain.".format(object_name, sla_name)
             else:
                 self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+
                 config = {}
                 config['managedIds'] = [vm_id]
-                assign_sla = self.post('internal', '/sla_domain/{}/assign'.format(sla_id), config, timeout)
-                return assign_sla
 
-    def live_mount_vsphere(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True):
-        """Create a request to Instantly Recover a vSphere VM from a specified Snapshot. If a specific date and time is not provided the last Snapshot taken will be selected.
+                return self.post('internal', '/sla_domain/{}/assign'.format(sla_id), config, timeout)
+
+    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True):
+        """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
-            vm_name {str} -- The name of the VM to Instantly Recover.
+            vm_name {str} -- The name of the vSphere VM to Live Mount.
 
         Keyword Arguments:
-            date {str} -- The date of the Snapshot you wish to Instantly Recover formated as Month-Day-Year. Example: 1-15-2014. If latest is specified the last Snapshot taken will be Instantly Recovered. (default: {'latest'})
-            time {str} -- The time of the Snapshot you wish to Instantly Recover formated formated as Hour:Minute AM/PM. Example: 1:30 AM. If latest is specified the last Snapshot taken will be Instantly Recovered. (default: {'latest'})
-            host {str} -- The hostname or IP address of the ESXi host to Instantly Recover the VM on. By default the VM will be Instantly Recovered to the host it is currently on. (default: {'current'})
-            remove_network_devices {bool} -- Determines whether to remove the network interfaces from the Instantly Recovered VM. Set to 'True' to remove all network interfaces. (default: {False})
-            power_on {bool} -- Determines whether the VM should be powered on after Instantly Recover. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on. (default: {True})
+            date {str} -- The date of the snapshot you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
+            time {str} -- The time of the snapshot you wish to Live Mount formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
+            host {str} -- The hostname or IP address of the ESXi host to Live Mount the VM on. By default, the current host will be used. (default: {'current'})
+            remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Live Mounted VM. Set to 'True' to remove all network interfaces. (default: {False})
+            power_on {bool} -- Flag that determines whether the VM should be powered on after the Live Mount. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on. (default: {True})
 
         Returns:
-            dict -- The full response of the Instantly Recover API call.
+            dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount'.
         """
 
         if isinstance(remove_network_devices, bool) is False:
@@ -193,18 +188,17 @@ class Data_Management(_API):
         elif date is not 'latest' and time is 'latest' or date is 'latest' and time is not 'latest':
             sys.exit("Error: The date and time arguments most both be 'latest' or a specific date and time.")
 
-        self.log("live_mount_vsphere: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(vm_name))
+        self.log("vsphere_live_mount: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware')
 
-        self.log("live_mount_vsphere: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
+        self.log("vsphere_live_mount: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
         vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
 
         if date is 'latest' and time is 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
             snapshot_id = vm_summary['snapshots'][number_of_snapshots - 1]['id']
         else:
-
-            self.log("live_mount_vsphere: Converting the provided date/time into UTC.")
+            self.log("vsphere_live_mount: Converting the provided date/time into UTC.")
             snapshot_date_time = self._date_time_conversion(date, time)
 
             current_snapshots = {}
@@ -212,7 +206,7 @@ class Data_Management(_API):
             for snapshot in vm_summary['snapshots']:
                 current_snapshots[snapshot['id']] = snapshot['date']
 
-            self.log("live_mount_vsphere: Searching for the provided Snapshot.")
+            self.log("vsphere_live_mount: Searching for the provided snapshot.")
             for id, date_time in current_snapshots.items():
                 if snapshot_date_time in date_time:
                     snapshot_id = id
@@ -220,7 +214,7 @@ class Data_Management(_API):
         try:
             snapshot_id
         except NameError:
-            sys.exit("Error: The vSphere VM '{}' does not have a Snapshot taken on {} at {}.".format(vm_name, date, time))
+            sys.exit("Error: The vSphere VM '{}' does not have a snapshot taken on {} at {}.".format(vm_name, date, time))
         else:
             if host is 'current':
                 host_id = vm_summary['hostId']
@@ -232,31 +226,29 @@ class Data_Management(_API):
             config['removeNetworkDevices'] = remove_network_devices
             config['powerOn'] = power_on
 
-            self.log("live_mount_vsphere: Instantly Recovering the Snapshot taken on {} at {} for vSphere VM '{}'.".format(
+            self.log("vsphere_live_mount: Live Mounting the snapshot taken on {} at {} for vSphere VM '{}'.".format(
                 date, time, vm_name))
 
-            live_mount = self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config)
+            return self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config)
 
-            return live_mount
-
-    def instant_recovery_vsphere(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False):
-        """Instantly recovery a virtual machine from a snapshot. If a specific date and time is not provided the last Snapshot taken will be selected.
+    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False):
+        """Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
             vm_name {str} -- The name of the VM to Instantly Recover.
 
         Keyword Arguments:
-            date {str} -- The date of the Snapshot you wish to Instantly Recover formated as Month-Day-Year. Example: 1-15-2014. If 'latest' is specified the last Snapshot taken will be Instantly Recovered. (default: {'latest'})
-            time {str} -- The time of the Snapshot you wish to Instantly Recover formated formated as Hour:Minute AM/PM. Example: 1:30 AM. If 'latest' is specified the last Snapshot taken will be Instantly Recovered. (default: {'latest'})
-            host {str} -- The hostname or IP address of the ESXi host to Instantly Recover the VM on. By default the VM will be Instantly Recovered to the host it is currently on. (default: {'current'})
-            remove_network_devices {bool} -- Determines whether to remove the network interfaces from the Instantly Recovered VM. Set to 'True' to remove all network interfaces. (default: {False})
-            power_on {bool} -- Determines whether the VM should be powered on after Instant Recovery. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on. (default: {True})
-            disable_network {bool} -- Sets the state of the network interfaces when the VM is mounted. Use 'False' to enable the network interfaces. Use 'True' to disable the network interfaces. Disabling the interfaces can prevent IP conflicts. (default: {False})
-            keep_mac_addresses {bool} -- Determines whether the MAC addresses of the network interfaces on the source VM are assigned to the new VM. Set to 'True' to assign the original MAC addresses to the new VM. Set to 'False' to assign new MAC addresses. When 'remove_network_devices' is set to 'True', this property is ignored. (default: {False})
-            preserve_moid {bool} -- Determines whether to preserve the MOID of the source VM in a restore operation. Use 'True' to keep the MOID of the source. Use 'False' to assign a new moid. (default: {False})
+            date {str} -- The date of the snapshot you wish to Instantly Recover formated as `Month-Day-Year` (ex: 1-15-2014). If 'latest' is specified, the last snapshot taken will used. (default: {'latest'})
+            time {str} -- The time of the snapshot you wish to Instantly Recover formated formated as `Hour:Minute AM/PM`  (ex: 1:30 AM). If 'latest' is specified, the last snapshot taken will be used. (default: {'latest'})
+            host {str} -- The hostname or IP address of the ESXi host to Instantly Recover the VM on. By default, the current host will be used. (default: {'current'})
+            remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Instantly Recovered VM. Set to 'True' to remove all network interfaces. (default: {False})
+            power_on {bool} -- Flag that determines whether the VM should be powered on after Instant Recovery. Set to 'True' to power on the VM. Set to 'False' to instantly recover the VM but not power it on. (default: {True})
+            disable_network {bool} -- Sets the state of the network interfaces when the VM is instantly recovered. Use 'False' to enable the network interfaces. Use 'True' to disable the network interfaces. Disabling the interfaces can prevent IP conflicts. (default: {False})
+            keep_mac_addresses {bool} -- Flag that determines whether the MAC addresses of the network interfaces on the source VM are assigned to the new VM. Set to 'True' to assign the original MAC addresses to the new VM. Set to 'False' to assign new MAC addresses. When 'remove_network_devices' is set to 'True', this property is ignored. (default: {False})
+            preserve_moid {bool} -- Flag that determines whether to preserve the MOID of the source VM in a restore operation. Use 'True' to keep the MOID of the source. Use 'False' to assign a new moid. (default: {False})
 
         Returns:
-            dict -- The full response of the Instantly Recover API call.
+            dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/instant_recover`.
         """
 
         if isinstance(remove_network_devices, bool) is False:
@@ -272,26 +264,24 @@ class Data_Management(_API):
         elif date is not 'latest' and time is 'latest' or date is 'latest' and time is not 'latest':
             sys.exit("Error: The date and time arguments most both be 'latest' or a specific date and time.")
 
-        self.log("instant_recovery_vsphere: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(vm_name))
+        self.log("vsphere_instant_recovery: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware')
 
-        self.log("instant_recovery_vsphere: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
+        self.log("vsphere_instant_recovery: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
         vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
 
         if date is 'latest' and time is 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
             snapshot_id = vm_summary['snapshots'][number_of_snapshots - 1]['id']
         else:
-
-            self.log("instant_recovery_vsphere: Converting the provided date/time into UTC.")
+            self.log("vsphere_instant_recovery: Converting the provided date/time into UTC.")
             snapshot_date_time = self._date_time_conversion(date, time)
 
             current_snapshots = {}
-
             for snapshot in vm_summary['snapshots']:
                 current_snapshots[snapshot['id']] = snapshot['date']
 
-            self.log("instant_recovery_vsphere: Searching for the provided Snapshot.")
+            self.log("vsphere_instant_recovery: Searching for the provided snapshot.")
             for id, date_time in current_snapshots.items():
                 if snapshot_date_time in date_time:
                     snapshot_id = id
@@ -299,7 +289,7 @@ class Data_Management(_API):
         try:
             snapshot_id
         except NameError:
-            sys.exit("Error: The vSphere VM '{}' does not have a Snapshot taken on {} at {}.".format(vm_name, date, time))
+            sys.exit("Error: The vSphere VM '{}' does not have a snapshot taken on {} at {}.".format(vm_name, date, time))
         else:
             if host is 'current':
                 host_id = vm_summary['hostId']
@@ -314,25 +304,23 @@ class Data_Management(_API):
             config['keepMacAddresses'] = keep_mac_addresses
             config['preserveMoid'] = preserve_moid
 
-            self.log("instant_recovery_vsphere: Instantly Recovering the Snapshot taken on {} at {} for vSphere VM '{}'.".format(
+            self.log("vsphere_instant_recovery: Instantly Recovering the snapshot taken on {} at {} for vSphere VM '{}'.".format(
                 date, time, vm_name))
 
-            instant_recovery = self.post('v1', '/vmware/vm/snapshot/{}/instant_recover'.format(snapshot_id), config)
-
-            return instant_recovery
+            return self.post('v1', '/vmware/vm/snapshot/{}/instant_recover'.format(snapshot_id), config)
 
     def _date_time_conversion(self, date, time):
         """All date values returned by the Rubrik API are stored in Coordinated Universal Time (UTC)
-        and need to be converted to the timezone configured on the Rubrik Cluster in order to match
+        and need to be converted to the timezone configured on the Rubrik cluster in order to match
         the values provided by the end user in various functions. This internal function will handle that
         conversion process.
 
         Arguments:
-            date {str} -- A date value formated as Month-Day-Year. Example: 1/15/2014
-            time {str} -- A time value formated as Hour:Minute AM/PM. Example: 1:30 AM
+            date {str} -- A date value formated as `Month-Day-Year` (ex: 1/15/2014).
+            time {str} -- A time value formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
 
         Returns:
-            str -- A combined date/time value formated as Year-Month-DayTHour:Minute. Where Hour:Minute is on the 24-hour clock. Example: 2014-1-15T01:30
+            str -- A combined date/time value formated as `Year-Month-DayTHour:Minute` where Hour:Minute is on the 24-hour clock (ex : 2014-1-15T01:30). 
         """
 
         from datetime import datetime
@@ -342,15 +330,15 @@ class Data_Management(_API):
         try:
             snapshot_date = datetime.strptime(date, '%m-%d-%Y')
         except ValueError:
-            sys.exit("Error: The date argument '{}' must be formatd as 'Month-Date-Year'. Example: 8-9-2018.".format(date))
+            sys.exit("Error: The date argument '{}' must be formatd as 'Month-Date-Year' (ex: 8-9-2018).".format(date))
 
         # Validate the Time formating
         try:
             snapshot_time = datetime.strptime(time, '%I:%M %p')
         except ValueError:
-            sys.exit("Error: The time argument '{}' must be formatd as 'Hour:Minute AM/PM' . Example: 2:57 AM.".format(time))
+            sys.exit("Error: The time argument '{}' must be formatd as 'Hour:Minute AM/PM' (ex: 2:57 AM).".format(time))
 
-        self.log("_date_time_conversion: Getting the Rubrik Cluster timezone.")
+        self.log("_date_time_conversion: Getting the Rubrik cluster timezone.")
         cluster_summary = self.get('v1', '/cluster/me')
         cluster_timezone = cluster_summary['timezone']['timezone']
 
@@ -368,52 +356,59 @@ class Data_Management(_API):
         utc_timezone = pytz.UTC
         snapshot_datetime = snapshot_datetime.astimezone(utc_timezone)
 
-        snapshot_datetime = snapshot_datetime.strftime('%Y-%m-%dT%H:%M')
-        return snapshot_datetime
+        return snapshot_datetime.strftime('%Y-%m-%dT%H:%M')
 
     def pause_snapshots(self, object_name, object_type, timeout=180):
-        """Pause all Snapshot activity for the provided object.
+        """Pause all snapshot activity for the provided object.
 
         Arguments:
-            object_name {str} -- The name of object (i.e vSphere VM) to pause Snaphots on.
+            object_name {str} -- The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to pause snapshots for.
 
         Keyword Arguments:
-            object_type {str} -- The Rubrik object type you wish to pause Snaphots on. 'vmware' is currently the only supported option. (default: {vmware})
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {180})
+            object_type {str} -- The Rubrik object type you wish to pause snaphots on. (choices: {vmware})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {180})
 
         Returns:
-            str -- If the object is currently paused the following will be returned: The vSphere VM '{object_name}' is already paused.
-            dict -- The full response of the Instantly Recover API call.
+            str -- No change required. The vSphere VM '`object_name`' is already paused.
+            dict -- The full API response for `PATCH /v1/vmware/vm/{vm_id}'.
         """
 
-        self.log("pause_snapshots: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
-        vm_id = self.object_id(object_name, object_type)
+        valid_object_type = ['vmware']
 
-        self.log("pause_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-        api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+        if object_type not in valid_object_type:
+            sys.exit("Error: The pause_snapshots() object_type argument must be one of the following: {}.".format(valid_object_type))
 
-        if api_request['blackoutWindowStatus']['isSnappableBlackoutActive'] is True:
-            return "The vSphere VM '{}' is already paused.".format(object_name)
-        else:
-            self.log("pause_snapshots: Pausing Snaphots for the vSphere VM '{}'.".format(object_name))
-            config = {}
-            config['isVmPaused'] = True
-            api_request = self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
-            return api_request
+        if object_type == 'vmware':
 
-    def resume_snapshots(self, object_name, object_type='vmware', timeout=180):
-        """Resume all Snapshot activity for the provided object.
+            self.log("pause_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+            vm_id = self.object_id(object_name, object_type)
+
+            self.log("pause_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
+            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+
+            if api_request['blackoutWindowStatus']['isSnappableBlackoutActive'] is True:
+                return "No change required. The vSphere VM '{}' is already paused.".format(object_name)
+            else:
+                self.log("pause_snapshots: Pausing Snaphots for the vSphere VM '{}'.".format(object_name))
+
+                config = {}
+                config['isVmPaused'] = True
+
+                return self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
+
+    def resume_snapshots(self, object_name, object_type, timeout=180):
+        """Resume all snapshot activity for the provided object.
 
         Arguments:
-            object_name {str} -- The name of object (i.e vSphere VM) to resume Snaphots on.
+            object_name {str} -- The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to resume snapshots for.
+            object_type {str} -- The Rubrik object type you wish to resume Snaphots on. (choices: {vmware})
 
         Keyword Arguments:
-            object_type {str} -- The Rubrik object type you wish to resume Snaphots on. 'vmware' is currently the only supported option. (default: {vmware})
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik Cluster. (default: {180})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {180})
 
         Returns:
-            str -- If the object is not currently paused the following will be returned: The vSphere VM '{object_name}' is currently not paused.
-            dict -- The full response of the Instantly Recover API call.
+            str -- No change required. The 'object_type' object 'object_name' is currently not paused.
+            dict -- The full response for `PATCH /v1/vmware/vm/{vm_id}`.
         """
 
         valid_object_type = ['vmware']
@@ -421,17 +416,20 @@ class Data_Management(_API):
         if object_type not in valid_object_type:
             sys.exit("Error: The resume_snapshots() object_type argument must be one of the following: {}.".format(valid_object_type))
 
-        self.log("resume_snapshots: Searching the Rubrik Cluster for the vSphere VM '{}'.".format(object_name))
-        vm_id = self.object_id(object_name, object_type)
+        if object_type == 'vmware':
 
-        self.log("resume_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-        api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+            self.log("resume_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+            vm_id = self.object_id(object_name, object_type)
 
-        if api_request['blackoutWindowStatus']['isSnappableBlackoutActive'] is False:
-            return "The vSphere VM '{}' is currently not paused.".format(object_name)
-        else:
-            self.log("resume_snapshots: Resuming Snaphots for the vSphere VM '{}'.".format(object_name))
-            config = {}
-            config['isVmPaused'] = False
-            api_request = self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
-            return api_request
+            self.log("resume_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
+            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+
+            if api_request['blackoutWindowStatus']['isSnappableBlackoutActive'] is False:
+                return "No change required. The '{}' object '{}' is currently not paused.".format(object_type, object_name)
+            else:
+                self.log("resume_snapshots: Resuming Snaphots for the vSphere VM '{}'.".format(object_name))
+
+                config = {}
+                config['isVmPaused'] = False
+
+                return self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)

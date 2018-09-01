@@ -8,14 +8,14 @@ def on_demand_snapshot(object_name, object_type=None, sla_name='current')
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| object_name  | str  | The name of object (i.e vSphere VM, Fileset, etc.) to take a Snapshot of. |         |
+| object_name  | str  | The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to take a on-demand snapshot of. |         |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| object_type  | str  | The Rubrik object type you wish to backup. vmware is currently the only supported option.  |         |    None     |
-| sla_name  | str  | The SLA Domain name you to assign the snapshot to. By default the currently assigne SLA Domain will be used.  |         |    current     |
+| object_type  | str  | The Rubrik object type you want to backup.  |    vmware     |    None      |
+| sla_name  | str  | The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used.  |         |    current     |
 
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| tuple  | The full API response and the job status URL which can be used to monitor progress of the Snapshot. (api_response, job_status_url) |
+| tuple  | The full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url) |
