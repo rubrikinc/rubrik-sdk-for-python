@@ -145,8 +145,8 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
         """Internal method used to validate the API Version and API Endpoint provided by the end user
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call.
-            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
         """
 
         valid_api_versions = ['v1', 'internal']

@@ -8,5 +8,5 @@ def _api_validation(api_version, api_endpoint)
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| api_version  | str  | The version of the Rubrik CDM API to call. |         |
-| api_endpoint  | str  | The endpoint (ex. cluster/me) of the Rubrik CDM API to call. |         |
+| api_version  | str  | The version of the Rubrik CDM API to call.  |    v1, internal     |
+| api_endpoint  | str  | The endpoint of the Rubrik CDM API to call (ex. /cluster/me). |         |
