@@ -260,6 +260,8 @@ class Cloud(_API):
             virtual_network_id {str} -- The Azure virtual network ID used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation.
             subnet_name {str} -- The Azure subnet name used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation.
             security_group_id {str} -- The Azure Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation.
+
+        Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
 
