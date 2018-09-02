@@ -224,7 +224,7 @@ class Physical(_API):
         Arguments:
             hostname {str} -- The hostname or IP Address of the physical host you wish to associate to the Fileset.
             fileset_name {str} -- The name of the Fileset you wish to assign to the Linux or Windows host.
-            operating_system {str} -- The operating system of the physical host you are assigning a Fileset to. (Choices: {Linux, Windows})
+            operating_system {str} -- The operating system of the physical host you are assigning a Fileset to. (choices: {Linux, Windows})
             sla_name {str} -- The name of the SLA Domain to associate with the Fileset.
 
         Keyword Arguments:
