@@ -8,7 +8,7 @@ def on_demand_snapshot(object_name, object_type, sla_name='current')
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| object_name  | str  | The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to take a on-demand snapshot of. |         |
+| object_name  | str  | The name of the Rubrik object to take a on-demand snapshot of. |         |
 | object_type  | str  | The Rubrik object type you want to backup.  |    vmware     |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |

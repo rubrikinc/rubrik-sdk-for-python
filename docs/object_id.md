@@ -1,6 +1,6 @@
 # object_id
 
-Get the ID of a Rubrik object (ex. VM, SLA, etc.) by providing its name.
+Get the ID of a Rubrik object by providing its name.
 ```py
 def object_id(object_name, object_type)
 ```

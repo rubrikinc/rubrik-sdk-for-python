@@ -29,7 +29,7 @@ class Data_Management(_API):
         """Initiate an on-demand snapshot.
 
         Arguments:
-            object_name {str} -- The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to take a on-demand snapshot of.
+            object_name {str} -- The name of the Rubrik object to take a on-demand snapshot of.
             object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware})
 
         Keyword Arguments:
@@ -70,7 +70,7 @@ class Data_Management(_API):
         return (api_request, snapshot_status_url)
 
     def object_id(self, object_name, object_type):
-        """Get the ID of a Rubrik object (ex. VM, SLA, etc.) by providing its name.
+        """Get the ID of a Rubrik object by providing its name.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
@@ -113,7 +113,7 @@ class Data_Management(_API):
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
-            object_name {str} -- The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) you wish to assign to an SLA Domain. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
+            object_name {str} -- The name of the Rubrik object you wish to assign to an SLA Domain. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to.
             object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware})
 
@@ -173,8 +173,8 @@ class Data_Management(_API):
             date {str} -- The date of the snapshot you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
             time {str} -- The time of the snapshot you wish to Live Mount formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
             host {str} -- The hostname or IP address of the ESXi host to Live Mount the VM on. By default, the current host will be used. (default: {'current'})
-            remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Live Mounted VM. Set to 'True' to remove all network interfaces. (default: {False})
-            power_on {bool} -- Flag that determines whether the VM should be powered on after the Live Mount. Set to 'True' to power on the VM. Set to 'False' to mount the VM but not power it on. (default: {True})
+            remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Live Mounted VM. Set to `True` to remove all network interfaces. (default: {False})
+            power_on {bool} -- Flag that determines whether the VM should be powered on after the Live Mount. Set to `True` to power on the VM. Set to `False` to mount the VM but not power it on. (default: {True})
 
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount`.
@@ -240,11 +240,11 @@ class Data_Management(_API):
             date {str} -- The date of the snapshot you wish to Instantly Recover formated as `Month-Day-Year` (ex: 1-15-2014). If 'latest' is specified, the last snapshot taken will used. (default: {'latest'})
             time {str} -- The time of the snapshot you wish to Instantly Recover formated formated as `Hour:Minute AM/PM`  (ex: 1:30 AM). If 'latest' is specified, the last snapshot taken will be used. (default: {'latest'})
             host {str} -- The hostname or IP address of the ESXi host to Instantly Recover the VM on. By default, the current host will be used. (default: {'current'})
-            remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Instantly Recovered VM. Set to 'True' to remove all network interfaces. (default: {False})
-            power_on {bool} -- Flag that determines whether the VM should be powered on after Instant Recovery. Set to 'True' to power on the VM. Set to 'False' to instantly recover the VM but not power it on. (default: {True})
-            disable_network {bool} -- Sets the state of the network interfaces when the VM is instantly recovered. Use 'False' to enable the network interfaces. Use 'True' to disable the network interfaces. Disabling the interfaces can prevent IP conflicts. (default: {False})
-            keep_mac_addresses {bool} -- Flag that determines whether the MAC addresses of the network interfaces on the source VM are assigned to the new VM. Set to 'True' to assign the original MAC addresses to the new VM. Set to 'False' to assign new MAC addresses. When 'remove_network_devices' is set to 'True', this property is ignored. (default: {False})
-            preserve_moid {bool} -- Flag that determines whether to preserve the MOID of the source VM in a restore operation. Use 'True' to keep the MOID of the source. Use 'False' to assign a new moid. (default: {False})
+            remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Instantly Recovered VM. Set to `True` to remove all network interfaces. (default: {False})
+            power_on {bool} -- Flag that determines whether the VM should be powered on after Instant Recovery. Set to `True` to power on the VM. Set to `False` to instantly recover the VM but not power it on. (default: {True})
+            disable_network {bool} -- Sets the state of the network interfaces when the VM is instantly recovered. Use `False` to enable the network interfaces. Use `True` to disable the network interfaces. Disabling the interfaces can prevent IP conflicts. (default: {False})
+            keep_mac_addresses {bool} -- Flag that determines whether the MAC addresses of the network interfaces on the source VM are assigned to the new VM. Set to `True` to assign the original MAC addresses to the new VM. Set to `False` to assign new MAC addresses. When 'remove_network_devices' is set to `True`, this property is ignored. (default: {False})
+            preserve_moid {bool} -- Flag that determines whether to preserve the MOID of the source VM in a restore operation. Use `True` to keep the MOID of the source. Use `False` to assign a new moid. (default: {False})
 
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/instant_recover`.
@@ -361,14 +361,14 @@ class Data_Management(_API):
         """Pause all snapshot activity for the provided object.
 
         Arguments:
-            object_name {str} -- The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to pause snapshots for.
+            object_name {str} -- The name of the Rubrik object to pause snapshots for.
 
         Keyword Arguments:
             object_type {str} -- The Rubrik object type you wish to pause snaphots on. (choices: {vmware})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {180})
 
         Returns:
-            str -- No change required. The vSphere VM '`object_name`' is already paused.
+            str -- No change required. The '`object_type`' '`object_name`' is already paused.
             dict -- The full API response for `PATCH /v1/vmware/vm/{vm_id}`.
         """
 
@@ -386,7 +386,7 @@ class Data_Management(_API):
             api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
 
             if api_request['blackoutWindowStatus']['isSnappableBlackoutActive'] is True:
-                return "No change required. The vSphere VM '{}' is already paused.".format(object_name)
+                return "No change required. The '{}' '{}' is already paused.".format(object_type, object_name)
             else:
                 self.log("pause_snapshots: Pausing Snaphots for the vSphere VM '{}'.".format(object_name))
 
@@ -399,8 +399,8 @@ class Data_Management(_API):
         """Resume all snapshot activity for the provided object.
 
         Arguments:
-            object_name {str} -- The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to resume snapshots for.
-            object_type {str} -- The Rubrik object type you wish to resume Snaphots on. (choices: {vmware})
+            object_name {str} -- The name of the Rubrik object to resume snapshots for.
+            object_type {str} -- The Rubrik object type you wish to resume snaphots on. (choices: {vmware})
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {180})

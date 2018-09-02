@@ -8,8 +8,8 @@ def resume_snapshots(object_name, object_type, timeout=180)
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| object_name  | str  | The name of the Rubrik object (i.e vSphere VM, Fileset, etc.) to resume snapshots for. |         |
-| object_type  | str  | The Rubrik object type you wish to resume Snaphots on.  |    vmware     |
+| object_name  | str  | The name of the Rubrik object to resume snapshots for. |         |
+| object_type  | str  | The Rubrik object type you wish to resume snaphots on.  |    vmware     |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
