@@ -32,11 +32,11 @@ class Cluster(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The API response from `GET /v1/cluster/me/version`.
+            str -- The version of CDM installed on the Rubrik cluster.
         """
 
         self.log('cluster_version: Getting the software version of the Rubrik cluster.')
-        return self.get('v1', '/cluster/me/version', timeout)
+        return self.get('v1', '/cluster/me/version', timeout)['version']
 
     def cluster_node_ip(self, timeout=15):
         """Retrive the IP Address for each node in the Rubrik cluster.

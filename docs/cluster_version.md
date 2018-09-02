@@ -13,4 +13,4 @@ def cluster_version(timeout=15)
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| dict  | The API response from `GET /v1/cluster/me/version`. |
+| str  | The version of CDM installed on the Rubrik cluster. |
