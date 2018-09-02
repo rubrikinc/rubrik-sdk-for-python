@@ -30,7 +30,7 @@ class Cloud(_API):
         """Add a new AWS S3 archival location to the Rubrik cluster.
 
         Arguments:
-            aws_bucket_name {str} -- The name of the AWS S3 bucket you wish to use as an archive target. The bucket name will automatically have all whitespace removed, all letters lowercased, and can not contain any of the following characters: "`_\/*?%.:|<>`".
+            aws_bucket_name {str} -- The name of the AWS S3 bucket you wish to use as an archive target. The bucket name will automatically have all whitespace removed, all letters lowercased, and can not contain any of the following characters: `_\/*?%.:\|<>`.
 
         Keyword Arguments:
             aws_region {str} -- The name of the AWS region where the bucket is located. If set to the default `None` keyword argument, we will look for a `AWS_DEFAULT_REGION` environment variable to pull the value from. (default: {None}) (choices: {ap-south-1, ap-northeast-2, ap-southeast-1, ap-southeast-2, ap-northeast-1, ca-central-1, cn-north-1, cn-northwest-1, eu-central-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-gov-west-1, us-west-1, us-east-1, us-east-2, us-west-2})
@@ -170,7 +170,7 @@ class Cloud(_API):
         """Add a new Azure archival location to the Rubrik cluster.
 
         Arguments:
-            container {str} -- The name of the Azure storage container you wish to use as an archive. The container name will automatically be lowercased and can not contain any of the following characters: "`_\/*?%.:|<>`".
+            container {str} -- The name of the Azure storage container you wish to use as an archive. The container name will automatically be lowercased and can not contain any of the following characters: `_\/*?%.:\|<>`.
             azure_access_key {str} -- The access key for the Azure storage account.
             storage_account_name {str} -- The name of the Storage Account that the `container` belongs to.
             rsa_key {str} -- The RSA key that will be used to encrypt the archive data. A key can be generated through `openssl genrsa -out rubrik_encryption_key.pem 2048`.

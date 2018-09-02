@@ -8,7 +8,7 @@ def azure_cloudout(container, azure_access_key, storage_account_name, rsa_key, a
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| container  | str  | The name of the Azure storage container you wish to use as an archive. The container name will automatically be lowercased and can not contain any of the following characters: "`_\/*?%.:|<>`". |         |
+| container  | str  | The name of the Azure storage container you wish to use as an archive. The container name will automatically be lowercased and can not contain any of the following characters: `_\/*?%.:\|<>`. |         |
 | azure_access_key  | str  | The access key for the Azure storage account. |         |
 | storage_account_name  | str  | The name of the Storage Account that the `container` belongs to. |         |
 | rsa_key  | str  | The RSA key that will be used to encrypt the archive data. A key can be generated through `openssl genrsa -out rubrik_encryption_key.pem 2048`. |         |
