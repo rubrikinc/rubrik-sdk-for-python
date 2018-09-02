@@ -129,7 +129,6 @@ for function in rubrk_sdk_functions:
 
 for function_name, function_doc_string in function_documentation.items():
 
-    # if function_name == "aws_s3_cloudout":
     print(function_name)
 
     if 'init' not in function_name:
