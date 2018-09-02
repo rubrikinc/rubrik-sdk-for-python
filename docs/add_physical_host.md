@@ -19,3 +19,13 @@ def add_physical_host(hostname, timeout=60)
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change requird. The host '`hostname`' is already connected to the Rubrik cluster. |
 | dict  | The full API response for `POST /v1'/host'`. |
+## Example
+```py
+import rubrik
+
+rubrik = rubrik.Connect()
+
+hostname = "python-sdk-demo"
+
+add_host = rubrik.add_physical_host(hostname)
+```

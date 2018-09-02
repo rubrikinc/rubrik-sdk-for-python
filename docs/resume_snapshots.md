@@ -20,3 +20,14 @@ def resume_snapshots(object_name, object_type, timeout=180)
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The 'object_type' object 'object_name' is currently not paused. |
 | dict  | The full response for `PATCH /v1/vmware/vm/{vm_id}`. |
+## Example
+```py
+import rubrik
+
+rubrik = rubrik.Connect()
+
+vm_name = "python-sdk-demo"
+object_type = "vmware"
+
+resume_snapshot = rubrik.resume_snapshots(vm_name, object_type)
+```

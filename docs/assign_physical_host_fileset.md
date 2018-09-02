@@ -28,3 +28,16 @@ def assign_physical_host_fileset(hostname, fileset_name, operating_system, sla_n
 | str  | No change required. The `operating_system` Fileset '`fileset_name`' is already assigned to the SLA Domain '`sla_name`' on the physical host '`hostname`'. |
 | tuple  | When a new Fileset is created the following tuple will be returned: (Full API response from `POST /v1/fileset`, Full API response from `POST /v1/fileset/{id}`) |
 | dict  | When the Fileset already exsits but is assigned to the wrong the SLA the Full API response from `POST `v1/fileset/{id}` is returned. |
+## Example
+```py
+import rubrik
+
+rubrik = rubrik.Connect()
+
+hostname = "python-sdk-demo"
+fileset_name = "Python SDK"
+operating_system = 'Linux'
+sla = 'Gold'
+
+assign_fileset = rubrik.assign_physical_host_fileset(hostname, fileset_name, operating_system, sla)
+```

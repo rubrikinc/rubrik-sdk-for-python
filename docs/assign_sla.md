@@ -21,3 +21,15 @@ def assign_sla(object_name, sla_name, object_type, timeout=30)
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain. |
 | dict  | The full API reponse for `POST /internal/sla_domain/{sla_id}/assign`. |
+## Example
+```py
+import rubrik
+
+rubrik = rubrik.Connect()
+
+vm_name = "python-sdk-demo"
+sla_name = "Gold"
+object_type = "vmware"
+
+assign_sla = rubrik.assign_sla(vm_name, sla_name, object_type)
+```

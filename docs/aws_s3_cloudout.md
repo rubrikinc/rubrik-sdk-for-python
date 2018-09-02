@@ -26,3 +26,17 @@ def aws_s3_cloudout(aws_bucket_name, archive_name='default', aws_region=None, aw
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The '`name`' archival location is already configured on the Rubrik cluster. |
 | dict  | The full API response for `POST /internal/archive/object_store'`. |
+## Example
+```py
+import rubrik
+
+rubrik = rubrik.Connect()
+
+with open("/home/python-sdk-demo/rubrik_encryption_key.pem") as rsa_pem:
+    rsa_key = rsa_pem.read()
+
+aws_bucket_name = 'rubrikpythonsdk'
+
+# AWS_DEFAULT_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY are being read from environment variables
+cloudout = rubrik.aws_s3_cloudout(aws_bucket_name, rsa_key=rsa_key)
+```

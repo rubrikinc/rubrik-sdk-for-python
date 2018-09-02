@@ -19,3 +19,13 @@ def delete_physical_host(hostname, timeout=120)
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The host '`hostname`' is not connected to the Rubrik cluster. |
 | dict  | The full API response for `DELETE /v1'/host/{host_id}`. |
+## Example
+```py
+import rubrik
+
+rubrik = rubrik.Connect()
+
+hostname = "python-sdk-demo"
+
+delete_host = rubrik.delete_physical_host(hostname)
+```

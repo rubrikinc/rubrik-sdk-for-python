@@ -14,3 +14,11 @@ def cluster_node_ip(timeout=15)
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | list  | A list that contains the IP Address for each node in the Rubrik cluster. |
+## Example
+```py
+import rubrik
+
+rubrik = rubrik.Connect()
+
+cluster_node_ips = rubrik.cluster_node_ip()
+```

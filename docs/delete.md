@@ -20,3 +20,14 @@ def delete(api_version, api_endpoint, timeout=15, authentication=True)
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | dict  | The response body of the API call. |
+## Example
+```py
+import rubrik
+
+rubrik = rubrik.Connect()
+
+# Delete an SLA Domain from the Rubrik cluster
+sla_id = "0589c4e5-eeec-4ece-9922-2c9ceef7bec8"
+
+delete_sla = rubrik.delete('v1', '/sla_domain/{}'.format(sla_id))
+```

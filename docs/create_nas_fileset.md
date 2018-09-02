@@ -24,3 +24,18 @@ def create_nas_fileset(name, share_type, include, exclude, exclude_exception, fo
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The Rubrik cluster already has a NAS Fileset named '`name`' configured with the provided variables." |
 | dict  | The full response for the `POST /internal/fileset_template/bulk` API endpoint. |
+## Example
+```py
+import rubrik
+
+rubrik = rubrik.Connect()
+
+name = "Python SDK"
+share_type = 'NFS'
+include = ['/usr/local', '*.pdf']
+exclude = ['/user/local/temp', '*.mov', '*.mp3', '*.mp4']
+exclude_exception = ['/company/*.mp4']
+
+
+new_fileset = rubrik.create_nas_fileset(name, share_type, include, exclude, exclude_exception)
+```

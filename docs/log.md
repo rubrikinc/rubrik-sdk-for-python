@@ -9,3 +9,11 @@ def log(log_message)
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | log_message  | str  | The message to pass to the debug log. |         |
+## Example
+```py
+import rubrik
+
+rubrik = rubrik.Connect(enable_logging=True)
+
+rubrik.log('Python SDK')
+```

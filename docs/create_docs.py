@@ -104,6 +104,10 @@ def doc_string_end_block(ending_lines, starting_line):
             return index
 
 
+def example_code(function_name):
+    print()
+
+
 rubrk_sdk_functions = inspect.getmembers(rubrik.Connect, inspect.isfunction)
 
 function_examples = {}
@@ -233,6 +237,14 @@ for function_name, function_doc_string in function_documentation.items():
         if returns:
             markdown.write('\n## Returns\n')
             print_doc_string(returns, 'returns')
+
+        if function_name[0] is not '_':
+            with open("../sample/{}.py".format(function_name)) as code:
+                example_code = code.read()
+            markdown.write('## Example\n')
+            markdown.write("```py\n")
+            markdown.write(example_code)
+            markdown.write("```")
 
         markdown.close()
 
