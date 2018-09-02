@@ -8,7 +8,7 @@ def aws_s3_cloudout(aws_bucket_name, archive_name='default', aws_region=None, aw
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| aws_bucket_name  | str  | The name of the AWS S3 bucket you wish to use as an archive target. The bucket name will automatically have all whitespace removed, all letters lowercased, and can not contain any of the following characters: <code>_\/*?%.:<>|</code>. |         |
+| aws_bucket_name  | str  | The name of the AWS S3 bucket you wish to use as an archive target. The bucket name will automatically have all whitespace removed, all letters lowercased, and can not contain any of the following characters: _\/*?%.:\|<>. |         |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
