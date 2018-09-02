@@ -9,10 +9,10 @@ def pause_snapshots(object_name, object_type, timeout=180)
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | object_name  | str  | The name of the Rubrik object to pause snapshots for. |         |
+| object_type  | str  | The Rubrik object type you wish to pause snaphots on.  |    vmware     |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| object_type  | str  | The Rubrik object type you wish to pause snaphots on. (choices: {vmware}) |    vmware     |         |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster.  |         |    180     |
 
 ## Returns

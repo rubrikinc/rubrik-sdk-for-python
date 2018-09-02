@@ -362,9 +362,9 @@ class Data_Management(_API):
 
         Arguments:
             object_name {str} -- The name of the Rubrik object to pause snapshots for.
+            object_type {str} -- The Rubrik object type you wish to pause snaphots on. (choices: {vmware})
 
         Keyword Arguments:
-            object_type {str} -- The Rubrik object type you wish to pause snaphots on. (choices: {vmware})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {180})
 
         Returns:
