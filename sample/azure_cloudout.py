@@ -2,7 +2,7 @@ import rubrik
 
 rubrik = rubrik.Connect()
 
-with open("/home/vagrant/Development/Python/rubrik-sdk-for-python/sample/rubrik_encryption_key.pem") as rsa_pem:
+with open("/home/python-sdk-demo/rubrik_encryption_key.pem") as rsa_pem:
     rsa_key = rsa_pem.read()
 
 storage_account_name = "pythonsdkdemo"

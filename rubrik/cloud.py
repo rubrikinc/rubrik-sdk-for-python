@@ -251,7 +251,7 @@ class Cloud(_API):
 
         Arguments:
             archive_name {str} -- The name of the archive location used in the Rubrik GUI.
-            container {str} -- The name of the Azure storage container being used as the archive target. The container name will automatically be lowercased and can not contain any of the following characters: `_\/*?%.:|<>`
+            container {str} -- The name of the Azure storage container being used as the archive target. The container name will automatically be lowercased and can not contain any of the following characters: `_\/*?%.:\|<>`.
             storage_account_name {str} -- The name of the Storage Account that the `container` belongs to.
             application_id {str} -- The ID of the application registered in Azure Active Directory.
             application_key {str} -- The key of the application registered in Azure Active Directory.

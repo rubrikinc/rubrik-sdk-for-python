@@ -34,12 +34,6 @@ import rubrik
 
 rubrik = rubrik.Connect()
 
-
-import rubrik
-
-rubrik = rubrik.Connect()
-
-
 storage_account_name = "pythonsdkdemo"
 container = "pythonsdkdemocontainer"
 archive_name = "Azure:{}".format(container)
