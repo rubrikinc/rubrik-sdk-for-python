@@ -11,9 +11,9 @@ def log(log_message)
 | log_message  | str  | The message to pass to the debug log. |         |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect(enable_logging=True)
+rubrik = rubrik_cdm.Connect(enable_logging=True)
 
 rubrik.log('Python SDK')
 ```

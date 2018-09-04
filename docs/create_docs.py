@@ -1,5 +1,5 @@
 import inspect
-import rubrik
+import rubrik_cdm
 import os
 import sys
 import reprlib
@@ -108,8 +108,8 @@ def example_code(function_name):
     print()
 
 
-connect_functions = inspect.getmembers(rubrik.Connect, inspect.isfunction)
-bootstrap_functions_all = inspect.getmembers(rubrik.Bootstrap, inspect.isfunction)
+connect_functions = inspect.getmembers(rubrik_cdm.Connect, inspect.isfunction)
+bootstrap_functions_all = inspect.getmembers(rubrik_cdm.Bootstrap, inspect.isfunction)
 
 bootstrap_functions = []
 for function in bootstrap_functions_all:
@@ -258,14 +258,14 @@ for function_name, function_doc_string in function_documentation.items():
         markdown.close()
 
 
-base_api_functions_search = inspect.getmembers(rubrik.api.Api, inspect.isfunction)
+base_api_functions_search = inspect.getmembers(rubrik_cdm.api.Api, inspect.isfunction)
 base_api_functions = []
 for function in base_api_functions_search:
     # If first character of the function name...
     base_api_functions.append(function[0])
 del base_api_functions[0]
 
-cluster_functions_search = inspect.getmembers(rubrik.cluster.Cluster, inspect.isfunction)
+cluster_functions_search = inspect.getmembers(rubrik_cdm.cluster.Cluster, inspect.isfunction)
 cluster_functions = []
 for function in cluster_functions_search:
     if function[0] not in base_api_functions:
@@ -274,7 +274,7 @@ for function in cluster_functions:
     if function[0] is '_':
         cluster_functions.remove(function)
 
-data_management_search = inspect.getmembers(rubrik.data_management.Data_Management, inspect.isfunction)
+data_management_search = inspect.getmembers(rubrik_cdm.data_management.Data_Management, inspect.isfunction)
 data_management_functions = []
 for function in data_management_search:
     if function[0] not in base_api_functions:
@@ -283,7 +283,7 @@ for function in data_management_functions:
     if function[0] is '_':
         data_management_functions.remove(function)
 
-physical_search = inspect.getmembers(rubrik.physical.Physical, inspect.isfunction)
+physical_search = inspect.getmembers(rubrik_cdm.physical.Physical, inspect.isfunction)
 physical_functions = []
 for function in physical_search:
     if function[0] not in base_api_functions:
@@ -292,7 +292,7 @@ for function in physical_functions:
     if function[0] is '_':
         physical_functions.remove(function)
 
-cloud_search = inspect.getmembers(rubrik.cloud.Cloud, inspect.isfunction)
+cloud_search = inspect.getmembers(rubrik_cdm.cloud.Cloud, inspect.isfunction)
 cloud_functions = []
 for function in cloud_search:
     if function[0] not in base_api_functions:
@@ -305,14 +305,14 @@ for function in cloud_functions:
 combined_function_list = base_api_functions + cluster_functions + \
     data_management_functions + physical_functions + cloud_functions
 
-connect_functions_search = inspect.getmembers(rubrik.rubrik.Connect, inspect.isfunction)
+connect_functions_search = inspect.getmembers(rubrik_cdm.rubrik_cdm.Connect, inspect.isfunction)
 connect_functions = []
 for function in connect_functions_search:
     if function[0] not in combined_function_list:
         connect_functions.append(function[0])
 del connect_functions[0]
 
-bootstrap_functions_search = inspect.getmembers(rubrik.rubrik.Bootstrap, inspect.isfunction)
+bootstrap_functions_search = inspect.getmembers(rubrik_cdm.rubrik_cdm.Bootstrap, inspect.isfunction)
 bootstrap_functions = []
 for function in bootstrap_functions_search:
     if function[0] not in combined_function_list:

@@ -21,9 +21,9 @@ def add_physical_host(hostname, timeout=60)
 | dict  | The full API response for `POST /v1'/host'`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 hostname = "python-sdk-demo"
 

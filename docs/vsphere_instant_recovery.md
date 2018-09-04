@@ -27,9 +27,9 @@ def vsphere_instant_recovery(vm_name, date='latest', time='latest', host='curren
 | dict  | The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/instant_recover`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 vm_name = "python-sdk-demo"
 date = "08-26-2018"

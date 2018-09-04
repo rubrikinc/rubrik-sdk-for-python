@@ -22,9 +22,9 @@ def pause_snapshots(object_name, object_type, timeout=180)
 | dict  | The full API response for `PATCH /v1/vmware/vm/{vm_id}`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 vm_name = "python-sdk-demo"
 object_type = "vmware"

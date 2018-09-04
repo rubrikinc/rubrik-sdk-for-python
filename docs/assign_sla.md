@@ -23,9 +23,9 @@ def assign_sla(object_name, sla_name, object_type, timeout=30)
 | dict  | The full API reponse for `POST /internal/sla_domain/{sla_id}/assign`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 vm_name = "python-sdk-demo"
 sla_name = "Gold"

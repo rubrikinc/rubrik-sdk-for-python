@@ -28,9 +28,9 @@ def aws_s3_cloudout(aws_bucket_name, archive_name='default', aws_region=None, aw
 | dict  | The full API response for `POST /internal/archive/object_store'`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 with open("/home/python-sdk-demo/rubrik_encryption_key.pem") as rsa_pem:
     rsa_key = rsa_pem.read()

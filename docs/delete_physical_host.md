@@ -21,9 +21,9 @@ def delete_physical_host(hostname, timeout=120)
 | dict  | The full API response for `DELETE /v1'/host/{host_id}`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 hostname = "python-sdk-demo"
 

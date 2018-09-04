@@ -21,9 +21,9 @@ def on_demand_snapshot(object_name, object_type, sla_name='current')
 | tuple  | The full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url) |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 vm_name = "python-sdk-demo"
 object_type = "vmware"

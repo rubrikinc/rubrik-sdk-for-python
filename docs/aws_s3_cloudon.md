@@ -24,9 +24,9 @@ def aws_s3_cloudon(archive_name, vpc_id, subnet_id, security_group_id, timeout=3
 | dict  | The full API response for `PATCH /internal/archive/object_store/{id}`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 with open("/home/python-sdk-demo/rubrik_encryption_key.pem") as rsa_pem:
     rsa_key = rsa_pem.read()

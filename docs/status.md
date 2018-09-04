@@ -17,7 +17,12 @@ def status(request_id="1", timeout=15)
 | dict  | The response returned by `GET /internal/cluster/me/bootstrap?request_id={request_id}`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-# Monitor Bootstrap progress
+node_ip = '172.22.13.66'
+bootstrap = rubrik_cdm.Bootstrap(node_ip)
+
+bootstrap_status = bootstrap.status()
+
+print(bootstrap_status)
 ```

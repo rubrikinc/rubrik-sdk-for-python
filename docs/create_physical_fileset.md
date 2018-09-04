@@ -27,9 +27,9 @@ def create_physical_fileset(name, operating_system, include, exclude, exclude_ex
 | dict  | The full response for the `POST /internal/fileset_template/bulk` API endpoint. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 name = "Python SDK"
 operating_system = 'Linux'

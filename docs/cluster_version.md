@@ -16,9 +16,9 @@ def cluster_version(timeout=15)
 | str  | The version of CDM installed on the Rubrik cluster. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 cluster_version = rubrik.cluster_version()
 ```

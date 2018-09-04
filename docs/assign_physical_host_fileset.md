@@ -30,9 +30,9 @@ def assign_physical_host_fileset(hostname, fileset_name, operating_system, sla_n
 | dict  | When the Fileset already exsits but is assigned to the wrong the SLA the Full API response from `POST `v1/fileset/{id}` is returned. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 hostname = "python-sdk-demo"
 fileset_name = "Python SDK"

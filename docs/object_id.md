@@ -17,9 +17,9 @@ def object_id(object_name, object_type)
 | str  | The ID of the provided Rubrik object. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 vm_name = "python-sdk-demo"
 object_type = "vmware"

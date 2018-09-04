@@ -23,9 +23,9 @@ def end_user_authorization(object_name, end_user, object_type='vmware', timeout=
 | dict  | The API response from `POST /internal/authorization/role/end_user`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 vm_name = 'python-sdk-demo'
 end_user_name = "pythonsdk"

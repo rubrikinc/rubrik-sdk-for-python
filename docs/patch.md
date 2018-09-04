@@ -23,9 +23,9 @@ def patch(api_version, api_endpoint, config, timeout=15, authentication=True)
 | dict  | The response body of the API call. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 vm_id = "VirtualMachine:::5008_f7c393f3-383-4b44-920-8cde7a9ae2bd:::0"
 

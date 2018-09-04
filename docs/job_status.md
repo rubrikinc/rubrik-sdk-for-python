@@ -21,9 +21,9 @@ def job_status(url, wait_for_completion=True, timeout=15)
 | dict  | The response body of the API call. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 # Monitor the progress of a On-Demand Snapshot
 job_status_url = "https://172.21.8.52/api/v1/vmware/vm/request/CREATE_VMWARE_SNAPSHOT_fase1f32-3872-2982-a68c-6fe145982f48-vm-5008_f7c393f3-383-4b44-920-8cde7a9ae2bd:::0"

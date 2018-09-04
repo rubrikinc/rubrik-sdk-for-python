@@ -26,9 +26,9 @@ def azure_cloudout(container, azure_access_key, storage_account_name, rsa_key, a
 | dict  | The full API response for `POST /internal/archive/object_store`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 with open("/home/python-sdk-demo/rubrik_encryption_key.pem") as rsa_pem:
     rsa_key = rsa_pem.read()

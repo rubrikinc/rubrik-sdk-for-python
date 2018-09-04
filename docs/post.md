@@ -23,9 +23,9 @@ def post(api_version, api_endpoint, config, timeout=15, authentication=True)
 | dict  | The response body of the API call. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 config = {}
 config['id'] = "pythonsdk"

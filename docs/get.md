@@ -22,9 +22,9 @@ def get(api_version, api_endpoint, timeout=15, authentication=True)
 | dict  | The response body of the API call. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 # Retrieve summary information for the "Python SDK" SLA Domain
 sla_name = "Python SDK"

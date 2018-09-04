@@ -30,9 +30,9 @@ def azure_cloudon(archive_name, container, storage_account_name, application_id,
 | dict  | The full API response for `PATCH /internal/archive/object_store/{id}`. |
 ## Example
 ```py
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 storage_account_name = "pythonsdkdemo"
 container = "pythonsdkdemocontainer"
