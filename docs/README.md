@@ -2,11 +2,7 @@
 
 ## Installation
 
-The SDK has been tested against Python 2.7.6 and Python 3.6.4.
-
-Install from pip:
-
-`pip install rubrik`
+The SDK supports Python 2.7, 3.4, 3.5, and 3.6.
 
 Install from source:
 ```
@@ -15,9 +11,8 @@ $ cd rubrik-sdk-for-python
 $ python setup.py install
 ``` 
 
-{% hint style="info" %}
-The following assumes that the Rubrik cluster has already been boostraped. If that has not been completed yet see the **Bootstrapping the Rubrik cluster** section below.
-{% endhint %}
+
+_**The following assumes that the Rubrik cluster has already been boostraped. If that has not been completed yet see the *Bootstrapping the Rubrik cluster* section below.**_
 
 ## Configuration
 
@@ -36,9 +31,7 @@ import rubrik
 rubrik = rubrik.Connect()
 ```
 
-{% hint style="info" %}
-Note: You may use any variable name to connect to the Rubrik Cluster.
-{% endhint %}
+_**Note: You may use any variable name to connect to the Rubrik Cluster.**_
 
 If you have not configured the correct environment variables you may also manually pass in the required authentication credentials.
 
@@ -103,17 +96,22 @@ Output:
 | management_subnet_mask | str  | Subnet mask assigned to the management network.                                |
 
 ### Keyword Arguments
-| Name                         | Type | Description                                                                                                                                                                                                        | Default        |
-|------------------------------|------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
-| enable_encryption            | bool | Enable software data encryption at rest.                                                                                                                                                                           | True           |
-| node_config                  | dict | The Node Name and IP formatted as a dictionary.                                                                                                                                                                    | None           |
-| dns_search_domains           | str  | The search domain that the DNS Service will use to resolve hostnames that are not fully qualified.                                                                                                                 | None           |
-| dns_nameservers              | list | IPv4 addresses of DNS servers.                                                                                                                                                                                     | [8.8.8.8]      |
-| ntp_servers                  | list | FQDN or IPv4 address of a network time protocol (NTP) server.                                                                                                                                                      | [pool.ntp.org] |
-| wait_for_completion          | bool | Flag to determine if the function should wait for the Bootstrap process to finish.                                                                                                                                 | True           |
-| wait_for_node_initialization | bool | Flag to determine if the function should wait for the initial node initialization to wait. For example, when automating a new Cloud Cluster deployment it may take a few minutes for the new nodes to come online. | True           |
-| enable_logging               | bool | Flag to determines if logging should be enabled.                                                                                                                                                                   | False          |
-| timeout                      | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.                                                                                                       | 15             |
+| Name                | Type | Description                                                                                                  | Default        |
+|---------------------|------|--------------------------------------------------------------------------------------------------------------|----------------|
+| enable_encryption   | bool | Enable software data encryption at rest.                                                                     | True           |
+| node_config         | dict | The Node Name and IP formatted as a dictionary.                                                              | None           |
+| dns_search_domains  | str  | The search domain that the DNS Service will use to resolve hostnames that are not fully qualified.           | None           |
+| dns_nameservers     | list | IPv4 addresses of DNS servers.                                                                               | [8.8.8.8]      |
+| ntp_servers         | list | FQDN or IPv4 address of a network time protocol (NTP) server.                                                | [pool.ntp.org] |
+| wait_for_completion | bool | Flag to determine if the function should wait for the Bootstrap process to finish.                           | True           |
+| enable_logging      | bool | Flag to enable logging                                                                                       | False          |
+| timeout             | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. | 15             |
+
+## Returns
+| Type | Return Value                                                    |
+|------|-----------------------------------------------------------------|
+| dict | The response returned by `POST /internal/cluster/me/bootstrap`. |
+
 ### Example
 
 
@@ -138,9 +136,11 @@ management_gateway = '172.26.7.1'
 management_subnet_mask = '255.255.255.0'
 
 
-bootstrap = rubrik.Bootstrap(node_ip, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config, enable_encryption=enable_encryption)
+bootstrap = rubrik.Bootstrap(node_ip, cluster_name, admin_email, admin_password, management_gateway, \
+                             management_subnet_mask, enable_encryption=enable_encryption, \
+                             node_config=node_config, dns_search_domains=dns_search_domains \
+                             dns_nameservers=dns_nameservers, ntp_servers=ntp_servers, \
+                             wait_for_completion=True, enable_logging=True, timeout=15)
 ```
 
-{% hint style="info" %}
-Note: You may use any variable name to connect to the Rubrik Cluster.
-{% endhint %}
+_**Note: You may use any variable name to connect to the Rubrik Cluster.**_
