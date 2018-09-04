@@ -15,10 +15,6 @@ $ cd rubrik-sdk-for-python
 $ python setup.py install
 ``` 
 
-{% hint style="info" %}
-The following assumes that the Rubrik cluster has already been boostraped. If that has not been completed yet see the **Bootstrapping the Rubrik cluster** section below.
-{% endhint %}
-
 ## Configuration
 
 Before you begin to use the Rubrik Python SDK, you should first setup your autentication credentials. By default, the SDK will attempt to read the the Rubrik Cluster credentials from the following environment variables:

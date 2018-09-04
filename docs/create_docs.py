@@ -334,7 +334,7 @@ for function in base_api_functions:
     if function[0] is not '_':
         markdown.write('* [{}]({}.md)\n'.format(function, function))
 
-markdown.write('### Bootstrap Functions\n')
+markdown.write('\n### Bootstrap Functions\n')
 for function in bootstrap_functions:
     if function[0] is not '_':
         markdown.write('* [{}]({}.md)\n'.format(function, function))
