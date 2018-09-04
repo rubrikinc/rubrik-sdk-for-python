@@ -1,6 +1,6 @@
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 config = {}
 config['id'] = "pythonsdk"

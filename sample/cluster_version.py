@@ -1,5 +1,5 @@
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 cluster_version = rubrik.cluster_version()

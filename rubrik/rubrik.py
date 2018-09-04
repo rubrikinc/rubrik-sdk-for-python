@@ -194,16 +194,16 @@ class Bootstrap(_API):
             management_subnet_mask {str} -- Subnet mask assigned to the management network.
 
         Keyword Arguments:
-            enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
             node_config {dict} -- The Node Name and IP formatted as a dictionary. (default: {None})
+            enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
-            dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {None})
-            ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {None})
+            dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {['8.8.8.8']})
+            ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {['pool.ntp.org']})
             wait_for_completion {bool} -- Flag to determine if the function should wait for the bootstrap process to complete. (default: {True})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
-            dict - - The response returned by the API call.
+            dict -- The response returned by `POST /internal/cluster/me/bootstrap`.
         """
 
         if node_config is None or isinstance(node_config, dict) is not True:
@@ -289,11 +289,11 @@ class Bootstrap(_API):
         """Retrieves status of in progress bootstrap requests
 
         Keyword Arguments:
-            request_id {str} - - Id of the bootstrap request(default: {"1"})
-            timeout {int} - - The response timeout value, in seconds, of the API call. (default: {15})
+            request_id {str} -- ID of the bootstrap request(default: {"1"})
+            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
 
         Returns:
-            dict - - The response returned by the API call.
+            dict -- The response returned by `GET /internal/cluster/me/bootstrap?request_id={request_id}`.
         """
 
         self.log('status: Getting the status of the Rubrik Cluster bootstrap.')

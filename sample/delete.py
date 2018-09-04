@@ -1,6 +1,6 @@
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 # Delete an SLA Domain from the Rubrik cluster
 sla_id = "0589c4e5-eeec-4ece-9922-2c9ceef7bec8"

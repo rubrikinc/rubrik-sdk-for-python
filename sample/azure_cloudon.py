@@ -1,6 +1,6 @@
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 storage_account_name = "pythonsdkdemo"
 container = "pythonsdkdemocontainer"

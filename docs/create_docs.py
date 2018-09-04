@@ -108,8 +108,17 @@ def example_code(function_name):
     print()
 
 
-rubrk_sdk_functions = inspect.getmembers(rubrik.Connect, inspect.isfunction)
+connect_functions = inspect.getmembers(rubrik.Connect, inspect.isfunction)
+bootstrap_functions_all = inspect.getmembers(rubrik.Bootstrap, inspect.isfunction)
 
+bootstrap_functions = []
+for function in bootstrap_functions_all:
+    if 'setup_cluster' in function or 'status' in function and 'job_status' not in function:
+        bootstrap_functions.append(function)
+rubrk_sdk_functions = connect_functions + bootstrap_functions
+
+# rubrk_sdk_functions = connect_functions + bootstrap_functions
+# rubrk_sdk_functions = inspect.getmembers(rubrik.Connect, inspect.isfunction)
 function_examples = {}
 function_documentation = {}
 
@@ -133,7 +142,7 @@ for function in rubrk_sdk_functions:
 
 for function_name, function_doc_string in function_documentation.items():
 
-    print(function_name)
+    # print(function_name)
 
     if 'init' not in function_name:
         arguments_start = None
@@ -303,15 +312,30 @@ for function in connect_functions_search:
         connect_functions.append(function[0])
 del connect_functions[0]
 
+bootstrap_functions_search = inspect.getmembers(rubrik.rubrik.Bootstrap, inspect.isfunction)
+bootstrap_functions = []
+for function in bootstrap_functions_search:
+    if function[0] not in combined_function_list:
+        bootstrap_functions.append(function[0])
+
+del bootstrap_functions[0]
+del bootstrap_functions[2]
+
 # Create the SUMMARY (side navigation) Document
 markdown = open('SUMMARY.md', 'w')
 markdown.write('# Summary\n\n')
+
 
 markdown.write('### Getting Started\n\n')
 markdown.write('* [Quick Start](README.md)\n\n')
 
 markdown.write('### Base API Calls\n')
 for function in base_api_functions:
+    if function[0] is not '_':
+        markdown.write('* [{}]({}.md)\n'.format(function, function))
+
+markdown.write('### Bootstrap Functions\n')
+for function in bootstrap_functions:
     if function[0] is not '_':
         markdown.write('* [{}]({}.md)\n'.format(function, function))
 
@@ -345,5 +369,4 @@ for function in connect_functions:
 for function in combined_function_list:
     if function[0] is '_':
         markdown.write('* [{}]({}.md)\n'.format(function, function))
-
 markdown.close()

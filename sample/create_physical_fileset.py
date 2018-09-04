@@ -1,6 +1,6 @@
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 name = "Python SDK"
 operating_system = 'Linux'

@@ -10,6 +10,9 @@
 * [job_status](job_status.md)
 * [patch](patch.md)
 * [post](post.md)
+### Bootstrap Functions
+* [setup_cluster](setup_cluster.md)
+* [status](status.md)
 
 ### Cluster Functions
 * [cluster_node_ip](cluster_node_ip.md)

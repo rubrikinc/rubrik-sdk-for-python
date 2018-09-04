@@ -1,6 +1,6 @@
-import rubrik
+import rubrik_cdm
 
-rubrik = rubrik.Connect()
+rubrik = rubrik_cdm.Connect()
 
 # Retrieve summary information for the "Python SDK" SLA Domain
 sla_name = "Python SDK"

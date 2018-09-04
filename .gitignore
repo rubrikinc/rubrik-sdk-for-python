@@ -110,3 +110,4 @@ venv.bak/
 .mypy_cache/
 dev.py
 .vscode/launch.json
+.vscode/settings.json
