@@ -171,28 +171,8 @@ class Bootstrap(_API):
         _API {class} - This class contains the base API methods that can be called independently or internally in standalone functions.
     """
 
-    def __init__(self, node_ip, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, enable_logging=False, timeout=30):
+    def __init__(self, node_ip, enable_logging=False):
         """Constructor for the Bootstrap class which is used to initialize the class variables.
-
-        Arguments:
-            node_ip {str} -- The IP address of a node in the Cluster you wish to bootstrap.
-            cluster_name {str} -- Unique name to assign to the Rubrik cluster.
-            admin_email {str} -- The Rubrik cluster sends messages for the admin account to this email address.
-            admin_password {str} --  Password for the admin account.
-            management_gateway {str} --  IP address assigned to the management network gateway
-            management_subnet_mask {str} -- Subnet mask assigned to the management network.
-
-
-        Keyword Arguments:
-            enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
-            node_config {dict} -- The Node Name and IP formatted as a dictionary. (default: {None})
-            dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
-            dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {None})
-            ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {None})
-            wait_for_completion {bool} -- Flag to determine if the function should wait for the bootstrap process to complete. (default: {True})
-            wait_for_node_initialization {bool} -- Flag to determine if the function should wait for the initial node initialization to wait. For example, when automating a new Cloud Cluster deployment it may take a few minutes for the new nodes to come online.  (default: {True})
-            enable_logging {bool} -- Flag to determines if logging should be enabled. (default: {False})
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         """
 
         if enable_logging is True:
@@ -203,10 +183,7 @@ class Bootstrap(_API):
 
         node_ip = [self.node_ip]
 
-        self._bootstrap(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config,
-                        enable_encryption, dns_search_domains, dns_nameservers, ntp_servers, wait_for_completion, wait_for_node_initialization, timeout)
-
-    def _bootstrap(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
@@ -293,7 +270,7 @@ class Bootstrap(_API):
         if wait_for_completion == True:
             self.log('bootstrap: Waiting for the bootstrap process to complete.')
             while True:
-                status = self._status(request_id)
+                status = self.status(request_id)
 
                 if status['status'] == 'IN_PROGRESS':
                     self.log("bootstrap_status: {}\n".format(status))
@@ -307,7 +284,7 @@ class Bootstrap(_API):
 
         return api_request
 
-    def _status(self, request_id="1", timeout=15):
+    def status(self, request_id="1", timeout=15):
         """Retrieves status of in progress bootstrap requests
 
         Keyword Arguments:
