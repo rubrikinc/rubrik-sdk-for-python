@@ -11,7 +11,7 @@ The SDK has been tested against Python 2.7.6 and Python 3.6.4.
 
 Install from pip:
 
-`pip install rubrik`
+`pip install rubrik_cdm`
 
 Install from source:
 ```
