@@ -1,121 +1,106 @@
-import json
+# Copyright 2018 Rubrik, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License prop
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+This module contains the Rubrik SDK Cluster class.
+"""
+
 import sys
+from .api import Api
+
+_API = Api
 
 
-class Cluster():
-    """[summary]
-
+class Cluster(_API):
+    """This class contains methods related to the managment of the Rubrik cluster itself.
     """
 
-    def cluster_version(self):
-        """Retrieves software version of the Rubrik cluster
+    def cluster_version(self, timeout=15):
+        """Retrieves the software version of the Rubrik cluster.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- Software version running on the cluster
+            str -- The version of CDM installed on the Rubrik cluster.
         """
 
-        cluster_version_api_version = 'v1'
-        cluster_version_api_endpoint = '/cluster/me/version'
+        self.log('cluster_version: Getting the software version of the Rubrik cluster.')
+        return self.get('v1', '/cluster/me/version', timeout)['version']
 
-        api_request = self.get(cluster_version_api_version, cluster_version_api_endpoint)
+    def cluster_node_ip(self, timeout=15):
+        """Retrive the IP Address for each node in the Rubrik cluster.
 
-        ########### DO NOT MODIFY THESE VALUES - USED IN UNIT TESTS ONLY #########
-        assert cluster_version_api_version == 'v1'
-        assert cluster_version_api_endpoint == '/cluster/me/version'
-        ##########################################################################
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
-        return api_request
+        Returns:
+            list -- A list that contains the IP Address for each node in the Rubrik cluster.
+        """
 
-    def bootstrap(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, enable_encryption=True, node_config=None, dns_search_domains=None, dns_nameservers=None, ntp_servers=None):
-        """Issues a bootstrap request to a specified Rubrik cluster
+        self.log('cluster_node_ip: Generating a list of all Cluster Node IPs.')
+        api_request = self.get('internal', '/cluster/me/node', timeout)
+
+        node_ip_list = []
+
+        for node in api_request['data']:
+            node_ip_list.append(node["ipAddress"])
+
+        return node_ip_list
+
+    def end_user_authorization(self, object_name, end_user, object_type='vmware', timeout=15):
+        """Grant an End User authorization to the provided object.
 
         Arguments:
-            cluster_name {str} -- Unique name to assign to the Rubrik cluster.
-            admin_email {str} -- The Rubrik cluster sends messages for the admin account to this email address.
-            admin_password {str} --  Password for the admin account.
-            management_gateway {str} --  IP address assigned to the management network gateway
-            management_subnet_mask {str} -- Subnet mask assigned to the management network.
+            object_name {str} -- The name of the object you wish to grant the `end_user` authorization to.
+            end_user {str} -- The name of the end user you wish to grant authorization to.
 
         Keyword Arguments:
-            enable_encryption {bool} -- Enable software data encryption at rest. (default: {True})
-            node_config {dict} -- [description] (default: {None})
-            dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
-            dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {None})
-            ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {None})
+            object_type {str} -- The Rubrik object type you wish to backup. (default: {vmware}) (choices: {vmware}) 
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The response returned by the API call.
+            str -- No change required. The End User "`end_user`" is already authorized to interact with the "`object_name`" VM.
+            dict -- The API response from `POST /internal/authorization/role/end_user`.
         """
 
-        if node_config is None or isinstance(node_config, dict) is not True:
-            sys.exit('Error: You must provide a valid dictionary for "node_config".')
+        valid_object_type = ['vmware']
 
-        if dns_search_domains is None:
-            dns_search_domains = []
-        elif isinstance(dns_search_domains, dict) is not True:
-            sys.exit('Error: You must provide a valid list for "dns_search_domains".')
+        if object_type not in valid_object_type:
+            sys.exit("Error: The end_user_authorization() object_type argument must be one of the following: {}.".format(
+                valid_object_type))
 
-        if dns_nameservers is None:
-            dns_nameservers = ['8.8.8.8']
-        elif isinstance(dns_nameservers, dict) is not True:
-            sys.exit('Error: You must provide a valid list for "dns_nameservers".')
+        self.log("end_user_authorization: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+        vm_id = self.object_id(object_name, object_type)
 
-        if ntp_servers is None:
-            ntp_servers = ['pool.ntp.org']
-        elif isinstance(ntp_servers, dict) is not True:
-            sys.exit('Error: You must provide a valid list for "ntp_servers".')
+        self.log("end_user_authorization: Searching the Rubrik cluster for the End User '{}'.".format(end_user))
+        user = self.get('internal', '/user?username={}'.format(end_user))
 
-        bootstrap_api_version = 'internal'
-        bootstrap_api_endpoint = '/cluster/me/bootstrap'
+        if not user:
+            sys.exit('The Rubrik cluster does not contain a End User account named "{}".'.format(end_user))
+        else:
+            user_id = user[0]['id']
 
-        bootstrap_config = {}
-        bootstrap_config["enableSoftwareEncryptionAtRest"] = enable_encryption
-        bootstrap_config["name"] = cluster_name
-        bootstrap_config["dnsNameservers"] = dns_nameservers
-        bootstrap_config["dnsSearchDomains"] = dns_search_domains
-        bootstrap_config["ntpServers"] = ntp_servers
+        self.log("end_user_authorization: Searching the Rubrik cluster for the End User '{}' authorizations.".format(end_user))
+        user_authorization = self.get('internal', '/authorization/role/end_user?principals={}'.format(user_id))
 
-        bootstrap_config["adminUserInfo"] = {}
-        bootstrap_config["adminUserInfo"]['password'] = admin_password
-        bootstrap_config["adminUserInfo"]['emailAddress'] = admin_email
-        bootstrap_config["adminUserInfo"]['id'] = "admin"
+        authorized_objects = user_authorization['data'][0]['privileges']['restore']
 
-        bootstrap_config["nodeConfigs"] = {}
-        for node_name, node_ip in node_config.items():
-            bootstrap_config["nodeConfigs"][node_name] = {}
-            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig'] = {}
-            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['netmask'] = management_subnet_mask
-            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
-            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
+        if vm_id in authorized_objects:
+            return 'No change required. The End User "{}" is already authorized to interact with the "{}" VM.'.format(end_user, object_name)
+        else:
+            config = {}
+            config['principals'] = [user_id]
+            config['privileges'] = {"restore": [vm_id]}
 
-        api_request = self.post(bootstrap_api_version, bootstrap_api_endpoint,
-                                bootstrap_config, timeout=10, authentication=False)
-
-        return api_request
-
-        ########### DO NOT MODIFY THESE VALUES - USED IN UNIT TESTS ONLY #########
-        assert bootstrap_api_version == 'internal'
-        assert bootstrap_api_endpoint == '/cluster/me/bootstrap'
-        ##########################################################################
-
-    def bootstrap_status(self, request_id="1"):
-        """Retrieves status of in progress bootstrap requests
-
-        Keyword Arguments:
-            request_id {str} -- Id of the bootstrap request (default: {"1"})
-
-        Returns:
-            dict -- The response returned by the API call.
-        """
-
-        bootstrap_status_api_version = 'internal'
-        bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(request_id)
-
-        api_request = self.get(bootstrap_status_api_version, bootstrap_status_api_endpoint, authentication=False)
-
-        ########### DO NOT MODIFY THESE VALUES - USED IN UNIT TESTS ONLY #########
-        assert bootstrap_status_api_version == 'internal'
-        assert bootstrap_status_api_endpoint == '/cluster/me/bootstrap?request_id={}'.format(request_id)
-        ##########################################################################
-
-        return api_request
+            return self.post('internal', '/authorization/role/end_user', config, timeout=timeout)
