@@ -165,13 +165,13 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
 
 
 class Bootstrap(_API):
-    """This class contains all functions related to the Bootstrapping of a Rubrik Cluster. 
+    """This class contains all functions related to the Bootstrapping of a Rubrik Cluster.
 
     Arguments:
         _API {class} - This class contains the base API methods that can be called independently or internally in standalone functions.
     """
 
-    def __init__(self, node_ip, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=15, enable_logging=False):
+    def __init__(self, node_ip, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, wait_for_node_initialization=True, enable_logging=False, timeout=30):
         """Constructor for the Bootstrap class which is used to initialize the class variables.
 
         Arguments:
@@ -184,15 +184,15 @@ class Bootstrap(_API):
 
 
         Keyword Arguments:
-            timeout {int} -- [description] (default: {15})
-            enable_logging {bool} -- [description] (default: {False})
             enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
-            node_config {dict} -- [description] (default: {None})
+            node_config {dict} -- The Node Name and IP formatted as a dictionary. (default: {None})
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
             dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {None})
             ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {None})
             wait_for_completion {bool} -- Flag to determine if the function should wait for the bootstrap process to complete. (default: {True})
-            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
+            wait_for_node_initialization {bool} -- Flag to determine if the function should wait for the initial node initialization to wait. For example, when automating a new Cloud Cluster deployment it may take a few minutes for the new nodes to come online.  (default: {True})
+            enable_logging {bool} -- Flag to determines if logging should be enabled. (default: {False})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         """
 
         if enable_logging is True:
@@ -203,24 +203,10 @@ class Bootstrap(_API):
 
         node_ip = [self.node_ip]
 
-        bootstrap, bootstrap_id = self._bootstrap(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask,
-                                                  node_config=node_config, enable_encryption=enable_encryption, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, timeout=15)
+        self._bootstrap(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config,
+                        enable_encryption, dns_search_domains, dns_nameservers, ntp_servers, wait_for_completion, wait_for_node_initialization, timeout)
 
-        if wait_for_completion == True:
-            while True:
-                status = self.status(bootstrap_id)
-
-                if status['status'] == 'IN_PROGRESS':
-                    self.log("status(): {}\n".format(status))
-                    time.sleep(30)
-                    continue
-                elif status['status'] == 'FAILURE':
-                    sys.exit("Error: {}".format(status['message']))
-                else:
-                    self.log("{}".format(status))
-                    return(status)
-
-    def _bootstrap(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, timeout=15):
+    def _bootstrap(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, wait_for_node_initialization=True, timeout=30):
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
@@ -231,15 +217,17 @@ class Bootstrap(_API):
             management_subnet_mask {str} -- Subnet mask assigned to the management network.
 
         Keyword Arguments:
-            enable_encryption {bool} -- Enable software data encryption at rest. (default: {True})
-            node_config {dict} -- [description] (default: {None})
+            enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
+            node_config {dict} -- The Node Name and IP formatted as a dictionary. (default: {None})
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
-            dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {['8.8.8.8']})
-            ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {['pool.ntp.org']})
-            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
+            dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {None})
+            ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {None})
+            wait_for_completion {bool} -- Flag to determine if the function should wait for the bootstrap process to complete. (default: {True})
+            wait_for_node_initialization {bool} -- Flag to determine if the function should wait for the initial node initialization to wait. For example, when automating a new Cloud Cluster deployment it may take a few minutes for the new nodes to come online.  (default: {True})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
-            dict -- The response returned by the API call.
+            dict - - The response returned by the API call.
         """
 
         if node_config is None or isinstance(node_config, dict) is not True:
@@ -283,17 +271,48 @@ class Bootstrap(_API):
         self.log('bootstrap: Starting the bootstrap process.')
         api_request = self.post('internal', '/cluster/me/bootstrap', bootstrap_config, timeout, authentication=False)
 
-        return api_request, api_request['id']
+        request_id = api_request['id']
 
-    def status(self, request_id="1", timeout=15):
+        if wait_for_node_initialization == True:
+            self.log('bootstrap: Checking for node initialization.')
+            while True:
+                status = self._status(request_id)
+
+                if status['status'] == 'UNKNOWN':
+                    self.log("bootstrap_status: {}\n".format(status))
+                    time.sleep(30)
+                    continue
+                elif status['status'] == 'FAILURE':
+                    sys.exit("Error: {}".format(status['message']))
+                elif status['status'] == 'IN_PROGRESS':
+                    break
+
+        if wait_for_completion == True:
+            self.log('bootstrap: Waiting for the bootstrap process to complete.')
+            while True:
+                status = self._status(request_id)
+
+                if status['status'] == 'IN_PROGRESS':
+                    self.log("bootstrap_status: {}\n".format(status))
+                    time.sleep(30)
+                    continue
+                elif status['status'] == 'FAILURE' or status['status'] == "FAILED":
+                    sys.exit("Error: {}".format(status['message']))
+                else:
+                    self.log("{}".format(status))
+                    return status
+
+        return api_request
+
+    def _status(self, request_id="1", timeout=15):
         """Retrieves status of in progress bootstrap requests
 
         Keyword Arguments:
-            request_id {str} -- Id of the bootstrap request (default: {"1"})
-            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {15})
+            request_id {str} - - Id of the bootstrap request(default: {"1"})
+            timeout {int} - - The response timeout value, in seconds, of the API call. (default: {15})
 
         Returns:
-            dict -- The response returned by the API call.
+            dict - - The response returned by the API call.
         """
 
         self.log('status: Getting the status of the Rubrik Cluster bootstrap.')
@@ -307,7 +326,7 @@ class Bootstrap(_API):
         """Create properly formatted debug log messages.
 
         Arguments:
-            log_message {str} -- The message to pass to the debug log.
+            log_message {str} - - The message to pass to the debug log.
         """
         log = logging.getLogger(__name__)
         log.debug(log_message)
@@ -317,7 +336,7 @@ class Bootstrap(_API):
         """Internal method used to create the a header without authorization used in the API calls.
 
         Returns:
-            dict -- The header that does not include any authorization.
+            dict - - The header that does not include any authorization.
         """
 
         header = {
@@ -332,8 +351,8 @@ class Bootstrap(_API):
         """Internal method used to validate the API Version and API Endpoint provided by the end user
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call.
-            api_endpoint {str} -- The endpoint (ex. cluster/me) of the Rubrik CDM API to call.
+            api_version {str} - - The version of the Rubrik CDM API to call.
+            api_endpoint {str} - - The endpoint(ex. cluster / me) of the Rubrik CDM API to call.
         """
 
         valid_api_versions = ['v1', 'internal']
