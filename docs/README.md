@@ -6,7 +6,7 @@ The SDK has been tested against Python 2.7.6 and Python 3.6.4.
 
 Install from pip:
 
-`pip install rubrik`
+`pip install rubrik_cdm`
 
 Install from source:
 ```
@@ -32,8 +32,8 @@ Before you begin to use the Rubrik Python SDK, you should first setup your auten
 To use the SDK, you must first instantiate a new variable, in thise case `rubrik`, to connect to the Rubrik Cluster.
 
 ```py
-import rubrik
-rubrik = rubrik.Connect()
+import rubrik_cdm
+rubrik = rubrik_cdm.Connect()
 ```
 
 {% hint style="info" %}
@@ -43,13 +43,13 @@ Note: You may use any variable name to connect to the Rubrik Cluster.
 If you have not configured the correct environment variables you may also manually pass in the required authentication credentials.
 
 ```py
-import rubrik
+import rubrik_cdm
 
 node_ip = "172.21.8.90"
 username = "sdk@rangers.lab"
 password = "RubrikPythonSDK"
 
-rubrik = rubrik.Connect(node_ip, username, password)
+rubrik = rubrik_cdm.Connect(node_ip, username, password)
 ```
 
 When connecting to the Rubrik Cluster for the first time, the SDK will use `cluster_node_ip()` to retrieve a list of the management IP address for each node in the Cluster. As a best practice, the SDK will randomly choose a IP from that list for all subsequent API calls.
@@ -64,8 +64,8 @@ To enable debuging set the `Connect()` `enable_logging` keyword argument to `Tru
 Script:
 
 ```py
-import rubrik
-rubrik = rubrik.Connect(enable_logging=True)
+import rubrik_cdm
+rubrik = rubrik_cdm.Connect(enable_logging=True)
 
 cluster_version = rubrik.cluster_version()
 print(cluster_version)
@@ -88,59 +88,3 @@ Output:
 
 {'version': '4.1.2-2366'}
 ```
-
-
-## Bootstrapping the Rubrik cluster
-
-### Arguments
-| Name                   | Type | Description                                                                    |
-|------------------------|------|--------------------------------------------------------------------------------|
-| node_ip                | str  | The node IP address of a node in the Rubrik cluster.                           |
-| cluster_name           | str  | Unique name to assign to the Rubrik cluster.                                   |
-| admin_email            | str  | The Rubrik cluster sends messages for the admin account to this email address. |
-| admin_password         | str  | Password for the admin account.                                                |
-| management_gateway     | str  | IP address assigned to the management network gateway                          |
-| management_subnet_mask | str  | Subnet mask assigned to the management network.                                |
-
-### Keyword Arguments
-| Name                         | Type | Description                                                                                                                                                                                                        | Default        |
-|------------------------------|------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
-| enable_encryption            | bool | Enable software data encryption at rest.                                                                                                                                                                           | True           |
-| node_config                  | dict | The Node Name and IP formatted as a dictionary.                                                                                                                                                                    | None           |
-| dns_search_domains           | str  | The search domain that the DNS Service will use to resolve hostnames that are not fully qualified.                                                                                                                 | None           |
-| dns_nameservers              | list | IPv4 addresses of DNS servers.                                                                                                                                                                                     | [8.8.8.8]      |
-| ntp_servers                  | list | FQDN or IPv4 address of a network time protocol (NTP) server.                                                                                                                                                      | [pool.ntp.org] |
-| wait_for_completion          | bool | Flag to determine if the function should wait for the Bootstrap process to finish.                                                                                                                                 | True           |
-| wait_for_node_initialization | bool | Flag to determine if the function should wait for the initial node initialization to wait. For example, when automating a new Cloud Cluster deployment it may take a few minutes for the new nodes to come online. | True           |
-| enable_logging               | bool | Flag to determines if logging should be enabled.                                                                                                                                                                   | False          |
-| timeout                      | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.                                                                                                       | 15             |
-### Example
-
-
-```py
-# Example Cloud Cluster Bootstrap
-
-import rubrik
-
-enable_encryption = False # Encryption should only be set to False when bootstrapping a Cloud Cluster
-node_ip = '172.26.7.199'
-node_config = {
-    '1': node_ip,
-    '2': '172.26.7.200',
-    '3': '172.26.7.201',
-    '4': '172.26.7.201'
-}
-
-cluster_name = 'Python-SDK'
-admin_email = 'pythonsdk@example.com'
-admin_password = 'RubrikGoForward'
-management_gateway = '172.26.7.1'
-management_subnet_mask = '255.255.255.0'
-
-
-bootstrap = rubrik.Bootstrap(node_ip, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config, enable_encryption=enable_encryption)
-```
-
-{% hint style="info" %}
-Note: You may use any variable name to connect to the Rubrik Cluster.
-{% endhint %}
