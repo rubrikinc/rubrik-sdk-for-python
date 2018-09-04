@@ -253,11 +253,12 @@ class Bootstrap(_API):
                                         bootstrap_config, timeout, authentication=False)
                 break
             except SystemExit as bootstrap_error:
-
                 if "Failed to establish a new connection: [Errno 111] Connection refused" in str(bootstrap_error):
                     self.log('bootstrap: Connection refused. Waiting 30 seconds for the node to initialize before trying again.')
                     number_of_attempts += 1
                     time.sleep(30)
+                elif "Error: Cannot bootstrap from an already bootstrapped node" in str(bootstrap_error):
+                    return "No change required. The Rubrik cluster is already bootstrapped."
                 else:
                     self.log('bootstrap: Connection refused.')
                     sys.exit(bootstrap_error)
