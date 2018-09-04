@@ -171,7 +171,7 @@ class Bootstrap(_API):
         _API {class} - This class contains the base API methods that can be called independently or internally in standalone functions.
     """
 
-    def __init__(self, node_ip, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, wait_for_node_initialization=True, enable_logging=False, timeout=30):
+    def __init__(self, node_ip, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, enable_logging=False, timeout=30):
         """Constructor for the Bootstrap class which is used to initialize the class variables.
 
         Arguments:
@@ -206,7 +206,7 @@ class Bootstrap(_API):
         self._bootstrap(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config,
                         enable_encryption, dns_search_domains, dns_nameservers, ntp_servers, wait_for_completion, wait_for_node_initialization, timeout)
 
-    def _bootstrap(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, wait_for_node_initialization=True, timeout=30):
+    def _bootstrap(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
@@ -223,7 +223,6 @@ class Bootstrap(_API):
             dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {None})
             ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {None})
             wait_for_completion {bool} -- Flag to determine if the function should wait for the bootstrap process to complete. (default: {True})
-            wait_for_node_initialization {bool} -- Flag to determine if the function should wait for the initial node initialization to wait. For example, when automating a new Cloud Cluster deployment it may take a few minutes for the new nodes to come online.  (default: {True})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
@@ -268,24 +267,28 @@ class Bootstrap(_API):
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
 
-        self.log('bootstrap: Starting the bootstrap process.')
-        api_request = self.post('internal', '/cluster/me/bootstrap', bootstrap_config, timeout, authentication=False)
+        while True:
+
+            try:
+                self.log('bootstrap: Starting the bootstrap process.')
+                number_of_attempts = 1
+                api_request = self.post('internal', '/cluster/me/bootstrap',
+                                        bootstrap_config, timeout, authentication=False)
+                break
+            except SystemExit as bootstrap_error:
+
+                if "Failed to establish a new connection: [Errno 111] Connection refused" in str(bootstrap_error):
+                    self.log('bootstrap: Connection refused. Waiting 30 seconds for the node to initialize before trying again.')
+                    number_of_attempts += 1
+                    time.sleep(30)
+                else:
+                    self.log('bootstrap: Connection refused.')
+                    sys.exit(bootstrap_error)
+
+            if number_of_attempts == 12:
+                sys.exit("Error: Unable to establish a connection to the Rubrik cluster.")
 
         request_id = api_request['id']
-
-        if wait_for_node_initialization == True:
-            self.log('bootstrap: Checking for node initialization.')
-            while True:
-                status = self._status(request_id)
-
-                if status['status'] == 'UNKNOWN':
-                    self.log("bootstrap_status: {}\n".format(status))
-                    time.sleep(30)
-                    continue
-                elif status['status'] == 'FAILURE':
-                    sys.exit("Error: {}".format(status['message']))
-                elif status['status'] == 'IN_PROGRESS':
-                    break
 
         if wait_for_completion == True:
             self.log('bootstrap: Waiting for the bootstrap process to complete.')
