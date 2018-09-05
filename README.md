@@ -30,8 +30,8 @@ By default, the Rubrik SDK will attempt to read the the Rubrik Cluster credentia
 * `rubrik_cdm_password`
 
 ```py
-import rubrik
-rubrik = rubrik.Connect()
+import rubrik_cdm
+rubrik = rubrik_cdm.Connect()
 ```
 
 ## AUTHOR INFORMATION
