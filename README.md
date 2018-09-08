@@ -1,6 +1,6 @@
 # Rubrik Cloud Data Management SDK for Python
 
-This project provies a Python package that makes it easy to interact with the Rubrik CDM API.
+This project provides a Python package that makes it easy to interact with the Rubrik CDM API.
 
 The SDK has been tested against Python 2.7.6 and Python 3.6.4.
 
