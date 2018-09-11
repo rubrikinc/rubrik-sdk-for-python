@@ -17,7 +17,7 @@ $ python setup.py install
 
 ## Configuration
 
-Before you begin to use the Rubrik Python SDK, you should first setup your autentication credentials. By default, the SDK will attempt to read the the Rubrik Cluster credentials from the following environment variables:
+Before you begin to use the Rubrik Python SDK, you should first setup your authentication credentials. By default, the SDK will attempt to read the the Rubrik Cluster credentials from the following environment variables:
 
 * `rubrik_cdm_node_ip`
 * `rubrik_cdm_username`
