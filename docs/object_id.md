@@ -2,14 +2,14 @@
 
 Get the ID of a Rubrik object by providing its name.
 ```py
-def object_id(object_name, object_type)
+def object_id(object_name, object_type, host_os=None)
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | object_name  | str  | The name of the Rubrik object whose ID you wish to lookup. |         |
-| object_type  | str  | The object type you wish to look up.  |    vmware, sla, vmware_host     |
+| object_type  | str  | The object type you wish to look up.  |    vmware, sla, vmware_host, physical_host, fileset_template     |
 
 ## Returns
 | Type | Return Value                                                                                   |
