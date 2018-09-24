@@ -28,6 +28,8 @@
 
 ### Data Management Functions
 * [assign_sla](assign_sla.md)
+* [begin_managed_volume_snapshot](begin_managed_volume_snapshot.md)
+* [end_managed_volume_snapshot](end_managed_volume_snapshot.md)
 * [object_id](object_id.md)
 * [on_demand_snapshot](on_demand_snapshot.md)
 * [pause_snapshots](pause_snapshots.md)

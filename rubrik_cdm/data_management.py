@@ -118,13 +118,13 @@ class Data_Management(_API):
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume})
 
         Returns:
             str -- The ID of the provided Rubrik object.
         """
 
-        valid_object_type = ['vmware', 'sla', 'vmware_host', 'physical_host', 'fileset_template']
+        valid_object_type = ['vmware', 'sla', 'vmware_host', 'physical_host', 'fileset_template', 'managed_volume']
 
         if object_type not in valid_object_type:
             sys.exit("Error: The object_id() object_type argument must be one of the following: {}.".format(valid_object_type))
@@ -150,6 +150,10 @@ class Data_Management(_API):
             object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
                 host_os, object_name)
+        elif object_type is 'managed_volume':
+            object_summary_api_version = 'internal'
+            object_summary_api_endpoint = '/managed_volume?is_relic=false&primary_cluster_id=local&name={}'.format(
+                object_name)
 
         self.log("object_id: Getting the object id for the {} object '{}'.".format(object_type, object_name))
         api_request = self.get(object_summary_api_version, object_summary_api_endpoint)
@@ -501,3 +505,70 @@ class Data_Management(_API):
                 config['isVmPaused'] = False
 
                 return self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
+
+    def begin_managed_volume_snapshot(self, name, timeout=30):
+        """Open a managed volume for writes. All writes to the managed volume until the snapshot is ended will be part of its snapshot.
+
+        Arguments:
+            name {str} -- The name of the Managed Volume to begin the snapshot on.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {30})
+
+        Returns:
+            str -- No change required. The Managed Volume '`name`' is already assigned in a writeable state.
+            dict -- The full response for `POST /managed_volume/{id}/begin_snapshot`.
+        """
+
+        self.log("begin_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
+        managed_volume_id = self.object_id(name, 'managed_volume')
+
+        self.log("begin_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
+        managed_volume_summary = self.get('internal', '/managed_volume/{}'.format(managed_volume_id))
+
+        if managed_volume_summary['isWritable'] is False:
+            self.log("begin_managed_volume_snapshot: Setting the Managed Volume '{}' to a writeable state.".format(name))
+            return self.post('internal', '/managed_volume/{}/begin_snapshot'.format(managed_volume_id), config={}, timeout=timeout)
+        else:
+            return "No change required. The Managed Volume '{}' is already assigned in a writeable state.".format(name)
+
+    def end_managed_volume_snapshot(self, name, sla_name='current', timeout=30):
+        """Close a managed volume for writes. A snapshot will be created containing all writes since the last begin snapshot call.
+
+
+        Arguments:
+            name {str} -- The name of the Managed Volume to end snapshots on.
+
+        Keyword Arguments:
+            sla_name {str} -- The SLA Domain name you want to assign the snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {30})
+
+        Returns:
+            dict -- The full response for `POST /managed_volume/{id}/end_snapshot`.
+        """
+
+        self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
+        managed_volume_id = self.object_id(name, 'managed_volume')
+
+        self.log("end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
+        managed_volume_summary = self.get('internal', '/managed_volume/{}'.format(managed_volume_id))
+
+        if managed_volume_summary['isWritable'] is False:
+            sys.exit("Error: The Managed Volume '{}' is in a Read-only state. This can be changed through the `begin_managed_volume_snapshot` function.".format(name))
+
+        if sla_name == 'current':
+            self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))
+            if managed_volume_summary['slaAssignment'] == 'Unassigned':
+                sys.exit(
+                    "Error: The Managed Volume '{}' does not have a SLA assigned currently assigned. You must populate the sla_name argument.".format(name))
+
+            sla_id = managed_volume_summary['configuredSlaDomainId']
+        else:
+            self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+            sla_id = self.object_id(sla_name, 'sla')
+
+        config = {}
+        config['retentionConfig'] = {}
+        config['retentionConfig']['slaId'] = sla_id
+
+        return self.post('internal', '/managed_volume/{}/end_snapshot'.format(managed_volume_id), config, timeout)

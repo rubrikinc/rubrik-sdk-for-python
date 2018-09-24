@@ -9,7 +9,7 @@ def object_id(object_name, object_type, host_os=None)
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | object_name  | str  | The name of the Rubrik object whose ID you wish to lookup. |         |
-| object_type  | str  | The object type you wish to look up.  |    vmware, sla, vmware_host, physical_host, fileset_template     |
+| object_type  | str  | The object type you wish to look up.  |    vmware, sla, vmware_host, physical_host, fileset_template, managed_volume     |
 
 ## Returns
 | Type | Return Value                                                                                   |
