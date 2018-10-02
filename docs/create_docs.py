@@ -1,9 +1,15 @@
 import inspect
-import rubrik_cdm
+# import rubrik_cdm
 import os
 import sys
 import reprlib
 
+CUR_DIR = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe()))
+)
+PAR_DIR = os.path.dirname(CUR_DIR)
+sys.path.insert(0, PAR_DIR)
+import rubrik_cdm
 
 def print_doc_string(doc_string, section):
 
@@ -301,9 +307,18 @@ for function in cloud_functions:
     if function[0] is '_':
         cloud_functions.remove(function)
 
+event_search = inspect.getmembers(rubrik_cdm.events.Events, inspect.isfunction)
+event_functions = []
+for function in event_search:
+    if function[0] not in base_api_functions:
+        event_functions.append(function[0])
+for function in event_functions:
+    if function[0] is '_':
+        event_functions.remove(function)
 
 combined_function_list = base_api_functions + cluster_functions + \
-    data_management_functions + physical_functions + cloud_functions
+    data_management_functions + physical_functions + cloud_functions + \
+    event_functions
 
 connect_functions_search = inspect.getmembers(rubrik_cdm.rubrik_cdm.Connect, inspect.isfunction)
 connect_functions = []
@@ -351,6 +366,10 @@ markdown.write('\n### Data Management Functions\n')
 for function in data_management_functions:
     if function[0] is not '_':
         markdown.write('* [{}]({}.md)\n'.format(function, function))
+
+markdown.write('\n### Event Functions\n')
+for function in event_functions:
+    markdown.write('* [{}]({}.md)\n'.format(function, function))
 
 markdown.write('\n### Physical Host Functions\n')
 for function in physical_functions:
