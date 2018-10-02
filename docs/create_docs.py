@@ -1,15 +1,9 @@
 import inspect
-# import rubrik_cdm
+import rubrik_cdm
 import os
 import sys
 import reprlib
 
-CUR_DIR = os.path.dirname(
-    os.path.abspath(inspect.getfile(inspect.currentframe()))
-)
-PAR_DIR = os.path.dirname(CUR_DIR)
-sys.path.insert(0, PAR_DIR)
-import rubrik_cdm
 
 def print_doc_string(doc_string, section):
 
