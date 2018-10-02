@@ -37,6 +37,9 @@
 * [vsphere_instant_recovery](vsphere_instant_recovery.md)
 * [vsphere_live_mount](vsphere_live_mount.md)
 
+### Event Functions
+* [get_events](get_events.md)
+
 ### Physical Host Functions
 * [add_physical_host](add_physical_host.md)
 * [assign_physical_host_fileset](assign_physical_host_fileset.md)
