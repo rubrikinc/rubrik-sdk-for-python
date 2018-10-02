@@ -24,21 +24,24 @@ _API = Api
 class Events(_API):
     """This class contains methods related to Cluster/Object Events from the Rubrik Cluster."""
 
-    def get_events(self, limit=10, status="", event_type=""):
+    def get_events(self, limit=10, status=None, event_type=None, object_type=None, object_name=None, before_date=None, after_date=None):
         """Return a list of Events matching the specified criteria.
 
-        Arguments:
-            limit (optional - defaults to 10) {int} -- The limit of Events to return. Accepted limit is between 1-15.
-            status (optional) {str} -- Filter the events by Status (Choices: {Failure}, {Warning}, {Running}, {Success}, {Canceled}, {Canceling})
-            event_type (optional) {str} -- Filter the events by Event Type (Choices: {Archive}, {Audit}, {AuthDomain}, {Backup}, {CloudNativeSource}, {Configuration}, {Diagnostic}, {Instantiate}, {Maintenance}, {NutanixCluster}, {Recovery}, {Replication}, {StorageArray}, {System}, {Vcd}, {VCenter})
-            object_type (optional) {str} -- Filter the events by Object Type (Choices: {VmwareVm}, {Mssql}, {LinuxFileset}, {WindowsFileset}, {WindowsHost}, {LinuxHost}, {StorageArrayVolumeGroup}, {VolumeGroup}, {NutanixVm}, {AwsAccount}, {Ec2Instance})
+        Keyword Arguments:
+            limit {int} -- The limit of Events to return. Accepted limit is between 1-15. (Default 10)
+            status {str} -- Filter the events by Status (Choices: {Failure}, {Warning}, {Running}, {Success}, {Canceled}, {Canceling})
+            event_type {str} -- Filter the events by Event Type (Choices: {Archive}, {Audit}, {AuthDomain}, {Backup}, {CloudNativeSource}, {Configuration}, {Diagnostic}, {Instantiate}, {Maintenance}, {NutanixCluster}, {Recovery}, {Replication}, {StorageArray}, {System}, {Vcd}, {VCenter})
+            object_type {str} -- Filter the events by Object Type (Choices: {VmwareVm}, {Mssql}, {LinuxFileset}, {WindowsFileset}, {WindowsHost}, {LinuxHost}, {StorageArrayVolumeGroup}, {VolumeGroup}, {NutanixVm}, {AwsAccount}, {Ec2Instance})
+            object_name {str} -- Filter the events by Object Name (Can be the name of a VM, Host, Fileset, Mssql Database, etc)
+            before_date {datetime} -- Only show events before specified date. (Ex. 2018-10-01)
+            after_date {datetime} -- Only show events after specified date. (Ex. 2018-10-01)
 
         Returns:
             dict -- The `data` object within the API response for `GET /internal/event/` after applying the specified filters.
         """
         valid_limit = range(1, 16)
         valid_status = [
-            "",
+            None,
             "Failure",
             "Warning",
             "Running",
@@ -47,7 +50,7 @@ class Events(_API):
             "Canceling",
         ]
         valid_event_type = [
-            "",
+            None,
             "Archive",
             "Audit",
             "AuthDomain",
@@ -66,7 +69,7 @@ class Events(_API):
             "VCenter",
         ]
         valid_object_type = [
-            "",
+            None,
             "VmwareVm",
             "Mssql",
             "LinuxFileset",
@@ -113,9 +116,9 @@ class Events(_API):
         event_data["limit"] = limit
         event_data["status"] = status
         event_data["event_type"] = event_type
-        event_data["object_name"] = ""
-        event_data["before_date"] = ""
-        event_data["after_date"] = ""
+        event_data["object_name"] = object_name
+        event_data["before_date"] = before_date
+        event_data["after_date"] = after_date
         event_url = "/event?"
         for param in event_data:
             if event_data[param]:
