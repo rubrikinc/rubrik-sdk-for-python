@@ -12,7 +12,7 @@
 # limitations under the License.
 
 """
-This module contains the Rubrik SDK Data_Management class.
+This module contains the Rubrik SDK Event class.
 """
 
 import sys
