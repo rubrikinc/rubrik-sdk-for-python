@@ -118,7 +118,7 @@ class Api():
             except NameError:
                 sys.exit(error)
             else:
-                sys.exit('Error: ' + error_message)
+                return error_message
         else:
             try:
                 return api_request.json()
