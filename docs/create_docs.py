@@ -310,6 +310,15 @@ for function in event_functions:
     if function[0] is '_':
         event_functions.remove(function)
 
+support_bundle_search = inspect.getmembers(rubrik_cdm.support_bundle.SupportBundle, inspect.isfunction)
+support_bundle_functions = []
+for function in support_bundle_search:
+    if function[0] not in base_api_functions:
+        support_bundle_functions.append(function[0])
+for function in support_bundle_functions:
+    if function[0] is '_':
+        support_bundle_functions.remove(function)
+
 combined_function_list = base_api_functions + cluster_functions + \
     data_management_functions + physical_functions + cloud_functions + \
     event_functions
@@ -372,6 +381,11 @@ for function in physical_functions:
 
 markdown.write('\n### SDK Helper Functions\n')
 for function in connect_functions:
+    if function[0] is not '_':
+        markdown.write('* [{}]({}.md)\n'.format(function, function))
+
+markdown.write('\n### Support Bundle Functions\n')
+for function in support_bundle_functions:
     if function[0] is not '_':
         markdown.write('* [{}]({}.md)\n'.format(function, function))
 
