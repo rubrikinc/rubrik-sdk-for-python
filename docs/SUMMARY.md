@@ -49,10 +49,25 @@
 
 ### SDK Helper Functions
 * [log](log.md)
+* [support_bundle](support_bundle.md)
+* [support_bundle_backlog](support_bundle_backlog.md)
+
+### Support Bundle Functions
+* [support_bundle](support_bundle.md)
+* [support_bundle_backlog](support_bundle_backlog.md)
 
 ### Internal Functions
 * [_api_validation](_api_validation.md)
 * [_authorization_header](_authorization_header.md)
+* [_db_a_event_id](_db_a_event_id.md)
+* [_db_d_event_id](_db_d_event_id.md)
+* [_db_q_backlog](_db_q_backlog.md)
+* [_db_q_event_id](_db_q_event_id.md)
+* [_db_u_bun_state](_db_u_bun_state.md)
+* [_db_u_job_state](_db_u_job_state.md)
+* [_download](_download.md)
+* [_generate](_generate.md)
 * [_header](_header.md)
+* [_status](_status.md)
 * [_common_api](_common_api.md)
 * [_date_time_conversion](_date_time_conversion.md)
