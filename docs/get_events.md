@@ -8,13 +8,13 @@ def get_events(limit=10, status=None, event_type=None, object_type=None, object_
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| limit  | int  | The limit of Events to return. Accepted limit is between 1-15. (Default 10) |         |         |
-| status  | str  | Filter the events by Status (Choices: {Failure}, {Warning}, {Running}, {Success}, {Canceled}, {Canceling}) |         |         |
-| event_type  | str  | Filter the events by Event Type (Choices: {Archive}, {Audit}, {AuthDomain}, {Backup}, {CloudNativeSource}, {Configuration}, {Diagnostic}, {Instantiate}, {Maintenance}, {NutanixCluster}, {Recovery}, {Replication}, {StorageArray}, {System}, {Vcd}, {VCenter}) |         |         |
-| object_type  | str  | Filter the events by Object Type (Choices: {VmwareVm}, {Mssql}, {LinuxFileset}, {WindowsFileset}, {WindowsHost}, {LinuxHost}, {StorageArrayVolumeGroup}, {VolumeGroup}, {NutanixVm}, {AwsAccount}, {Ec2Instance}) |         |         |
-| object_name  | str  | Filter the events by Object Name (Can be the name of a VM, Host, Fileset, Mssql Database, etc) |         |         |
-| before_date  | datetime  | Only show events before specified date. (Ex. 2018-10-01) |         |         |
-| after_date  | datetime  | Only show events after specified date. (Ex. 2018-10-01) |         |         |
+| limit  | int  | The limit of Events to return.  |    1-15     |    10      |
+| status  | str  | Filter the events by Status.  |    Failure, Warning, Running, Success, Canceled, Canceling     |    None      |
+| event_type  | str  | Filter the events by Event Type.  |    Archive Audit, AuthDomain, Backup, CloudNativeSource, Configuration, Diagnostic, Instantiate, Maintenance, NutanixCluster, Recovery, Replication, StorageArray, System, Vcd, VCenter     |    None      |
+| object_type  | str  | Filter the events by Object Type.  |    VmwareVm, Mssql, LinuxFileset, WindowsFileset, WindowsHost, LinuxHost, StorageArrayVolumeGroup, VolumeGroup, NutanixVm, AwsAccount, Ec2Instance     |    None      |
+| object_name  | str  | Filter the events by Object Name.  |    Can be the name of a VM, Host, Fileset, Mssql Database, etc     |    None      |
+| before_date  | datetime  | Only show events before specified date.  |    E.g. 2018-10-01     |    None      |
+| after_date  | datetime  | Only show events after specified date.  |    E.g. 2018-10-01     |    None      |
 
 ## Returns
 | Type | Return Value                                                                                   |

@@ -28,13 +28,13 @@ class Events(_API):
         """Return a list of Events matching the specified criteria.
 
         Keyword Arguments:
-            limit {int} -- The limit of Events to return. Accepted limit is between 1-15. (default: {'10'})
-            status {str} -- Filter the events by Status (choices: {Failure, Warning, Running, Success, Canceled, Canceling}) (default: {'None'})
-            event_type {str} -- Filter the events by Event Type (choices: {Archive Audit, AuthDomain, Backup, CloudNativeSource, Configuration, Diagnostic, Instantiate, Maintenance, NutanixCluster, Recovery, Replication, StorageArray, System, Vcd, VCenter}) (default: {'None'})
-            object_type {str} -- Filter the events by Object Type (choices: {VmwareVm, Mssql, LinuxFileset, WindowsFileset, WindowsHost, LinuxHost, StorageArrayVolumeGroup, VolumeGroup, NutanixVm, AwsAccount, Ec2Instance}) (default: {'None'})
-            object_name {str} -- Filter the events by Object Name (Can be the name of a VM, Host, Fileset, Mssql Database, etc) (default: {'None'})
-            before_date {datetime} -- Only show events before specified date. (Ex. 2018-10-01) (default: {'None'})
-            after_date {datetime} -- Only show events after specified date. (Ex. 2018-10-01) (default: {'None'})
+            limit {int} -- The limit of Events to return. (default: {'10'}) (choices: {1-15})
+            status {str} -- Filter the events by Status. (default: {'None'}) (choices: {Failure, Warning, Running, Success, Canceled, Canceling})
+            event_type {str} -- Filter the events by Event Type. (default: {'None'}) (choices: {Archive Audit, AuthDomain, Backup, CloudNativeSource, Configuration, Diagnostic, Instantiate, Maintenance, NutanixCluster, Recovery, Replication, StorageArray, System, Vcd, VCenter})
+            object_type {str} -- Filter the events by Object Type. (default: {'None'}) (choices: {VmwareVm, Mssql, LinuxFileset, WindowsFileset, WindowsHost, LinuxHost, StorageArrayVolumeGroup, VolumeGroup, NutanixVm, AwsAccount, Ec2Instance})
+            object_name {str} -- Filter the events by Object Name. (default: {'None'}) (choices: {Can be the name of a VM, Host, Fileset, Mssql Database, etc}) 
+            before_date {datetime} -- Only show events before specified date. (default: {'None'}) (choices: {E.g. 2018-10-01})
+            after_date {datetime} -- Only show events after specified date. (default: {'None'}) (choices: {E.g. 2018-10-01})
 
         Returns:
             dict -- The `data` object within the API response for `GET /internal/event/` after applying the specified filters.
