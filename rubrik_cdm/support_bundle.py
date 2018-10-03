@@ -54,8 +54,7 @@ class SupportBundle(_API):
 
         Arguments:
             job_id {str} -- JobID of the `SUPPORT_BUNDLE_GENERATOR` job.
-            bun_status {str} -- Status of the Bundle
-            (`GENERATING` / `DOWNLOADED`).
+            bun_status {str} -- Status of the Bundle (`GENERATING` / `DOWNLOADED`).
         """
         try:
             self.db_curs.execute(  # pylint: disable=no-member
@@ -73,8 +72,7 @@ class SupportBundle(_API):
 
         Arguments:
             job_id {str} -- JobID of the `SUPPORT_BUNDLE_GENERATOR` job.
-            job_state {str} -- Status of the `SUPPORT_BUNDLE_GENERATOR` job as
-            retrieved from the `/internal/support/support_bundle` endpoint.
+            job_state {str} -- Status of the `SUPPORT_BUNDLE_GENERATOR` job as retrieved from the `/internal/support/support_bundle` endpoint.
         """
         try:
             self.db_curs.execute(  # pylint: disable=no-member
