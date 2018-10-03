@@ -22,6 +22,7 @@ import os
 import logging
 from random import choice
 import time
+import sqlite3
 
 from .api import Api
 from .cluster import Cluster
@@ -29,6 +30,7 @@ from .data_management import Data_Management
 from .physical import Physical
 from .cloud import Cloud
 from .events import Events
+from .support_bundle import SupportBundle
 
 
 _CLUSTER = Cluster
@@ -37,9 +39,10 @@ _PHYSICAL = Physical
 _API = Api
 _CLOUD = Cloud
 _EVENTS = Events
+_SUPPORTBUNDLE = SupportBundle
 
 
-class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD, _EVENTS):
+class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD, _EVENTS, _SUPPORTBUNDLE):
     """This class acts as the base class for the Rubrik SDK and serves as the main interaction point
     for its end users. It also contains various helper functions used throughout the SDK.
 
@@ -59,6 +62,33 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD, _EVENTS):
             password {str} -- The Password you wish to use to connect to the Rubrik Cluster.. If a value is not provided we will check for a `rubrik_cdm_password` environment variable. (default: {None})
             enable_logging {bool} -- Flag to determine if logging will be enabled for the SDK. (default: {False})
         """
+
+        # Set User Variables and internal database location
+        self.home_dir = os.path.expanduser("~")
+        self.conf_dir = self.home_dir + "/.rubrik-sdk"
+        self.db_file = self.conf_dir + "/rubrik-sdk.db"
+        self.dl_dir = self.home_dir + "/Downloads/"
+
+        # Create directory if not exists
+        if not os.path.isdir(self.conf_dir):
+            self.log("Creating rubrik-sdk directory {}".format(self.conf_dir))
+            try:
+                os.mkdir(self.conf_dir)
+            except OSError as err:
+                sys.exit("Error creating directory {}".format(err))
+
+        # Create/Connect to internal sqlite3 database
+        try:
+            self.conn = sqlite3.connect(self.db_file)
+            self.db_curs = self.conn.cursor()
+            self.db_curs.execute(
+                """CREATE TABLE IF NOT EXISTS support_bundle
+                (event_id text PRIMARY KEY,
+                job_id text, job_state text,
+                expiry_time datetime, status text)"""
+            )
+        except sqlite3.Error as err:
+            sys.exit("Error creating table - {}".format(err))
 
         if node_ip is None:
             node_ip = os.environ.get('rubrik_cdm_node_ip')
