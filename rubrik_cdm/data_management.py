@@ -25,24 +25,33 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current'):
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None):
         """Initiate an on-demand snapshot.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object to take a on-demand snapshot of.
-            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware})
+            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host})
 
         Keyword Arguments:
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
+            fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
+            host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
+
 
         Returns:
             tuple -- The full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
         """
 
-        valid_object_type = ['vmware']
+        valid_object_type = ['vmware', 'physical_host']
+        valid_host_os_type = ['Linux', 'Windows']
 
         if object_type not in valid_object_type:
             sys.exit("Error: The on_demand_snapshot() object_type argument must be one of the following: {}.".format(valid_object_type))
+
+        if host_os is not None:
+            if host_os not in valid_host_os_type:
+                sys.exit("Error: The on_demand_snapshot() host_os argument must be one of the following: {}.".format(
+                    valid_object_type))
 
         if object_type is 'vmware':
             self.log("on_demand_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
@@ -67,20 +76,55 @@ class Data_Management(_API):
 
             snapshot_status_url = api_request['links'][0]['href']
 
+        elif object_type is 'physical_host':
+            if host_os is None:
+                sys.exit("Error: The on_demand_snapshot() host_os argument must be populated when taking a Physical host snapshot.")
+            elif fileset is None:
+                sys.exit("Error: The on_demand_snapshot() fileset argument must be populated when taking a Physical host snapshot.")
+
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the Physical Host '{}'.".format(object_name))
+            host_id = self.object_id(object_name, object_type)
+
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the Fileset Template '{}'.".format(fileset))
+            fileset_template_id = self.object_id(fileset, 'fileset_template', host_os)
+
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
+            fileset_summary = self.get(
+                'v1', '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id, fileset_template_id))
+
+            if fileset_summary['total'] is 0:
+                sys.exit("Error: The Physical Host '{}' is not assigned to the '{}' Fileset.".format(object_name, fileset))
+
+            fileset_id = fileset_summary['data'][0]['id']
+
+            if sla_name is 'current':
+                sla_id = fileset_summary['data'][0]['effectiveSlaDomainId']
+            elif sla_name is not 'current':
+                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                sla_id = self.object_id(sla_name, 'sla')
+
+            config = {}
+            config['slaId'] = sla_id
+
+            self.log("on_demand_snapshot: Initiating snapshot for the Physical Host '{}'.".format(object_name))
+            api_request = self.post('v1', '/fileset/{}/snapshot'.format(fileset_id), config)
+
+            snapshot_status_url = api_request['links'][0]['href']
+
         return (api_request, snapshot_status_url)
 
-    def object_id(self, object_name, object_type):
+    def object_id(self, object_name, object_type, host_os=None):
         """Get the ID of a Rubrik object by providing its name.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume})
 
         Returns:
             str -- The ID of the provided Rubrik object.
         """
 
-        valid_object_type = ['vmware', 'sla', 'vmware_host']
+        valid_object_type = ['vmware', 'sla', 'vmware_host', 'physical_host', 'fileset_template', 'managed_volume']
 
         if object_type not in valid_object_type:
             sys.exit("Error: The object_id() object_type argument must be one of the following: {}.".format(valid_object_type))
@@ -95,6 +139,21 @@ class Data_Management(_API):
         elif object_type is 'vmware_host':
             object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/vmware/host?primary_cluster_id=local'
+        elif object_type is 'physical_host':
+            object_summary_api_version = 'v1'
+            object_summary_api_endpoint = '/host?primary_cluster_id=local&hostname={}'.format(object_name)
+        elif object_type is 'fileset_template':
+            if host_os is None:
+                sys.exit("Error: You must provide the Fileset Tempalte OS type.")
+            elif host_os not in ['Linux', 'Windows']:
+                sys.exit("Error: The host_os must be either 'Linux' or 'Windows'.")
+            object_summary_api_version = 'v1'
+            object_summary_api_endpoint = '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
+                host_os, object_name)
+        elif object_type is 'managed_volume':
+            object_summary_api_version = 'internal'
+            object_summary_api_endpoint = '/managed_volume?is_relic=false&primary_cluster_id=local&name={}'.format(
+                object_name)
 
         self.log("object_id: Getting the object id for the {} object '{}'.".format(object_type, object_name))
         api_request = self.get(object_summary_api_version, object_summary_api_endpoint)
@@ -102,10 +161,24 @@ class Data_Management(_API):
         if api_request['total'] == 0:
             sys.exit("Error: The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
         elif api_request['total'] > 0:
+            object_ids = []
+            # Define the "object name" to search for
+            if object_type == 'physical_host':
+                name_value = 'hostname'
+            else:
+                name_value = 'name'
+
             for item in api_request['data']:
-                if item['name'] == object_name:
-                    object_id = item['id']
-                    return object_id
+                if item[name_value] == object_name:
+                    object_ids.append(item['id'])
+
+            if len(object_ids) > 1:
+                sys.exit("Error: Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(
+                    object_type, object_name))
+            elif len(object_ids) == 0:
+                sys.exit("Error: The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
+            else:
+                return object_ids[0]
 
             sys.exit("Error: The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
@@ -432,3 +505,70 @@ class Data_Management(_API):
                 config['isVmPaused'] = False
 
                 return self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
+
+    def begin_managed_volume_snapshot(self, name, timeout=30):
+        """Open a managed volume for writes. All writes to the managed volume until the snapshot is ended will be part of its snapshot.
+
+        Arguments:
+            name {str} -- The name of the Managed Volume to begin the snapshot on.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {30})
+
+        Returns:
+            str -- No change required. The Managed Volume '`name`' is already assigned in a writeable state.
+            dict -- The full response for `POST /managed_volume/{id}/begin_snapshot`.
+        """
+
+        self.log("begin_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
+        managed_volume_id = self.object_id(name, 'managed_volume')
+
+        self.log("begin_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
+        managed_volume_summary = self.get('internal', '/managed_volume/{}'.format(managed_volume_id))
+
+        if managed_volume_summary['isWritable'] is False:
+            self.log("begin_managed_volume_snapshot: Setting the Managed Volume '{}' to a writeable state.".format(name))
+            return self.post('internal', '/managed_volume/{}/begin_snapshot'.format(managed_volume_id), config={}, timeout=timeout)
+        else:
+            return "No change required. The Managed Volume '{}' is already assigned in a writeable state.".format(name)
+
+    def end_managed_volume_snapshot(self, name, sla_name='current', timeout=30):
+        """Close a managed volume for writes. A snapshot will be created containing all writes since the last begin snapshot call.
+
+
+        Arguments:
+            name {str} -- The name of the Managed Volume to end snapshots on.
+
+        Keyword Arguments:
+            sla_name {str} -- The SLA Domain name you want to assign the snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {30})
+
+        Returns:
+            dict -- The full response for `POST /managed_volume/{id}/end_snapshot`.
+        """
+
+        self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
+        managed_volume_id = self.object_id(name, 'managed_volume')
+
+        self.log("end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
+        managed_volume_summary = self.get('internal', '/managed_volume/{}'.format(managed_volume_id))
+
+        if managed_volume_summary['isWritable'] is False:
+            sys.exit("Error: The Managed Volume '{}' is in a Read-only state. This can be changed through the `begin_managed_volume_snapshot` function.".format(name))
+
+        if sla_name == 'current':
+            self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))
+            if managed_volume_summary['slaAssignment'] == 'Unassigned' or managed_volume_summary['effectiveSlaDomainId'] == 'UNPROTECTED':
+                sys.exit(
+                    "Error: The Managed Volume '{}' does not have a SLA assigned currently assigned. You must populate the sla_name argument.".format(name))
+
+            sla_id = managed_volume_summary['configuredSlaDomainId']
+        else:
+            self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+            sla_id = self.object_id(sla_name, 'sla')
+
+        config = {}
+        config['retentionConfig'] = {}
+        config['retentionConfig']['slaId'] = sla_id
+
+        return self.post('internal', '/managed_volume/{}/end_snapshot'.format(managed_volume_id), config, timeout)

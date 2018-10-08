@@ -84,3 +84,20 @@ Output:
 
 {'version': '4.1.2-2366'}
 ```
+
+## Certificate Verification
+
+When connecting to a Rubrik cluster without certificate verification enabled (see the Rubrik CDM Security Guide for additional information) you will receive the following warning message:
+
+```
+/usr/local/lib/python3.6/site-packages/urllib3/connectionpool.py:857: InsecureRequestWarning: 
+Unverified HTTPS request is being made. Adding certificate verification is strongly advised. 
+See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warningsInsecureRequestWarning)
+```
+
+To supress this warning add the following code to your script:
+
+```py
+import urllib3
+urllib3.disable_warnings()
+```
