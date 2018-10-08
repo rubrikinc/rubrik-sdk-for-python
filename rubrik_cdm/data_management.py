@@ -552,13 +552,14 @@ class Data_Management(_API):
 
         self.log("end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
         managed_volume_summary = self.get('internal', '/managed_volume/{}'.format(managed_volume_id))
+        print(managed_volume_summary)
 
         if managed_volume_summary['isWritable'] is False:
             sys.exit("Error: The Managed Volume '{}' is in a Read-only state. This can be changed through the `begin_managed_volume_snapshot` function.".format(name))
 
         if sla_name == 'current':
             self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))
-            if managed_volume_summary['slaAssignment'] == 'Unassigned':
+            if managed_volume_summary['slaAssignment'] == 'Unassigned' or managed_volume_summary['effectiveSlaDomainId'] == 'UNPROTECTED':
                 sys.exit(
                     "Error: The Managed Volume '{}' does not have a SLA assigned currently assigned. You must populate the sla_name argument.".format(name))
 
