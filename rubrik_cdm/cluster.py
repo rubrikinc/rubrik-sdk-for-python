@@ -175,3 +175,26 @@ class Cluster(_API):
 
         self.log("cluster_timezone: Configuring the Rubrik cluster timezone")
         return self.patch("v1", "/cluster/me", config)
+
+    def cluster_ntp(self, ntp_server):
+        """Configure the Rubrik cluster timezone.
+
+        Arguments:
+            ntp_server {list} -- A list of the NTP server(s) you wish to configure the Rubrik cluster to use.
+
+        Returns:
+            str -- No change required. The NTP server(s) `ntp_server` has already been added to the Rubrik cluster.
+            dict -- {'status_code': 204}
+        """
+
+        if isinstance(ntp_server, list) is False:
+            sys.exit("Error: The 'ntp_server' argument must be a list object.")
+
+        self.log("cluster_ntp: Determing the current cluster NTP settings")
+        cluster_ntp = self.get("internal", "/cluster/me/ntp_server")
+
+        if sorted(cluster_ntp["data"]) == sorted(ntp_server):
+            return "No change required. The NTP server(s) {} has already been added to the Rubrik cluster.".format(ntp_server)
+
+        self.log("cluster_ntp: Adding the NTP server(s) '{}' to the Rubrik cluster.".format(ntp_server))
+        return self.post("internal", "/cluster/me/ntp_server", ntp_server)
