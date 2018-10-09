@@ -66,7 +66,7 @@ class Cluster(_API):
             end_user {str} -- The name of the end user you wish to grant authorization to.
 
         Keyword Arguments:
-            object_type {str} -- The Rubrik object type you wish to backup. (default: {vmware}) (choices: {vmware}) 
+            object_type {str} -- The Rubrik object type you wish to backup. (default: {vmware}) (choices: {vmware})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -119,6 +119,7 @@ class Cluster(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
+            str -- No change required. The vCenter '`vcenter_ip`' has already been added to the Rubrik cluster.
             tuple -- The full API response for `POST /v1/vmware/vcenter` and the job status URL which can be used to monitor progress of the adding the vCenter to the Rubrik cluster. (api_response, job_status_url)
         """
 
@@ -127,7 +128,7 @@ class Cluster(_API):
 
         for vcenter in current_vcenter["data"]:
             if vcenter["hostname"] == vcenter_ip:
-                return "No change required. The vCenter `{}` has already been added to the Rubrik cluster.".format(vcenter_ip)
+                return "No change required. The vCenter '{}' has already been added to the Rubrik cluster.".format(vcenter_ip)
 
         config = {}
         config["hostname"] = vcenter_ip
@@ -144,3 +145,33 @@ class Cluster(_API):
         add_vcenter = self.post("v1", "/vmware/vcenter", config, timeout)
 
         return add_vcenter, add_vcenter['links'][0]['href']
+
+    def cluster_timezone(self, timezone):
+        """Configure the Rubrik cluster timezone.
+
+        Arguments:
+            timezone {str} -- The timezone you wish the Rubrik cluster to use. (choices: {America/Anchorage, America/Araguaina, America/Barbados, America/Chicago, America/Denver, America/Los_Angeles, America/Mexico_City, America/New_York, America/Noronha, America/Phoenix, America/Toronto, America/Vancouver, Asia/Bangkok, Asia/Dhaka, Asia/Dubai, Asia/Hong_Kong, Asia/Karachi, Asia/Kathmandu, Asia/Kolkata, Asia/Magadan, Asia/Singapore, Asia/Tokyo, Atlantic/Cape_Verde, Australia/Perth, Australia/Sydney, Europe/Amsterdam, Europe/Athens, Europe/London, Europe/Moscow, Pacific/Auckland, Pacific/Honolulu, Pacific/Midway, UTC})
+
+        Returns:
+            str -- No change required. The Rubrik cluster is already configured with '`timezone`' as it's timezone.
+            dict -- The full API response for `PATCH /v1//cluster/me'`
+        """
+
+        valid_timezones = ['America/Anchorage', 'America/Araguaina', 'America/Barbados', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'America/Mexico_City', 'America/New_York', 'America/Noronha', 'America/Phoenix', 'America/Toronto', 'America/Vancouver', 'Asia/Bangkok', 'Asia/Dhaka', 'Asia/Dubai',
+                           'Asia/Hong_Kong', 'Asia/Karachi', 'Asia/Kathmandu', 'Asia/Kolkata', 'Asia/Magadan', 'Asia/Singapore', 'Asia/Tokyo', 'Atlantic/Cape_Verde', 'Australia/Perth', 'Australia/Sydney', 'Europe/Amsterdam', 'Europe/Athens', 'Europe/London', 'Europe/Moscow', 'Pacific/Auckland', 'Pacific/Honolulu', 'Pacific/Midway', 'UTC']
+
+        if timezone not in valid_timezones:
+            sys.exit("Error: The timezone argument must be one of the following: {}.".format(valid_timezones))
+
+        self.log("cluster_timezone: Determing the current cluster timezone")
+        cluster_summary = self.get("v1", "/cluster/me")
+
+        if cluster_summary["timezone"]["timezone"] == timezone:
+            return "No change required. The Rubrik cluster is already configured with '{}' as it's timezone.".format(timezone)
+
+        config = {}
+        config["timezone"] = {}
+        config["timezone"]["timezone"] = timezone
+
+        self.log("cluster_timezone: Configuring the Rubrik cluster timezone")
+        return self.patch("v1", "/cluster/me", config)
