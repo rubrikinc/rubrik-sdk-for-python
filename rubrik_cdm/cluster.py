@@ -104,3 +104,43 @@ class Cluster(_API):
             config['privileges'] = {"restore": [vm_id]}
 
             return self.post('internal', '/authorization/role/end_user', config, timeout=timeout)
+
+    def add_vcenter(self, vcenter_ip, vcenter_username, vcenter_password, vm_linking=True, ca_certificate=None, timeout=30):
+        """Add a new vCenter to the Rubrik cluster.
+
+        Arguments:
+            vcenter_ip {str} -- The IP address or FQDN of the vCenter you wish to add.
+            vcenter_username {str} -- The vCenter username used for authentication.
+            vcenter_password {str} -- The vCenter password used for authentication.
+
+        Keyword Arguments:
+            vm_linking {bool} -- Automatically link discovered virtual machines (i.e VM Linking). (default: {True})
+            ca_certificate {str} -- CA certificiate used to perform TLS certificate validation (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+
+        Returns:
+            tuple -- The full API response for `POST /v1/vmware/vcenter` and the job status URL which can be used to monitor progress of the adding the vCenter to the Rubrik cluster. (api_response, job_status_url)
+        """
+
+        self.log("add_vcenter: Searching the Rubrik cluster for the vCenter '{}'.".format(vcenter_ip))
+        current_vcenter = self.get("v1", "/vmware/vcenter?primary_cluster_id=local")
+
+        for vcenter in current_vcenter["data"]:
+            if vcenter["hostname"] == vcenter_ip:
+                return "No change required. The vCenter `{}` has already been added to the Rubrik cluster.".format(vcenter_ip)
+
+        config = {}
+        config["hostname"] = vcenter_ip
+        config["username"] = vcenter_username
+        config["password"] = vcenter_password
+        if vm_linking is True:
+            config["conflictResolutionAuthz"] = "AllowAutoConflictResolution"
+        elif vm_linking is False:
+            config["conflictResolutionAuthz"] = "NoConflictResolution"
+        if ca_certificate is not None:
+            config["caCerts"] = ca_certificate
+
+        self.log("add_vcenter: Adding vCenter '{}' to the Rubrik cluster.".format(vcenter_ip))
+        add_vcenter = self.post("v1", "/vmware/vcenter", config, timeout)
+
+        return add_vcenter, add_vcenter['links'][0]['href']

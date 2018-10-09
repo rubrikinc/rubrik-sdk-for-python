@@ -16,6 +16,7 @@
 * [status](status.md)
 
 ### Cluster Functions
+* [add_vcenter](add_vcenter.md)
 * [cluster_node_ip](cluster_node_ip.md)
 * [cluster_version](cluster_version.md)
 * [end_user_authorization](end_user_authorization.md)
