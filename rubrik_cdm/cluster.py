@@ -198,3 +198,47 @@ class Cluster(_API):
 
         self.log("cluster_ntp: Adding the NTP server(s) '{}' to the Rubrik cluster.".format(ntp_server))
         return self.post("internal", "/cluster/me/ntp_server", ntp_server)
+
+    def cluster_syslog(self, syslog_ip, protocol, port=514, timeout=15):
+        """Configure the Rubrik cluster syslog settings..
+
+        Arguments:
+            syslog_ip {str} -- The IP address or hostname of the syslog server you wish to add to the Rubrik cluster.
+            protocol {str} -- The protocol to use when making the connection to the syslog server. (choices: {TCP, UDP})
+
+        Keyword Arguments:
+            port {int} -- The port to use when making the connection to the syslog server. (default: {514})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            str -- No change required. The Rubrik cluster is already configured to use the syslog server '`syslog_hostname`' on port '`port`' using the '`protocol`' protocol.
+            dict -- The full API response for `POST /internal/syslog'`
+        """
+
+        valid_protocols = ["TCP", "UDP"]
+
+        if protocol not in valid_protocols:
+            sys.exit("Error: The protocol argument must be one of the following: {}.".format(valid_protocols))
+
+        self.log("cluster_syslog: Getting the current cluster syslog settings")
+        syslog = self.get("internal", "/syslog")
+
+        config = {}
+        config["hostname"] = syslog_ip
+        config["protocol"] = protocol
+        config["port"] = int(port) # convert to an int in case the user provides a string
+
+        if syslog["total"] != 0:
+
+            current_syslog_config = syslog["data"][0]
+            # remove the id key from the syslog config for comparison
+            del current_syslog_config["id"]
+
+            if current_syslog_config == config:
+                return "No change required. The Rubrik cluster is already configured to use the syslog server '{}' on port '{}' using the '{}' protocol.".format(syslog_hostname, port, protocol)
+
+            self.log("cluster_syslog: Clearing the existing syslog configuration.")
+            self.delete("internal", "/syslog/1")
+
+        self.log("cluster_syslog: Configuring the syslog settings.")
+        return self.post("internal", "/syslog", config, timeout)
