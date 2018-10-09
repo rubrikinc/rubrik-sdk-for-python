@@ -21,6 +21,7 @@ def add_vcenter(vcenter_ip, vcenter_username, vcenter_password, vm_linking=True,
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
+| str  | No change required. The vCenter '`vcenter_ip`' has already been added to the Rubrik cluster. |
 | tuple  | The full API response for `POST /v1/vmware/vcenter` and the job status URL which can be used to monitor progress of the adding the vCenter to the Rubrik cluster. (api_response, job_status_url) |
 ## Example
 ```py
