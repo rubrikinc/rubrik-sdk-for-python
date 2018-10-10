@@ -22,6 +22,7 @@
 * [cluster_node_name](cluster_node_name.md)
 * [cluster_ntp](cluster_ntp.md)
 * [cluster_search_domain](cluster_search_domain.md)
+* [cluster_smtp_settings](cluster_smtp_settings.md)
 * [cluster_syslog](cluster_syslog.md)
 * [cluster_timezone](cluster_timezone.md)
 * [cluster_version](cluster_version.md)

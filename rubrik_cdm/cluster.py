@@ -367,3 +367,56 @@ class Cluster(_API):
             return "No change required. The Rubrik cluster is already configured with the provided DNS servers."
 
         return self.post("internal", "/cluster/me/dns_search_domain", search_domain, timeout)
+
+    def cluster_smtp_settings(self, hostname, port, from_email, smtp_username, smtp_password, encryption="NONE", timeout=15):
+        """The Rubrik cluster uses email to send all notifications to local Rubrik cluster user accounts that have the Admin role. To do this the Rubrik cluster transfers the email messages to an SMTP server for delivery. 
+        This function will configure the Rubrik cluster with account information for the SMTP server to permit the Rubrik cluster to use the SMTP server for sending outgoing email.
+
+        Arguments:
+            hostname {str} -- Hostname of the SMTP server.
+            port {int} -- Incoming port on the SMTP server. Normally port 25, port 465, or port 587, depending upon the type of encryption used.
+            from_email {str} --  The email address assigned to the account on the SMTP server
+            smtp_username {str} -- The username assigned to the account on the SMTP server
+            smtp_password {str} -- The password associated with the username
+
+        Keyword Arguments:
+            encryption {str} --  The encryption protocol that the SMTP server requires for incoming SMTP connections (default: {"NONE"}) (choices: {NONE, SSL, STARTTLS})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            str -- No change required. The Rubrik cluster is already configured with the provided SMTP settings.
+            dict -- The full API response for `POST /internal/smtp_instance'`
+            dict -- The full API response for `PATCH /internal/smtp_instance/{id}'`
+        """
+
+        valid_encryption = ['SSL', 'STARTTLS', 'NONE']
+
+        if encryption not in valid_encryption:
+            sys.exit("Error: cluster_smtp_settings() encryption argument must be one of the following: {}.".format(
+                valid_encryption))
+
+        self.log("cluster_smtp_settings: Determing the current SMTP settings on the Rubrik cluster.")
+        current_smtp_settings = self.get("internal", "/smtp_instance")
+
+        config = {}
+        config["smtpHostname"] = hostname
+        config["smtpPort"] = int(port)
+        config["smtpSecurity"] = encryption
+        config["smtpUsername"] = smtp_username
+        config["fromEmailId"] = from_email
+
+        if current_smtp_settings["total"] == 0:
+            config["smtpPassword"] = smtp_password
+            self.log("cluster_smtp_settings: Configuring the SMTP settings.")
+            return self.post("internal", "/smtp_instance", config, timeout)
+        else:
+            current_smtp_settings = current_smtp_settings["data"][0]
+            # Save the SMTP ID in case of PATCH and then delete for comparison
+            smtp_id = current_smtp_settings["id"]
+            del current_smtp_settings["id"]
+
+            if current_smtp_settings == config:
+                return "No change required. The Rubrik cluster is already configured with the provided SMTP settings."
+
+            self.log("cluster_smtp_settings: Updating the SMTP settings.")
+            return self.patch("internal", "/smtp_instance/{}".format(smtp_id), config, timeout)
