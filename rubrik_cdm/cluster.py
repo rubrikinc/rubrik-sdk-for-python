@@ -317,3 +317,28 @@ class Cluster(_API):
 
         self.log("cluster_vlan: Configuring the VLANs.")
         return self.post("internal", "/cluster/me/vlan", config, timeout)
+
+    def cluster_dns_servers(self, server_ip, timeout=15):
+        """Configure the DNS Servers on the Rubrik cluster.
+
+        Arguments:
+            server_ip {list} -- The DNS Server IPs you wish to add to the Rubrik cluster.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            str -- No change required. The Rubrik cluster is already configured with the provided DNS servers.
+            dict -- The full API response for `POST /internal/cluster/me/dns_nameserver'`
+        """
+
+        if isinstance(server_ip, list) is False:
+            sys.exit("Error: The 'server_ip' argument must be a list")
+
+        self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
+        current_dns_servers = self.get("internal", "/cluster/me/dns_nameserver")
+
+        if sorted(current_dns_servers["data"]) == sorted(server_ip):
+            return "No change required. The Rubrik cluster is already configured with the provided DNS servers."
+
+        return self.post("internal", "/cluster/me/dns_nameserver", server_ip, timeout)

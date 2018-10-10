@@ -17,6 +17,7 @@
 
 ### Cluster Functions
 * [add_vcenter](add_vcenter.md)
+* [cluster_dns_servers](cluster_dns_servers.md)
 * [cluster_node_ip](cluster_node_ip.md)
 * [cluster_node_name](cluster_node_name.md)
 * [cluster_ntp](cluster_ntp.md)
