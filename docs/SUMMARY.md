@@ -21,6 +21,7 @@
 * [cluster_node_ip](cluster_node_ip.md)
 * [cluster_node_name](cluster_node_name.md)
 * [cluster_ntp](cluster_ntp.md)
+* [cluster_search_domain](cluster_search_domain.md)
 * [cluster_syslog](cluster_syslog.md)
 * [cluster_timezone](cluster_timezone.md)
 * [cluster_version](cluster_version.md)

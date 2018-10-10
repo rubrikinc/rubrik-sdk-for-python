@@ -342,3 +342,28 @@ class Cluster(_API):
             return "No change required. The Rubrik cluster is already configured with the provided DNS servers."
 
         return self.post("internal", "/cluster/me/dns_nameserver", server_ip, timeout)
+
+    def cluster_search_domain(self, search_domain, timeout=15):
+        """Configure the DNS search domains on the Rubrik cluster.
+
+        Arguments:
+            search_domain {list} -- The DNS search domains you wish to add to the Rubrik cluster.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            str -- No change required. The Rubrik cluster is already configured with the provided DNS search domains.
+            dict -- The full API response for `POST /internal/cluster/me/dns_search_domain'`
+        """
+
+        if isinstance(search_domain, list) is False:
+            sys.exit("Error: The 'server_ip' argument must be a list")
+
+        self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
+        current_dns_search_domains = self.get("internal", "/cluster/me/dns_search_domain")
+
+        if sorted(current_dns_search_domains["data"]) == sorted(search_domain):
+            return "No change required. The Rubrik cluster is already configured with the provided DNS servers."
+
+        return self.post("internal", "/cluster/me/dns_search_domain", search_domain, timeout)
