@@ -18,10 +18,12 @@
 ### Cluster Functions
 * [add_vcenter](add_vcenter.md)
 * [cluster_node_ip](cluster_node_ip.md)
+* [cluster_node_name](cluster_node_name.md)
 * [cluster_ntp](cluster_ntp.md)
 * [cluster_syslog](cluster_syslog.md)
 * [cluster_timezone](cluster_timezone.md)
 * [cluster_version](cluster_version.md)
+* [cluster_vlan](cluster_vlan.md)
 * [end_user_authorization](end_user_authorization.md)
 
 ### Cloud Functions

@@ -58,6 +58,26 @@ class Cluster(_API):
 
         return node_ip_list
 
+    def cluster_node_name(self, timeout=15):
+        """Retrive the name of each node in the Rubrik cluster.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            list -- A list that contains the name of each node in the Rubrik cluster.
+        """
+
+        self.log('cluster_node_ip: Generating a list of all Cluster')
+        api_request = self.get('internal', '/cluster/me/node', timeout)
+
+        node_ip_name = []
+
+        for node in api_request['data']:
+            node_ip_name.append(node["id"])
+
+        return node_ip_name
+
     def end_user_authorization(self, object_name, end_user, object_type='vmware', timeout=15):
         """Grant an End User authorization to the provided object.
 
@@ -242,3 +262,58 @@ class Cluster(_API):
 
         self.log("cluster_syslog: Configuring the syslog settings.")
         return self.post("internal", "/syslog", config, timeout)
+
+    def cluster_vlan(self, vlan, netmask, ips, timeout=15):
+        """Configure VLANs on the Rubrik cluster.
+
+        Arguments:
+            vlan {int} -- The VLAN ID you wish to configure.
+            netmask {str} -- The netmask of the VLAN ID you wish to configure.
+            ips {list or dict} -- The `ips` argument can either be a list or a dictionary. The list should contain an IP, in the relevant VLAN, for each node in the cluster. These IPs will be sorted, from lowest to highest, and then automatically associated with a node name based on alphabetical order. If you would like more finite control over the assignment you can use a dict with `node_name:ip` as it's key pairs.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            str -- No change required. The Rubrik cluster is already configured with the provided VLAN information.
+            dict -- The full API response for `POST /internal/cluster/me/vlan'`
+        """
+
+        if isinstance(ips, list) is True:
+            self.log("cluster_vlan: Generating a list of all Cluster Node IPs.")
+            node_names = self.cluster_node_name()
+
+            if len(node_names) != len(ips):
+                sys.exit("Error: The Rubrik cluster has {} nodes but you provided {} IP addresses. There must be a 1 to 1 relationship between nodes and IPs.".format(
+                    str(len(node_names)), str(len(ips))))
+
+            node_names = sorted(node_names)
+            interfaces = sorted(ips)
+
+            node_ip_combined = {}
+            for i in range(0, len(node_names)):
+                node_ip_combined[node_names[i]] = interfaces[i]
+            print(node_ip_combined)
+        elif isinstance(ips, dict) is True:
+            node_ip_combined = ips
+        else:
+            sys.exit(
+                "Error: The interfaces argument must be either a list of IPs or a dictionary with node_name:ip as the key, value pairs.")
+
+        self.log("cluster_vlan: Getting the current VLAN configurations.")
+        current_vlans = self.get("internal", "/cluster/me/vlan")
+        if current_vlans["total"] != 0:
+            current_vlans = current_vlans["data"][0]
+
+        interface_node_ip = [{'node': key, 'ip': val} for key, val in node_ip_combined.items()]
+
+        config = {}
+        config["vlan"] = int(vlan)
+        config["netmask"] = netmask
+        config["interfaces"] = interface_node_ip
+
+        if current_vlans == config:
+            return "No change required. The Rubrik cluster is already configured with the provided VLAN information."
+
+        self.log("cluster_vlan: Configuring the VLANs.")
+        return self.post("internal", "/cluster/me/vlan", config, timeout)
