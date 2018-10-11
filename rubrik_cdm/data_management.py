@@ -392,7 +392,7 @@ class Data_Management(_API):
             time {str} -- A time value formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
 
         Returns:
-            str -- A combined date/time value formated as `Year-Month-DayTHour:Minute` where Hour:Minute is on the 24-hour clock (ex : 2014-1-15T01:30). 
+            str -- A combined date/time value formated as `Year-Month-DayTHour:Minute` where Hour:Minute is on the 24-hour clock (ex : 2014-1-15T01:30).
         """
 
         from datetime import datetime
@@ -572,3 +572,38 @@ class Data_Management(_API):
         config['retentionConfig']['slaId'] = sla_id
 
         return self.post('internal', '/managed_volume/{}/end_snapshot'.format(managed_volume_id), config, timeout)
+
+    def get_sla_objects(self, sla, object_type, timeout=15):
+        """Retrieve the name and ID of a specific object type.
+
+        Arguments:
+            sla {str} -- The name of the SLA Domain you wish to search.
+            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware})
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {15})
+
+        Returns:
+            dict -- The `name:id` of each object in the provided SLA Domain.
+        """
+
+        valid_object_type = ['vmware']
+
+        if object_type not in valid_object_type:
+            sys.exit("Error: The get_sla_object() object_type argument must be one of the following: {}.".format(valid_object_type))
+
+        if object_type == 'vmware':
+
+            sla_id = self.object_id(sla, "sla")
+
+            all_vms_in_sla = self.get(
+                "v1", "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(sla_id), timeout)
+
+            vm_name_id = {}
+            for vm in all_vms_in_sla["data"]:
+                vm_name_id[vm["name"]] = vm["id"]
+
+            if bool(vm_name_id) is False:
+                sys.exit("Error: The SLA '{}' is currently not protecting any {} objects.".format(sla, object_type))
+
+            return vm_name_id
