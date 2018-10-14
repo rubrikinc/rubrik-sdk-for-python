@@ -154,11 +154,11 @@ class Cluster(_API):
         config["hostname"] = vcenter_ip
         config["username"] = vcenter_username
         config["password"] = vcenter_password
-        if vm_linking is True:
+        if vm_linking == True:
             config["conflictResolutionAuthz"] = "AllowAutoConflictResolution"
-        elif vm_linking is False:
+        elif vm_linking == False:
             config["conflictResolutionAuthz"] = "NoConflictResolution"
-        if ca_certificate is not None:
+        if ca_certificate != None:
             config["caCerts"] = ca_certificate
 
         self.log("add_vcenter: Adding vCenter '{}' to the Rubrik cluster.".format(vcenter_ip))
@@ -207,7 +207,7 @@ class Cluster(_API):
             dict -- {'status_code': 204}
         """
 
-        if isinstance(ntp_server, list) is False:
+        if isinstance(ntp_server, list) == False:
             sys.exit("Error: The 'ntp_server' argument must be a list object.")
 
         self.log("cluster_ntp: Determing the current cluster NTP settings")
@@ -279,7 +279,7 @@ class Cluster(_API):
             dict -- The full API response for `POST /internal/cluster/me/vlan'`
         """
 
-        if isinstance(ips, list) is True:
+        if isinstance(ips, list) == True:
             self.log("cluster_vlan: Generating a list of all Cluster Node IPs.")
             node_names = self.cluster_node_name()
 
@@ -294,7 +294,7 @@ class Cluster(_API):
             for i in range(0, len(node_names)):
                 node_ip_combined[node_names[i]] = interfaces[i]
             print(node_ip_combined)
-        elif isinstance(ips, dict) is True:
+        elif isinstance(ips, dict) == True:
             node_ip_combined = ips
         else:
             sys.exit(
@@ -332,7 +332,7 @@ class Cluster(_API):
             dict -- The full API response for `POST /internal/cluster/me/dns_nameserver'`
         """
 
-        if isinstance(server_ip, list) is False:
+        if isinstance(server_ip, list) == False:
             sys.exit("Error: The 'server_ip' argument must be a list")
 
         self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
@@ -357,7 +357,7 @@ class Cluster(_API):
             dict -- The full API response for `POST /internal/cluster/me/dns_search_domain'`
         """
 
-        if isinstance(search_domain, list) is False:
+        if isinstance(search_domain, list) == False:
             sys.exit("Error: The 'server_ip' argument must be a list")
 
         self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")

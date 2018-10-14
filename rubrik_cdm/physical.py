@@ -77,7 +77,7 @@ class Physical(_API):
                 host_id = host['id']
                 break
 
-        if host_present is False:
+        if host_present == False:
             return "No change required. The host '{}' is not connected to the Rubrik cluster.".format(hostname)
 
         self.log("Deleting the host '{}' from the Rubrik cluster.".format(hostname))
@@ -109,15 +109,15 @@ class Physical(_API):
             sys.exit("Error: The create_physical_fileset() operating_system argument must be one of the following: {}.".format(
                 valid_operating_system))
 
-        if isinstance(follow_network_shares, bool) is False:
+        if isinstance(follow_network_shares, bool) == False:
             sys.exit("Error: The 'follow_network_shares' argument must be True or False.")
-        elif isinstance(backup_hidden_folders, bool) is False:
+        elif isinstance(backup_hidden_folders, bool) == False:
             sys.exit("Error: The 'backup_hidden_folders' argument must be True or False.")
-        elif isinstance(include, list) is False:
+        elif isinstance(include, list) == False:
             sys.exit("Error: The 'include' argument must be a list object.")
-        elif isinstance(exclude, list) is False:
+        elif isinstance(exclude, list) == False:
             sys.exit("Error: The 'exclude' argument must be a list object.")
-        elif isinstance(exclude_exception, list) is False:
+        elif isinstance(exclude_exception, list) == False:
             sys.exit("Error: The 'exclude_exception' argument must be a list object.")
 
         config = {}
@@ -177,13 +177,13 @@ class Physical(_API):
         if share_type not in valid_share_type:
             sys.exit("Error: The create_fileset() share_type argument must be one of the following: {}.".format(valid_share_type))
 
-        if isinstance(follow_network_shares, bool) is False:
+        if isinstance(follow_network_shares, bool) == False:
             sys.exit("Error: The 'follow_network_shares' argument must be True or False.")
-        elif isinstance(include, list) is False:
+        elif isinstance(include, list) == False:
             sys.exit("Error: The 'include' argument must be a list object.")
-        elif isinstance(exclude, list) is False:
+        elif isinstance(exclude, list) == False:
             sys.exit("Error: The 'exclude' argument must be a list object.")
-        elif isinstance(exclude_exception, list) is False:
+        elif isinstance(exclude_exception, list) == False:
             sys.exit("Error: The 'exclude_exception' argument must be a list object.")
 
         config = {}
@@ -256,15 +256,15 @@ class Physical(_API):
         if exclude_exception == None:
             exclude_exception = []
 
-        if isinstance(follow_network_shares, bool) is False:
+        if isinstance(follow_network_shares, bool) == False:
             sys.exit("Error: The 'follow_network_shares' argument must be True or False.")
-        elif isinstance(backup_hidden_folders, bool) is False:
+        elif isinstance(backup_hidden_folders, bool) == False:
             sys.exit("Error: The 'backup_hidden_folders' argument must be True or False.")
-        elif isinstance(include, list) is False:
+        elif isinstance(include, list) == False:
             sys.exit("Error: The 'include' argument must be a list object.")
-        elif isinstance(exclude, list) is False:
+        elif isinstance(exclude, list) == False:
             sys.exit("Error: The 'exclude' argument must be a list object.")
-        elif isinstance(exclude_exception, list) is False:
+        elif isinstance(exclude_exception, list) == False:
             sys.exit("Error: The 'exclude_exception' argument must be a list object.")
 
         self.log("assign_physical_host_fileset: Searching the Rubrik cluster for the {} physical host {}.".format(

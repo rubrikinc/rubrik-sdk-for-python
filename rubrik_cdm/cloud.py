@@ -56,19 +56,19 @@ class Cloud(_API):
         if re.compile(r'[_\/*?%.:|<>]').findall(aws_bucket_name):
             sys.exit("Error: The `aws_bucket_name` may not contain any of the following characters: _\/*?%.:|<>")
 
-        if aws_region is None:
+        if aws_region == None:
             aws_region = os.environ.get('AWS_DEFAULT_REGION')
-            if aws_region is None:
+            if aws_region == None:
                 sys.exit("Error: `aws_region` has not been provided.")
 
-        if aws_access_key is None:
+        if aws_access_key == None:
             aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID')
-            if aws_access_key is None:
+            if aws_access_key == None:
                 sys.exit("Error: `aws_access_key` has not been provided.")
 
-        if aws_secret_key is None:
+        if aws_secret_key == None:
             aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-            if aws_secret_key is None:
+            if aws_secret_key == None:
                 sys.exit("Error: `aws_secret_key` has not been provided.")
 
         if aws_region not in valid_aws_regions:
@@ -82,9 +82,9 @@ class Cloud(_API):
         if archive_name == 'default':
             archive_name = 'AWS:S3:{}'.format(aws_bucket_name.lower().strip())
 
-        if kms_master_key_id is None and rsa_key is None:
+        if kms_master_key_id == None and rsa_key == None:
             sys.exit("Error: You must populated either `kms_master_key_id` or `rsa_key`.")
-        elif kms_master_key_id is not None and rsa_key is not None:
+        elif kms_master_key_id != None and rsa_key != None:
             sys.exit("Error: Both `kms_master_key_id` or `rsa_key` have been populated. You may only use one.")
 
         self.log("aws_s3_cloudout: Searching the Rubrik cluster for archival locations.")

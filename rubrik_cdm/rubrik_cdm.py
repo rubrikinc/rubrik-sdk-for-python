@@ -57,34 +57,34 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
             enable_logging {bool} -- Flag to determine if logging will be enabled for the SDK. (default: {False})
         """
 
-        if node_ip is None:
+        if node_ip == None:
             node_ip = os.environ.get('rubrik_cdm_node_ip')
-            if node_ip is None:
+            if node_ip == None:
                 sys.exit("Error: The Rubrik CDM Node IP has not been provided.")
             else:
                 self.node_ip = node_ip
         else:
             self.node_ip = node_ip
 
-        if username is None:
+        if username == None:
             username = os.environ.get('rubrik_cdm_username')
-            if username is None:
+            if username == None:
                 sys.exit("Error: The Rubrik CDM Username has not been provided.")
             else:
                 self.username = username
         else:
             self.username = username
 
-        if password is None:
+        if password == None:
             password = os.environ.get('rubrik_cdm_password')
-            if password is None:
+            if password == None:
                 sys.exit("Error: The Rubrik CDM Password has not been provided.")
             else:
                 self.password = password
         else:
             self.password = password
 
-        if enable_logging is True:
+        if enable_logging == True:
             logging.getLogger().setLevel(logging.DEBUG)
 
         self.log("User Provided Node IP: {}".format(self.node_ip))
@@ -156,7 +156,7 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
             sys.exit("Error: Enter a valid API version {}.".format(valid_api_versions))
 
         # Validate the API Endpoint Syntax
-        if type(api_endpoint) is not str:
+        if type(api_endpoint) != str:
             sys.exit("Error: The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
             sys.exit("Error: The API Endpoint should begin with '/'. (ex: /cluster/me)")
@@ -175,7 +175,7 @@ class Bootstrap(_API):
         """Constructor for the Bootstrap class which is used to initialize the class variables.
         """
 
-        if enable_logging is True:
+        if enable_logging == True:
             logging.getLogger().setLevel(logging.DEBUG)
 
         self.node_ip = node_ip
@@ -206,22 +206,22 @@ class Bootstrap(_API):
             dict -- The response returned by `POST /internal/cluster/me/bootstrap`.
         """
 
-        if node_config is None or isinstance(node_config, dict) is not True:
+        if node_config == None or isinstance(node_config, dict) != True:
             sys.exit('Error: You must provide a valid dictionary for "node_config".')
 
-        if dns_search_domains is None:
+        if dns_search_domains == None:
             dns_search_domains = []
-        elif isinstance(dns_search_domains, list) is not True:
+        elif isinstance(dns_search_domains, list) != True:
             sys.exit('Error: You must provide a valid list for "dns_search_domains".')
 
-        if dns_nameservers is None:
+        if dns_nameservers == None:
             dns_nameservers = ['8.8.8.8']
-        elif isinstance(dns_nameservers, list) is not True:
+        elif isinstance(dns_nameservers, list) != True:
             sys.exit('Error: You must provide a valid list for "dns_nameservers".')
 
-        if ntp_servers is None:
+        if ntp_servers == None:
             ntp_servers = ['pool.ntp.org']
-        elif isinstance(ntp_servers, list) is not True:
+        elif isinstance(ntp_servers, list) != True:
             sys.exit('Error: You must provide a valid list for "ntp_servers".')
 
         bootstrap_config = {}
@@ -343,7 +343,7 @@ class Bootstrap(_API):
             sys.exit("Error: Enter a valid API version {}.".format(valid_api_versions))
 
         # Validate the API Endpoint Syntax
-        if type(api_endpoint) is not str:
+        if type(api_endpoint) != str:
             sys.exit("Error: The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
             sys.exit("Error: The API Endpoint should begin with '/'. (ex: /cluster/me)")

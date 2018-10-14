@@ -49,7 +49,7 @@ class Api():
         Returns:
             dict -- The full API call response for the provided endpoint.
         """
-        if call_type is not 'JOB_STATUS':
+        if call_type != 'JOB_STATUS':
             self._api_validation(api_version, api_endpoint)
 
         """In order to dynamically select a node to interact with, the SDK will first use the node IP provided
@@ -70,28 +70,28 @@ class Api():
 
         try:
             # Determine which call type is being used and then set the relevant variables for that call type
-            if call_type is 'GET':
+            if call_type == 'GET':
                 request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
                 request_url = quote(request_url, '://?=&')
                 self.log('GET {}'.format(request_url))
                 api_request = requests.get(request_url, verify=False, headers=header, timeout=timeout)
-            elif call_type is 'POST':
+            elif call_type == 'POST':
                 config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
                 self.log('POST {}'.format(request_url))
                 self.log('Config: {}'.format(config))
                 api_request = requests.post(request_url, verify=False, headers=header, data=config, timeout=timeout)
-            elif call_type is 'PATCH':
+            elif call_type == 'PATCH':
                 config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
                 self.log('PATCH {}'.format(request_url))
                 self.log('Config: {}'.format(config))
                 api_request = requests.patch(request_url, verify=False, headers=header, data=config, timeout=timeout)
-            elif call_type is 'DELETE':
+            elif call_type == 'DELETE':
                 request_url = "https://{}/api/{}{}".format(node_ip, api_version, api_endpoint)
                 self.log('DELETE {}'.format(request_url))
                 api_request = requests.delete(request_url, verify=False, headers=header, timeout=timeout)
-            elif call_type is 'JOB_STATUS':
+            elif call_type == 'JOB_STATUS':
                 self.log('JOB STATUS for {}'.format(job_status_url))
                 api_request = requests.get(job_status_url, verify=False, headers=header, timeout=timeout)
             else:
