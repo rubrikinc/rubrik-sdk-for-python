@@ -344,6 +344,7 @@ class Cloud(_API):
 
 
         Returns:
+            str -- No change required. Cloud native source with access key `aws_access_key` is already configured on the Rubrik cluster.
             dict -- The full API response for `POST /internal/aws/account'`.
         """
 
@@ -389,7 +390,7 @@ class Cloud(_API):
             
             cloud_source_detail = self.get('internal', '/aws/account/{}'.format(cloud_source['id']))
             if cloud_source_detail['accessKey'] == aws_access_key:
-                sys.exit("Error: Cloud native source with access key '{}' already exists. Please enter a unique `aws_access_key`.".format(aws_access_key))
+                return "No change required. Cloud native source with access key '{}' is already configured on the Rubrik cluster.".format(aws_access_key)
 
         config = {}
         config['name'] = aws_account_name
