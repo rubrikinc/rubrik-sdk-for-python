@@ -30,6 +30,7 @@
 * [end_user_authorization](end_user_authorization.md)
 
 ### Cloud Functions
+* [add_aws_native_account](add_aws_native_account.md)
 * [aws_s3_cloudon](aws_s3_cloudon.md)
 * [aws_s3_cloudout](aws_s3_cloudout.md)
 * [azure_cloudon](azure_cloudon.md)
