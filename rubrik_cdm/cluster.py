@@ -91,7 +91,7 @@ class Cluster(_API):
 
         Returns:
             str -- No change required. The End User "`end_user`" is already authorized to interact with the "`object_name`" VM.
-            dict -- The API response from `POST /internal/authorization/role/end_user`.
+            dict -- The full API response from `POST /internal/authorization/role/end_user`.
         """
 
         valid_object_type = ['vmware']

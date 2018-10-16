@@ -39,7 +39,9 @@ class Data_Management(_API):
 
 
         Returns:
-            tuple -- The full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
+            tuple -- When object_type is vmware, the full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
+            tuple -- When object_type is physical_host, the full API response for `POST /v1/fileset/{}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
+
         """
 
         valid_object_type = ['vmware', 'physical_host']
@@ -186,8 +188,8 @@ class Data_Management(_API):
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
-            object_name {str} -- The name of the Rubrik object you wish to assign to an SLA Domain. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
-            sla_name {str} -- The name of the SLA Domain you wish to assign an object to.
+            object_name {str} -- The name of the Rubrik object you wish to assign to an SLA Domain. 
+            sla_name {str} -- The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
             object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware})
 
         Keyword Arguments:
@@ -517,7 +519,7 @@ class Data_Management(_API):
 
         Returns:
             str -- No change required. The Managed Volume '`name`' is already assigned in a writeable state.
-            dict -- The full response for `POST /managed_volume/{id}/begin_snapshot`.
+            dict -- The full API response for `POST /managed_volume/{id}/begin_snapshot`.
         """
 
         self.log("begin_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
@@ -544,7 +546,7 @@ class Data_Management(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {30})
 
         Returns:
-            dict -- The full response for `POST /managed_volume/{id}/end_snapshot`.
+            dict -- The full API response for `POST /managed_volume/{id}/end_snapshot`.
         """
 
         self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))

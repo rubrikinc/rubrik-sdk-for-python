@@ -18,7 +18,7 @@ def end_managed_volume_snapshot(name, sla_name='current', timeout=30)
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| dict  | The full response for `POST /managed_volume/{id}/end_snapshot`. |
+| dict  | The full API response for `POST /managed_volume/{id}/end_snapshot`. |
 ## Example
 ```py
 import rubrik_cdm

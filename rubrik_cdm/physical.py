@@ -35,7 +35,7 @@ class Physical(_API):
 
         Returns:
             str -- No change requird. The host '`hostname`' is already connected to the Rubrik cluster.
-            dict -- The full API response for `POST /v1'/host'`.
+            dict -- The full API response for `POST /v1/host`.
         """
 
         self.log('Searching the Rubrik cluster for the current hosts.')
@@ -168,7 +168,7 @@ class Physical(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            str -- No change required. The Rubrik cluster already has a NAS Fileset named '`name`' configured with the provided variables."
+            str -- No change required. The Rubrik cluster already has a NAS Fileset named '`name`' configured with the provided variables.
             dict -- The full response for the `POST /internal/fileset_template/bulk` API endpoint.
         """
 

@@ -208,8 +208,9 @@ class Api():
             url {str} -- The job status URL provided by a previous API call.
 
         Keyword Arguments:
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             wait_for_completion {bool} -- Flag that determines if the method should wait for the job to complete before exiting. (default: {True})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
 
         Returns:
             dict -- The response body of the API call.
