@@ -329,7 +329,7 @@ class Cloud(_API):
 
         sys.exit("Error: The Rubrik cluster does not have an archive location named '{}'.".format(archive_name))
 
-    def aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None, aws_regions=None, regional_bolt_network_configs=None, timeout=30):
+    def add_aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None, aws_regions=None, regional_bolt_network_configs=None, timeout=30):
         """Add a new AWS account to EC2 native protection on the Rubrik cluster.
 
         Arguments:
@@ -350,7 +350,8 @@ class Cloud(_API):
 
         valid_aws_regions = ['ap-south-1', 'ap-northeast-3', 'ap-northeast-2', 'ap-southeast-1', 'ap-southeast-2', 'ap-northeast-1', 'ca-central-1', 'cn-north-1',
                              'cn-northwest-1', 'eu-central-1', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'us-west-1', 'us-east-1', 'us-east-2', 'us-west-2']
-                             
+
+        # check for regions and credentials in environment variables if not provided explicitly                     
         if aws_regions == None:
             aws_regions = [os.environ.get('AWS_DEFAULT_REGION')]
             if aws_regions == None:
@@ -366,17 +367,23 @@ class Cloud(_API):
             if aws_secret_key == None:
                 sys.exit("Error: `aws_secret_key` has not been provided.")
 
+        # verify supplied regions are in the supported list of regions for cloud native protection
         if any(aws_region not in valid_aws_regions for aws_region in aws_regions):
             sys.exit('Error: The list `aws_regions` may only contain the following values: {}'.format(valid_aws_regions))
         
+        # verify that our regional_bolt_network_configs are either None or in a list
         if isinstance(regional_bolt_network_configs, list) is False and regional_bolt_network_configs is not None:
             sys.exit("Error: Parameter `regional_bolt_network_configs` must be a list if defined.")
 
-        if regional_bolt_network_configs is not None: 
+        if regional_bolt_network_configs is not None:
+
+            # verify our list of bolt_network_configs only contains dicts
             for bolt_network_config in regional_bolt_network_configs:
                 if isinstance(bolt_network_config, dict) is False:
                     sys.exit("Error: List `regional_bolt_network_configs` can only contain dicts.")
-                elif any(requiredkey not in bolt_network_config for requiredkey in ['region','vNetId','subnetId','securityGroupId']):
+
+                # verify that all the required paramteters are provided in all regional_bolt_network_configs
+                if any(requiredkey not in bolt_network_config for requiredkey in ['region','vNetId','subnetId','securityGroupId']):
                     sys.exit("Error: Each `regional_bolt_network_config` dict must contain the following keys: 'region', 'vNetId', 'subnetId', 'securityGroupId'.")
 
         self.log("aws_native_account: Searching the Rubrik cluster for cloud native sources.")
@@ -384,21 +391,27 @@ class Cloud(_API):
 
         for cloud_source in cloud_native_on_cluster['data']:
 
+            # verify a cloud native source with this name does not exist already
             self.log("aws_native_account: Validating no conflict with `{}`".format(cloud_source['id']))
             if cloud_source['name'] == aws_account_name:
                 sys.exit("Error: Cloud native source with name '{}' already exists. Please enter a unique `aws_account_name`.".format(aws_account_name))
             
+            # idempotent return if a cloud native source with this access key already exists
             cloud_source_detail = self.get('internal', '/aws/account/{}'.format(cloud_source['id']))
             if cloud_source_detail['accessKey'] == aws_access_key:
                 return "No change required. Cloud native source with access key '{}' is already configured on the Rubrik cluster.".format(aws_access_key)
 
+        # build the config for our API call
         config = {}
         config['name'] = aws_account_name
         config['accessKey'] = aws_access_key
         config ['secretKey'] = aws_secret_key
         config ['regions'] = aws_regions
+
+        # only include bolt configs if they were supplied
         if regional_bolt_network_configs is not None:
             config['regionalBoltNetworkConfigs'] = regional_bolt_network_configs
 
+        # make the API call, return the result
         self.log("aws_native_account: Creating the cloud native source.")
         return self.post('internal', '/aws/account', config, timeout)
