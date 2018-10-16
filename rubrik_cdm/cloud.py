@@ -351,6 +351,10 @@ class Cloud(_API):
         valid_aws_regions = ['ap-south-1', 'ap-northeast-3', 'ap-northeast-2', 'ap-southeast-1', 'ap-southeast-2', 'ap-northeast-1', 'ca-central-1', 'cn-north-1',
                              'cn-northwest-1', 'eu-central-1', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'us-west-1', 'us-east-1', 'us-east-2', 'us-west-2']
 
+        # verify we are on cdm 4.2 or newer, required for cloud native protection
+        if float(self.cluster_version()[:3]) < 4.2:
+            sys.exit("Error: The Rubrik cluster version must be 4.2 or newer to use this method.")
+
         # check for regions and credentials in environment variables if not provided explicitly                     
         if aws_regions == None:
             aws_regions = [os.environ.get('AWS_DEFAULT_REGION')]
