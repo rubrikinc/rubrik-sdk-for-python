@@ -537,7 +537,6 @@ class Data_Management(_API):
     def end_managed_volume_snapshot(self, name, sla_name='current', timeout=30):
         """Close a managed volume for writes. A snapshot will be created containing all writes since the last begin snapshot call.
 
-
         Arguments:
             name {str} -- The name of the Managed Volume to end snapshots on.
 
@@ -546,6 +545,7 @@ class Data_Management(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {30})
 
         Returns:
+            str -- No change required. The Managed Volume `name` is already assigned in a read only state.
             dict -- The full API response for `POST /managed_volume/{id}/end_snapshot`.
         """
 
@@ -556,7 +556,7 @@ class Data_Management(_API):
         managed_volume_summary = self.get('internal', '/managed_volume/{}'.format(managed_volume_id))
 
         if managed_volume_summary['isWritable'] == False:
-            sys.exit("Error: The Managed Volume '{}' is in a Read-only state. This can be changed through the `begin_managed_volume_snapshot` function.".format(name))
+            return "No change required. The Managed Volume 'name' is already assigned in a read only state."
 
         if sla_name == 'current':
             self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))

@@ -18,6 +18,7 @@ def end_managed_volume_snapshot(name, sla_name='current', timeout=30)
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
+| str  | No change required. The Managed Volume `name` is already assigned in a read only state. |
 | dict  | The full API response for `POST /managed_volume/{id}/end_snapshot`. |
 ## Example
 ```py
