@@ -166,7 +166,7 @@ class Cluster(_API):
 
         return add_vcenter, add_vcenter['links'][0]['href']
 
-    def cluster_timezone(self, timezone):
+    def configure_timezone(self, timezone):
         """Configure the Rubrik cluster timezone.
 
         Arguments:
@@ -196,7 +196,7 @@ class Cluster(_API):
         self.log("cluster_timezone: Configuring the Rubrik cluster timezone")
         return self.patch("v1", "/cluster/me", config)
 
-    def cluster_ntp(self, ntp_server):
+    def configure_ntp(self, ntp_server):
         """Configure the Rubrik cluster timezone.
 
         Arguments:
@@ -219,7 +219,7 @@ class Cluster(_API):
         self.log("cluster_ntp: Adding the NTP server(s) '{}' to the Rubrik cluster.".format(ntp_server))
         return self.post("internal", "/cluster/me/ntp_server", ntp_server)
 
-    def cluster_syslog(self, syslog_ip, protocol, port=514, timeout=15):
+    def configure_syslog(self, syslog_ip, protocol, port=514, timeout=15):
         """Configure the Rubrik cluster syslog settings..
 
         Arguments:
@@ -263,7 +263,7 @@ class Cluster(_API):
         self.log("cluster_syslog: Configuring the syslog settings.")
         return self.post("internal", "/syslog", config, timeout)
 
-    def cluster_vlan(self, vlan, netmask, ips, timeout=15):
+    def configure_vlan(self, vlan, netmask, ips, timeout=15):
         """Configure VLANs on the Rubrik cluster.
 
         Arguments:
@@ -318,7 +318,7 @@ class Cluster(_API):
         self.log("cluster_vlan: Configuring the VLANs.")
         return self.post("internal", "/cluster/me/vlan", config, timeout)
 
-    def cluster_dns_servers(self, server_ip, timeout=15):
+    def configure_dns_servers(self, server_ip, timeout=15):
         """Configure the DNS Servers on the Rubrik cluster.
 
         Arguments:
@@ -343,7 +343,7 @@ class Cluster(_API):
 
         return self.post("internal", "/cluster/me/dns_nameserver", server_ip, timeout)
 
-    def cluster_search_domain(self, search_domain, timeout=15):
+    def configure_search_domain(self, search_domain, timeout=15):
         """Configure the DNS search domains on the Rubrik cluster.
 
         Arguments:
@@ -368,7 +368,7 @@ class Cluster(_API):
 
         return self.post("internal", "/cluster/me/dns_search_domain", search_domain, timeout)
 
-    def cluster_smtp_settings(self, hostname, port, from_email, smtp_username, smtp_password, encryption="NONE", timeout=15):
+    def configure_smtp_settings(self, hostname, port, from_email, smtp_username, smtp_password, encryption="NONE", timeout=15):
         """The Rubrik cluster uses email to send all notifications to local Rubrik cluster user accounts that have the Admin role. To do this the Rubrik cluster transfers the email messages to an SMTP server for delivery. 
         This function will configure the Rubrik cluster with account information for the SMTP server to permit the Rubrik cluster to use the SMTP server for sending outgoing email.
 
