@@ -53,7 +53,12 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD, _EVENTS, _SUPPORTBU
         _EVENTS {class} - This class contains methods related to Cluster/Object events.
     """
 
-    def __init__(self, node_ip=None, username=None, password=None, enable_logging=False):
+    def __init__(
+            self,
+            node_ip=None,
+            username=None,
+            password=None,
+            enable_logging=False):
         """Constructor for the Connect class which is used to initialize the class variables.
 
         Keyword Arguments:
@@ -117,7 +122,7 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD, _EVENTS, _SUPPORTBU
         else:
             self.password = password
 
-        if enable_logging is True:
+        if enable_logging:
             logging.getLogger().setLevel(logging.DEBUG)
 
         self.log("User Provided Node IP: {}".format(self.node_ip))
@@ -186,15 +191,18 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD, _EVENTS, _SUPPORTBU
 
         # Validate the API Version
         if api_version not in valid_api_versions:
-            sys.exit("Error: Enter a valid API version {}.".format(valid_api_versions))
+            sys.exit(
+                "Error: Enter a valid API version {}.".format(valid_api_versions))
 
         # Validate the API Endpoint Syntax
-        if type(api_endpoint) is not str:
+        if not isinstance(api_endpoint, str):
             sys.exit("Error: The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
-            sys.exit("Error: The API Endpoint should begin with '/'. (ex: /cluster/me)")
+            sys.exit(
+                "Error: The API Endpoint should begin with '/'. (ex: /cluster/me)")
         elif api_endpoint[-1] == "/":
-            sys.exit("Error: The API Endpoint should not end with '/'. (ex. /cluster/me)")
+            sys.exit(
+                "Error: The API Endpoint should not end with '/'. (ex. /cluster/me)")
 
 
 class Bootstrap(_API):
@@ -208,7 +216,7 @@ class Bootstrap(_API):
         """Constructor for the Bootstrap class which is used to initialize the class variables.
         """
 
-        if enable_logging is True:
+        if enable_logging:
             logging.getLogger().setLevel(logging.DEBUG)
 
         self.node_ip = node_ip
@@ -216,7 +224,20 @@ class Bootstrap(_API):
 
         node_ip = [self.node_ip]
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
+    def setup_cluster(
+            self,
+            cluster_name,
+            admin_email,
+            admin_password,
+            management_gateway,
+            management_subnet_mask,
+            node_config=None,
+            enable_encryption=True,
+            dns_search_domains=None,
+            dns_nameservers=None,
+            ntp_servers=None,
+            wait_for_completion=True,
+            timeout=30):
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
@@ -240,12 +261,14 @@ class Bootstrap(_API):
         """
 
         if node_config is None or isinstance(node_config, dict) is not True:
-            sys.exit('Error: You must provide a valid dictionary for "node_config".')
+            sys.exit(
+                'Error: You must provide a valid dictionary for "node_config".')
 
         if dns_search_domains is None:
             dns_search_domains = []
         elif isinstance(dns_search_domains, list) is not True:
-            sys.exit('Error: You must provide a valid list for "dns_search_domains".')
+            sys.exit(
+                'Error: You must provide a valid list for "dns_search_domains".')
 
         if dns_nameservers is None:
             dns_nameservers = ['8.8.8.8']
@@ -282,12 +305,18 @@ class Bootstrap(_API):
             try:
                 self.log('bootstrap: Starting the bootstrap process.')
                 number_of_attempts = 1
-                api_request = self.post('internal', '/cluster/me/bootstrap',
-                                        bootstrap_config, timeout, authentication=False)
+                api_request = self.post(
+                    'internal',
+                    '/cluster/me/bootstrap',
+                    bootstrap_config,
+                    timeout,
+                    authentication=False)
                 break
             except SystemExit as bootstrap_error:
-                if "Failed to establish a new connection: [Errno 111] Connection refused" in str(bootstrap_error):
-                    self.log('bootstrap: Connection refused. Waiting 30 seconds for the node to initialize before trying again.')
+                if "Failed to establish a new connection: [Errno 111] Connection refused" in str(
+                        bootstrap_error):
+                    self.log(
+                        'bootstrap: Connection refused. Waiting 30 seconds for the node to initialize before trying again.')
                     number_of_attempts += 1
                     time.sleep(30)
                 elif "Error: Cannot bootstrap from an already bootstrapped node" in str(bootstrap_error):
@@ -297,11 +326,12 @@ class Bootstrap(_API):
                     sys.exit(bootstrap_error)
 
             if number_of_attempts == 12:
-                sys.exit("Error: Unable to establish a connection to the Rubrik cluster.")
+                sys.exit(
+                    "Error: Unable to establish a connection to the Rubrik cluster.")
 
         request_id = api_request['id']
 
-        if wait_for_completion == True:
+        if wait_for_completion:
             self.log('bootstrap: Waiting for the bootstrap process to complete.')
             while True:
                 status = self.status(request_id)
@@ -330,8 +360,13 @@ class Bootstrap(_API):
         """
 
         self.log('status: Getting the status of the Rubrik Cluster bootstrap.')
-        bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(request_id)
-        api_request = self.get('internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
+        bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(
+            request_id)
+        api_request = self.get(
+            'internal',
+            bootstrap_status_api_endpoint,
+            timeout=timeout,
+            authentication=False)
 
         return api_request
 
@@ -373,12 +408,15 @@ class Bootstrap(_API):
 
         # Validate the API Version
         if api_version not in valid_api_versions:
-            sys.exit("Error: Enter a valid API version {}.".format(valid_api_versions))
+            sys.exit(
+                "Error: Enter a valid API version {}.".format(valid_api_versions))
 
         # Validate the API Endpoint Syntax
-        if type(api_endpoint) is not str:
+        if not isinstance(api_endpoint, str):
             sys.exit("Error: The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
-            sys.exit("Error: The API Endpoint should begin with '/'. (ex: /cluster/me)")
+            sys.exit(
+                "Error: The API Endpoint should begin with '/'. (ex: /cluster/me)")
         elif api_endpoint[-1] == "/":
-            sys.exit("Error: The API Endpoint should not end with '/'. (ex. /cluster/me)")
+            sys.exit(
+                "Error: The API Endpoint should not end with '/'. (ex. /cluster/me)")

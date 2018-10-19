@@ -1,32 +1,34 @@
-# job_status
+# configure_syslog
 
-Certain Rubrik operations (on-demand snapshots, live mounts, etc.) may not complete instantaneously. In those cases we have the ability to monitor the status of the job through a job status url provided in the actions API response body. This function will perform a GET operation on the provided url and return the jobs status.
+Configure the Rubrik cluster syslog settings..
 ```py
-def job_status(url, wait_for_completion=True, timeout=15)
+def configure_syslog(syslog_ip, protocol, port=514, timeout=15)
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| url  | str  | The job status URL provided by a previous API call. |         |
+| syslog_ip  | str  | The IP address or hostname of the syslog server you wish to add to the Rubrik cluster. |         |
+| protocol  | str  | The protocol to use when making the connection to the syslog server.  |    TCP, UDP     |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| wait_for_completion  | bool  | Flag that determines if the method should wait for the job to complete before exiting.  |         |    True     |
+| port  | int  | The port to use when making the connection to the syslog server.  |         |    514     |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| dict  | The response body of the API call. |
+| str  | No change required. The Rubrik cluster is already configured to use the syslog server '`syslog_hostname`' on port '`port`' using the '`protocol`' protocol. |
+| dict  | The full API response for `POST /internal/syslog'` |
 ## Example
 ```py
 import rubrik_cdm
 
 rubrik = rubrik_cdm.Connect()
 
-# Monitor the progress of a On-Demand Snapshot
-job_status_url = "https://172.21.8.52/api/v1/vmware/vm/request/CREATE_VMWARE_SNAPSHOT_fase1f32-3872-2982-a68c-6fe145982f48-vm-5008_f7c393f3-383-4b44-920-8cde7a9ae2bd:::0"
+syslog_ip = "192.168.1.208"
+protocol = "UDP"
 
-snapshot_status = rubrik.job_status(job_status_url)
+syslog = rubrik.cluster_syslog(syslog_ip, protocol)
 ```

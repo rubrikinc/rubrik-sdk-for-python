@@ -20,7 +20,8 @@ def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=Non
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| tuple  | The full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url) |
+| tuple  | When object_type is vmware, the full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url) |
+| tuple  | When object_type is physical_host, the full API response for `POST /v1/fileset/{}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url) |
 ## Example
 ```py
 import rubrik_cdm
@@ -30,5 +31,15 @@ rubrik = rubrik_cdm.Connect()
 vm_name = "python-sdk-demo"
 object_type = "vmware"
 
+#VMware Snapshot
 snapshot = rubrik.on_demand_snapshot(vm_name, object_type)
+
+# Physical Host Snapst
+physical_host_name = "python-sdk-physical-demo"
+object_type = "physical_host"
+sla = "Gold"
+fileset = "/etc"
+host_os = "Linux"
+
+snapshot = rubrik.on_demand_snapshot(physical_host_name, object_type, sla, fileset, host_os)
 ```

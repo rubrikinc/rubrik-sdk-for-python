@@ -1,31 +1,29 @@
-# add_physical_host
+# get_sla_objects
 
-Add a physical host to the Rubrik cluster.
+Retrieve the name and ID of a specific object type.
 ```py
-def add_physical_host(hostname, timeout=60)
+def get_sla_objects(sla, object_type, timeout=15)
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| hostname  | str  | The hostname or IP Address of the physical host you want to add to the Rubrik cluster. |         |
+| sla  | str  | The name of the SLA Domain you wish to search. |         |
+| object_type  | str  | The object type you wish to search the SLA for.  |    vmware     |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    60     |
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster.  |         |    15     |
 
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| str  | No change requird. The host '`hostname`' is already connected to the Rubrik cluster. |
-| dict  | The full API response for `POST /v1/host`. |
+| dict  | The `name:id` of each object in the provided SLA Domain. |
 ## Example
 ```py
 import rubrik_cdm
 
 rubrik = rubrik_cdm.Connect()
 
-hostname = "python-sdk-demo"
-
-add_host = rubrik.add_physical_host(hostname)
+vms_in_sla = rubrik.get_sla_objects("Gold", "vmware")
 ```

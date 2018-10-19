@@ -22,7 +22,7 @@ def create_nas_fileset(name, share_type, include, exclude, exclude_exception, fo
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| str  | No change required. The Rubrik cluster already has a NAS Fileset named '`name`' configured with the provided variables." |
+| str  | No change required. The Rubrik cluster already has a NAS Fileset named '`name`' configured with the provided variables. |
 | dict  | The full response for the `POST /internal/fileset_template/bulk` API endpoint. |
 ## Example
 ```py
