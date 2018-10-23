@@ -8,8 +8,8 @@ def assign_sla(object_name, sla_name, object_type, timeout=30)
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| object_name  | str  | The name of the Rubrik object you wish to assign to an SLA Domain. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`. |         |
-| sla_name  | str  | The name of the SLA Domain you wish to assign an object to. |         |
+| object_name  | str  | The name of the Rubrik object you wish to assign to an SLA Domain. |         |
+| sla_name  | str  | The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`. |         |
 | object_type  | str  | The Rubrik object type you want to assign to the SLA Domain.  |    vmware     |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
