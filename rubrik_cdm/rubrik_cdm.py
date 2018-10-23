@@ -92,11 +92,11 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
         if enable_logging:
             logging.getLogger().setLevel(logging.DEBUG)
 
-        self.log("User Provided Node IP: {}".format(self.node_ip))
+        self.node_ip = node_ip
+
+        self.log("Node IP: {}".format(self.node_ip))
         self.log("Username: {}".format(self.username))
         self.log("Password: *******\n")
-
-        self.node_ip = self.cluster_node_ip(timeout=5)
 
     @staticmethod
     def log(log_message):

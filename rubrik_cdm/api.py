@@ -60,14 +60,6 @@ class Api():
         if call_type != 'JOB_STATUS':
             self._api_validation(api_version, api_endpoint)
 
-        """In order to dynamically select a node to interact with, the SDK will first use the node IP provided
-        by the end user to get a list of all node IPs in the Rubrik cluster. This code will determine if the SDK has gathered
-        that list yet and if it has will randomly select a node IP from the list to interact with."""
-        if isinstance(self.node_ip, str):
-            node_ip = self.node_ip
-        else:
-            node_ip = choice(self.node_ip)
-
         # Determine if authentication should be sent as part of the API Header
         if authentication:
             header = self._authorization_header()
@@ -81,7 +73,7 @@ class Api():
             # variables for that call type
             if call_type == 'GET':
                 request_url = "https://{}/api/{}{}".format(
-                    node_ip, api_version, api_endpoint)
+                    self.node_ip, api_version, api_endpoint)
                 request_url = quote(request_url, '://?=&')
                 self.log('GET {}'.format(request_url))
                 api_request = requests.get(
@@ -89,7 +81,7 @@ class Api():
             elif call_type == 'POST':
                 config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(
-                    node_ip, api_version, api_endpoint)
+                    self.node_ip, api_version, api_endpoint)
                 self.log('POST {}'.format(request_url))
                 self.log('Config: {}'.format(config))
                 api_request = requests.post(
@@ -101,7 +93,7 @@ class Api():
             elif call_type == 'PATCH':
                 config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(
-                    node_ip, api_version, api_endpoint)
+                    self.node_ip, api_version, api_endpoint)
                 self.log('PATCH {}'.format(request_url))
                 self.log('Config: {}'.format(config))
                 api_request = requests.patch(
@@ -112,7 +104,7 @@ class Api():
                     timeout=timeout)
             elif call_type == 'DELETE':
                 request_url = "https://{}/api/{}{}".format(
-                    node_ip, api_version, api_endpoint)
+                    self.node_ip, api_version, api_endpoint)
                 self.log('DELETE {}'.format(request_url))
                 api_request = requests.delete(
                     request_url, verify=False, headers=header, timeout=timeout)
