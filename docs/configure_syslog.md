@@ -1,6 +1,6 @@
 # configure_syslog
 
-Configure the Rubrik cluster syslog settings..
+Configure the Rubrik cluster syslog settings.
 ```py
 def configure_syslog(syslog_ip, protocol, port=514, timeout=15)
 ```
@@ -30,5 +30,5 @@ rubrik = rubrik_cdm.Connect()
 syslog_ip = "192.168.1.208"
 protocol = "UDP"
 
-syslog = rubrik.cluster_syslog(syslog_ip, protocol)
+syslog = rubrik.configure_syslog(syslog_ip, protocol)
 ```
