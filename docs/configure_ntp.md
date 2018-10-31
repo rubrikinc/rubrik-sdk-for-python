@@ -1,6 +1,6 @@
 # configure_ntp
 
-Configure the Rubrik cluster timezone.
+Configure connection information for the NTP servers used by the Rubrik cluster for time synchronization.
 ```py
 def configure_ntp(ntp_server)
 ```
@@ -22,5 +22,5 @@ import rubrik_cdm
 rubrik = rubrik_cdm.Connect()
 
 ntp_servers = ["192.168.10.121", "192.168.10.122"]
-configure_ntp = rubrik.cluster_ntp(ntp_servers)
+configure_ntp = rubrik.configure_ntp(ntp_servers)
 ```

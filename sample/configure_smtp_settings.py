@@ -8,4 +8,5 @@ from_email = "python@sdk.com"
 smtp_username = "pythonuser"
 smtp_password = "pythonpass"
 
-smtp_settings = rubrik.cluster_smtp_settings(smtp_hostname, port, from_email, smtp_username, smtp_password)
+smtp_settings = rubrik.configure_smtp_settings(
+    smtp_hostname, port, from_email, smtp_username, smtp_password)

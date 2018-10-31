@@ -4,4 +4,4 @@ rubrik = rubrik_cdm.Connect()
 
 timezone = "America/Chicago"
 
-configure_timezone = rubrik.cluster_timezone(timezone)
+configure_timezone = rubrik.configure_timezone(timezone)
