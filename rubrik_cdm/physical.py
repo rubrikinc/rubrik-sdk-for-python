@@ -380,7 +380,7 @@ class Physical(_API):
 
         self.log(
             "assign_physical_host_fileset: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-        sla_id = self.object_id(sla_name, 'sla')
+        sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
         self.log("assign_physical_host_fileset: Getting the properties of the {} Fileset.".format(
             fileset_name))

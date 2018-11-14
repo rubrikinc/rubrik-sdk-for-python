@@ -103,7 +103,7 @@ class Cluster(_API):
 
         self.log("end_user_authorization: Searching the Rubrik cluster for the vSphere VM '{}'.".format(
             object_name))
-        vm_id = self.object_id(object_name, object_type)
+        vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
         self.log(
             "end_user_authorization: Searching the Rubrik cluster for the End User '{}'.".format(end_user))
