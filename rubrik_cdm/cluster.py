@@ -79,12 +79,7 @@ class Cluster(_API):
 
         return node_ip_name
 
-    def end_user_authorization(
-            self,
-            object_name,
-            end_user,
-            object_type='vmware',
-            timeout=15):
+    def end_user_authorization(self, object_name, end_user, object_type='vmware', timeout=15):
         """Grant an End User authorization to the provided object.
 
         Arguments:
@@ -141,14 +136,7 @@ class Cluster(_API):
                 config,
                 timeout=timeout)
 
-    def add_vcenter(
-            self,
-            vcenter_ip,
-            vcenter_username,
-            vcenter_password,
-            vm_linking=True,
-            ca_certificate=None,
-            timeout=30):
+    def add_vcenter(self, vcenter_ip, vcenter_username, vcenter_password, vm_linking=True, ca_certificate=None, timeout=30):
         """Add a new vCenter to the Rubrik cluster.
 
         Arguments:
@@ -258,7 +246,7 @@ class Cluster(_API):
         return self.patch("v1", "/cluster/me", config)
 
     def configure_ntp(self, ntp_server):
-        """Configure the Rubrik cluster timezone.
+        """Configure connection information for the NTP servers used by the Rubrik cluster for time synchronization.
 
         Arguments:
             ntp_server {list} -- A list of the NTP server(s) you wish to configure the Rubrik cluster to use.
@@ -283,7 +271,7 @@ class Cluster(_API):
         return self.post("internal", "/cluster/me/ntp_server", ntp_server)
 
     def configure_syslog(self, syslog_ip, protocol, port=514, timeout=15):
-        """Configure the Rubrik cluster syslog settings..
+        """Configure the Rubrik cluster syslog settings.
 
         Arguments:
             syslog_ip {str} -- The IP address or hostname of the syslog server you wish to add to the Rubrik cluster.
@@ -447,15 +435,7 @@ class Cluster(_API):
             search_domain,
             timeout)
 
-    def configure_smtp_settings(
-            self,
-            hostname,
-            port,
-            from_email,
-            smtp_username,
-            smtp_password,
-            encryption="NONE",
-            timeout=15):
+    def configure_smtp_settings(self, hostname, port, from_email, smtp_username, smtp_password, encryption="NONE", timeout=15):
         """The Rubrik cluster uses email to send all notifications to local Rubrik cluster user accounts that have the Admin role. To do this the Rubrik cluster transfers the email messages to an SMTP server for delivery.
         This function will configure the Rubrik cluster with account information for the SMTP server to permit the Rubrik cluster to use the SMTP server for sending outgoing email.
 

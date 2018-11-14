@@ -25,13 +25,7 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(
-            self,
-            object_name,
-            object_type,
-            sla_name='current',
-            fileset=None,
-            host_os=None):
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None):
         """Initiate an on-demand snapshot.
 
         Arguments:
@@ -295,14 +289,7 @@ class Data_Management(_API):
                     config,
                     timeout)
 
-    def vsphere_live_mount(
-            self,
-            vm_name,
-            date='latest',
-            time='latest',
-            host='current',
-            remove_network_devices=False,
-            power_on=True):
+    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True):
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -382,17 +369,7 @@ class Data_Management(_API):
                 '/vmware/vm/snapshot/{}/mount'.format(snapshot_id),
                 config)
 
-    def vsphere_instant_recovery(
-            self,
-            vm_name,
-            date='latest',
-            time='latest',
-            host='current',
-            remove_network_devices=False,
-            power_on=True,
-            disable_network=False,
-            keep_mac_addresses=False,
-            preserve_moid=False):
+    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False):
         """Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -661,8 +638,7 @@ class Data_Management(_API):
             return "No change required. The Managed Volume '{}' is already assigned in a writeable state.".format(
                 name)
 
-    def end_managed_volume_snapshot(
-            self, name, sla_name='current', timeout=30):
+    def end_managed_volume_snapshot(self, name, sla_name='current', timeout=30):
         """Close a managed volume for writes. A snapshot will be created containing all writes since the last begin snapshot call.
 
         Arguments:
@@ -738,7 +714,8 @@ class Data_Management(_API):
 
             all_vms_in_sla = self.get(
                 "v1",
-                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(sla_id),
+                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(
+                    sla_id),
                 timeout)
 
             vm_name_id = {}
