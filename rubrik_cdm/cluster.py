@@ -182,11 +182,14 @@ class Cluster(_API):
 
         return add_vcenter, add_vcenter['links'][0]['href']
 
-    def configure_timezone(self, timezone):
+    def configure_timezone(self, timezone, timeout=15):
         """Configure the Rubrik cluster timezone.
 
         Arguments:
             timezone {str} -- The timezone you wish the Rubrik cluster to use. (choices: {America/Anchorage, America/Araguaina, America/Barbados, America/Chicago, America/Denver, America/Los_Angeles, America/Mexico_City, America/New_York, America/Noronha, America/Phoenix, America/Toronto, America/Vancouver, Asia/Bangkok, Asia/Dhaka, Asia/Dubai, Asia/Hong_Kong, Asia/Karachi, Asia/Kathmandu, Asia/Kolkata, Asia/Magadan, Asia/Singapore, Asia/Tokyo, Atlantic/Cape_Verde, Australia/Perth, Australia/Sydney, Europe/Amsterdam, Europe/Athens, Europe/London, Europe/Moscow, Pacific/Auckland, Pacific/Honolulu, Pacific/Midway, UTC})
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
             str -- No change required. The Rubrik cluster is already configured with '`timezone`' as it's timezone.
@@ -246,11 +249,14 @@ class Cluster(_API):
         self.log("cluster_timezone: Configuring the Rubrik cluster timezone")
         return self.patch("v1", "/cluster/me", config)
 
-    def configure_ntp(self, ntp_server):
+    def configure_ntp(self, ntp_server, timeout=15):
         """Configure connection information for the NTP servers used by the Rubrik cluster for time synchronization.
 
         Arguments:
             ntp_server {list} -- A list of the NTP server(s) you wish to configure the Rubrik cluster to use.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
             str -- No change required. The NTP server(s) `ntp_server` has already been added to the Rubrik cluster.

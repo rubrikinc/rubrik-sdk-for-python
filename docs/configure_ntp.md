@@ -2,13 +2,17 @@
 
 Configure connection information for the NTP servers used by the Rubrik cluster for time synchronization.
 ```py
-def configure_ntp(ntp_server)
+def configure_ntp(ntp_server, timeout=15)
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | ntp_server  | list  | A list of the NTP server(s) you wish to configure the Rubrik cluster to use. |         |
+## Keyword Arguments
+| Name        | Type | Description                                                                 | Choices | Default |
+|-------------|------|-----------------------------------------------------------------------------|---------|---------|
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
 | Type | Return Value                                                                                   |
