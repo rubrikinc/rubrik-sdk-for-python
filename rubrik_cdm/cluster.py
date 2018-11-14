@@ -247,7 +247,7 @@ class Cluster(_API):
         config["timezone"]["timezone"] = timezone
 
         self.log("cluster_timezone: Configuring the Rubrik cluster timezone")
-        return self.patch("v1", "/cluster/me", config)
+        return self.patch("v1", "/cluster/me", config, timeout)
 
     def configure_ntp(self, ntp_server, timeout=15):
         """Configure connection information for the NTP servers used by the Rubrik cluster for time synchronization.
@@ -275,7 +275,7 @@ class Cluster(_API):
 
         self.log(
             "cluster_ntp: Adding the NTP server(s) '{}' to the Rubrik cluster.".format(ntp_server))
-        return self.post("internal", "/cluster/me/ntp_server", ntp_server)
+        return self.post("internal", "/cluster/me/ntp_server", ntp_server, timeout)
 
     def configure_syslog(self, syslog_ip, protocol, port=514, timeout=15):
         """Configure the Rubrik cluster syslog settings.
