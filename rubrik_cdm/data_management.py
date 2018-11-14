@@ -65,7 +65,8 @@ class Data_Management(_API):
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the vSphere VM '{}'.".format(object_name))
 
-                vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+                vm_summary = self.get(
+                    'v1', '/vmware/vm/{}'.format(vm_id), timeout)
                 sla_id = vm_summary['effectiveSlaDomainId']
 
             elif sla_name != 'current':
@@ -103,10 +104,7 @@ class Data_Management(_API):
             self.log(
                 "on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
             fileset_summary = self.get(
-                'v1',
-                '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(
-                    host_id,
-                    fileset_template_id))
+                'v1', '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id, fileset_template_id), timeout)
 
             if fileset_summary['total'] == 0:
                 sys.exit(
@@ -185,12 +183,10 @@ class Data_Management(_API):
             object_summary_api_endpoint = '/managed_volume?is_relic=false&primary_cluster_id=local&name={}'.format(
                 object_name)
 
-        self.log(
-            "object_id: Getting the object id for the {} object '{}'.".format(
-                object_type, object_name))
-        api_request = self.get(
-            object_summary_api_version,
-            object_summary_api_endpoint)
+        self.log("object_id: Getting the object id for the {} object '{}'.".format(
+            object_type, object_name))
+        api_request = self.get(object_summary_api_version,
+                               object_summary_api_endpoint, timeout)
 
         if api_request['total'] == 0:
             sys.exit(
@@ -266,7 +262,7 @@ class Data_Management(_API):
 
             self.log(
                 "assign_sla: Determing the SLA Domain currently assigned to the vSphere VM '{}'.".format(object_name))
-            vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+            vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout)
             if sla_id == "INHERIT":
                 current_sla_id = vm_summary['configuredSlaDomainId']
             else:
@@ -321,7 +317,7 @@ class Data_Management(_API):
 
         self.log(
             "vsphere_live_mount: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
-        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout)
 
         if date == 'latest' and time == 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
@@ -411,7 +407,7 @@ class Data_Management(_API):
 
         self.log(
             "vsphere_instant_recovery: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
-        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout)
 
         if date == 'latest' and time == 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
@@ -494,7 +490,7 @@ class Data_Management(_API):
                 "Error: The time argument '{}' must be formatd as 'Hour:Minute AM/PM' (ex: 2:57 AM).".format(time))
 
         self.log("_date_time_conversion: Getting the Rubrik cluster timezone.")
-        cluster_summary = self.get('v1', '/cluster/me')
+        cluster_summary = self.get('v1', '/cluster/me', timeout)
         cluster_timezone = cluster_summary['timezone']['timezone']
 
         self.log(
@@ -544,7 +540,8 @@ class Data_Management(_API):
 
             self.log(
                 "pause_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+            api_request = self.get(
+                'v1', '/vmware/vm/{}'.format(vm_id), timeout)
 
             if api_request['blackoutWindowStatus']['isSnappableBlackoutActive']:
                 return "No change required. The '{}' '{}' is already paused.".format(
@@ -588,7 +585,8 @@ class Data_Management(_API):
 
             self.log(
                 "resume_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+            api_request = self.get(
+                'v1', '/vmware/vm/{}'.format(vm_id), timeout)
 
             if not api_request['blackoutWindowStatus']['isSnappableBlackoutActive']:
                 return "No change required. The '{}' object '{}' is currently not paused.".format(
@@ -624,7 +622,7 @@ class Data_Management(_API):
         self.log(
             "begin_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
         managed_volume_summary = self.get(
-            'internal', '/managed_volume/{}'.format(managed_volume_id))
+            'internal', '/managed_volume/{}'.format(managed_volume_id), timeout)
 
         if not managed_volume_summary['isWritable']:
             self.log(
@@ -660,7 +658,7 @@ class Data_Management(_API):
         self.log(
             "end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
         managed_volume_summary = self.get(
-            'internal', '/managed_volume/{}'.format(managed_volume_id))
+            'internal', '/managed_volume/{}'.format(managed_volume_id), timeout)
 
         if not managed_volume_summary['isWritable']:
             return "No change required. The Managed Volume 'name' is already assigned in a read only state."
@@ -713,10 +711,7 @@ class Data_Management(_API):
             sla_id = self.object_id(sla, "sla")
 
             all_vms_in_sla = self.get(
-                "v1",
-                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(
-                    sla_id),
-                timeout)
+                "v1", "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(sla_id), timeout)
 
             vm_name_id = {}
             for vm in all_vms_in_sla["data"]:

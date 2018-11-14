@@ -312,10 +312,7 @@ class Bootstrap(_API):
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(
             request_id)
         api_request = self.get(
-            'internal',
-            bootstrap_status_api_endpoint,
-            timeout=timeout,
-            authentication=False)
+            'internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
 
         return api_request
 
