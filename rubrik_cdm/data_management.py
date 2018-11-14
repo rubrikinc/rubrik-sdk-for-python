@@ -25,7 +25,7 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None):
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, timeout=15):
         """Initiate an on-demand snapshot.
 
         Arguments:
@@ -36,7 +36,7 @@ class Data_Management(_API):
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
             host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
-
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
             tuple -- When object_type is vmware, the full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
@@ -80,7 +80,7 @@ class Data_Management(_API):
             self.log(
                 "on_demand_snapshot: Initiating snapshot for the vSphere VM '{}'.".format(object_name))
             api_request = self.post(
-                'v1', '/vmware/vm/{}/snapshot'.format(vm_id), config)
+                'v1', '/vmware/vm/{}/snapshot'.format(vm_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -126,7 +126,7 @@ class Data_Management(_API):
             self.log(
                 "on_demand_snapshot: Initiating snapshot for the Physical Host '{}'.".format(object_name))
             api_request = self.post(
-                'v1', '/fileset/{}/snapshot'.format(fileset_id), config)
+                'v1', '/fileset/{}/snapshot'.format(fileset_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -285,7 +285,7 @@ class Data_Management(_API):
                     config,
                     timeout)
 
-    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True):
+    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -297,6 +297,7 @@ class Data_Management(_API):
             host {str} -- The hostname or IP address of the ESXi host to Live Mount the VM on. By default, the current host will be used. (default: {'current'})
             remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Live Mounted VM. Set to `True` to remove all network interfaces. (default: {False})
             power_on {bool} -- Flag that determines whether the VM should be powered on after the Live Mount. Set to `True` to power on the VM. Set to `False` to mount the VM but not power it on. (default: {True})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount`.
@@ -363,9 +364,9 @@ class Data_Management(_API):
             return self.post(
                 'v1',
                 '/vmware/vm/snapshot/{}/mount'.format(snapshot_id),
-                config)
+                config, timeout)
 
-    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False):
+    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):
         """Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -380,6 +381,7 @@ class Data_Management(_API):
             disable_network {bool} -- Sets the state of the network interfaces when the VM is instantly recovered. Use `False` to enable the network interfaces. Use `True` to disable the network interfaces. Disabling the interfaces can prevent IP conflicts. (default: {False})
             keep_mac_addresses {bool} -- Flag that determines whether the MAC addresses of the network interfaces on the source VM are assigned to the new VM. Set to `True` to assign the original MAC addresses to the new VM. Set to `False` to assign new MAC addresses. When 'remove_network_devices' is set to `True`, this property is ignored. (default: {False})
             preserve_moid {bool} -- Flag that determines whether to preserve the MOID of the source VM in a restore operation. Use `True` to keep the MOID of the source. Use `False` to assign a new moid. (default: {False})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/instant_recover`.
@@ -453,10 +455,7 @@ class Data_Management(_API):
                     time,
                     vm_name))
 
-            return self.post(
-                'v1',
-                '/vmware/vm/snapshot/{}/instant_recover'.format(snapshot_id),
-                config)
+            return self.post('v1', '/vmware/vm/snapshot/{}/instant_recover'.format(snapshot_id), config, timeout)
 
     def _date_time_conversion(self, date, time):
         """All date values returned by the Rubrik API are stored in Coordinated Universal Time (UTC)
