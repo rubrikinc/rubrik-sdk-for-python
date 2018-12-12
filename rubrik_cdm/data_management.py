@@ -678,8 +678,7 @@ class Data_Management(_API):
 
         self.log(
             "end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
-        managed_volume_id = self.object_id(
-            name, 'managed_volume', timeout=timeout)
+        managed_volume_id = self.object_id(name, 'managed_volume')
 
         self.log(
             "end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
@@ -698,7 +697,7 @@ class Data_Management(_API):
         else:
             self.log(
                 "end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-            sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+            sla_id = self.object_id(sla_name, 'sla')
 
             config = {}
             config['retentionConfig'] = {}
