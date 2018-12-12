@@ -661,8 +661,7 @@ class Data_Management(_API):
             return "No change required. The Managed Volume '{}' is already assigned in a writeable state.".format(
                 name)
 
-    def end_managed_volume_snapshot(
-            self, name, sla_name='current', timeout=30):
+    def end_managed_volume_snapshot(self, name, sla_name='current', timeout=30):
         """Close a managed volume for writes. A snapshot will be created containing all writes since the last begin snapshot call.
 
         Arguments:
@@ -679,38 +678,33 @@ class Data_Management(_API):
 
         self.log(
             "end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
-        managed_volume_id = self.object_id(name, 'managed_volume')
+        managed_volume_id = self.object_id(
+            name, 'managed_volume', timeout=timeout)
 
         self.log(
             "end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
         managed_volume_summary = self.get(
-            'internal', '/managed_volume/{}'.format(managed_volume_id))
+            "internal", "/managed_volume/{}".format(managed_volume_id), timeout)
 
         if not managed_volume_summary['isWritable']:
             return "No change required. The Managed Volume 'name' is already assigned in a read only state."
 
         if sla_name == 'current':
-            self.log(
-                "end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))
+            self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))
             if managed_volume_summary['slaAssignment'] == 'Unassigned' or managed_volume_summary['effectiveSlaDomainId'] == 'UNPROTECTED':
                 sys.exit(
                     "Error: The Managed Volume '{}' does not have a SLA assigned currently assigned. You must populate the sla_name argument.".format(name))
-
-            sla_id = managed_volume_summary['configuredSlaDomainId']
+            config = {}
         else:
             self.log(
                 "end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-            sla_id = self.object_id(sla_name, 'sla')
+            sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
-        config = {}
-        config['retentionConfig'] = {}
-        config['retentionConfig']['slaId'] = sla_id
+            config = {}
+            config['retentionConfig'] = {}
+            config['retentionConfig']['slaId'] = sla_id
 
-        return self.post(
-            'internal',
-            '/managed_volume/{}/end_snapshot'.format(managed_volume_id),
-            config,
-            timeout)
+        return self.post("internal", "/managed_volume/{}/end_snapshot".format(managed_volume_id), config, timeout)
 
     def get_sla_objects(self, sla, object_type, timeout=15):
         """Retrieve the name and ID of a specific object type.
@@ -738,7 +732,8 @@ class Data_Management(_API):
 
             all_vms_in_sla = self.get(
                 "v1",
-                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(sla_id),
+                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(
+                    sla_id),
                 timeout)
 
             vm_name_id = {}
