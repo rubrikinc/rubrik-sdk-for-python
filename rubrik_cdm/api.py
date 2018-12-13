@@ -37,7 +37,7 @@ class Api():
 
         Arguments:
             call_type {str} -- The HTTP Method for the type of RESTful API call being made. (choices: {'GET', 'POST', 'PATCH', 'DELETE', and 'JOB_STATUS'.})
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal}) (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
@@ -124,10 +124,9 @@ class Api():
                 api_request.raise_for_status()
         except requests.exceptions.ConnectTimeout:
             sys.exit(
-                'Error: Unable to establish a connection to the Rubrik cluster.')
+                "Error: Unable to establish a connection to the Rubrik cluster.")
         except requests.exceptions.ReadTimeout:
-            sys.exit(
-                "Error: The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
+            sys.exit("Error: The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
         except requests.exceptions.RequestException as error:
             # If "error_message" has be defined sys.exit that message else
             # sys.exit the request exception error
@@ -147,7 +146,7 @@ class Api():
         """Send a GET request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
@@ -171,7 +170,7 @@ class Api():
         """Send a POST request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
             config {dict} -- The specified data to send with the API call.
 
@@ -196,7 +195,7 @@ class Api():
         """Send a PATCH request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
             config {dict} -- The specified data to send with the API call.
 
@@ -221,7 +220,7 @@ class Api():
         """Send a DELETE request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
