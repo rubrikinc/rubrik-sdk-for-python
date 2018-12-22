@@ -107,10 +107,6 @@ rubrik = rubrik_cdm.Connect()
 | Note: It is strongly advised that valid certificates are installed and utilized on the Rubrik cluster. For more information see the [Rubrik CDM Security Guide](https://support.rubrik.com/servlet/servlet.FileDownload?file=00P1W00001EQnaYUAT). |
 | --- |
 
-
-
-
-
 ## Rubrik SDK for Python Quickstart
 
 The following section outlines how to get started using the Rubrik SDK for Go, including installation, configuration, as well as sample code.
@@ -167,54 +163,56 @@ Create a file named `vmwarevms.py` in your working directory and copy in the fol
 import rubrik_cdm
 import urllib3
 
-#Disable certificate warnings and connect to Rubrik Cluster
-urllib3.disable_warnings()
+main {
+  #Disable certificate warnings and connect to Rubrik Cluster
+  urllib3.disable_warnings()
 
-#Establish a connection to the Rubrik cluster
-rubrik=rubrik_cdm.Connect()
+  #Establish a connection to the Rubrik cluster
+  rubrik=rubrik_cdm.Connect()
 
-#=============================================================
-# Example of protecting a VMware Virtual Machine
-#=============================================================
+  #=============================================================
+  # Example of protecting a VMware Virtual Machine
+  #=============================================================
 
-# Set Object Variables
-vm_name = "VM1"
-sla_name = "Gold"
-object_type = "vmware"
+  # Set Object Variables
+  vm_name := "VM1"
+  sla_name := "Gold"
+  object_type := "vmware"
 
-# Assign VM to SLA Domain
-assign_sla = rubrik.assign_sla(vm_name, sla_name, object_type)
+  # Assign VM to SLA Domain
+   assign_sla = rubrik.assign_sla(vm_name, sla_name, object_type)
 
-#=============================================================
-# Example of taking an On-Demand Snapshot of a VMware VM
-#=============================================================
+  #=============================================================
+  # Example of taking an On-Demand Snapshot of a VMware VM
+  #=============================================================
 
-# Set Object Variables
-vm_name = "VM1"
-sla_name = "Gold"
-object_type = "vmware"
+  # Set Object Variables
+  vm_name = "VM1"
+  sla_name = "Gold"
+  object_type = "vmware"
 
-# Take On-Demand Snapshot of VM
-snapshot = rubrik.on_demand_snapshot(vm_name, object_type, sla_name)
+  # Take On-Demand Snapshot of VM
+  snapshot = rubrik.on_demand_snapshot(vm_name, object_type, sla_name)
 
-#=============================================================
-# Recovering VMware Virtual Machines
-#=============================================================
+  #=============================================================
+  # Recovering VMware Virtual Machines
+  #=============================================================
 
-# Set Object Variables
+  # Set Object Variables
 
-vm_name = "VM1"
-date = "10-21-2018"
-time = "9:56 AM"
+  vm_name = "VM1"
+  date = "10-21-2018"
+  time = "9:56 AM"
 
-# Live Mount specific snapshot to the current host
-live_mount = rubrik.vsphere_live_mount(vm_name, date, time)
+  # Live Mount specific snapshot to the current host
+  live_mount = rubrik.vsphere_live_mount(vm_name, date, time)
 
-# Live Mount latest snapshot to a specific host
-live_mount = rubrik.vsphere_live_mount(vm_name, date='latest', time='latest', host='esxi44.rubrik.us')
+  # Live Mount latest snapshot to a specific host
+  live_mount = rubrik.vsphere_live_mount(vm_name, date='latest', time='latest', host='esxi44.rubrik.us')
 
-# Instant Recovery of the latest snapshot to the current host
-instant_recovery = rubrik.vsphere_instant_recovery(vm_name, date='latest', time='latest')
+  # Instant Recovery of the latest snapshot to the current host
+  instant_recovery = rubrik.vsphere_instant_recovery(vm_name, date='latest', time='latest')
+}
 ```
 
 #### Breaking Down the Sample Workflow
