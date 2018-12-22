@@ -109,7 +109,7 @@ rubrik = rubrik_cdm.Connect()
 
 ## Rubrik SDK for Python Quickstart
 
-The following section outlines how to get started using the Rubrik SDK for Go, including installation, configuration, as well as sample code.
+The following section outlines how to get started using the Rubrik SDK for Python, including installation, configuration, as well as sample code.
 
 ### Prerequisites
 
@@ -374,7 +374,7 @@ Sample code may be executed using the following syntax:
 python samplefile.py
 ```
 
-## Rubrik SDK for Go Documentation
+## Rubrik SDK for Python Documentation
 
 This guide acts only as a quick start to get up and running with the Rubrik SDK for Python. For detailed information on all of the functions and features included see the complete [Rubrik SDK for Python documentation](https://rubrik.gitbook.io/rubrik-sdk-for-python). 
 
