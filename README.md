@@ -16,9 +16,9 @@ $ git clone https://github.com/rubrik-devops/rubrik-sdk-for-python
 $ cd rubrik-sdk-for-python
 $ python setup.py install
 ```
-## Quickstart
+## Quick Start
 
-[Quickstart Guide]( )
+[Quickstart Guide](https://github.com/rubrikinc/rubrik-sdk-for-python/blob/master/docs/quickstart.md)
 
 ## Documentation
 
