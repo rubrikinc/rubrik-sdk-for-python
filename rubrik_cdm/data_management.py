@@ -161,6 +161,8 @@ class Data_Management(_API):
             object_summary_api_endpoint = '/vmware/vm?primary_cluster_id=local&is_relic=false&name={}'.format(
                 object_name)
         elif object_type == 'sla':
+            if object_name.upper() == "FOREVER":
+                return "UNPROTECTED"
             object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/sla_domain?primary_cluster_id=local&name={}'.format(
                 object_name)
@@ -659,33 +661,27 @@ class Data_Management(_API):
         self.log(
             "end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
         managed_volume_summary = self.get(
-            'internal', '/managed_volume/{}'.format(managed_volume_id), timeout)
+            "internal", "/managed_volume/{}".format(managed_volume_id), timeout)
 
         if not managed_volume_summary['isWritable']:
             return "No change required. The Managed Volume 'name' is already assigned in a read only state."
 
         if sla_name == 'current':
-            self.log(
-                "end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))
+            self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))
             if managed_volume_summary['slaAssignment'] == 'Unassigned' or managed_volume_summary['effectiveSlaDomainId'] == 'UNPROTECTED':
                 sys.exit(
                     "Error: The Managed Volume '{}' does not have a SLA assigned currently assigned. You must populate the sla_name argument.".format(name))
-
-            sla_id = managed_volume_summary['configuredSlaDomainId']
+            config = {}
         else:
             self.log(
                 "end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
             sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
-        config = {}
-        config['retentionConfig'] = {}
-        config['retentionConfig']['slaId'] = sla_id
+            config = {}
+            config['retentionConfig'] = {}
+            config['retentionConfig']['slaId'] = sla_id
 
-        return self.post(
-            'internal',
-            '/managed_volume/{}/end_snapshot'.format(managed_volume_id),
-            config,
-            timeout)
+        return self.post("internal", "/managed_volume/{}/end_snapshot".format(managed_volume_id), config, timeout)
 
     def get_sla_objects(self, sla, object_type, timeout=15):
         """Retrieve the name and ID of a specific object type.
