@@ -18,7 +18,7 @@ $ python setup.py install
 ```
 ## Quick Start
 
-[Quickstart Guide](https://github.com/rubrikinc/rubrik-sdk-for-python/blob/master/docs/quickstart.md)
+[Quick Start Guide](https://github.com/rubrikinc/rubrik-sdk-for-python/blob/master/docs/quick-start.md)
 
 ## Documentation
 
