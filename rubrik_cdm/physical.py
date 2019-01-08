@@ -39,7 +39,7 @@ class Physical(_API):
         """
 
         self.log('Searching the Rubrik cluster for the current hosts.')
-        current_hosts = self.get('v1', '/host')
+        current_hosts = self.get('v1', '/host', timeout)
 
         for host in current_hosts['data']:
             if host['hostname'] == hostname:
@@ -68,7 +68,7 @@ class Physical(_API):
         """
 
         self.log('Searching the Rubrik cluster for the current hosts.')
-        current_hosts = self.get('v1', '/host')
+        current_hosts = self.get('v1', '/host', timeout)
 
         host_present = False
 
@@ -86,16 +86,7 @@ class Physical(_API):
             "Deleting the host '{}' from the Rubrik cluster.".format(hostname))
         return self.delete('v1', '/host/{}'.format(host_id), timeout)
 
-    def create_physical_fileset(
-            self,
-            name,
-            operating_system,
-            include,
-            exclude,
-            exclude_exception,
-            follow_network_shares=False,
-            backup_hidden_folders=False,
-            timeout=15):
+    def create_physical_fileset(self, name, operating_system, include, exclude, exclude_exception, follow_network_shares=False, backup_hidden_folders=False, timeout=15):
         """Create a Fileset for a Linux or Windows machine.
 
         Arguments:
@@ -147,11 +138,7 @@ class Physical(_API):
         self.log("create_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(
             operating_system))
         current_filesets = self.get(
-            'v1',
-            '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
-                operating_system,
-                name),
-            timeout)
+            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(operating_system, name), timeout)
 
         current_config = {}
         if current_filesets['data']:
@@ -181,15 +168,7 @@ class Physical(_API):
             model,
             timeout=timeout)
 
-    def create_nas_fileset(
-            self,
-            name,
-            share_type,
-            include,
-            exclude,
-            exclude_exception,
-            follow_network_shares=False,
-            timeout=15):
+    def create_nas_fileset(self, name, share_type, include, exclude, exclude_exception, follow_network_shares=False, timeout=15):
         """Create a NAS Fileset.
 
         Arguments:
@@ -236,9 +215,7 @@ class Physical(_API):
         self.log(
             "create_fileset: Searching the Rubrik cluster for all current NAS Filesets.")
         current_filesets = self.get(
-            'v1',
-            '/fileset_template?primary_cluster_id=local&operating_system_type=NONE&name={}'.format(name),
-            timeout=timeout)
+            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type=NONE&name={}'.format(name), timeout)
 
         current_config = {}
         if current_filesets['data']:
@@ -267,18 +244,7 @@ class Physical(_API):
             model,
             timeout=timeout)
 
-    def assign_physical_host_fileset(
-            self,
-            hostname,
-            fileset_name,
-            operating_system,
-            sla_name,
-            include=None,
-            exclude=None,
-            exclude_exception=None,
-            follow_network_shares=False,
-            backup_hidden_folders=False,
-            timeout=30):
+    def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None, exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):
         """Assign a Fileset to a Linux or Windows machine. If you have multiple Filesets with identical names, you will need to populate the Filesets properties (i.e this functions keyword arguments)
         to find a specific match. Filesets with identical names and properties are not supported.
 
@@ -336,11 +302,7 @@ class Physical(_API):
                 operating_system,
                 hostname))
         current_hosts = self.get(
-            'v1',
-            '/host?operating_system_type={}&primary_cluster_id=local&hostname={}'.format(
-                operating_system,
-                hostname),
-            timeout)
+            'v1', '/host?operating_system_type={}&primary_cluster_id=local&hostname={}'.format(operating_system, hostname), timeout)
 
         if current_hosts['total'] >= 1:
             for host in current_hosts['data']:
@@ -357,11 +319,7 @@ class Physical(_API):
         self.log("assign_physical_host_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(
             operating_system))
         current_filesets_templates = self.get(
-            'v1',
-            '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
-                operating_system,
-                fileset_name),
-            timeout)
+            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(operating_system, fileset_name), timeout)
 
         number_of_matches = 0
         if current_filesets_templates['total'] == 0:
@@ -422,16 +380,12 @@ class Physical(_API):
 
         self.log(
             "assign_physical_host_fileset: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-        sla_id = self.object_id(sla_name, 'sla')
+        sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
         self.log("assign_physical_host_fileset: Getting the properties of the {} Fileset.".format(
             fileset_name))
         current_fileset = self.get(
-            'v1',
-            '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(
-                host_id,
-                fileset_template_id),
-            timeout)
+            'v1', '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id, fileset_template_id), timeout)
 
         if current_fileset['total'] == 0:
             self.log(

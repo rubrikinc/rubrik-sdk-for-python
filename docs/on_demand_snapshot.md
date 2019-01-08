@@ -2,7 +2,7 @@
 
 Initiate an on-demand snapshot.
 ```py
-def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=None, host_os=None)
+def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=None, host_os=None, timeout=15)
 ```
 
 ## Arguments
@@ -16,6 +16,7 @@ def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=Non
 | sla_name  | str  | The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used.  |         |    current     |
 | fileset  | str  | The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host.  |         |    None     |
 | host_os  | str  | The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host.  |    Linux, Windows     |    None      |
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
 | Type | Return Value                                                                                   |

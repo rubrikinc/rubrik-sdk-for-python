@@ -32,20 +32,12 @@ class Api():
     def __init__(self, node_ip):
         super().__init__(node_ip)
 
-    def _common_api(
-            self,
-            call_type,
-            api_version,
-            api_endpoint,
-            config=None,
-            job_status_url=None,
-            timeout=15,
-            authentication=True):
+    def _common_api(self, call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=15, authentication=True):
         """Internal method that consolidates the base API functions.
 
         Arguments:
             call_type {str} -- The HTTP Method for the type of RESTful API call being made. (choices: {'GET', 'POST', 'PATCH', 'DELETE', and 'JOB_STATUS'.})
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal}) (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
@@ -132,7 +124,9 @@ class Api():
                 api_request.raise_for_status()
         except requests.exceptions.ConnectTimeout:
             sys.exit(
-                'Error: Unable to establish a connection to the Rubrik cluster.')
+                "Error: Unable to establish a connection to the Rubrik cluster.")
+        except requests.exceptions.ReadTimeout:
+            sys.exit("Error: The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
         except requests.exceptions.RequestException as error:
             # If "error_message" has be defined sys.exit that message else
             # sys.exit the request exception error
@@ -152,7 +146,7 @@ class Api():
         """Send a GET request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
@@ -172,17 +166,11 @@ class Api():
             timeout=timeout,
             authentication=authentication)
 
-    def post(
-            self,
-            api_version,
-            api_endpoint,
-            config,
-            timeout=15,
-            authentication=True):
+    def post(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Send a POST request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
             config {dict} -- The specified data to send with the API call.
 
@@ -203,17 +191,11 @@ class Api():
             timeout=timeout,
             authentication=authentication)
 
-    def patch(
-            self,
-            api_version,
-            api_endpoint,
-            config,
-            timeout=15,
-            authentication=True):
+    def patch(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Send a PATCH request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
             config {dict} -- The specified data to send with the API call.
 
@@ -234,16 +216,11 @@ class Api():
             timeout=timeout,
             authentication=authentication)
 
-    def delete(
-            self,
-            api_version,
-            api_endpoint,
-            timeout=15,
-            authentication=True):
+    def delete(self, api_version, api_endpoint, timeout=15, authentication=True):
         """Send a DELETE request to the provided Rubrik API endpoint.
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:

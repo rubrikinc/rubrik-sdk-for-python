@@ -2,7 +2,7 @@
 
 Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 ```py
-def vsphere_live_mount(vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True)
+def vsphere_live_mount(vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15)
 ```
 
 ## Arguments
@@ -17,6 +17,7 @@ def vsphere_live_mount(vm_name, date='latest', time='latest', host='current', re
 | host  | str  | The hostname or IP address of the ESXi host to Live Mount the VM on. By default, the current host will be used.  |         |    current     |
 | remove_network_devices  | bool  | Flag that determines whether to remove the network interfaces from the Live Mounted VM. Set to `True` to remove all network interfaces.  |         |    False     |
 | power_on  | bool  | Flag that determines whether the VM should be powered on after the Live Mount. Set to `True` to power on the VM. Set to `False` to mount the VM but not power it on.  |         |    True     |
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
 | Type | Return Value                                                                                   |

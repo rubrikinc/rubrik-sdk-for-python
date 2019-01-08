@@ -2,7 +2,7 @@
 
 Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 ```py
-def vsphere_instant_recovery(vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False)
+def vsphere_instant_recovery(vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15)
 ```
 
 ## Arguments
@@ -20,6 +20,7 @@ def vsphere_instant_recovery(vm_name, date='latest', time='latest', host='curren
 | disable_network  | bool  | Sets the state of the network interfaces when the VM is instantly recovered. Use `False` to enable the network interfaces. Use `True` to disable the network interfaces. Disabling the interfaces can prevent IP conflicts.  |         |    False     |
 | keep_mac_addresses  | bool  | Flag that determines whether the MAC addresses of the network interfaces on the source VM are assigned to the new VM. Set to `True` to assign the original MAC addresses to the new VM. Set to `False` to assign new MAC addresses. When 'remove_network_devices' is set to `True`, this property is ignored.  |         |    False     |
 | preserve_moid  | bool  | Flag that determines whether to preserve the MOID of the source VM in a restore operation. Use `True` to keep the MOID of the source. Use `False` to assign a new moid.  |         |    False     |
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
 | Type | Return Value                                                                                   |

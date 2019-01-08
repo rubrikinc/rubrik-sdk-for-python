@@ -26,17 +26,7 @@ _API = Api
 class Cloud(_API):
     """This class contains methods for the managment of Cloud related functionality on the Rubrik cluster."""
 
-    def aws_s3_cloudout(
-            self,
-            aws_bucket_name,
-            archive_name='default',
-            aws_region=None,
-            aws_access_key=None,
-            aws_secret_key=None,
-            kms_master_key_id=None,
-            rsa_key=None,
-            storage_class='standard',
-            timeout=30):
+    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=30):
         """Add a new AWS S3 archival location to the Rubrik cluster.
 
         Arguments:
@@ -124,7 +114,8 @@ class Cloud(_API):
 
         self.log(
             "aws_s3_cloudout: Searching the Rubrik cluster for archival locations.")
-        archives_on_cluster = self.get('internal', '/archive/object_store')
+        archives_on_cluster = self.get(
+            'internal', '/archive/object_store', timeout)
 
         config = {}
         config['name'] = archive_name
@@ -166,13 +157,7 @@ class Cloud(_API):
         self.log("aws_s3_cloudout: Creating the AWS S3 archive location.")
         return self.post('internal', '/archive/object_store', config, timeout)
 
-    def aws_s3_cloudon(
-            self,
-            archive_name,
-            vpc_id,
-            subnet_id,
-            security_group_id,
-            timeout=30):
+    def aws_s3_cloudon(self, archive_name, vpc_id, subnet_id, security_group_id, timeout=30):
         """Enable CloudOn for an exsiting AWS S3 archival location.
 
         Arguments:
@@ -191,7 +176,8 @@ class Cloud(_API):
 
         self.log(
             "aws_s3_cloudon: Searching the Rubrik cluster for archival locations.")
-        archives_on_cluster = self.get('internal', '/archive/object_store')
+        archives_on_cluster = self.get(
+            'internal', '/archive/object_store', timeout)
 
         config = {}
         config['defaultComputeNetworkConfig'] = {}
@@ -216,15 +202,7 @@ class Cloud(_API):
         sys.exit("Error: The Rubrik cluster does not have an archive location named '{}'.".format(
             archive_name))
 
-    def azure_cloudout(
-            self,
-            container,
-            azure_access_key,
-            storage_account_name,
-            rsa_key,
-            archive_name='default',
-            instance_type='default',
-            timeout=30):
+    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=30):
         """Add a new Azure archival location to the Rubrik cluster.
 
         Arguments:
@@ -260,7 +238,8 @@ class Cloud(_API):
 
         self.log(
             "azure_cloudout: Searching the Rubrik cluster for archival locations.")
-        archives_on_cluster = self.get('internal', '/archive/object_store')
+        archives_on_cluster = self.get(
+            'internal', '/archive/object_store', timeout)
 
         config = {}
         config['name'] = archive_name
@@ -310,19 +289,7 @@ class Cloud(_API):
         self.log("azure_cloudout: Creating the Azure archive location.")
         return self.post('internal', '/archive/object_store', config)
 
-    def azure_cloudon(
-            self,
-            archive_name,
-            container,
-            storage_account_name,
-            application_id,
-            application_key,
-            tenant_id,
-            region,
-            virtual_network_id,
-            subnet_name,
-            security_group_id,
-            timeout=30):
+    def azure_cloudon(self, archive_name, container, storage_account_name, application_id, application_key, tenant_id, region, virtual_network_id, subnet_name, security_group_id, timeout=30):
         """Enable CloudOn for an exsiting AWS S3 archival location.
 
         Arguments:
@@ -380,7 +347,8 @@ class Cloud(_API):
 
         self.log(
             "azure_cloudon: Searching the Rubrik cluster for archival locations.")
-        archives_on_cluster = self.get('internal', '/archive/object_store')
+        archives_on_cluster = self.get(
+            'internal', '/archive/object_store', timeout)
 
         config = {}
         config['name'] = archive_name
@@ -438,14 +406,7 @@ class Cloud(_API):
         sys.exit("Error: The Rubrik cluster does not have an archive location named '{}'.".format(
             archive_name))
 
-    def add_aws_native_account(
-            self,
-            aws_account_name,
-            aws_access_key=None,
-            aws_secret_key=None,
-            aws_regions=None,
-            regional_bolt_network_configs=None,
-            timeout=30):
+    def add_aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None, aws_regions=None, regional_bolt_network_configs=None, timeout=30):
         """Add a new AWS account to EC2 native protection on the Rubrik cluster.
 
         Arguments:
@@ -541,7 +502,7 @@ class Cloud(_API):
 
         self.log(
             "aws_native_account: Searching the Rubrik cluster for cloud native sources.")
-        cloud_native_on_cluster = self.get('internal', '/aws/account')
+        cloud_native_on_cluster = self.get('internal', '/aws/account', timeout)
 
         for cloud_source in cloud_native_on_cluster['data']:
 
@@ -557,7 +518,7 @@ class Cloud(_API):
             # idempotent return if a cloud native source with this access key
             # already exists
             cloud_source_detail = self.get(
-                'internal', '/aws/account/{}'.format(cloud_source['id']))
+                'internal', '/aws/account/{}'.format(cloud_source['id']), timeout)
             if cloud_source_detail['accessKey'] == aws_access_key:
                 return "No change required. Cloud native source with access key '{}' is already configured on the Rubrik cluster.".format(
                     aws_access_key)

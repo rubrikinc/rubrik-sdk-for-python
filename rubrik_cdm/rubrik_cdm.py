@@ -47,12 +47,7 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
         _PHYSICAL {class} - This class contains methods related to the managment of the Physical objects in the Rubrik Cluster.
     """
 
-    def __init__(
-            self,
-            node_ip=None,
-            username=None,
-            password=None,
-            enable_logging=False):
+    def __init__(self, node_ip=None, username=None, password=None, enable_logging=False):
         """Constructor for the Connect class which is used to initialize the class variables.
 
         Keyword Arguments:
@@ -150,11 +145,11 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
         """Internal method used to validate the API Version and API Endpoint provided by the end user
 
         Arguments:
-            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, internal})
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
         """
 
-        valid_api_versions = ['v1', 'internal']
+        valid_api_versions = ['v1', 'v2', 'internal']
 
         # Validate the API Version
         if api_version not in valid_api_versions:
@@ -191,20 +186,7 @@ class Bootstrap(_API):
 
         node_ip = [self.node_ip]
 
-    def setup_cluster(
-            self,
-            cluster_name,
-            admin_email,
-            admin_password,
-            management_gateway,
-            management_subnet_mask,
-            node_config=None,
-            enable_encryption=True,
-            dns_search_domains=None,
-            dns_nameservers=None,
-            ntp_servers=None,
-            wait_for_completion=True,
-            timeout=30):
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
@@ -330,10 +312,7 @@ class Bootstrap(_API):
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(
             request_id)
         api_request = self.get(
-            'internal',
-            bootstrap_status_api_endpoint,
-            timeout=timeout,
-            authentication=False)
+            'internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
 
         return api_request
 

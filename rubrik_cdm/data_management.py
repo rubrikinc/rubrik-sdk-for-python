@@ -25,13 +25,7 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(
-            self,
-            object_name,
-            object_type,
-            sla_name='current',
-            fileset=None,
-            host_os=None):
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, timeout=15):
         """Initiate an on-demand snapshot.
 
         Arguments:
@@ -42,7 +36,7 @@ class Data_Management(_API):
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
             host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
-
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
             tuple -- When object_type is vmware, the full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
@@ -65,19 +59,20 @@ class Data_Management(_API):
         if object_type == 'vmware':
             self.log(
                 "on_demand_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
-            vm_id = self.object_id(object_name, object_type)
+            vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
             if sla_name == 'current':
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the vSphere VM '{}'.".format(object_name))
 
-                vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+                vm_summary = self.get(
+                    'v1', '/vmware/vm/{}'.format(vm_id), timeout)
                 sla_id = vm_summary['effectiveSlaDomainId']
 
             elif sla_name != 'current':
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-                sla_id = self.object_id(sla_name, 'sla')
+                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
@@ -85,7 +80,7 @@ class Data_Management(_API):
             self.log(
                 "on_demand_snapshot: Initiating snapshot for the vSphere VM '{}'.".format(object_name))
             api_request = self.post(
-                'v1', '/vmware/vm/{}/snapshot'.format(vm_id), config)
+                'v1', '/vmware/vm/{}/snapshot'.format(vm_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -99,20 +94,17 @@ class Data_Management(_API):
 
             self.log(
                 "on_demand_snapshot: Searching the Rubrik cluster for the Physical Host '{}'.".format(object_name))
-            host_id = self.object_id(object_name, object_type)
+            host_id = self.object_id(object_name, object_type, timeout=timeout)
 
             self.log(
                 "on_demand_snapshot: Searching the Rubrik cluster for the Fileset Template '{}'.".format(fileset))
             fileset_template_id = self.object_id(
-                fileset, 'fileset_template', host_os)
+                fileset, 'fileset_template', host_os, timeout=timeout)
 
             self.log(
                 "on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
             fileset_summary = self.get(
-                'v1',
-                '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(
-                    host_id,
-                    fileset_template_id))
+                'v1', '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id, fileset_template_id), timeout)
 
             if fileset_summary['total'] == 0:
                 sys.exit(
@@ -126,7 +118,7 @@ class Data_Management(_API):
             elif sla_name != 'current':
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-                sla_id = self.object_id(sla_name, 'sla')
+                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
@@ -134,18 +126,19 @@ class Data_Management(_API):
             self.log(
                 "on_demand_snapshot: Initiating snapshot for the Physical Host '{}'.".format(object_name))
             api_request = self.post(
-                'v1', '/fileset/{}/snapshot'.format(fileset_id), config)
+                'v1', '/fileset/{}/snapshot'.format(fileset_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
         return (api_request, snapshot_status_url)
 
-    def object_id(self, object_name, object_type, host_os=None):
+    def object_id(self, object_name, object_type, host_os=None, timeout=15):
         """Get the ID of a Rubrik object by providing its name.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
             object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
             str -- The ID of the provided Rubrik object.
@@ -168,6 +161,8 @@ class Data_Management(_API):
             object_summary_api_endpoint = '/vmware/vm?primary_cluster_id=local&is_relic=false&name={}'.format(
                 object_name)
         elif object_type == 'sla':
+            if object_name.upper() == "FOREVER" or object_name.upper() == "UNPROTECTED":
+                return "UNPROTECTED"
             object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/sla_domain?primary_cluster_id=local&name={}'.format(
                 object_name)
@@ -191,17 +186,14 @@ class Data_Management(_API):
             object_summary_api_endpoint = '/managed_volume?is_relic=false&primary_cluster_id=local&name={}'.format(
                 object_name)
 
-        self.log(
-            "object_id: Getting the object id for the {} object '{}'.".format(
-                object_type, object_name))
-        api_request = self.get(
-            object_summary_api_version,
-            object_summary_api_endpoint)
+        self.log("object_id: Getting the object id for the {} object '{}'.".format(
+            object_type, object_name))
+        api_request = self.get(object_summary_api_version,
+                               object_summary_api_endpoint, timeout)
 
         if api_request['total'] == 0:
-            sys.exit(
-                "Error: The {} object '{}' was not found on the Rubrik cluster.".format(
-                    object_type, object_name))
+            sys.exit("Error: The {} object '{}' was not found on the Rubrik cluster.".format(
+                object_type, object_name))
         elif api_request['total'] > 0:
             object_ids = []
             # Define the "object name" to search for
@@ -263,16 +255,16 @@ class Data_Management(_API):
         else:
             self.log(
                 "assign_sla: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-            sla_id = self.object_id(sla_name, 'sla')
+            sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
         if object_type == 'vmware':
             self.log(
                 "assign_sla: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
-            vm_id = self.object_id(object_name, object_type)
+            vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
             self.log(
                 "assign_sla: Determing the SLA Domain currently assigned to the vSphere VM '{}'.".format(object_name))
-            vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+            vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout)
             if sla_id == "INHERIT":
                 current_sla_id = vm_summary['configuredSlaDomainId']
             else:
@@ -295,14 +287,7 @@ class Data_Management(_API):
                     config,
                     timeout)
 
-    def vsphere_live_mount(
-            self,
-            vm_name,
-            date='latest',
-            time='latest',
-            host='current',
-            remove_network_devices=False,
-            power_on=True):
+    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -314,6 +299,7 @@ class Data_Management(_API):
             host {str} -- The hostname or IP address of the ESXi host to Live Mount the VM on. By default, the current host will be used. (default: {'current'})
             remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Live Mounted VM. Set to `True` to remove all network interfaces. (default: {False})
             power_on {bool} -- Flag that determines whether the VM should be powered on after the Live Mount. Set to `True` to power on the VM. Set to `False` to mount the VM but not power it on. (default: {True})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount`.
@@ -330,11 +316,11 @@ class Data_Management(_API):
 
         self.log(
             "vsphere_live_mount: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
-        vm_id = self.object_id(vm_name, 'vmware')
+        vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
         self.log(
             "vsphere_live_mount: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
-        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout)
 
         if date == 'latest' and time == 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
@@ -364,7 +350,7 @@ class Data_Management(_API):
             if host == 'current':
                 host_id = vm_summary['hostId']
             else:
-                host_id = self.object_id(host, 'vmware_host')
+                host_id = self.object_id(host, 'vmware_host', timeout=timeout)
 
             config = {}
             config['hostId'] = host_id
@@ -380,19 +366,9 @@ class Data_Management(_API):
             return self.post(
                 'v1',
                 '/vmware/vm/snapshot/{}/mount'.format(snapshot_id),
-                config)
+                config, timeout)
 
-    def vsphere_instant_recovery(
-            self,
-            vm_name,
-            date='latest',
-            time='latest',
-            host='current',
-            remove_network_devices=False,
-            power_on=True,
-            disable_network=False,
-            keep_mac_addresses=False,
-            preserve_moid=False):
+    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):
         """Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -407,6 +383,7 @@ class Data_Management(_API):
             disable_network {bool} -- Sets the state of the network interfaces when the VM is instantly recovered. Use `False` to enable the network interfaces. Use `True` to disable the network interfaces. Disabling the interfaces can prevent IP conflicts. (default: {False})
             keep_mac_addresses {bool} -- Flag that determines whether the MAC addresses of the network interfaces on the source VM are assigned to the new VM. Set to `True` to assign the original MAC addresses to the new VM. Set to `False` to assign new MAC addresses. When 'remove_network_devices' is set to `True`, this property is ignored. (default: {False})
             preserve_moid {bool} -- Flag that determines whether to preserve the MOID of the source VM in a restore operation. Use `True` to keep the MOID of the source. Use `False` to assign a new moid. (default: {False})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/instant_recover`.
@@ -430,11 +407,11 @@ class Data_Management(_API):
 
         self.log(
             "vsphere_instant_recovery: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
-        vm_id = self.object_id(vm_name, 'vmware')
+        vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
         self.log(
             "vsphere_instant_recovery: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
-        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout)
 
         if date == 'latest' and time == 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
@@ -464,7 +441,7 @@ class Data_Management(_API):
             if host == 'current':
                 host_id = vm_summary['hostId']
             else:
-                host_id = self.object_id(host, 'vmware_host')
+                host_id = self.object_id(host, 'vmware_host', timeout=timeout)
 
             config = {}
             config['hostId'] = host_id
@@ -480,10 +457,7 @@ class Data_Management(_API):
                     time,
                     vm_name))
 
-            return self.post(
-                'v1',
-                '/vmware/vm/snapshot/{}/instant_recover'.format(snapshot_id),
-                config)
+            return self.post('v1', '/vmware/vm/snapshot/{}/instant_recover'.format(snapshot_id), config, timeout)
 
     def _date_time_conversion(self, date, time):
         """All date values returned by the Rubrik API are stored in Coordinated Universal Time (UTC)
@@ -517,7 +491,7 @@ class Data_Management(_API):
                 "Error: The time argument '{}' must be formatd as 'Hour:Minute AM/PM' (ex: 2:57 AM).".format(time))
 
         self.log("_date_time_conversion: Getting the Rubrik cluster timezone.")
-        cluster_summary = self.get('v1', '/cluster/me')
+        cluster_summary = self.get('v1', '/cluster/me', timeout)
         cluster_timezone = cluster_summary['timezone']['timezone']
 
         self.log(
@@ -563,11 +537,12 @@ class Data_Management(_API):
 
             self.log(
                 "pause_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
-            vm_id = self.object_id(object_name, object_type)
+            vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
             self.log(
                 "pause_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+            api_request = self.get(
+                'v1', '/vmware/vm/{}'.format(vm_id), timeout)
 
             if api_request['blackoutWindowStatus']['isSnappableBlackoutActive']:
                 return "No change required. The '{}' '{}' is already paused.".format(
@@ -607,11 +582,12 @@ class Data_Management(_API):
 
             self.log(
                 "resume_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
-            vm_id = self.object_id(object_name, object_type)
+            vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
             self.log(
                 "resume_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id))
+            api_request = self.get(
+                'v1', '/vmware/vm/{}'.format(vm_id), timeout)
 
             if not api_request['blackoutWindowStatus']['isSnappableBlackoutActive']:
                 return "No change required. The '{}' object '{}' is currently not paused.".format(
@@ -642,12 +618,13 @@ class Data_Management(_API):
 
         self.log(
             "begin_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
-        managed_volume_id = self.object_id(name, 'managed_volume')
+        managed_volume_id = self.object_id(
+            name, 'managed_volume', timeout=timeout)
 
         self.log(
             "begin_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
         managed_volume_summary = self.get(
-            'internal', '/managed_volume/{}'.format(managed_volume_id))
+            'internal', '/managed_volume/{}'.format(managed_volume_id), timeout)
 
         if not managed_volume_summary['isWritable']:
             self.log(
@@ -678,7 +655,8 @@ class Data_Management(_API):
 
         self.log(
             "end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
-        managed_volume_id = self.object_id(name, 'managed_volume')
+        managed_volume_id = self.object_id(
+            name, 'managed_volume', timeout=timeout)
 
         self.log(
             "end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
@@ -697,7 +675,7 @@ class Data_Management(_API):
         else:
             self.log(
                 "end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-            sla_id = self.object_id(sla_name, 'sla')
+            sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['retentionConfig'] = {}
@@ -727,13 +705,10 @@ class Data_Management(_API):
 
         if object_type == 'vmware':
 
-            sla_id = self.object_id(sla, "sla")
+            sla_id = self.object_id(sla, "sla", timeout=timeout)
 
             all_vms_in_sla = self.get(
-                "v1",
-                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(
-                    sla_id),
-                timeout)
+                "v1", "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(sla_id), timeout)
 
             vm_name_id = {}
             for vm in all_vms_in_sla["data"]:
