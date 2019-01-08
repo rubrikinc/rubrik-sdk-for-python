@@ -1,4 +1,4 @@
-# Quickstart Guide: Rubrik SDK for Python
+# Quick Start Guide: Rubrik SDK for Python
 
 ## Introduction to the Rubrik SDK for Python
 
@@ -107,7 +107,7 @@ rubrik = rubrik_cdm.Connect()
 | Note: It is strongly advised that valid certificates are installed and utilized on the Rubrik cluster. For more information see the [Rubrik CDM Security Guide](https://support.rubrik.com/servlet/servlet.FileDownload?file=00P1W00001EQnaYUAT). |
 | --- |
 
-## Rubrik SDK for Python Quickstart
+## Rubrik SDK for Python Quick Start
 
 The following section outlines how to get started using the Rubrik SDK for Python, including installation, configuration, as well as sample code.
 
