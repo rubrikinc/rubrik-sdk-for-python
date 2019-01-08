@@ -161,7 +161,7 @@ class Data_Management(_API):
             object_summary_api_endpoint = '/vmware/vm?primary_cluster_id=local&is_relic=false&name={}'.format(
                 object_name)
         elif object_type == 'sla':
-            if object_name.upper() == "FOREVER":
+            if object_name.upper() == "FOREVER" or object_name.upper() == "UNPROTECTED":
                 return "UNPROTECTED"
             object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/sla_domain?primary_cluster_id=local&name={}'.format(
