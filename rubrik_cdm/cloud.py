@@ -26,7 +26,7 @@ _API = Api
 class Cloud(_API):
     """This class contains methods for the managment of Cloud related functionality on the Rubrik cluster."""
 
-    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=30):
+    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=180):
         """Add a new AWS S3 archival location to the Rubrik cluster.
 
         Arguments:
@@ -40,7 +40,7 @@ class Cloud(_API):
             rsa_key {str} -- The RSA key that will be used to encrypt the archive data. A key can be generated through `openssl genrsa -out rubrik_encryption_key.pem 2048`. If set to the default `None` keyword argument, you will need to provide a `kms_master_key_id` instead.  (default: {None})
             archive_name {str} -- The name of the archive location used in the Rubrik GUI. If set to 'default' the following naming convention will be used: "AWS:S3:`aws_bucket_name`" (default: {'default'})
             storage_class {str} -- The AWS storage class you wish to use. (default: {'standard'}) (choices: {standard, 'standard_ia, reduced_redundancy})
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {180})
 
 
         Returns:
@@ -202,7 +202,7 @@ class Cloud(_API):
         sys.exit("Error: The Rubrik cluster does not have an archive location named '{}'.".format(
             archive_name))
 
-    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=30):
+    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=180):
         """Add a new Azure archival location to the Rubrik cluster.
 
         Arguments:
@@ -214,7 +214,7 @@ class Cloud(_API):
         Keyword Arguments:
             archive_name {str} -- The name of the archive location used in the Rubrik GUI. If set to `default`, the following naming convention will be used: "Azure:`container`" (default: {'default'})
             instance_type {str} -- The Cloud Platform type of the archival location. (default: {'default'}) (choices: {'default', 'china', 'germany', 'government'})
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {180})
 
         Returns:
             str -- No change required. The '`name`' archival location is already configured on the Rubrik cluster.
