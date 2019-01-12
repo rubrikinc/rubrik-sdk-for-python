@@ -121,7 +121,7 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'Authorization': 'Basic ' + authorization,
-            'User-Agent': 'Python SDK v1.0.11'
+            'User-Agent': 'Rubrik Python SDK v1.0.11'
         }
 
         return authorization_header
