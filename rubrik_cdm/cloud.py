@@ -537,3 +537,37 @@ class Cloud(_API):
         # make the API call, return the result
         self.log("aws_native_account: Creating the cloud native source.")
         return self.post('internal', '/aws/account', config, timeout)
+
+    def update_aws_native_account(self, aws_account_name, config, timeout=15):
+        """Update an exsiting AWS account used for EC2 native protection on the Rubrik cluster.
+
+        Arguments:
+            aws_account_name {str} -- The name of the AWS account you wish to update. This is the name that is displayed in the Rubrik UI.
+
+        Keyword Arguments:
+            config {dict} -- The configuration to use to update the AWS account. Full example values can be found in the Rubrik API Playground for the PATCH /aws/account/{id} endpoint
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+
+        Returns:
+            dict -- The full API response for `PATCH /aws/account/{id}'`.
+        """
+
+        # verify we are on cdm 4.2 or newer, required for cloud native
+        # protection
+        if float(self.cluster_version()[:3]) < 4.2:
+            sys.exit(
+                "Error: The Rubrik cluster version must be 4.2 or newer to use this method.")
+
+        if type(config) != dict:
+            sys.exit("Error: The 'config' argument must be a dictionary.")
+
+        self.log(
+            "update_aws_native_account: Checking the Rubrik cluster for the AWS Native Account.")
+        account_id = self.object_id(
+            aws_account_name, "aws_native", timeout=timeout)
+
+        self.log(
+            "update_aws_native_account: Updating the AWS Native Account.")
+
+        return self.patch("internal", "/aws/account/{}".format(account_id), config)
