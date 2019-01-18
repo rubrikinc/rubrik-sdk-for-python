@@ -499,3 +499,33 @@ class Cluster(_API):
                 "/smtp_instance/{}".format(smtp_id),
                 config,
                 timeout)
+
+    def refresh_vcenter(self, vcenter_ip, wait_for_completion=True, timeout=15):
+        """Refresh the metadata for the specified vCenter Server.
+
+        Arguments:
+            vcenter_ip {str} -- The IP address or FQDN of the vCenter you wish to refesh.
+
+
+        Keyword Arguments:
+            wait_for_completion {bool} -- Flag to determine if the function should wait for the refresh to complete before completing. (default: {True})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- When wait_for_completion is False, the full API response for `POST /v1/vmware/vcenter/{id}/refresh`
+            dict -- When wait_for_completion is True, the full API response of the job status
+        """
+
+        self.log(
+            "refresh_vcenter: Searching the Rubrik cluster for the provided vCenter Server.")
+        vcenter_id = self.object_id(vcenter_ip, "vcenter", timeout=timeout)
+
+        self.log("refresh_vcenter: Refresh vCenter.")
+
+        api_request = self.post(
+            "v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
+
+        if wait_for_completion:
+            return self.job_status(api_request["links"][0]["href"])
+
+        return self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)

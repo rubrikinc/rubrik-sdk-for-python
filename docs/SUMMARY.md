@@ -28,6 +28,7 @@
 * [configure_timezone](configure_timezone.md)
 * [configure_vlan](configure_vlan.md)
 * [end_user_authorization](end_user_authorization.md)
+* [refresh_vcenter](refresh_vcenter.md)
 
 ### Cloud Functions
 * [add_aws_native_account](add_aws_native_account.md)

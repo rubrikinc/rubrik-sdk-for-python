@@ -137,7 +137,7 @@ class Data_Management(_API):
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, aws_native})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, aws_native, vcenter})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -145,13 +145,14 @@ class Data_Management(_API):
         """
 
         valid_object_type = [
-            'vmware',
-            'sla',
-            'vmware_host',
-            'physical_host',
-            'fileset_template',
-            'managed_volume',
-            'aws_native'
+            "vmware",
+            "sla",
+            "vmware_host",
+            "physical_host",
+            "fileset_template",
+            "managed_volume",
+            "aws_native",
+            "vcenter",
         ]
 
         if object_type not in valid_object_type:
@@ -191,6 +192,9 @@ class Data_Management(_API):
             object_summary_api_version = 'internal'
             object_summary_api_endpoint = '/aws/account?name={}'.format(
                 object_name)
+        elif object_type == 'vcenter':
+            object_summary_api_version = 'v1'
+            object_summary_api_endpoint = '/vmware/vcenter'
 
         self.log("object_id: Getting the object id for the {} object '{}'.".format(
             object_type, object_name))
