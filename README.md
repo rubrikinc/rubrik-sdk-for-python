@@ -18,13 +18,12 @@ $ python setup.py install
 ```
 ## Quick Start
 
-[Quick Start Guide](https://github.com/rubrikinc/rubrik-sdk-for-python/blob/master/docs/quick-start.md)
+* [Quick Start Guide](https://github.com/rubrikinc/rubrik-sdk-for-python/blob/master/docs/quick-start.md)
 
 ## Documentation
 
-[SDK Documentation](https://rubrik.gitbook.io/rubrik-sdk-for-python/)
-
-[Rubrik API Documentation](https://github.com/rubrikinc/api-documentation)
+* [SDK Documentation](https://rubrik.gitbook.io/rubrik-sdk-for-python/)
+* [Rubrik API Documentation](https://github.com/rubrikinc/api-documentation)
 
 ## Example
 
