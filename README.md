@@ -24,7 +24,7 @@ $ python setup.py install
 
 [SDK Documentation](https://rubrik.gitbook.io/rubrik-sdk-for-python/)
 
-[Rubrik API Documentation]( )
+[Rubrik API Documentation](https://github.com/rubrikinc/api-documentation)
 
 ## Example
 
