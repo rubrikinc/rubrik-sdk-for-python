@@ -37,3 +37,7 @@ By default, the Rubrik SDK will attempt to read the the Rubrik Cluster credentia
 import rubrik_cdm
 rubrik = rubrik_cdm.Connect()
 ```
+
+## Additional Links
+* [VIDEO: Getting Start with the Rubrik SDK for Python]()
+* [BLOG: Hello World! Welcoming Rubrik’s Python SDK](https://www.rubrik.com/blog/introducing-rubrik-python-sdk/)
