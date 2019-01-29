@@ -32,7 +32,7 @@ class Api():
     def __init__(self, node_ip):
         super().__init__(node_ip)
 
-    def _common_api(self, call_type, api_version, api_endpoint, params=None, config=None, job_status_url=None, timeout=15, authentication=True):
+    def _common_api(self, call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=15, authentication=True, params=None):
         """Internal method that consolidates the base API functions.
 
         Arguments:
@@ -147,7 +147,7 @@ class Api():
             except BaseException:
                 return {'status_code': api_request.status_code}
 
-    def get(self, api_version, api_endpoint, params=None, timeout=15, authentication=True):
+    def get(self, api_version, api_endpoint, timeout=15, authentication=True, params=None):
         """Send a GET request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -167,11 +167,11 @@ class Api():
             'GET',
             api_version,
             api_endpoint,
-            params=params,
             config=None,
             job_status_url=None,
             timeout=timeout,
-            authentication=authentication)
+            authentication=authentication,
+            params=params)
 
     def post(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Send a POST request to the provided Rubrik API endpoint.
@@ -223,7 +223,7 @@ class Api():
             timeout=timeout,
             authentication=authentication)
 
-    def delete(self, api_version, api_endpoint, params=None, timeout=15, authentication=True):
+    def delete(self, api_version, api_endpoint, timeout=15, authentication=True, params=None):
         """Send a DELETE request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -243,11 +243,11 @@ class Api():
             'DELETE',
             api_version,
             api_endpoint,
-            params=params,
             config=None,
             job_status_url=None,
             timeout=timeout,
-            authentication=authentication)
+            authentication=authentication,
+            params=params)
 
     def job_status(self, url, wait_for_completion=True, timeout=15):
         """Certain Rubrik operations (on-demand snapshots, live mounts, etc.) may not complete instantaneously. In those cases we have
