@@ -84,7 +84,7 @@ class Physical(_API):
 
         self.log(
             "Deleting the host '{}' from the Rubrik cluster.".format(hostname))
-        return self.delete('v1', '/host/{}'.format(host_id), timeout)
+        return self.delete('v1', '/host/{}'.format(host_id), timeout=timeout)
 
     def create_physical_fileset(self, name, operating_system, include, exclude, exclude_exception, follow_network_shares=False, backup_hidden_folders=False, timeout=15):
         """Create a Fileset for a Linux or Windows machine.

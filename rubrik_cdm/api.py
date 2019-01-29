@@ -41,7 +41,7 @@ class Api():
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
-            api_vars {dict} -- An optional dict containing variables in a key:value format to send with `GET` API calls (default: {None})
+            api_vars {dict} -- An optional dict containing variables in a key:value format to send with `GET` & `DELETE` API calls (default: {None})
             config {dict} -- The specified data to send with `POST` and `PATCH` API calls. (default: {None})
             job_status_url {str} -- The job status URL provided by a previous API call. (default: {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
@@ -100,6 +100,8 @@ class Api():
             elif call_type == 'DELETE':
                 request_url = "https://{}/api/{}{}".format(
                     self.node_ip, api_version, api_endpoint)
+                if api_vars is not None:
+                    request_url = request_url + "?" + '&'.join("{}={}".format(key,val) for (key,val) in api_vars.items())
                 self.log('DELETE {}'.format(request_url))
                 api_request = requests.delete(
                     request_url, verify=False, headers=header, timeout=timeout)
@@ -153,7 +155,7 @@ class Api():
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
-            api_vars {dict} -- An optional dict containing variables in a key:value format to send with `GET` API calls (default: {None})
+            api_vars {dict} -- An optional dict containing variables in a key:value format to send with `GET` & `DELETE` API calls (default: {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
@@ -221,7 +223,7 @@ class Api():
             timeout=timeout,
             authentication=authentication)
 
-    def delete(self, api_version, api_endpoint, timeout=15, authentication=True):
+    def delete(self, api_version, api_endpoint, api_vars=None, timeout=15, authentication=True):
         """Send a DELETE request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -229,6 +231,7 @@ class Api():
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
+            api_vars {dict} -- An optional dict containing variables in a key:value format to send with `GET` & `DELETE` API calls (default: {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
@@ -240,6 +243,7 @@ class Api():
             'DELETE',
             api_version,
             api_endpoint,
+            api_vars=api_vars,
             config=None,
             job_status_url=None,
             timeout=timeout,
