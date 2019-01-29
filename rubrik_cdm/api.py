@@ -165,7 +165,7 @@ class Api():
             'GET',
             api_version,
             api_endpoint,
-            api_vars=None,
+            api_vars=api_vars,
             config=None,
             job_status_url=None,
             timeout=timeout,
