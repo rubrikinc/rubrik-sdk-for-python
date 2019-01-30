@@ -14,6 +14,7 @@ def _common_api(call_type, api_version, api_endpoint, config=None, job_status_ur
 ## Keyword Arguments
 | Name           | Type | Description                                                                                                  | Choices | Default |
 |----------------|------|--------------------------------------------------------------------------------------------------------------|---------|---------|
+| params         | dict | An optional dict containing variables in a key:value format to send with `GET` & `DELETE` API calls          |         | None    |
 | config         | dict | The specified data to send with `POST` and `PATCH` API calls.                                                |         | None    |
 | job_status_url | str  | The job status URL provided by a previous API call.                                                          |         | None    |
 | timeout        | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. |         | 15      |

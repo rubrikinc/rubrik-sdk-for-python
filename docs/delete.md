@@ -13,6 +13,7 @@ def delete(api_version, api_endpoint, timeout=15, authentication=True)
 ## Keyword Arguments
 | Name           | Type | Description                                                                                                  | Choices | Default |
 |----------------|------|--------------------------------------------------------------------------------------------------------------|---------|---------|
+| params         | dict | An optional dict containing variables in a key:value format to send with `GET` & `DELETE` API calls          |         | None    |
 | timeout        | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. |         | 15      |
 | authentication | bool | Flag that specifies whether or not to utilize authentication when making the API call.                       |         | True    |
 
