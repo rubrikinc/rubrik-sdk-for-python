@@ -115,7 +115,7 @@ class Cloud(_API):
         self.log(
             "aws_s3_cloudout: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout)
+            'internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['name'] = archive_name
@@ -177,7 +177,7 @@ class Cloud(_API):
         self.log(
             "aws_s3_cloudon: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout)
+            'internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['defaultComputeNetworkConfig'] = {}
@@ -239,7 +239,7 @@ class Cloud(_API):
         self.log(
             "azure_cloudout: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout)
+            'internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['name'] = archive_name
@@ -348,7 +348,7 @@ class Cloud(_API):
         self.log(
             "azure_cloudon: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout)
+            'internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['name'] = archive_name
@@ -502,7 +502,7 @@ class Cloud(_API):
 
         self.log(
             "aws_native_account: Searching the Rubrik cluster for cloud native sources.")
-        cloud_native_on_cluster = self.get('internal', '/aws/account', timeout)
+        cloud_native_on_cluster = self.get('internal', '/aws/account', timeout=timeout)
 
         for cloud_source in cloud_native_on_cluster['data']:
 
@@ -518,7 +518,7 @@ class Cloud(_API):
             # idempotent return if a cloud native source with this access key
             # already exists
             cloud_source_detail = self.get(
-                'internal', '/aws/account/{}'.format(cloud_source['id']), timeout)
+                'internal', '/aws/account/{}'.format(cloud_source['id']), timeout=timeout)
             if cloud_source_detail['accessKey'] == aws_access_key:
                 return "No change required. Cloud native source with access key '{}' is already configured on the Rubrik cluster.".format(
                     aws_access_key)
