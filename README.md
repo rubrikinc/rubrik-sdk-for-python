@@ -39,5 +39,5 @@ rubrik = rubrik_cdm.Connect()
 ```
 
 ## Additional Links
-* [VIDEO: Getting Start with the Rubrik SDK for Python]()
+* [VIDEO: Getting Start with the Rubrik SDK for Python](https://www.youtube.com/watch?v=TQM60X2_r_c&feature=youtu.be)
 * [BLOG: Hello World! Welcoming Rubrik’s Python SDK](https://www.rubrik.com/blog/introducing-rubrik-python-sdk/)
