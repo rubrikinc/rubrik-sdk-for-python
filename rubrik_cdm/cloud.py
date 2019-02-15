@@ -26,7 +26,7 @@ _API = Api
 class Cloud(_API):
     """This class contains methods for the managment of Cloud related functionality on the Rubrik cluster."""
 
-    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=30):
+    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=180):
         """Add a new AWS S3 archival location to the Rubrik cluster.
 
         Arguments:
@@ -40,7 +40,7 @@ class Cloud(_API):
             rsa_key {str} -- The RSA key that will be used to encrypt the archive data. A key can be generated through `openssl genrsa -out rubrik_encryption_key.pem 2048`. If set to the default `None` keyword argument, you will need to provide a `kms_master_key_id` instead.  (default: {None})
             archive_name {str} -- The name of the archive location used in the Rubrik GUI. If set to 'default' the following naming convention will be used: "AWS:S3:`aws_bucket_name`" (default: {'default'})
             storage_class {str} -- The AWS storage class you wish to use. (default: {'standard'}) (choices: {standard, 'standard_ia, reduced_redundancy})
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {180})
 
 
         Returns:
@@ -115,7 +115,7 @@ class Cloud(_API):
         self.log(
             "aws_s3_cloudout: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout)
+            'internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['name'] = archive_name
@@ -177,7 +177,7 @@ class Cloud(_API):
         self.log(
             "aws_s3_cloudon: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout)
+            'internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['defaultComputeNetworkConfig'] = {}
@@ -202,7 +202,7 @@ class Cloud(_API):
         sys.exit("Error: The Rubrik cluster does not have an archive location named '{}'.".format(
             archive_name))
 
-    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=30):
+    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=180):
         """Add a new Azure archival location to the Rubrik cluster.
 
         Arguments:
@@ -214,7 +214,7 @@ class Cloud(_API):
         Keyword Arguments:
             archive_name {str} -- The name of the archive location used in the Rubrik GUI. If set to `default`, the following naming convention will be used: "Azure:`container`" (default: {'default'})
             instance_type {str} -- The Cloud Platform type of the archival location. (default: {'default'}) (choices: {'default', 'china', 'germany', 'government'})
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {180})
 
         Returns:
             str -- No change required. The '`name`' archival location is already configured on the Rubrik cluster.
@@ -239,7 +239,7 @@ class Cloud(_API):
         self.log(
             "azure_cloudout: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout)
+            'internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['name'] = archive_name
@@ -348,7 +348,7 @@ class Cloud(_API):
         self.log(
             "azure_cloudon: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout)
+            'internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['name'] = archive_name
@@ -502,7 +502,7 @@ class Cloud(_API):
 
         self.log(
             "aws_native_account: Searching the Rubrik cluster for cloud native sources.")
-        cloud_native_on_cluster = self.get('internal', '/aws/account', timeout)
+        cloud_native_on_cluster = self.get('internal', '/aws/account', timeout=timeout)
 
         for cloud_source in cloud_native_on_cluster['data']:
 
@@ -518,7 +518,7 @@ class Cloud(_API):
             # idempotent return if a cloud native source with this access key
             # already exists
             cloud_source_detail = self.get(
-                'internal', '/aws/account/{}'.format(cloud_source['id']), timeout)
+                'internal', '/aws/account/{}'.format(cloud_source['id']), timeout=timeout)
             if cloud_source_detail['accessKey'] == aws_access_key:
                 return "No change required. Cloud native source with access key '{}' is already configured on the Rubrik cluster.".format(
                     aws_access_key)
@@ -537,3 +537,37 @@ class Cloud(_API):
         # make the API call, return the result
         self.log("aws_native_account: Creating the cloud native source.")
         return self.post('internal', '/aws/account', config, timeout)
+
+    def update_aws_native_account(self, aws_account_name, config, timeout=15):
+        """Update an exsiting AWS account used for EC2 native protection on the Rubrik cluster.
+
+        Arguments:
+            aws_account_name {str} -- The name of the AWS account you wish to update. This is the name that is displayed in the Rubrik UI.
+
+        Keyword Arguments:
+            config {dict} -- The configuration to use to update the AWS account. Full example values can be found in the Rubrik API Playground for the PATCH /aws/account/{id} endpoint
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+
+        Returns:
+            dict -- The full API response for `PATCH /aws/account/{id}'`.
+        """
+
+        # verify we are on cdm 4.2 or newer, required for cloud native
+        # protection
+        if float(self.cluster_version()[:3]) < 4.2:
+            sys.exit(
+                "Error: The Rubrik cluster version must be 4.2 or newer to use this method.")
+
+        if type(config) != dict:
+            sys.exit("Error: The 'config' argument must be a dictionary.")
+
+        self.log(
+            "update_aws_native_account: Checking the Rubrik cluster for the AWS Native Account.")
+        account_id = self.object_id(
+            aws_account_name, "aws_native", timeout=timeout)
+
+        self.log(
+            "update_aws_native_account: Updating the AWS Native Account.")
+
+        return self.patch("internal", "/aws/account/{}".format(account_id), config)

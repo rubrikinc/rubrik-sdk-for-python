@@ -120,7 +120,8 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
         authorization_header = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': 'Basic ' + authorization
+            'Authorization': 'Basic ' + authorization,
+            'User-Agent': 'Rubrik Python SDK v1.0.11'
         }
 
         return authorization_header
