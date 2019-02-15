@@ -98,6 +98,7 @@ class Data_Management(_API):
         if object_type == 'ahv':
             self.log(
                 "on_demand_snapshot: Searching the Rubrik cluster for the AHV VM '{}'.".format(object_name))
+
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
             if sla_name == 'current':
