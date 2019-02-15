@@ -174,9 +174,9 @@ rubrik=rubrik_cdm.Connect()
 #=============================================================
 
 # Set Object Variables
-vm_name := "VM1"
-sla_name := "Gold"
-object_type := "vmware"
+vm_name = "VM1"
+sla_name = "Gold"
+object_type = "vmware"
 
 # Assign VM to SLA Domain
 assign_sla = rubrik.assign_sla(vm_name, sla_name, object_type)

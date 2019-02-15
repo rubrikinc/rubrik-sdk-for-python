@@ -18,13 +18,12 @@ $ python setup.py install
 ```
 ## Quick Start
 
-[Quick Start Guide](https://github.com/rubrikinc/rubrik-sdk-for-python/blob/master/docs/quick-start.md)
+* [Quick Start Guide](https://github.com/rubrikinc/rubrik-sdk-for-python/blob/master/docs/quick-start.md)
 
 ## Documentation
 
-[SDK Documentation](https://rubrik.gitbook.io/rubrik-sdk-for-python/)
-
-[Rubrik API Documentation]( )
+* [SDK Documentation](https://rubrik.gitbook.io/rubrik-sdk-for-python/)
+* [Rubrik API Documentation](https://github.com/rubrikinc/api-documentation)
 
 ## Example
 
@@ -38,3 +37,7 @@ By default, the Rubrik SDK will attempt to read the the Rubrik Cluster credentia
 import rubrik_cdm
 rubrik = rubrik_cdm.Connect()
 ```
+
+## Additional Links
+* [VIDEO: Getting Start with the Rubrik SDK for Python](https://www.youtube.com/watch?v=TQM60X2_r_c&feature=youtu.be)
+* [BLOG: Hello World! Welcoming Rubrik’s Python SDK](https://www.rubrik.com/blog/introducing-rubrik-python-sdk/)
