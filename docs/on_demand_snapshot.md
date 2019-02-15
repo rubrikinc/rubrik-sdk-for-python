@@ -9,7 +9,7 @@ def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=Non
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | object_name  | str  | The name of the Rubrik object to take a on-demand snapshot of. |         |
-| object_type  | str  | The Rubrik object type you want to backup.  |    vmware, physical_host     |
+| object_type  | str  | The Rubrik object type you want to backup.  |    vmware, physical_host, ahv     |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
@@ -30,9 +30,13 @@ import rubrik_cdm
 rubrik = rubrik_cdm.Connect()
 
 vm_name = "python-sdk-demo"
-object_type = "vmware"
 
 #VMware Snapshot
+object_type = "vmware"
+snapshot = rubrik.on_demand_snapshot(vm_name, object_type)
+
+#AHV Snapshot
+object_type = "ahv"
 snapshot = rubrik.on_demand_snapshot(vm_name, object_type)
 
 # Physical Host Snapst
