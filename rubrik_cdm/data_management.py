@@ -189,7 +189,8 @@ class Data_Management(_API):
             'vmware_host',
             'physical_host',
             'fileset_template',
-            'managed_volume']
+            'managed_volume',
+            'ahv']
 
         if object_type not in valid_object_type:
             sys.exit("Error: The object_id() object_type argument must be one of the following: {}.".format(
@@ -223,6 +224,10 @@ class Data_Management(_API):
         elif object_type == 'managed_volume':
             object_summary_api_version = 'internal'
             object_summary_api_endpoint = '/managed_volume?is_relic=false&primary_cluster_id=local&name={}'.format(
+                object_name)
+        elif object_type == 'ahv':
+            object_summary_api_version = 'internal'
+            object_summary_api_endpoint = '/nutanix/vm?primary_cluster_id=local&is_relic=false&name={}'.format(
                 object_name)
 
         self.log("object_id: Getting the object id for the {} object '{}'.".format(
