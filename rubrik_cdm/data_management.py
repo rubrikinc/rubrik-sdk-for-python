@@ -86,43 +86,34 @@ class Data_Management(_API):
 
         elif object_type == 'ahv':
 
-            if object_type not in valid_object_type:
-                sys.exit("Error: The on_demand_snapshot() object_type argument must be one of the following: {}.".format(
-                    valid_object_type))
-
-        if host_os is not None:
-            if host_os not in valid_host_os_type:
-                sys.exit("Error: The on_demand_snapshot() host_os argument must be one of the following: {}.".format(
-                    valid_object_type))
-
-        if object_type == 'ahv':
-            self.log(
-                "on_demand_snapshot: Searching the Rubrik cluster for the AHV VM '{}'.".format(object_name))
-
-            vm_id = self.object_id(object_name, object_type, timeout=timeout)
-
-            if sla_name == 'current':
+            if object_type == 'ahv':
                 self.log(
-                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the AHV VM '{}'.".format(object_name))
+                    "on_demand_snapshot: Searching the Rubrik cluster for the AHV VM '{}'.".format(object_name))
 
-                vm_summary = self.get(
-                    'internal', '/nutanix/vm/{}'.format(vm_id), timeout)
-                sla_id = vm_summary['effectiveSlaDomainId']
+                vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
-            elif sla_name != 'current':
+                if sla_name == 'current':
+                    self.log(
+                        "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the AHV VM '{}'.".format(object_name))
+
+                    vm_summary = self.get(
+                        'internal', '/nutanix/vm/{}'.format(vm_id), timeout)
+                    sla_id = vm_summary['effectiveSlaDomainId']
+
+                elif sla_name != 'current':
+                    self.log(
+                        "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                    sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+                config = {}
+                config['slaId'] = sla_id
+
                 self.log(
-                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+                    "on_demand_snapshot: Initiating snapshot for the AHV VM '{}'.".format(object_name))
+                api_request = self.post(
+                    'internal', '/nutanix/vm/{}/snapshot'.format(vm_id), config, timeout)
 
-            config = {}
-            config['slaId'] = sla_id
-
-            self.log(
-                "on_demand_snapshot: Initiating snapshot for the AHV VM '{}'.".format(object_name))
-            api_request = self.post(
-                'internal', '/nutanix/vm/{}/snapshot'.format(vm_id), config, timeout)
-
-            snapshot_status_url = api_request['links'][0]['href']
+                snapshot_status_url = api_request['links'][0]['href']
 
         elif object_type == 'physical_host':
             if host_os is None:
