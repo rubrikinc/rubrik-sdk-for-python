@@ -30,7 +30,7 @@ class Data_Management(_API):
 
         Arguments:
             object_name {str} -- The name of the Rubrik object to take a on-demand snapshot of.
-            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host})
+            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host, ahv})
 
         Keyword Arguments:
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
@@ -44,7 +44,7 @@ class Data_Management(_API):
 
         """
 
-        valid_object_type = ['vmware', 'physical_host']
+        valid_object_type = ['vmware', 'physical_host', 'ahv']
         valid_host_os_type = ['Linux', 'Windows']
 
         if object_type not in valid_object_type:
@@ -81,6 +81,45 @@ class Data_Management(_API):
                 "on_demand_snapshot: Initiating snapshot for the vSphere VM '{}'.".format(object_name))
             api_request = self.post(
                 'v1', '/vmware/vm/{}/snapshot'.format(vm_id), config, timeout)
+
+            snapshot_status_url = api_request['links'][0]['href']
+
+        elif object_type == 'ahv':
+
+            if object_type not in valid_object_type:
+                sys.exit("Error: The on_demand_snapshot() object_type argument must be one of the following: {}.".format(
+                    valid_object_type))
+
+        if host_os is not None:
+            if host_os not in valid_host_os_type:
+                sys.exit("Error: The on_demand_snapshot() host_os argument must be one of the following: {}.".format(
+                    valid_object_type))
+
+        if object_type == 'ahv':
+            self.log(
+                "on_demand_snapshot: Searching the Rubrik cluster for the AHV VM '{}'.".format(object_name))
+            vm_id = self.object_id(object_name, object_type, timeout=timeout)
+
+            if sla_name == 'current':
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the AHV VM '{}'.".format(object_name))
+
+                vm_summary = self.get(
+                    'internal', '/nutanix/vm/{}'.format(vm_id), timeout)
+                sla_id = vm_summary['effectiveSlaDomainId']
+
+            elif sla_name != 'current':
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+            config = {}
+            config['slaId'] = sla_id
+
+            self.log(
+                "on_demand_snapshot: Initiating snapshot for the AHV VM '{}'.".format(object_name))
+            api_request = self.post(
+                'internal', '/nutanix/vm/{}/snapshot'.format(vm_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
