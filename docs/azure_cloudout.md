@@ -2,7 +2,7 @@
 
 Add a new Azure archival location to the Rubrik cluster.
 ```py
-def azure_cloudout(container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=30)
+def azure_cloudout(container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=180)
 ```
 
 ## Arguments
@@ -17,7 +17,7 @@ def azure_cloudout(container, azure_access_key, storage_account_name, rsa_key, a
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
 | archive_name  | str  | The name of the archive location used in the Rubrik GUI. If set to `default`, the following naming convention will be used: "Azure:`container`"  |         |    default     |
 | instance_type  | str  | The Cloud Platform type of the archival location.  |    default, china, germany, government     |    default      |
-| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    30     |
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    180     |
 
 ## Returns
 | Type | Return Value                                                                                   |
