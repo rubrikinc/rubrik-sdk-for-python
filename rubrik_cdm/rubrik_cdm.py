@@ -120,7 +120,8 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
         authorization_header = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': 'Basic ' + authorization
+            'Authorization': 'Basic ' + authorization,
+            'User-Agent': 'Rubrik Python SDK v1.0.12'
         }
 
         return authorization_header
@@ -186,7 +187,8 @@ class Bootstrap(_API):
 
         node_ip = [self.node_ip]
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,
+                      enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
