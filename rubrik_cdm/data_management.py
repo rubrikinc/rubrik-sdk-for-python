@@ -183,7 +183,6 @@ class Data_Management(_API):
             'managed_volume',
             'ahv']
 
-
         if object_type not in valid_object_type:
             sys.exit("Error: The object_id() object_type argument must be one of the following: {}.".format(
                 valid_object_type))
@@ -283,12 +282,10 @@ class Data_Management(_API):
         valid_object_type = ['vmware']
 
         if object_type not in valid_object_type:
-            sys.exit("Error: The assign_sla() object_type argument must be one of the following: {}.".format(
-                valid_object_type))
+            sys.exit("Error: The assign_sla() object_type argument must be one of the following: {}.".format(valid_object_type))
 
         # Determine if 'do not protect' or 'clear' are the SLA Domain Name
-        do_not_protect_regex = re.findall(
-            '\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
+        do_not_protect_regex = re.findall('\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
         clear_regex = re.findall('\\bclear\\b', sla_name, flags=re.IGNORECASE)
 
         if len(do_not_protect_regex) > 0:
@@ -296,41 +293,29 @@ class Data_Management(_API):
         elif len(clear_regex) > 0:
             sla_id = 'INHERIT'
         else:
-            self.log(
-                "assign_sla: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+            self.log("assign_sla: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
             sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
         if object_type == 'vmware':
-            self.log(
-                "assign_sla: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+            self.log("assign_sla: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
-            self.log(
-                "assign_sla: Determing the SLA Domain currently assigned to the vSphere VM '{}'.".format(object_name))
+            self.log("assign_sla: Determing the SLA Domain currently assigned to the vSphere VM '{}'.".format(object_name))
             vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
-            if sla_id == "INHERIT":
-                current_sla_id = vm_summary['configuredSlaDomainId']
-            else:
-                current_sla_id = vm_summary['effectiveSlaDomainId']
 
-            if sla_id == current_sla_id:
+            if sla_id == vm_summary['configuredSlaDomainId']:
                 return "No change required. The vSphere VM '{}' is already assigned to the '{}' SLA Domain.".format(
                     object_name, sla_name)
             else:
-                self.log(
-                    "assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(
-                        object_name, sla_name))
+                self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
 
                 config = {}
                 config['managedIds'] = [vm_id]
 
-                return self.post(
-                    'internal',
-                    '/sla_domain/{}/assign'.format(sla_id),
-                    config,
-                    timeout)
+                return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout)
 
-    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):
+    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current',
+                           remove_network_devices=False, power_on=True, timeout=15):
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -411,7 +396,8 @@ class Data_Management(_API):
                 '/vmware/vm/snapshot/{}/mount'.format(snapshot_id),
                 config, timeout)
 
-    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):
+    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False,
+                                 power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):
         """Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -710,7 +696,8 @@ class Data_Management(_API):
             return "No change required. The Managed Volume 'name' is already assigned in a read only state."
 
         if sla_name == 'current':
-            self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))
+            self.log(
+                "end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))
             if managed_volume_summary['slaAssignment'] == 'Unassigned' or managed_volume_summary['effectiveSlaDomainId'] == 'UNPROTECTED':
                 sys.exit(
                     "Error: The Managed Volume '{}' does not have a SLA assigned currently assigned. You must populate the sla_name argument.".format(name))
