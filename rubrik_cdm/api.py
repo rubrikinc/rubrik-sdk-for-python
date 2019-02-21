@@ -121,8 +121,9 @@ class Api():
             except BaseException:
                 api_request.raise_for_status()
         except requests.exceptions.ConnectTimeout:
-            sys.exit(
-                "Error: Unable to establish a connection to the Rubrik cluster.")
+            sys.exit("Error: Unable to establish a connection to the Rubrik cluster.")
+        except requests.exceptions.ConnectionError:
+            sys.exit("Error: Unable to establish a connection to the Rubrik cluster.")
         except requests.exceptions.ReadTimeout:
             sys.exit("Error: The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
         except requests.exceptions.RequestException as error:
