@@ -88,8 +88,8 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
                         self.username = username
                         self.log("Username: {}".format(self.username))
                 else:
-                    self.log("Username: {}\n".format(self.username))
                     self.username = username
+                    self.log("Username: {}".format(self.username))
 
                 if password is None:
                     password = os.environ.get('rubrik_cdm_password')
