@@ -137,7 +137,8 @@ class Cluster(_API):
                 config,
                 timeout=timeout)
 
-    def add_vcenter(self, vcenter_ip, vcenter_username, vcenter_password, vm_linking=True, ca_certificate=None, timeout=30):
+    def add_vcenter(self, vcenter_ip, vcenter_username, vcenter_password,
+                    vm_linking=True, ca_certificate=None, timeout=30):
         """Add a new vCenter to the Rubrik cluster.
 
         Arguments:
@@ -442,7 +443,8 @@ class Cluster(_API):
             search_domain,
             timeout)
 
-    def configure_smtp_settings(self, hostname, port, from_email, smtp_username, smtp_password, encryption="NONE", timeout=15):
+    def configure_smtp_settings(self, hostname, port, from_email, smtp_username,
+                                smtp_password, encryption="NONE", timeout=15):
         """The Rubrik cluster uses email to send all notifications to local Rubrik cluster user accounts that have the Admin role. To do this the Rubrik cluster transfers the email messages to an SMTP server for delivery.
         This function will configure the Rubrik cluster with account information for the SMTP server to permit the Rubrik cluster to use the SMTP server for sending outgoing email.
 
@@ -494,11 +496,7 @@ class Cluster(_API):
                 return "No change required. The Rubrik cluster is already configured with the provided SMTP settings."
 
             self.log("cluster_smtp_settings: Updating the SMTP settings.")
-            return self.patch(
-                "internal",
-                "/smtp_instance/{}".format(smtp_id),
-                config,
-                timeout)
+            return self.patch("internal", "/smtp_instance/{}".format(smtp_id), config, timeout)
 
     def refresh_vcenter(self, vcenter_ip, wait_for_completion=True, timeout=15):
         """Refresh the metadata for the specified vCenter Server.
@@ -522,10 +520,89 @@ class Cluster(_API):
 
         self.log("refresh_vcenter: Refresh vCenter.")
 
-        api_request = self.post(
-            "v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
+        api_request = self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
 
         if wait_for_completion:
             return self.job_status(api_request["links"][0]["href"])
 
         return self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
+
+    def create_user(self, username, password, first_name=None, last_name=None,
+                    email_address=None, contact_number=None, timeout=15):
+        """Create a new user on the Rubrik cluster
+
+        Arguments:
+            username {str} -- The username for the user you wish to create.
+            password {str} -- The password for the user you wish to create.
+
+        Keyword Arguments:
+            first_name {str} -- The first name of the user you wish to create. (default: {None})
+            last_name {str} -- The last name of the user you wish to create. (default: {None})
+            email_address {str} -- The email address of the user you wish to create. (default: {None})
+            contact_number {str} -- The contact number of the user you wish to create. (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            str -- No change required. The user '`username`' already exists on the Rubrik cluster
+            dict -- The full API response from `POST /internal/user`.
+        """
+
+        self.log("create_user: Searching for the current users on the Rubrik cluster")
+        current_users = self.get("internal", "/user?username={}".format(username), timeout=timeout)
+        if len(current_users) > 0:
+            return "No change required. The user '{}' already exists on the Rubrik cluster.".format(username)
+
+        config = {}
+        config["username"] = username
+        config["password"] = password
+        if first_name is not None:
+            config["firstName"] = first_name
+        if last_name is not None:
+            config["lastName"] = last_name
+        if email_address is not None:
+            config["emailAddress"] = email_address
+        if contact_number is not None:
+            config["contactNumber"] = contact_number
+
+        self.log("create_user: Creating the new user account.")
+        return self.post("internal", "/user", config, timeout)
+
+    def read_only_authorization(self, username, timeout=15):
+        """Grant read-only access to a specific user.
+
+        Arguments:
+            username {str} -- The username you wish to grant read-only access to.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            str -- No change required. The user '`username`' already has read-only permissions.
+            dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
+        """
+
+        if float(self.cluster_version(timeout)[:3]) < 5.0:
+            sys.exit("Error: The Rubrik cluster version must be 5.0 or newer to grant read-only authorization.")
+
+        self.log("read_only_authorization: Searching for the current users on the Rubrik cluster")
+        current_users = self.get("internal", "/user?username={}".format(username), timeout=timeout)
+        if len(current_users) < 0:
+            sys.exit("Error: The user '{}' does not exsit on the Rubrik cluster.".format(username))
+
+        self.log("read_only_authorization: Checking the current authorizations for user '{}'".format(username))
+        current_authorizations = self.get(
+            "internal", "/authorization/role/read_only_admin?principals={}".format(current_users[0]["id"]), timeout=timeout)
+
+        try:
+            if current_authorizations["data"][0]["privileges"]["basic"][0] == "Global:::All":
+                return "No change required. The user '{}' already has read-only permissions.".format(username)
+        except BaseException:
+            pass
+
+        config = {}
+        config["principals"] = [current_users[0]["id"]]
+        config["privileges"] = {}
+        config["privileges"]["basic"] = ["Global:::All"]
+
+        self.log("read_only_authorization: Granting read-only privilages to user '{}'.".format(username))
+        return self.post("internal", "/authorization/role/read_only_admin", config, timeout)

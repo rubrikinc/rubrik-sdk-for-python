@@ -27,7 +27,9 @@
 * [configure_syslog](configure_syslog.md)
 * [configure_timezone](configure_timezone.md)
 * [configure_vlan](configure_vlan.md)
+* [create_user](create_user.md)
 * [end_user_authorization](end_user_authorization.md)
+* [read_only_authorization](read_only_authorization.md)
 * [refresh_vcenter](refresh_vcenter.md)
 
 ### Cloud Functions
