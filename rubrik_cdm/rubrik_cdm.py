@@ -47,15 +47,19 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
         _PHYSICAL {class} - This class contains methods related to the managment of the Physical objects in the Rubrik Cluster.
     """
 
-    def __init__(self, node_ip=None, username=None, password=None, enable_logging=False):
+    def __init__(self, node_ip=None, username=None, password=None, api_token=None, enable_logging=False):
         """Constructor for the Connect class which is used to initialize the class variables.
 
         Keyword Arguments:
-            node_ip {str} -- The Hostname or IP Address of a node in the Rubrik Cluster you wish to connect to. If a value is not provided we will check for a `rubrik_cdm_node_ip` environment variable. (default: {None})
-            username {str} -- The Username you wish to use to connect to the Rubrik Cluster.. If a value is not provided we will check for a `rubrik_cdm_username` environment variable. (default: {None})
-            password {str} -- The Password you wish to use to connect to the Rubrik Cluster.. If a value is not provided we will check for a `rubrik_cdm_password` environment variable. (default: {None})
+            node_ip {str} -- The Hostname or IP Address of a node in the Rubrik cluster you wish to connect to. If a value is not provided we will check for a `rubrik_cdm_node_ip` environment variable. (default: {None})
+            username {str} -- The Username you wish to use to connect to the Rubrik cluster. If a value is not provided we will check for a `rubrik_cdm_username` environment variable. (default: {None})
+            password {str} -- The Password you wish to use to connect to the Rubrik cluster. If a value is not provided we will check for a `rubrik_cdm_password` environment variable. (default: {None})
+            api_token {str} -- The API Token you wish to use to connect to the Rubrik cluster. If populated, the `username` and `password` fields will be ignored. If a value is not provided we will check for a `rubrik_cdm_token` environment variable.  (default: {None})
             enable_logging {bool} -- Flag to determine if logging will be enabled for the SDK. (default: {False})
         """
+
+        if enable_logging:
+            logging.getLogger().setLevel(logging.DEBUG)
 
         if node_ip is None:
             node_ip = os.environ.get('rubrik_cdm_node_ip')
@@ -66,32 +70,44 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
         else:
             self.node_ip = node_ip
 
-        if username is None:
-            username = os.environ.get('rubrik_cdm_username')
-            if username is None:
-                sys.exit("Error: The Rubrik CDM Username has not been provided.")
-            else:
-                self.username = username
-        else:
-            self.username = username
-
-        if password is None:
-            password = os.environ.get('rubrik_cdm_password')
-            if password is None:
-                sys.exit("Error: The Rubrik CDM Password has not been provided.")
-            else:
-                self.password = password
-        else:
-            self.password = password
-
-        if enable_logging:
-            logging.getLogger().setLevel(logging.DEBUG)
-
-        self.node_ip = node_ip
-
         self.log("Node IP: {}".format(self.node_ip))
-        self.log("Username: {}".format(self.username))
-        self.log("Password: *******\n")
+
+        # If the api_token has not been provided check for the env variable and then
+        # check for the username and password fields
+        if api_token is None:
+            api_token = os.environ.get('rubrik_cdm_token')
+            if api_token is None:
+
+                self.api_token = None
+
+                if username is None:
+                    username = os.environ.get('rubrik_cdm_username')
+                    if username is None:
+                        sys.exit("Error: The Rubrik CDM Username or an API Token has not been provided.")
+                    else:
+                        self.username = username
+                        self.log("Username: {}".format(self.username))
+                else:
+                    self.log("Username: {}\n".format(self.username))
+                    self.username = username
+
+                if password is None:
+                    password = os.environ.get('rubrik_cdm_password')
+                    if password is None:
+                        sys.exit("Error: The Rubrik CDM Password or an API Token has not been provided.")
+                    else:
+                        self.password = password
+                        self.log("Password: *******\n")
+                else:
+                    self.password = password
+                    self.log("Password: *******\n")
+
+            else:
+                self.api_token = api_token
+                self.log("API Token: *******\n")
+        else:
+            self.api_token = api_token
+            self.log("API Token: *******\n")
 
     @staticmethod
     def log(log_message):
@@ -110,19 +126,32 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
             dict -- The authorization header that utilizes Basic authentication.
         """
 
-        credentials = '{}:{}'.format(self.username, self.password)
+        if self.api_token is None:
+            self.log("Creating the authorization header using the provided username and password.")
 
-        # Encode the Username:Password as base64
-        authorization = base64.b64encode(credentials.encode())
-        # Convert to String for API Call
-        authorization = authorization.decode()
+            credentials = '{}:{}'.format(self.username, self.password)
 
-        authorization_header = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Basic ' + authorization,
-            'User-Agent': 'Rubrik Python SDK v1.0.13'
-        }
+            # Encode the Username:Password as base64
+            authorization = base64.b64encode(credentials.encode())
+            # Convert to String for API Call
+            authorization = authorization.decode()
+
+            authorization_header = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Basic ' + authorization,
+                'User-Agent': 'Rubrik Python SDK v1.0.13'
+            }
+
+        else:
+
+            self.log("Creating the authorization header using the provided API Token.")
+            authorization_header = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Bearer ' + self.api_token,
+                'User-Agent': 'Rubrik Python SDK v1.0.13'
+            }
 
         return authorization_header
 
