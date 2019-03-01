@@ -606,3 +606,20 @@ class Cluster(_API):
 
         self.log("read_only_authorization: Granting read-only privilages to user '{}'.".format(username))
         return self.post("internal", "/authorization/role/read_only_admin", config, timeout)
+
+    def cluster_version_check(self, minimum_cluster_version, timeout=15):
+        """Determine if the Rubrik cluster is using running an earlier release than the provided CDM `minimum_cluster_version`.
+        If the CDM version is an earlier release than the "clusterVersion", the following message error message is thrown:
+            Error: The Rubrik cluster must be running CDM version {`minimum_cluster_version`} or later.
+
+        Arguments:
+            minimum_cluster_version {float} -- The minimum required version of Rubrik CDM you wish ensure is running.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+        """
+
+        if float(self.cluster_version(timeout)[:3]) < float(minimum_cluster_version):
+            sys.exit(
+                "Error: The Rubrik cluster must be running CDM version {} or later.".format(
+                    float(minimum_cluster_version)))
