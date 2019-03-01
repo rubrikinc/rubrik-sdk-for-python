@@ -202,8 +202,11 @@ class Data_Management(_API):
             object_summary_api_endpoint = '/vmware/host?primary_cluster_id=local'
         elif object_type == 'physical_host':
             object_summary_api_version = 'v1'
-            object_summary_api_endpoint = '/host?primary_cluster_id=local&hostname={}'.format(
-                object_name)
+            try:
+                self.cluster_version_check(5.0, timeout)
+                object_summary_api_endpoint = '/host?primary_cluster_id=local&name={}'.format(object_name)
+            except SystemExit:
+                object_summary_api_endpoint = '/host?primary_cluster_id=local&hostname={}'.format(object_name)
         elif object_type == 'fileset_template':
             if host_os is None:
                 sys.exit("Error: You must provide the Fileset Tempalte OS type.")
@@ -240,9 +243,11 @@ class Data_Management(_API):
             object_ids = []
             # Define the "object name" to search for
             if object_type == 'physical_host':
-                name_value = 'hostname'
-            else:
-                name_value = 'name'
+                try:
+                    self.cluster_version_check(5.0, timeout)
+                    name_value = 'name'
+                except SystemExit:
+                    name_value = 'hostname'
 
             for item in api_request['data']:
                 if item[name_value] == object_name:
