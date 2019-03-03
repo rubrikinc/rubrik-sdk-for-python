@@ -1,5 +1,5 @@
 import pytest
-from rubrik_cdm.exceptions import CDMVersion
+from rubrik_cdm.exceptions import CDMVersionException
 
 
 @pytest.mark.unit
@@ -11,5 +11,5 @@ def test_cluster_version_check(rubrik, monkeypatch):
     # Monkey match rubrik.cluster_version to equal the patch_cluster_version() result
     monkeypatch.setattr(rubrik, "cluster_version", patch_cluster_version)
 
-    with pytest.raises(CDMVersion):
+    with pytest.raises(CDMVersionException):
         rubrik.cluster_version_check("5.0")
