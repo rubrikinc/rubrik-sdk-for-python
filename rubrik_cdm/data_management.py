@@ -18,7 +18,7 @@ This module contains the Rubrik SDK Data_Management class.
 import sys
 import re
 from .api import Api
-from rubrik_cdm.exceptions import CDMVersion
+from rubrik_cdm.exceptions import CDMVersionException
 
 
 _API = Api
@@ -207,7 +207,7 @@ class Data_Management(_API):
             try:
                 self.cluster_version_check(5.0, timeout)
                 object_summary_api_endpoint = '/host?primary_cluster_id=local&name={}'.format(object_name)
-            except CDMVersion:
+            except CDMVersionException:
                 object_summary_api_endpoint = '/host?primary_cluster_id=local&hostname={}'.format(object_name)
         elif object_type == 'fileset_template':
             if host_os is None:
@@ -248,7 +248,7 @@ class Data_Management(_API):
                 try:
                     self.cluster_version_check(5.0, timeout)
                     name_value = 'name'
-                except CDMVersion:
+                except CDMVersionException:
                     name_value = 'hostname'
 
             for item in api_request['data']:

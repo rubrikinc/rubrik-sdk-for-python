@@ -3,7 +3,7 @@ class RubrikError(Exception):
     pass
 
 
-class CDMVersion(RubrikError):
+class CDMVersionException(RubrikError):
     """Exception used to handle situations when the Rubrik cluster is not running a minimum
     required version of CDM.
 

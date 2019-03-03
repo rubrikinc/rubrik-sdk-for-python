@@ -17,7 +17,7 @@ This module contains the Rubrik SDK Cluster class.
 
 import sys
 from .api import Api
-from .exceptions import CDMVersion
+from .exceptions import CDMVersionException
 
 _API = Api
 
@@ -52,12 +52,12 @@ class Cluster(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Raises:
-            CDMVersion -- When the Rubrik cluster is using running an earlier release than the provided CDM `minimum_cluster_version` the following error is raised:
+            CDMVersionException -- When the Rubrik cluster is using running an earlier release than the provided CDM `minimum_cluster_version` the following error is raised:
             The Rubrik cluster must be running CDM version {`minimum_cluster_version`} or later.
         """
 
         if float(self.cluster_version(timeout)[:3]) < float(minimum_cluster_version):
-            raise CDMVersion(float(minimum_cluster_version))
+            raise CDMVersionException(float(minimum_cluster_version))
 
     def cluster_node_ip(self, timeout=15):
         """Retrive the IP Address for each node in the Rubrik cluster.
