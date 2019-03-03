@@ -1,14 +1,14 @@
-class RubrikError(Exception):
+class RubrikException(Exception):
     """Base class for exceptions in this module."""
     pass
 
 
-class CDMVersionException(RubrikError):
+class CDMVersionException(RubrikException):
     """Exception used to handle situations when the Rubrik cluster is not running a minimum
     required version of CDM.
 
     Arguments:
-        RubrikError {class} -- Base class for exceptions in this module
+        RubrikException {class} -- Base class for exceptions in this module
     """
 
     def __init__(self, cdm_version):
