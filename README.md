@@ -28,6 +28,10 @@ By default, the Rubrik SDK will attempt to read the the Rubrik Cluster credentia
 ```py
 import rubrik_cdm
 rubrik = rubrik_cdm.Connect()
+
+cluster_version = rubrik.cluster_version()
+
+print(cluster_version)
 ```
 
 # :blue_book: Documentation 
