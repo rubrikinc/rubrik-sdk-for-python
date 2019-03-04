@@ -20,7 +20,6 @@
 * [cluster_node_ip](cluster_node_ip.md)
 * [cluster_node_name](cluster_node_name.md)
 * [cluster_version](cluster_version.md)
-* [cluster_version_check](cluster_version_check.md)
 * [configure_dns_servers](configure_dns_servers.md)
 * [configure_ntp](configure_ntp.md)
 * [configure_search_domain](configure_search_domain.md)
@@ -30,6 +29,7 @@
 * [configure_vlan](configure_vlan.md)
 * [create_user](create_user.md)
 * [end_user_authorization](end_user_authorization.md)
+* [minimum_installed_cdm_version](minimum_installed_cdm_version.md)
 * [read_only_authorization](read_only_authorization.md)
 * [refresh_vcenter](refresh_vcenter.md)
 

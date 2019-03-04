@@ -204,10 +204,9 @@ class Data_Management(_API):
             object_summary_api_endpoint = '/vmware/host?primary_cluster_id=local'
         elif object_type == 'physical_host':
             object_summary_api_version = 'v1'
-            try:
-                self.cluster_version_check(5.0, timeout)
+            if self.minimum_installed_cdm_version(5.0, timeout) is True:
                 object_summary_api_endpoint = '/host?primary_cluster_id=local&name={}'.format(object_name)
-            except CDMVersionException:
+            else:
                 object_summary_api_endpoint = '/host?primary_cluster_id=local&hostname={}'.format(object_name)
         elif object_type == 'fileset_template':
             if host_os is None:
@@ -245,10 +244,9 @@ class Data_Management(_API):
             object_ids = []
             # Define the "object name" to search for
             if object_type == 'physical_host':
-                try:
-                    self.cluster_version_check(5.0, timeout)
+                if self.minimum_installed_cdm_version(5.0, timeout):
                     name_value = 'name'
-                except CDMVersionException:
+                else:
                     name_value = 'hostname'
 
             for item in api_request['data']:
