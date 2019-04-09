@@ -143,7 +143,7 @@ As the Rubrik SDK for Python is hosted on GitHub, installing from source allows 
 To install the Rubrik SDK for Python from source run the following commands.
 
 ```
-git clone https://github.com/rubrik-devops/rubrik-sdk-for-python
+git clone https://github.com/rubrikinc/rubrik-sdk-for-python
 cd rubrik-sdk-for-python
 sudo python setup.py install
 ```
