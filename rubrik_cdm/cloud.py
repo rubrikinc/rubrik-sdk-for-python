@@ -15,7 +15,6 @@
 This module contains the Rubrik SDK Cloud class.
 """
 
-import sys
 import os
 import re
 from .api import Api

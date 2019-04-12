@@ -17,7 +17,6 @@ This module contains the Rubrik SDK API class.
 
 import requests
 import json
-import sys
 import time
 try:
     from urllib import quote  # Python 2.X

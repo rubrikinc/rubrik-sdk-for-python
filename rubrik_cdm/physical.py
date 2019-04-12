@@ -15,7 +15,6 @@
 This module contains the Rubrik SDK Physical class.
 """
 
-import sys
 from .api import Api
 from .exceptions import InvalidParameterException
 
