@@ -16,3 +16,8 @@ class CDMVersionException(RubrikException):
 
     def __str__(self):
         return("The Rubrik cluster must be running CDM version {} or later.".format(self.cdm_version))
+
+
+class APICallException(Exception):
+    """Base class for exceptions in this module."""
+    pass

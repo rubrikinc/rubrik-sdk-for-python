@@ -24,6 +24,7 @@ try:
 except ImportError:
     from urllib.parse import quote  # Python 3+
 from random import choice
+from rubrik_cdm.exceptions import APICallException
 
 
 class Api():
@@ -80,12 +81,7 @@ class Api():
                     self.node_ip, api_version, api_endpoint)
                 self.log('POST {}'.format(request_url))
                 self.log('Config: {}'.format(config))
-                api_request = requests.post(
-                    request_url,
-                    verify=False,
-                    headers=header,
-                    data=config,
-                    timeout=timeout)
+                api_request = requests.post(request_url, verify=False, headers=header, data=config, timeout=timeout)
             elif call_type == 'PATCH':
                 config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(
@@ -100,8 +96,7 @@ class Api():
                     request_url = request_url + "?" + '&'.join("{}={}".format(key, val)
                                                                for (key, val) in params.items())
                 self.log('DELETE {}'.format(request_url))
-                api_request = requests.delete(
-                    request_url, verify=False, headers=header, timeout=timeout)
+                api_request = requests.delete(request_url, verify=False, headers=header, timeout=timeout)
             elif call_type == 'JOB_STATUS':
                 self.log('JOB STATUS for {}'.format(job_status_url))
                 api_request = requests.get(job_status_url, verify=False, headers=header, timeout=timeout)
@@ -121,20 +116,21 @@ class Api():
             except BaseException:
                 api_request.raise_for_status()
         except requests.exceptions.ConnectTimeout:
-            sys.exit("Error: Unable to establish a connection to the Rubrik cluster.")
+            raise APICallException("Error: Unable to establish a connection to the Rubrik cluster.")
         except requests.exceptions.ConnectionError:
-            sys.exit("Error: Unable to establish a connection to the Rubrik cluster.")
+            raise APICallException("Error: Unable to establish a connection to the Rubrik cluster.")
         except requests.exceptions.ReadTimeout:
-            sys.exit("Error: The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
+            raise APICallException(
+                "Error: The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
         except requests.exceptions.RequestException as error:
             # If "error_message" has be defined sys.exit that message else
             # sys.exit the request exception error
             try:
                 error_message
             except NameError:
-                sys.exit(error)
+                raise APICallException(error)
             else:
-                sys.exit('Error: ' + error_message)
+                raise APICallException('Error: ' + error_message)
         else:
             try:
                 return api_request.json()
