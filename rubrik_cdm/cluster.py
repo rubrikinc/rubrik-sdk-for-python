@@ -15,7 +15,6 @@
 This module contains the Rubrik SDK Cluster class.
 """
 
-import sys
 from .api import Api
 from .exceptions import InvalidParameterException, CDMVersionException
 
