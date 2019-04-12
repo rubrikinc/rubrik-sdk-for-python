@@ -17,7 +17,6 @@ This module contains the Rubrik SDK Connect class.
 
 import base64
 import requests
-import sys
 import os
 import logging
 from random import choice
@@ -28,6 +27,7 @@ from .cluster import Cluster
 from .data_management import Data_Management
 from .physical import Physical
 from .cloud import Cloud
+from .exceptions import InvalidParameterException, RubrikException, APICallException
 
 
 _CLUSTER = Cluster
@@ -37,7 +37,7 @@ _API = Api
 _CLOUD = Cloud
 
 
-class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
+class Connect(Cluster, Data_Management, Physical, Cloud):
     """This class acts as the base class for the Rubrik SDK and serves as the main interaction point
     for its end users. It also contains various helper functions used throughout the SDK.
 
@@ -64,7 +64,7 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
         if node_ip is None:
             node_ip = os.environ.get('rubrik_cdm_node_ip')
             if node_ip is None:
-                sys.exit("Error: The Rubrik CDM Node IP has not been provided.")
+                raise InvalidParameterException("The Rubrik CDM Node IP has not been provided.")
             else:
                 self.node_ip = node_ip
         else:
@@ -83,7 +83,8 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
                 if username is None:
                     username = os.environ.get('rubrik_cdm_username')
                     if username is None:
-                        sys.exit("Error: The Rubrik CDM Username or an API Token has not been provided.")
+                        raise InvalidParameterException(
+                            "The Rubrik CDM Username or an API Token has not been provided.")
                     else:
                         self.username = username
                         self.log("Username: {}".format(self.username))
@@ -94,7 +95,8 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
                 if password is None:
                     password = os.environ.get('rubrik_cdm_password')
                     if password is None:
-                        sys.exit("Error: The Rubrik CDM Password or an API Token has not been provided.")
+                        raise InvalidParameterException(
+                            "The Rubrik CDM Password or an API Token has not been provided.")
                     else:
                         self.password = password
                         self.log("Password: *******\n")
@@ -183,19 +185,20 @@ class Connect(_CLUSTER, _DATA_MANAGEMENT, _PHYSICAL, _CLOUD):
 
         # Validate the API Version
         if api_version not in valid_api_versions:
-            sys.exit(
-                "Error: Enter a valid API version {}.".format(valid_api_versions))
+            raise InvalidParameterException(
+                "Enter a valid API version {}.".format(valid_api_versions))
 
         # Validate the API Endpoint Syntax
         if not isinstance(api_endpoint, str):
-            sys.exit("Error: The API Endpoint must be a string.")
+            raise InvalidParameterException("The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
-            sys.exit(
-                "Error: The API Endpoint should begin with '/'. (ex: /cluster/me)")
+            raise InvalidParameterException(
+                "The API Endpoint should begin with '/'. (ex: /cluster/me)")
         elif api_endpoint[-1] == "/":
             if api_endpoint[-2] != "=":
-                sys.exit(
+                raise InvalidParameterException(
                     "Error: The API Endpoint should not end with '/' unless proceeded by '='. (ex. /cluster/me or /fileset/snapshot/<id>/browse?path=/)")
+
 
 
 class Bootstrap(_API):
@@ -242,24 +245,24 @@ class Bootstrap(_API):
         """
 
         if node_config is None or isinstance(node_config, dict) is not True:
-            sys.exit(
-                'Error: You must provide a valid dictionary for "node_config".')
+            raise InvalidParameterException(
+                'You must provide a valid dictionary for "node_config".')
 
         if dns_search_domains is None:
             dns_search_domains = []
         elif isinstance(dns_search_domains, list) is not True:
-            sys.exit(
-                'Error: You must provide a valid list for "dns_search_domains".')
+            raise InvalidParameterException(
+                'You must provide a valid list for "dns_search_domains".')
 
         if dns_nameservers is None:
             dns_nameservers = ['8.8.8.8']
         elif isinstance(dns_nameservers, list) is not True:
-            sys.exit('Error: You must provide a valid list for "dns_nameservers".')
+            raise InvalidParameterException('You must provide a valid list for "dns_nameservers".')
 
         if ntp_servers is None:
             ntp_servers = ['pool.ntp.org']
         elif isinstance(ntp_servers, list) is not True:
-            sys.exit('Error: You must provide a valid list for "ntp_servers".')
+            raise InvalidParameterException('You must provide a valid list for "ntp_servers".')
 
         bootstrap_config = {}
         bootstrap_config["enableSoftwareEncryptionAtRest"] = enable_encryption
@@ -293,22 +296,22 @@ class Bootstrap(_API):
                     timeout,
                     authentication=False)
                 break
-            except SystemExit as bootstrap_error:
+            except APICallException as bootstrap_error:
                 if "Failed to establish a new connection: [Errno 111] Connection refused" in str(
                         bootstrap_error):
                     self.log(
                         'bootstrap: Connection refused. Waiting 30 seconds for the node to initialize before trying again.')
                     number_of_attempts += 1
                     time.sleep(30)
-                elif "Error: Cannot bootstrap from an already bootstrapped node" in str(bootstrap_error):
+                elif "Cannot bootstrap from an already bootstrapped node" in str(bootstrap_error):
                     return "No change required. The Rubrik cluster is already bootstrapped."
                 else:
                     self.log('bootstrap: Connection refused.')
-                    sys.exit(bootstrap_error)
+                    raise RubrikException(bootstrap_error)
 
             if number_of_attempts == 12:
-                sys.exit(
-                    "Error: Unable to establish a connection to the Rubrik cluster.")
+                raise APICallException(
+                    "Unable to establish a connection to the Rubrik cluster.")
 
         request_id = api_request['id']
 
@@ -322,7 +325,7 @@ class Bootstrap(_API):
                     time.sleep(30)
                     continue
                 elif status['status'] == 'FAILURE' or status['status'] == "FAILED":
-                    sys.exit("Error: {}".format(status['message']))
+                    raise RubrikException("{}".format(status['message']))
                 else:
                     self.log("{}".format(status))
                     return status
@@ -386,16 +389,16 @@ class Bootstrap(_API):
 
         # Validate the API Version
         if api_version not in valid_api_versions:
-            sys.exit(
-                "Error: Enter a valid API version {}.".format(valid_api_versions))
+            raise InvalidParameterException(
+                "Enter a valid API version {}.".format(valid_api_versions))
 
         # Validate the API Endpoint Syntax
         if not isinstance(api_endpoint, str):
-            sys.exit("Error: The API Endpoint must be a string.")
+            raise InvalidParameterException("The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
-            sys.exit(
-                "Error: The API Endpoint should begin with '/'. (ex: /cluster/me)")
+            raise InvalidParameterException(
+                "The API Endpoint should begin with '/'. (ex: /cluster/me)")
         elif api_endpoint[-1] == "/":
             if api_endpoint[-2] != "=":
-                sys.exit(
+                raise InvalidParameterException(
                     "Error: The API Endpoint should not end with '/' unless proceeded by '='. (ex. /cluster/me or /fileset/snapshot/<id>/browse?path=/)")
