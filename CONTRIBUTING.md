@@ -45,7 +45,7 @@ At a high level the directory contains the following:
 
 When adding a new function, it would ideally fit into one of these files. Each function should have the following:
 
-* Each function **must be idempontent**. Before making any configuration changes (post, patch, delete) you should first check to see if that change is necessary. If it's not you must return a message formated as `No change required. {message}:` For example, the `assign_sla` function first checks to see if the Rubrik object is alreay assigned to the provided SLA Domain.
+* Each function **must be idempotent**. Before making any configuration changes (post, patch, delete) you should first check to see if that change is necessary. If it's not you must return a message formated as `No change required. {message}:` For example, the `assign_sla` function first checks to see if the Rubrik object is already assigned to the provided SLA Domain.
 * A doc string using the docBlockr format. Visual Studio Code users can take advantage of the [autoDocstring](https://marketplace.visualstudio.com/items?itemName=njpwerner.autodocstring) extension to simplify this process.
 * Each API call made in the function should have a `self.log()` call made explaining what the API call is doing. The log message should be formated as `function_name: message`.
 * A corresponding example in the `/rubrik-sdk-for-python/sample` directory named the same as the function_name.
