@@ -18,6 +18,11 @@ class CDMVersionException(RubrikException):
         return("The Rubrik cluster must be running CDM version {} or later.".format(self.cdm_version))
 
 
-class APICallException(Exception):
+class APICallException(RubrikException):
+    """Base class for exceptions in this module."""
+    pass
+
+
+class InvalidParameterException(RubrikException):
     """Base class for exceptions in this module."""
     pass

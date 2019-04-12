@@ -24,7 +24,7 @@ try:
 except ImportError:
     from urllib.parse import quote  # Python 3+
 from random import choice
-from rubrik_cdm.exceptions import APICallException
+from rubrik_cdm.exceptions import APICallException, InvalidParameterException
 
 
 class Api():
@@ -61,7 +61,7 @@ class Api():
         elif authentication is False:
             header = self._header()
         else:
-            sys.exit('Error: "authentication" must be either True or False')
+            raise InvalidParameterException('Error: "authentication" must be either True or False')
 
         try:
             # Determine which call type is being used and then set the relevant
@@ -101,7 +101,7 @@ class Api():
                 self.log('JOB STATUS for {}'.format(job_status_url))
                 api_request = requests.get(job_status_url, verify=False, headers=header, timeout=timeout)
             else:
-                sys.exit('Error: the _common_api() call_type must be one of the following: {}'.format(
+                raise InvalidParameterException('Error: the _common_api() call_type must be one of the following: {}'.format(
                     ['GET', 'POST', 'PATCH', 'DELETE', 'JOB_STATUS']))
 
             self.log(str(api_request) + "\n")
@@ -123,8 +123,7 @@ class Api():
             raise APICallException(
                 "Error: The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
         except requests.exceptions.RequestException as error:
-            # If "error_message" has be defined sys.exit that message else
-            # sys.exit the request exception error
+            # If "error_message" has be defined raise that message else raise the request exception error
             try:
                 error_message
             except NameError:
@@ -261,7 +260,7 @@ class Api():
         """
 
         if not isinstance(wait_for_completion, bool):
-            sys.exit(
+            raise InvalidParameterException(
                 'Error: The job_status() wait_for_completion argument must be True or False.')
 
         if wait_for_completion:
