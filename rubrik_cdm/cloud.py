@@ -19,6 +19,7 @@ import sys
 import os
 import re
 from .api import Api
+from .exceptions import InvalidParameterException, CDMVersionException
 
 
 class Cloud(Api):
@@ -73,30 +74,30 @@ class Cloud(Api):
             'reduced_redundancy']
 
         if re.compile(r'[_\/*?%.:|<>]').findall(aws_bucket_name):
-            sys.exit(
-                "Error: The `aws_bucket_name` may not contain any of the following characters: _\/*?%.:|<>")
+            raise InvalidParameterException(
+                r"Error: The `aws_bucket_name` may not contain any of the following characters: _\/*?%.:|<>")
 
         if aws_region is None:
             aws_region = os.environ.get('AWS_DEFAULT_REGION')
             if aws_region is None:
-                sys.exit("Error: `aws_region` has not been provided.")
+                raise InvalidParameterException("Error: `aws_region` has not been provided.")
 
         if aws_access_key is None:
             aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID')
             if aws_access_key is None:
-                sys.exit("Error: `aws_access_key` has not been provided.")
+                raise InvalidParameterException("Error: `aws_access_key` has not been provided.")
 
         if aws_secret_key is None:
             aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
             if aws_secret_key is None:
-                sys.exit("Error: `aws_secret_key` has not been provided.")
+                raise InvalidParameterException("Error: `aws_secret_key` has not been provided.")
 
         if aws_region not in valid_aws_regions:
-            sys.exit('Error: The `aws_region` must be one of the following: {}'.format(
+            raise InvalidParameterException('Error: The `aws_region` must be one of the following: {}'.format(
                 valid_aws_regions))
 
         if storage_class not in valid_storage_classes:
-            sys.exit('Error: The `storage_class` must be one of the following: {}'.format(
+            raise InvalidParameterException('Error: The `storage_class` must be one of the following: {}'.format(
                 valid_storage_classes))
         else:
             storage_class = storage_class.upper()
@@ -105,14 +106,13 @@ class Cloud(Api):
             archive_name = 'AWS:S3:{}'.format(aws_bucket_name.lower().strip())
 
         if kms_master_key_id is None and rsa_key is None:
-            sys.exit(
+            raise InvalidParameterException(
                 "Error: You must populated either `kms_master_key_id` or `rsa_key`.")
         elif kms_master_key_id is not None and rsa_key is not None:
-            sys.exit(
+            raise InvalidParameterException(
                 "Error: Both `kms_master_key_id` or `rsa_key` have been populated. You may only use one.")
 
-        self.log(
-            "aws_s3_cloudout: Searching the Rubrik cluster for archival locations.")
+        self.log("aws_s3_cloudout: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get(
             'internal', '/archive/object_store', timeout=timeout)
 
@@ -150,7 +150,7 @@ class Cloud(Api):
                 return "No change required. The '{}' archival location is already configured on the Rubrik cluster.".format(
                     archive_name)
             if archive['definition']['objectStoreType'] == 'S3' and archive['definition']['name'] == archive_name:
-                sys.exit(
+                raise InvalidParameterException(
                     "Error: Archival location with name '{}' already exists. Please enter a unique `archive_name`.".format(archive_name))
 
         self.log("aws_s3_cloudout: Creating the AWS S3 archive location.")
@@ -198,8 +198,8 @@ class Cloud(Api):
                     return self.patch(
                         'internal', "/archive/object_store/{}".format(archive['id']), config, timeout)
 
-        sys.exit("Error: The Rubrik cluster does not have an archive location named '{}'.".format(
-            archive_name))
+        raise InvalidParameterException(
+            "Error: The Rubrik cluster does not have an archive location named '{}'.".format(archive_name))
 
     def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key,
                        archive_name='default', instance_type='default', timeout=180):
@@ -224,13 +224,13 @@ class Cloud(Api):
         container = container.lower()
 
         if re.compile(r'[_\/*?%.:|<>]').findall(container):
-            sys.exit(
-                "Error: The `container` may not contain any of the following characters: _\/*?%.:|<>")
+            raise InvalidParameterException(
+                r"Error: The `container` may not contain any of the following characters: _\/*?%.:|<>")
 
         valid_instance_types = ['default', 'china', 'germany', 'government']
 
         if instance_type not in valid_instance_types:
-            sys.exit('Error: The `instance_type` argument must be one of the following: {}'.format(
+            raise InvalidParameterException('Error: The `instance_type` argument must be one of the following: {}'.format(
                 valid_instance_types))
 
         if archive_name == 'default':
@@ -283,7 +283,7 @@ class Cloud(Api):
                 return "No change required. The '{}' archival location is already configured on the Rubrik cluster.".format(
                     archive_name)
             if archive['definition']['objectStoreType'] == 'Azure' and archive['definition']['name'] == archive_name:
-                sys.exit("Error: Archival location with name '{}' already exists. Please enter a unique `name`.".format(
+                raise InvalidParameterException("Error: Archival location with name '{}' already exists. Please enter a unique `name`.".format(
                     archive_name))
 
         self.log("azure_cloudout: Creating the Azure archive location.")
@@ -343,7 +343,7 @@ class Cloud(Api):
             "koreasouth"]
 
         if region not in valid_regions:
-            sys.exit(
+            raise InvalidParameterException(
                 'Error: The `region` must be one of the following: {}'.format(valid_regions))
 
         self.log(
@@ -404,7 +404,7 @@ class Cloud(Api):
                     return self.patch(
                         'internal', "/archive/object_store/{}".format(archive['id']), config, timeout)
 
-        sys.exit("Error: The Rubrik cluster does not have an archive location named '{}'.".format(
+        raise InvalidParameterException("Error: The Rubrik cluster does not have an archive location named '{}'.".format(
             archive_name))
 
     def add_aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None,
@@ -449,30 +449,29 @@ class Cloud(Api):
         # verify we are on cdm 4.2 or newer, required for cloud native
         # protection
         if float(self.cluster_version()[:3]) < 4.2:
-            sys.exit(
-                "Error: The Rubrik cluster version must be 4.2 or newer to use this method.")
+            raise CDMVersionException(4.2)
 
         # check for regions and credentials in environment variables if not
         # provided explicitly
         if aws_regions is None:
             aws_regions = [os.environ.get('AWS_DEFAULT_REGION')]
             if aws_regions is None:
-                sys.exit("Error: `aws_region` has not been provided.")
+                raise InvalidParameterException("Error: `aws_region` has not been provided.")
 
         if aws_access_key is None:
             aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID')
             if aws_access_key is None:
-                sys.exit("Error: `aws_access_key` has not been provided.")
+                raise InvalidParameterException("Error: `aws_access_key` has not been provided.")
 
         if aws_secret_key is None:
             aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
             if aws_secret_key is None:
-                sys.exit("Error: `aws_secret_key` has not been provided.")
+                raise InvalidParameterException("Error: `aws_secret_key` has not been provided.")
 
         # verify supplied regions are in the supported list of regions for
         # cloud native protection
         if any(aws_region not in valid_aws_regions for aws_region in aws_regions):
-            sys.exit('Error: The list `aws_regions` may only contain the following values: {}'.format(
+            raise InvalidParameterException('Error: The list `aws_regions` may only contain the following values: {}'.format(
                 valid_aws_regions))
 
         # verify that our regional_bolt_network_configs are either None or in a
@@ -480,7 +479,7 @@ class Cloud(Api):
         if isinstance(
                 regional_bolt_network_configs,
                 list) is False and regional_bolt_network_configs is not None:
-            sys.exit(
+            raise InvalidParameterException(
                 "Error: Parameter `regional_bolt_network_configs` must be a list if defined.")
 
         if regional_bolt_network_configs is not None:
@@ -488,7 +487,7 @@ class Cloud(Api):
             # verify our list of bolt_network_configs only contains dicts
             for bolt_network_config in regional_bolt_network_configs:
                 if isinstance(bolt_network_config, dict) is False:
-                    sys.exit(
+                    raise InvalidParameterException(
                         "Error: List `regional_bolt_network_configs` can only contain dicts.")
 
                 # verify that all the required paramteters are provided in all
@@ -499,7 +498,7 @@ class Cloud(Api):
                         'vNetId',
                         'subnetId',
                         'securityGroupId']):
-                    sys.exit(
+                    raise InvalidParameterException(
                         "Error: Each `regional_bolt_network_config` dict must contain the following keys: 'region', 'vNetId', 'subnetId', 'securityGroupId'.")
 
         self.log(
@@ -514,7 +513,7 @@ class Cloud(Api):
                 "aws_native_account: Validating no conflict with `{}`".format(
                     cloud_source['id']))
             if cloud_source['name'] == aws_account_name:
-                sys.exit("Error: Cloud native source with name '{}' already exists. Please enter a unique `aws_account_name`.".format(
+                raise InvalidParameterException("Error: Cloud native source with name '{}' already exists. Please enter a unique `aws_account_name`.".format(
                     aws_account_name))
 
             # idempotent return if a cloud native source with this access key
@@ -558,11 +557,10 @@ class Cloud(Api):
         # verify we are on cdm 4.2 or newer, required for cloud native
         # protection
         if float(self.cluster_version()[:3]) < 4.2:
-            sys.exit(
-                "Error: The Rubrik cluster version must be 4.2 or newer to use this method.")
+            raise CDMVersionException(4.2)
 
         if not isinstance(config, dict):
-            sys.exit("Error: The 'config' argument must be a dictionary.")
+            raise InvalidParameterException("Error: The 'config' argument must be a dictionary.")
 
         self.log(
             "update_aws_native_account: Checking the Rubrik cluster for the AWS Native Account.")
