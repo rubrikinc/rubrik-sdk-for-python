@@ -17,11 +17,10 @@ This module contains the Rubrik SDK Physical class.
 
 import sys
 from .api import Api
+from .exceptions import InvalidParameterException
 
-_API = Api
 
-
-class Physical(_API):
+class Physical(Api):
     """This class contains methods related to the managment of the Physical objects in the Rubrik cluster."""
 
     def add_physical_host(self, hostname, timeout=60):
@@ -86,7 +85,8 @@ class Physical(_API):
             "Deleting the host '{}' from the Rubrik cluster.".format(hostname))
         return self.delete('v1', '/host/{}'.format(host_id), timeout=timeout)
 
-    def create_physical_fileset(self, name, operating_system, include, exclude, exclude_exception, follow_network_shares=False, backup_hidden_folders=False, timeout=15):
+    def create_physical_fileset(self, name, operating_system, include, exclude, exclude_exception,
+                                follow_network_shares=False, backup_hidden_folders=False, timeout=15):
         """Create a Fileset for a Linux or Windows machine.
 
         Arguments:
@@ -109,22 +109,22 @@ class Physical(_API):
         valid_operating_system = ['Linux', 'Windows']
 
         if operating_system not in valid_operating_system:
-            sys.exit("Error: The create_physical_fileset() operating_system argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The create_physical_fileset() operating_system argument must be one of the following: {}.".format(
                 valid_operating_system))
 
         if isinstance(follow_network_shares, bool) is False:
-            sys.exit(
-                "Error: The 'follow_network_shares' argument must be True or False.")
+            raise InvalidParameterException(
+                "The 'follow_network_shares' argument must be True or False.")
         elif isinstance(backup_hidden_folders, bool) is False:
-            sys.exit(
-                "Error: The 'backup_hidden_folders' argument must be True or False.")
+            raise InvalidParameterException(
+                "The 'backup_hidden_folders' argument must be True or False.")
         elif isinstance(include, list) is False:
-            sys.exit("Error: The 'include' argument must be a list object.")
+            raise InvalidParameterException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
-            sys.exit("Error: The 'exclude' argument must be a list object.")
+            raise InvalidParameterException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            sys.exit(
-                "Error: The 'exclude_exception' argument must be a list object.")
+            raise InvalidParameterException(
+                "The 'exclude_exception' argument must be a list object.")
 
         config = {}
         config['name'] = name
@@ -168,7 +168,8 @@ class Physical(_API):
             model,
             timeout=timeout)
 
-    def create_nas_fileset(self, name, share_type, include, exclude, exclude_exception, follow_network_shares=False, timeout=15):
+    def create_nas_fileset(self, name, share_type, include, exclude,
+                           exclude_exception, follow_network_shares=False, timeout=15):
         """Create a NAS Fileset.
 
         Arguments:
@@ -190,19 +191,19 @@ class Physical(_API):
         valid_share_type = ['NFS', 'SMB']
 
         if share_type not in valid_share_type:
-            sys.exit("Error: The create_fileset() share_type argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The create_fileset() share_type argument must be one of the following: {}.".format(
                 valid_share_type))
 
         if isinstance(follow_network_shares, bool) is False:
-            sys.exit(
-                "Error: The 'follow_network_shares' argument must be True or False.")
+            raise InvalidParameterException(
+                "The 'follow_network_shares' argument must be True or False.")
         elif isinstance(include, list) is False:
-            sys.exit("Error: The 'include' argument must be a list object.")
+            raise InvalidParameterException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
-            sys.exit("Error: The 'exclude' argument must be a list object.")
+            raise InvalidParameterException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            sys.exit(
-                "Error: The 'exclude_exception' argument must be a list object.")
+            raise InvalidParameterException(
+                "The 'exclude_exception' argument must be a list object.")
 
         config = {}
         config['name'] = name
@@ -244,7 +245,8 @@ class Physical(_API):
             model,
             timeout=timeout)
 
-    def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None, exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):
+    def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None,
+                                     exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):
         """Assign a Fileset to a Linux or Windows machine. If you have multiple Filesets with identical names, you will need to populate the Filesets properties (i.e this functions keyword arguments)
         to find a specific match. Filesets with identical names and properties are not supported.
 
@@ -271,7 +273,7 @@ class Physical(_API):
         valid_operating_system = ['Linux', 'Windows']
 
         if operating_system not in valid_operating_system:
-            sys.exit("Error: The create_physical_fileset() operating_system argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The create_physical_fileset() operating_system argument must be one of the following: {}.".format(
                 valid_operating_system))
 
         if include is None:
@@ -284,18 +286,18 @@ class Physical(_API):
             exclude_exception = []
 
         if isinstance(follow_network_shares, bool) is False:
-            sys.exit(
-                "Error: The 'follow_network_shares' argument must be True or False.")
+            raise InvalidParameterException(
+                "The 'follow_network_shares' argument must be True or False.")
         elif isinstance(backup_hidden_folders, bool) is False:
-            sys.exit(
-                "Error: The 'backup_hidden_folders' argument must be True or False.")
+            raise InvalidParameterException(
+                "The 'backup_hidden_folders' argument must be True or False.")
         elif isinstance(include, list) is False:
-            sys.exit("Error: The 'include' argument must be a list object.")
+            raise InvalidParameterException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
-            sys.exit("Error: The 'exclude' argument must be a list object.")
+            raise InvalidParameterException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            sys.exit(
-                "Error: The 'exclude_exception' argument must be a list object.")
+            raise InvalidParameterException(
+                "The 'exclude_exception' argument must be a list object.")
 
         self.log(
             "assign_physical_host_fileset: Searching the Rubrik cluster for the {} physical host {}.".format(
@@ -312,8 +314,8 @@ class Physical(_API):
         try:
             host_id
         except NameError:
-            sys.exit(
-                "Error: The Rubrik cluster is not connected to a {} physical host named '{}'.".format(
+            raise InvalidParameterException(
+                "The Rubrik cluster is not connected to a {} physical host named '{}'.".format(
                     operating_system, hostname))
 
         self.log("assign_physical_host_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(
@@ -323,8 +325,8 @@ class Physical(_API):
 
         number_of_matches = 0
         if current_filesets_templates['total'] == 0:
-            sys.exit(
-                "Error: The Rubrik cluster does not have a {} Fileset named '{}'.".format(
+            raise InvalidParameterException(
+                "The Rubrik cluster does not have a {} Fileset named '{}'.".format(
                     operating_system, fileset_name))
         elif current_filesets_templates['total'] > 1:
             for fileset_template in current_filesets_templates['data']:
@@ -361,15 +363,15 @@ class Physical(_API):
                             # the extra variables are populated with anything
                             # besides the default (aka the user tried to be as
                             # unique as possible)
-                            sys.exit(
-                                "Error: The Rubrik cluster contains multiple {} Filesets named '{}' that match all of the populate function arguments. Please use a unique Fileset.".format(
+                            raise InvalidParameterException(
+                                "The Rubrik cluster contains multiple {} Filesets named '{}' that match all of the populate function arguments. Please use a unique Fileset.".format(
                                     operating_system, fileset_name))
                         else:
-                            sys.exit(
-                                "Error: The Rubrik cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(
+                            raise InvalidParameterException(
+                                "The Rubrik cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(
                                     operating_system, fileset_name))
-                    sys.exit(
-                        "Error: The Rubrik cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(
+                    raise InvalidParameterException(
+                        "The Rubrik cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(
                             operating_system,
                             fileset_name))
 
