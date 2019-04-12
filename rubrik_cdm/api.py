@@ -24,7 +24,7 @@ try:
 except ImportError:
     from urllib.parse import quote  # Python 3+
 from random import choice
-from rubrik_cdm.exceptions import APICallException, InvalidParameterException
+from rubrik_cdm.exceptions import APICallException, InvalidParameterException, RubrikException
 
 
 class Api():
@@ -295,7 +295,7 @@ class Api():
                     time.sleep(10)
                     continue
                 else:
-                    sys.exit('Error: {}'.format(str(api_call)))
+                    raise RubrikException('Error: {}'.format(str(api_call)))
 
         else:
             api_call = self._common_api(
