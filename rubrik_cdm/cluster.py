@@ -112,7 +112,7 @@ class Cluster(Api):
         valid_object_type = ['vmware']
 
         if object_type not in valid_object_type:
-            raise InvalidParameterException("Error: The end_user_authorization() object_type argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The end_user_authorization() object_type argument must be one of the following: {}.".format(
                 valid_object_type))
 
         self.log("end_user_authorization: Searching the Rubrik cluster for the vSphere VM '{}'.".format(
@@ -247,7 +247,7 @@ class Cluster(Api):
             'UTC']
 
         if timezone not in valid_timezones:
-            raise InvalidParameterException("Error: The timezone argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The timezone argument must be one of the following: {}.".format(
                 valid_timezones))
 
         self.log("cluster_timezone: Determing the current cluster timezone")
@@ -279,7 +279,7 @@ class Cluster(Api):
         """
 
         if isinstance(ntp_server, list) is False:
-            raise InvalidParameterException("Error: The 'ntp_server' argument must be a list object.")
+            raise InvalidParameterException("The 'ntp_server' argument must be a list object.")
 
         self.log("cluster_ntp: Determing the current cluster NTP settings")
         cluster_ntp = self.get("internal", "/cluster/me/ntp_server", timeout=timeout)
@@ -311,7 +311,7 @@ class Cluster(Api):
         valid_protocols = ["TCP", "UDP"]
 
         if protocol not in valid_protocols:
-            raise InvalidParameterException("Error: The protocol argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The protocol argument must be one of the following: {}.".format(
                 valid_protocols))
 
         self.log("cluster_syslog: Getting the current cluster syslog settings")
@@ -360,7 +360,7 @@ class Cluster(Api):
             node_names = self.cluster_node_name()
 
             if len(node_names) != len(ips):
-                raise InvalidParameterException("Error: The Rubrik cluster has {} nodes but you provided {} IP addresses. There must be a 1 to 1 relationship between nodes and IPs.".format(
+                raise InvalidParameterException("The Rubrik cluster has {} nodes but you provided {} IP addresses. There must be a 1 to 1 relationship between nodes and IPs.".format(
                     str(len(node_names)), str(len(ips))))
 
             node_names = sorted(node_names)
@@ -374,7 +374,7 @@ class Cluster(Api):
             node_ip_combined = ips
         else:
             raise InvalidParameterException(
-                "Error: The interfaces argument must be either a list of IPs or a dictionary with node_name:ip as the key, value pairs.")
+                "The interfaces argument must be either a list of IPs or a dictionary with node_name:ip as the key, value pairs.")
 
         self.log("cluster_vlan: Getting the current VLAN configurations.")
         current_vlans = self.get("internal", "/cluster/me/vlan", timeout=timeout)
@@ -410,7 +410,7 @@ class Cluster(Api):
         """
 
         if isinstance(server_ip, list) is False:
-            raise InvalidParameterException("Error: The 'server_ip' argument must be a list")
+            raise InvalidParameterException("The 'server_ip' argument must be a list")
 
         self.log(
             "cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
@@ -437,7 +437,7 @@ class Cluster(Api):
         """
 
         if isinstance(search_domain, list) is False:
-            raise InvalidParameterException("Error: The 'server_ip' argument must be a list")
+            raise InvalidParameterException("The 'server_ip' argument must be a list")
 
         self.log(
             "cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
@@ -474,7 +474,7 @@ class Cluster(Api):
         valid_encryption = ['SSL', 'STARTTLS', 'NONE']
 
         if encryption not in valid_encryption:
-            raise InvalidParameterException("Error: cluster_smtp_settings() encryption argument must be one of the following: {}.".format(
+            raise InvalidParameterException("cluster_smtp_settings() encryption argument must be one of the following: {}.".format(
                 valid_encryption))
 
         self.log(
@@ -594,7 +594,7 @@ class Cluster(Api):
         current_users = self.get("internal", "/user?username={}".format(username), timeout=timeout)
         if len(current_users) < 0:
             raise InvalidParameterException(
-                "Error: The user '{}' does not exsit on the Rubrik cluster.".format(username))
+                "The user '{}' does not exsit on the Rubrik cluster.".format(username))
 
         self.log("read_only_authorization: Checking the current authorizations for user '{}'".format(username))
         current_authorizations = self.get(
