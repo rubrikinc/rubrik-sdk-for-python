@@ -18,7 +18,7 @@ This module contains the Rubrik SDK Data_Management class.
 import sys
 import re
 from .api import Api
-from rubrik_cdm.exceptions import CDMVersionException
+from rubrik_cdm.exceptions import CDMVersionException, InvalidParameterException
 
 
 _API = Api
@@ -50,12 +50,12 @@ class Data_Management(_API):
         valid_host_os_type = ['Linux', 'Windows']
 
         if object_type not in valid_object_type:
-            sys.exit("Error: The on_demand_snapshot() object_type argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The on_demand_snapshot() object_type argument must be one of the following: {}.".format(
                 valid_object_type))
 
         if host_os is not None:
             if host_os not in valid_host_os_type:
-                sys.exit("Error: The on_demand_snapshot() host_os argument must be one of the following: {}.".format(
+                raise InvalidParameterException("The on_demand_snapshot() host_os argument must be one of the following: {}.".format(
                     valid_object_type))
 
         if object_type == 'vmware':
@@ -118,11 +118,11 @@ class Data_Management(_API):
 
         elif object_type == 'physical_host':
             if host_os is None:
-                sys.exit(
-                    "Error: The on_demand_snapshot() host_os argument must be populated when taking a Physical host snapshot.")
+                raise InvalidParameterException(
+                    "The on_demand_snapshot() host_os argument must be populated when taking a Physical host snapshot.")
             elif fileset is None:
-                sys.exit(
-                    "Error: The on_demand_snapshot() fileset argument must be populated when taking a Physical host snapshot.")
+                raise InvalidParameterException(
+                    "The on_demand_snapshot() fileset argument must be populated when taking a Physical host snapshot.")
 
             self.log(
                 "on_demand_snapshot: Searching the Rubrik cluster for the Physical Host '{}'.".format(object_name))
@@ -139,8 +139,8 @@ class Data_Management(_API):
                 'v1', '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id, fileset_template_id), timeout=timeout)
 
             if fileset_summary['total'] == 0:
-                sys.exit(
-                    "Error: The Physical Host '{}' is not assigned to the '{}' Fileset.".format(
+                raise InvalidParameterException(
+                    "The Physical Host '{}' is not assigned to the '{}' Fileset.".format(
                         object_name, fileset))
 
             fileset_id = fileset_summary['data'][0]['id']
@@ -186,7 +186,7 @@ class Data_Management(_API):
             'ahv']
 
         if object_type not in valid_object_type:
-            sys.exit("Error: The object_id() object_type argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
                 valid_object_type))
 
         if object_type == 'vmware':
@@ -210,9 +210,9 @@ class Data_Management(_API):
                 object_summary_api_endpoint = '/host?primary_cluster_id=local&hostname={}'.format(object_name)
         elif object_type == 'fileset_template':
             if host_os is None:
-                sys.exit("Error: You must provide the Fileset Tempalte OS type.")
+                raise InvalidParameterException("You must provide the Fileset Tempalte OS type.")
             elif host_os not in ['Linux', 'Windows']:
-                sys.exit("Error: The host_os must be either 'Linux' or 'Windows'.")
+                raise InvalidParameterException("The host_os must be either 'Linux' or 'Windows'.")
             object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
                 host_os, object_name)
@@ -238,7 +238,7 @@ class Data_Management(_API):
                                object_summary_api_endpoint, timeout=timeout)
 
         if api_request['total'] == 0:
-            sys.exit("Error: The {} object '{}' was not found on the Rubrik cluster.".format(
+            raise InvalidParameterException("The {} object '{}' was not found on the Rubrik cluster.".format(
                 object_type, object_name))
         elif api_request['total'] > 0:
             object_ids = []
@@ -254,18 +254,18 @@ class Data_Management(_API):
                     object_ids.append(item['id'])
 
             if len(object_ids) > 1:
-                sys.exit(
-                    "Error: Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(
+                raise InvalidParameterException(
+                    "Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(
                         object_type, object_name))
             elif len(object_ids) == 0:
-                sys.exit(
-                    "Error: The {} object '{}' was not found on the Rubrik cluster.".format(
+                raise InvalidParameterException(
+                    "The {} object '{}' was not found on the Rubrik cluster.".format(
                         object_type, object_name))
             else:
                 return object_ids[0]
 
-            sys.exit(
-                "Error: The {} object '{}' was not found on the Rubrik cluster.".format(
+            raise InvalidParameterException(
+                "The {} object '{}' was not found on the Rubrik cluster.".format(
                     object_type, object_name))
 
     def assign_sla(self, object_name, sla_name, object_type, timeout=30):
@@ -287,7 +287,8 @@ class Data_Management(_API):
         valid_object_type = ['vmware']
 
         if object_type not in valid_object_type:
-            sys.exit("Error: The assign_sla() object_type argument must be one of the following: {}.".format(valid_object_type))
+            raise InvalidParameterException(
+                "The assign_sla() object_type argument must be one of the following: {}.".format(valid_object_type))
 
         # Determine if 'do not protect' or 'clear' are the SLA Domain Name
         do_not_protect_regex = re.findall('\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
@@ -339,13 +340,13 @@ class Data_Management(_API):
         """
 
         if isinstance(remove_network_devices, bool) is False:
-            sys.exit(
-                "Error: The 'remove_network_devices' argument must be True or False.")
+            raise InvalidParameterException(
+                "The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
-            sys.exit("Error: The 'power_on' argument must be True or False.")
+            raise InvalidParameterException("The 'power_on' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
-            sys.exit(
-                "Error: The date and time arguments most both be 'latest' or a specific date and time.")
+            raise InvalidParameterException(
+                "The date and time arguments most both be 'latest' or a specific date and time.")
 
         self.log(
             "vsphere_live_mount: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
@@ -376,8 +377,8 @@ class Data_Management(_API):
         try:
             snapshot_id
         except NameError:
-            sys.exit(
-                "Error: The vSphere VM '{}' does not have a snapshot taken on {} at {}.".format(
+            raise InvalidParameterException(
+                "The vSphere VM '{}' does not have a snapshot taken on {} at {}.".format(
                     vm_name, date, time))
         else:
             if host == 'current':
@@ -424,20 +425,20 @@ class Data_Management(_API):
         """
 
         if isinstance(remove_network_devices, bool) is False:
-            sys.exit(
-                "Error: The 'remove_network_devices' argument must be True or False.")
+            raise InvalidParameterException(
+                "The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
-            sys.exit("Error: The 'power_on' argument must be True or False.")
+            raise InvalidParameterException("The 'power_on' argument must be True or False.")
         elif isinstance(disable_network, bool) is False:
-            sys.exit("Error: The 'disable_network' argument must be True or False.")
+            raise InvalidParameterException("The 'disable_network' argument must be True or False.")
         elif isinstance(keep_mac_addresses, bool) is False:
-            sys.exit(
-                "Error: The 'keep_mac_addresses' argument must be True or False.")
+            raise InvalidParameterException(
+                "The 'keep_mac_addresses' argument must be True or False.")
         elif isinstance(preserve_moid, bool) is False:
-            sys.exit("Error: The 'preserve_moid' argument must be True or False.")
+            raise InvalidParameterException("The 'preserve_moid' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
-            sys.exit(
-                "Error: The date and time arguments most both be 'latest' or a specific date and time.")
+            raise InvalidParameterException(
+                "The date and time arguments most both be 'latest' or a specific date and time.")
 
         self.log(
             "vsphere_instant_recovery: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
@@ -468,8 +469,8 @@ class Data_Management(_API):
         try:
             snapshot_id
         except NameError:
-            sys.exit(
-                "Error: The vSphere VM '{}' does not have a snapshot taken on {} at {}.".format(
+            raise InvalidParameterException(
+                "The vSphere VM '{}' does not have a snapshot taken on {} at {}.".format(
                     vm_name, date, time))
         else:
             if host == 'current':
@@ -514,15 +515,15 @@ class Data_Management(_API):
         try:
             snapshot_date = datetime.strptime(date, '%m-%d-%Y')
         except ValueError:
-            sys.exit(
-                "Error: The date argument '{}' must be formatd as 'Month-Date-Year' (ex: 8-9-2018).".format(date))
+            raise InvalidParameterException(
+                "The date argument '{}' must be formatd as 'Month-Date-Year' (ex: 8-9-2018).".format(date))
 
         # Validate the Time formating
         try:
             snapshot_time = datetime.strptime(time, '%I:%M %p')
         except ValueError:
-            sys.exit(
-                "Error: The time argument '{}' must be formatd as 'Hour:Minute AM/PM' (ex: 2:57 AM).".format(time))
+            raise InvalidParameterException(
+                "The time argument '{}' must be formatd as 'Hour:Minute AM/PM' (ex: 2:57 AM).".format(time))
 
         self.log("_date_time_conversion: Getting the Rubrik cluster timezone.")
         cluster_summary = self.get('v1', '/cluster/me', timeout=timeout)
@@ -564,7 +565,7 @@ class Data_Management(_API):
         valid_object_type = ['vmware']
 
         if object_type not in valid_object_type:
-            sys.exit("Error: The pause_snapshots() object_type argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The pause_snapshots() object_type argument must be one of the following: {}.".format(
                 valid_object_type))
 
         if object_type == 'vmware':
@@ -609,7 +610,7 @@ class Data_Management(_API):
         valid_object_type = ['vmware']
 
         if object_type not in valid_object_type:
-            sys.exit("Error: The resume_snapshots() object_type argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The resume_snapshots() object_type argument must be one of the following: {}.".format(
                 valid_object_type))
 
         if object_type == 'vmware':
@@ -704,8 +705,8 @@ class Data_Management(_API):
             self.log(
                 "end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Managed Volume '{}'.".format(name))
             if managed_volume_summary['slaAssignment'] == 'Unassigned' or managed_volume_summary['effectiveSlaDomainId'] == 'UNPROTECTED':
-                sys.exit(
-                    "Error: The Managed Volume '{}' does not have a SLA assigned currently assigned. You must populate the sla_name argument.".format(name))
+                raise InvalidParameterException(
+                    "The Managed Volume '{}' does not have a SLA assigned currently assigned. You must populate the sla_name argument.".format(name))
             config = {}
         else:
             self.log(
@@ -735,7 +736,7 @@ class Data_Management(_API):
         valid_object_type = ['vmware']
 
         if object_type not in valid_object_type:
-            sys.exit("Error: The get_sla_object() object_type argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The get_sla_object() object_type argument must be one of the following: {}.".format(
                 valid_object_type))
 
         if object_type == 'vmware':
@@ -750,8 +751,8 @@ class Data_Management(_API):
                 vm_name_id[vm["name"]] = vm["id"]
 
             if bool(vm_name_id) is False:
-                sys.exit(
-                    "Error: The SLA '{}' is currently not protecting any {} objects.".format(
+                raise InvalidParameterException(
+                    "The SLA '{}' is currently not protecting any {} objects.".format(
                         sla, object_type))
 
             return vm_name_id
