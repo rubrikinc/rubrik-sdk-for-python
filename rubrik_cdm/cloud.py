@@ -20,13 +20,12 @@ import os
 import re
 from .api import Api
 
-_API = Api
 
-
-class Cloud(_API):
+class Cloud(Api):
     """This class contains methods for the managment of Cloud related functionality on the Rubrik cluster."""
 
-    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=180):
+    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None,
+                        aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=180):
         """Add a new AWS S3 archival location to the Rubrik cluster.
 
         Arguments:
@@ -202,7 +201,8 @@ class Cloud(_API):
         sys.exit("Error: The Rubrik cluster does not have an archive location named '{}'.".format(
             archive_name))
 
-    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=180):
+    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key,
+                       archive_name='default', instance_type='default', timeout=180):
         """Add a new Azure archival location to the Rubrik cluster.
 
         Arguments:
@@ -289,7 +289,8 @@ class Cloud(_API):
         self.log("azure_cloudout: Creating the Azure archive location.")
         return self.post('internal', '/archive/object_store', config)
 
-    def azure_cloudon(self, archive_name, container, storage_account_name, application_id, application_key, tenant_id, region, virtual_network_id, subnet_name, security_group_id, timeout=30):
+    def azure_cloudon(self, archive_name, container, storage_account_name, application_id, application_key,
+                      tenant_id, region, virtual_network_id, subnet_name, security_group_id, timeout=30):
         """Enable CloudOn for an exsiting AWS S3 archival location.
 
         Arguments:
@@ -406,7 +407,8 @@ class Cloud(_API):
         sys.exit("Error: The Rubrik cluster does not have an archive location named '{}'.".format(
             archive_name))
 
-    def add_aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None, aws_regions=None, regional_bolt_network_configs=None, timeout=30):
+    def add_aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None,
+                               aws_regions=None, regional_bolt_network_configs=None, timeout=30):
         """Add a new AWS account to EC2 native protection on the Rubrik cluster.
 
         Arguments:
@@ -559,7 +561,7 @@ class Cloud(_API):
             sys.exit(
                 "Error: The Rubrik cluster version must be 4.2 or newer to use this method.")
 
-        if type(config) != dict:
+        if not isinstance(config, dict):
             sys.exit("Error: The 'config' argument must be a dictionary.")
 
         self.log(
