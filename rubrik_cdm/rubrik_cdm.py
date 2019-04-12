@@ -42,9 +42,9 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
     for its end users. It also contains various helper functions used throughout the SDK.
 
     Arguments:
-        _CLUSTER {class} -- This class contains methods related to the managment of the Rubrik Cluster itself.
+        _CLUSTER {class} -- This class contains methods related to the management of the Rubrik Cluster itself.
         _DATA_MANAGEMENT {class} - This class contains methods related to backup and restore operations for the various objects managed by the Rubrik Cluster.
-        _PHYSICAL {class} - This class contains methods related to the managment of the Physical objects in the Rubrik Cluster.
+        _PHYSICAL {class} - This class contains methods related to the management of the Physical objects in the Rubrik Cluster.
     """
 
     def __init__(self, node_ip=None, username=None, password=None, api_token=None, enable_logging=False):
@@ -195,8 +195,10 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             raise InvalidParameterException(
                 "The API Endpoint should begin with '/'. (ex: /cluster/me)")
         elif api_endpoint[-1] == "/":
-            raise InvalidParameterException(
-                "The API Endpoint should not end with '/'. (ex. /cluster/me)")
+            if api_endpoint[-2] != "=":
+                raise InvalidParameterException(
+                    "Error: The API Endpoint should not end with '/' unless proceeded by '='. (ex. /cluster/me or /fileset/snapshot/<id>/browse?path=/)")
+
 
 
 class Bootstrap(_API):
@@ -397,5 +399,6 @@ class Bootstrap(_API):
             raise InvalidParameterException(
                 "The API Endpoint should begin with '/'. (ex: /cluster/me)")
         elif api_endpoint[-1] == "/":
-            raise InvalidParameterException(
-                "The API Endpoint should not end with '/'. (ex. /cluster/me)")
+            if api_endpoint[-2] != "=":
+                raise InvalidParameterException(
+                    "Error: The API Endpoint should not end with '/' unless proceeded by '='. (ex. /cluster/me or /fileset/snapshot/<id>/browse?path=/)")

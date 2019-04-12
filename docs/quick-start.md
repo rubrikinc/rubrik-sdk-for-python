@@ -38,7 +38,7 @@ export rubrik_cdm_username=user@domain.com
 export rubrik_cdm_password=SecretPassword
 ```
 
-In order for the environment variables to persist across terminal sessions, add the above three export commands to the ~\.bash_profile or ~\.profile file.
+In order for the environment variables to persist across terminal sessions, add the above three export commands to the `~\.bash_profile` or ~\.profile file and then run `source ~\.bash_profile` or `source ~\.profile` to ensure the environment variables are present in your current terminal session.
 
 Once set, the `rubrik_cdm.Connect()` function will automatically utilize the data within the environment variables to perform its connection unless credentials are specifically passed in the arguments of the function.
 
@@ -76,7 +76,7 @@ Any subsequent calls to methods or functions within the rubrik_cdm package are n
 ```
 import rubrik_cdm
 rubrik = rubrik_cdm.Connect()
-print rubrik.get_sla_objects("Gold","vmware")
+print rubrik.get_sla_objects("Gold","VMware")
 ```
 
 For a full list of functions, methods, and their associated arguments see the official [Rubrik SDK for Python documentation](https://rubrik.gitbook.io/rubrik-sdk-for-python).
@@ -143,7 +143,7 @@ As the Rubrik SDK for Python is hosted on GitHub, installing from source allows 
 To install the Rubrik SDK for Python from source run the following commands.
 
 ```
-git clone https://github.com/rubrik-devops/rubrik-sdk-for-python
+git clone https://github.com/rubrikinc/rubrik-sdk-for-python
 cd rubrik-sdk-for-python
 sudo python setup.py install
 ```
@@ -176,7 +176,7 @@ rubrik=rubrik_cdm.Connect()
 # Set Object Variables
 vm_name = "VM1"
 sla_name = "Gold"
-object_type = "vmware"
+object_type = "VMware"
 
 # Assign VM to SLA Domain
 assign_sla = rubrik.assign_sla(vm_name, sla_name, object_type)
@@ -188,7 +188,7 @@ assign_sla = rubrik.assign_sla(vm_name, sla_name, object_type)
 # Set Object Variables
 vm_name = "VM1"
 sla_name = "Gold"
-object_type = "vmware"
+object_type = "VMware"
 
 # Take On-Demand Snapshot of VM
 snapshot = rubrik.on_demand_snapshot(vm_name, object_type, sla_name)
@@ -218,9 +218,9 @@ instant_recovery = rubrik.vsphere_instant_recovery(vm_name, date='latest', time=
 
 After importing the needed modules, disabling certificate warnings and connecting to the Rubrik cluster, the main examples start on Line 8. 
 
-**Lines 8 through 18** show an example of associating an existing SLA Domain with a VMware VM. The `assign_sla(`) function is utilized to accomplish this, taking in three arguments; the VM name, SLA Domain name, and Object Type (vmware).
+**Lines 8 through 18** show an example of associating an existing SLA Domain with a VMware VM. The `assign_sla(`) function is utilized to accomplish this, taking in three arguments; the VM name, SLA Domain name, and Object Type (VMware).
 
-**Lines 20 through 30** illustrate performing an on-demand snapshot of a VMware VM. The `on_demand_snapshot()` function is utilized to accomplish this, taking in three arguments; the VM name, object type (vmware), and SLA Domain name to apply to the snapshot. The SLA Domain name is an optional requirement and if not specified the currently associated SLA Domain of the VM will be used.
+**Lines 20 through 30** illustrate performing an on-demand snapshot of a VMware VM. The `on_demand_snapshot()` function is utilized to accomplish this, taking in three arguments; the VM name, object type (VMware), and SLA Domain name to apply to the snapshot. The SLA Domain name is an optional requirement and if not specified the currently associated SLA Domain of the VM will be used.
 
 **Lines 32 through 49** illustrate a couple of different recovery options for VMware VMs. The first, on Line 42 is a Live Mount of a specific snapshot to the same host which is running the production VM. Line 46 shows a Live Mount of the same VM, only utilizing the most recent snapshot and specifying a host on which to mount the VM. Line 49 performs an Instant Recovery of the VM utilizing the most recent available snapshot.
 
@@ -389,7 +389,7 @@ import base64
 
 auth_values = ("administrator","SuperSecret")
 
-response = requests.get("https://192.168.150.111/api/v1/vmware/vm?name="+vmname, auth=auth_values, verify=False)
+response = requests.get("https://192.168.150.111/api/v1/VMware/vm?name="+vmname, auth=auth_values, verify=False)
 vmid = response.json()['data'][0]['id']
 
 
@@ -397,7 +397,7 @@ response = requests.get("https://192.168.150.111/api/v1/sla_domain?name="+slanam
 slaid = response.json()['data'][0]['id']
 
 
-response = requests.patch("https://192.168.150.111/api/v1/vmware/vm/"+vmid, auth=auth_values, verify=False, json={"configuredSlaDomainId": slaid })
+response = requests.patch("https://192.168.150.111/api/v1/VMware/vm/"+vmid, auth=auth_values, verify=False, json={"configuredSlaDomainId": slaid })
 ```
 
 Rubrik prides itself upon its API-first architecture, ensuring everything available within the HTML5 interface, and more, is consumable via a RESTful API. For more information on Rubrik’s API architecture and complete API documentation, please see the official Rubrik API Documentation.
@@ -510,6 +510,6 @@ For more information around contributing to the Rubrik SDK for Python see the [R
 
 * [Rubrik SDK for Python GitHub Repository](https://github.com/rubrikinc/rubrik-sdk-for-python)
 * [Rubrik SDK for Python Official Documentation](https://rubrik.gitbook.io/rubrik-sdk-for-python)
-* [Rubrik CDM API Documentation]
+* [Rubrik CDM API Documentation](https://github.com/rubrikinc/api-documentation)
 * [Rubrik SDK for Python Development Guide (GitHub)](https://github.com/rubrikinc/rubrik-sdk-for-python/blob/devel/CONTRIBUTING.md)
 * [Hello World - Welcoming Rubrik SDK for Python](https://www.rubrik.com/blog/introducing-rubrik-python-sdk/)
