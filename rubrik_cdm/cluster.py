@@ -18,10 +18,8 @@ This module contains the Rubrik SDK Cluster class.
 import sys
 from .api import Api
 
-_API = Api
 
-
-class Cluster(_API):
+class Cluster(Api):
     """This class contains methods related to the managment of the Rubrik cluster itself.
     """
 
