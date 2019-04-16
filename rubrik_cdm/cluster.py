@@ -33,8 +33,8 @@ class Cluster(Api):
             str -- The version of CDM installed on the Rubrik cluster.
         """
 
-        self.log(
-            'cluster_version: Getting the software version of the Rubrik cluster.')
+        self.log('cluster_version: Getting the software version of the Rubrik cluster.')
+
         return self.get('v1', '/cluster/me/version', timeout=timeout)['version']
 
     def minimum_installed_cdm_version(self, cluster_version, timeout=15):
