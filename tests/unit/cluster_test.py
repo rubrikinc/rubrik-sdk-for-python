@@ -2,7 +2,7 @@ import pytest
 
 
 @pytest.mark.unit
-def test_cluster_version_check(rubrik, monkeypatch):
+def test_cluster_version(rubrik, monkeypatch):
 
     # Result of self.get('v1', '/cluster/me/version', timeout=timeout)
     def patch_get_v1_cluster_me_version(api_version, api_endpoint, timeout):
