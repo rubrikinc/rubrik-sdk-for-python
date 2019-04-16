@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="rubrik_cdm",
-    version="1.0.12",
+    version="1.0.13",
     author="Rubrik Ranger Team",
     description="A Python package for interacting with the Rubrik CDM API.",
     long_description=long_description,

@@ -38,7 +38,7 @@ export rubrik_cdm_username=user@domain.com
 export rubrik_cdm_password=SecretPassword
 ```
 
-In order for the environment variables to persist across terminal sessions, add the above three export commands to the ~\.bash_profile or ~\.profile file.
+In order for the environment variables to persist across terminal sessions, add the above three export commands to the `~\.bash_profile` or ~\.profile file and then run `source ~\.bash_profile` or `source ~\.profile` to ensure the environment variables are present in your current terminal session.
 
 Once set, the `rubrik_cdm.Connect()` function will automatically utilize the data within the environment variables to perform its connection unless credentials are specifically passed in the arguments of the function.
 
@@ -143,7 +143,7 @@ As the Rubrik SDK for Python is hosted on GitHub, installing from source allows 
 To install the Rubrik SDK for Python from source run the following commands.
 
 ```
-git clone https://github.com/rubrik-devops/rubrik-sdk-for-python
+git clone https://github.com/rubrikinc/rubrik-sdk-for-python
 cd rubrik-sdk-for-python
 sudo python setup.py install
 ```

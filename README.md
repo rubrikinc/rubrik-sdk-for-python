@@ -4,7 +4,7 @@ This project provides a Python package that makes it easy to interact with the R
 
 The SDK has been tested against Python 2.7.6 and Python 3.6.4.
 
-## Installation
+# :hammer: Installation
 
 Install from pip:
 
@@ -12,20 +12,12 @@ Install from pip:
 
 Install from source:
 ```
-$ git clone https://github.com/rubrik-devops/rubrik-sdk-for-python
+$ git clone https://github.com/rubrikinc/rubrik-sdk-for-python
 $ cd rubrik-sdk-for-python
 $ python setup.py install
 ```
-## Quick Start
 
-* [Quick Start Guide](https://github.com/rubrikinc/rubrik-sdk-for-python/blob/master/docs/quick-start.md)
-
-## Documentation
-
-* [SDK Documentation](https://rubrik.gitbook.io/rubrik-sdk-for-python/)
-* [Rubrik API Documentation](https://github.com/rubrikinc/api-documentation)
-
-## Example
+# :mag: Example
 
 By default, the Rubrik SDK will attempt to read the the Rubrik Cluster credentials from the following environment variables:
 
@@ -36,8 +28,35 @@ By default, the Rubrik SDK will attempt to read the the Rubrik Cluster credentia
 ```py
 import rubrik_cdm
 rubrik = rubrik_cdm.Connect()
+
+cluster_version = rubrik.cluster_version()
+
+print(cluster_version)
 ```
 
-## Additional Links
+# :blue_book: Documentation 
+
+Here are some resources to get you started! If you find any challenges from this project are not properly documented or are unclear, please [raise an issue](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/new/choose) and let us know! This is a fun, safe environment - don't worry if you're a GitHub newbie! :heart:
+
+* [Quick Start Guide](https://github.com/rubrikinc/rubrik-sdk-for-python/blob/master/docs/quick-start.md)
+* [SDK for Python Documentation](https://rubrik.gitbook.io/rubrik-sdk-for-python/)
+* [Rubrik API Documentation](https://github.com/rubrikinc/api-documentation)
 * [VIDEO: Getting Start with the Rubrik SDK for Python](https://www.youtube.com/watch?v=wd1PxPOd3f8&feature=youtu.be)
 * [BLOG: Hello World! Welcoming Rubrik’s Python SDK](https://www.rubrik.com/blog/introducing-rubrik-python-sdk/)
+
+# :muscle: How You Can Help
+
+We glady welcome contributions from the community. From updating the documentation to adding more functions for Python, all ideas are welcome. Thank you in advance for all of your issues, pull requests, and comments! :star:
+
+* [Contributing Guide](CONTRIBUTING.md)
+* [Code of Conduct](CODE_OF_CONDUCT.md)
+
+# :pushpin: License
+
+* [MIT License](LICENSE)
+
+# :point_right: About Rubrik Build
+
+We encourage all contributors to become members. We aim to grow an active, healthy community of contributors, reviewers, and code owners. Learn more in our [Welcome to the Rubrik Build Community](https://github.com/rubrikinc/welcome-to-rubrik-build) page.
+
+We'd  love to hear from you! Email us: build@rubrik.com :love_letter:
