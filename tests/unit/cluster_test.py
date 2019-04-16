@@ -34,3 +34,59 @@ def test_minimum_installed_cdm_version_not_met(rubrik, monkeypatch):
     # Test to validate the version of CDM does not meet the minimum requirements
     monkeypatch.setattr(rubrik, "cluster_version", patch_cluster_version)
     assert rubrik.minimum_installed_cdm_version("5.2") is False
+
+
+@pytest.mark.unit
+def test_cluster_node_name(rubrik, monkeypatch):
+
+    def patch_internal_cluster_me_node(api_version, api_endpoint, timeout):
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "RVM000A000001",
+                    "brikId": "string",
+                    "status": "string",
+                    "ipAddress": "string",
+                    "supportTunnel": {
+                        "isTunnelEnabled": True,
+                        "port": 0,
+                        "enabledTime": "2019-04-16T14:16:15.573Z",
+                        "lastActivityTime": "2019-04-16T14:16:15.573Z",
+                        "inactivityTimeoutInSeconds": 0
+                    }
+                },
+                {
+                    "id": "RVM000A000002",
+                    "brikId": "string",
+                    "status": "string",
+                    "ipAddress": "string",
+                    "supportTunnel": {
+                        "isTunnelEnabled": True,
+                        "port": 0,
+                        "enabledTime": "2019-04-16T14:16:15.573Z",
+                        "lastActivityTime": "2019-04-16T14:16:15.573Z",
+                        "inactivityTimeoutInSeconds": 0
+                    }
+                },
+                {
+                    "id": "RVM000A000003",
+                    "brikId": "string",
+                    "status": "string",
+                    "ipAddress": "string",
+                    "supportTunnel": {
+                        "isTunnelEnabled": True,
+                        "port": 0,
+                        "enabledTime": "2019-04-16T14:16:15.573Z",
+                        "lastActivityTime": "2019-04-16T14:16:15.573Z",
+                        "inactivityTimeoutInSeconds": 0
+                    }
+                }
+
+            ],
+            "total": 0
+        }
+
+    # Test to validate the version of CDM does not meet the minimum requirements
+    monkeypatch.setattr(rubrik, "get", patch_internal_cluster_me_node)
+    assert rubrik.cluster_node_name() == ["RVM000A000001", "RVM000A000002", "RVM000A000003"]
