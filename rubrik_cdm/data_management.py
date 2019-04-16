@@ -25,12 +25,12 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, timeout=15):
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15):
         """Initiate an on-demand snapshot.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object to take a on-demand snapshot of.
-            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host, ahv})
+            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host, ahv, mssql})
 
         Keyword Arguments:
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
@@ -44,7 +44,7 @@ class Data_Management(_API):
 
         """
 
-        valid_object_type = ['vmware', 'physical_host', 'ahv']
+        valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db']
         valid_host_os_type = ['Linux', 'Windows']
 
         if object_type not in valid_object_type:
@@ -111,6 +111,47 @@ class Data_Management(_API):
                 "on_demand_snapshot: Initiating snapshot for the AHV VM '{}'.".format(object_name))
             api_request = self.post(
                 'internal', '/nutanix/vm/{}/snapshot'.format(vm_id), config, timeout)
+
+            snapshot_status_url = api_request['links'][0]['href']
+
+        elif object_type == 'mssql_db':
+
+            self.log(
+                "on_demand_snapshot: Searching the Rubrik cluster for the MS SQL '{}'.".format(object_name))
+
+            mssql_host = self.object_id(sql_host, 'physical_host', timeout=timeout)
+            mssql_instance = self.get('v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
+
+            for instance in mssql_instance['data']:
+                if instance['name'] == sql_instance:
+                    sql_db_id = instance['id']
+
+            mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_db_id), timeout)
+
+            for db in mssql_db['data']:
+                if db['name'] == sql_db:
+                    mssql_id = db['id']
+
+            if sla_name == 'current':
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(object_name))
+
+                mssql_summary = self.get(
+                    'v1', '/mssql/db/{}'.format(mssql_id), timeout)
+                sla_id = mssql_summary['effectiveSlaDomainId']
+
+            elif sla_name != 'current':
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+            config = {}
+            config['slaId'] = sla_id
+
+            self.log(
+                "on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(object_name))
+            api_request = self.post(
+                'v1', '/mssql/db/{}/snapshot'.format(mssql_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -181,7 +222,10 @@ class Data_Management(_API):
             'physical_host',
             'fileset_template',
             'managed_volume',
-            'ahv']
+            'ahv',
+            'mssql_db',
+            'mssql_instance'
+        ]
 
         if object_type not in valid_object_type:
             sys.exit("Error: The object_id() object_type argument must be one of the following: {}.".format(
@@ -202,8 +246,10 @@ class Data_Management(_API):
             object_summary_api_endpoint = '/vmware/host?primary_cluster_id=local'
         elif object_type == 'physical_host':
             object_summary_api_version = 'v1'
-            object_summary_api_endpoint = '/host?primary_cluster_id=local&hostname={}'.format(
-                object_name)
+            if self.minimum_installed_cdm_version(5.0, timeout) is True:
+                object_summary_api_endpoint = '/host?primary_cluster_id=local&name={}'.format(object_name)
+            else:
+                object_summary_api_endpoint = '/host?primary_cluster_id=local&hostname={}'.format(object_name)
         elif object_type == 'fileset_template':
             if host_os is None:
                 sys.exit("Error: You must provide the Fileset Tempalte OS type.")
@@ -220,6 +266,15 @@ class Data_Management(_API):
             object_summary_api_version = 'internal'
             object_summary_api_endpoint = '/nutanix/vm?primary_cluster_id=local&is_relic=false&name={}'.format(
                 object_name)
+        elif object_type == 'mssql_db':
+            object_summary_api_version = 'v1'
+            object_summary_api_endpoint = '/mssql/db?primary_cluster_id=local&is_relic=false&instance_id={}'.format(
+                object_name)
+        elif object_type == 'mssql_instance':
+            object_summary_api_version = 'v1'
+            object_summary_api_endpoint = '/mssql/instance?primary_cluster_id=local&root_id={}'.format(
+                object_name)
+            print(object_summary_api_endpoint)
         elif object_type == 'aws_native':
             object_summary_api_version = 'internal'
             object_summary_api_endpoint = '/aws/account?name={}'.format(
@@ -240,13 +295,14 @@ class Data_Management(_API):
             object_ids = []
             # Define the "object name" to search for
             if object_type == 'physical_host':
-                name_value = 'hostname'
-            else:
-                name_value = 'name'
+                if self.minimum_installed_cdm_version(5.0, timeout):
+                    name_value = 'name'
+                else:
+                    name_value = 'hostname'
 
-            for item in api_request['data']:
-                if item[name_value] == object_name:
-                    object_ids.append(item['id'])
+                for item in api_request['data']:
+                    if item[name_value] == object_name:
+                        object_ids.append(item['id'])
 
             if len(object_ids) > 1:
                 sys.exit(
