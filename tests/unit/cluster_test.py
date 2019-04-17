@@ -1,7 +1,6 @@
 import pytest
 from rubrik_cdm.exceptions import InvalidParameterException
 from rubrik_cdm import Connect
-from unittest.mock import patch
 
 
 def test_cluster_version(rubrik, mocker):
