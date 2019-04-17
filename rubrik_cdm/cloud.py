@@ -18,12 +18,7 @@ This module contains the Rubrik SDK Cloud class.
 import os
 import re
 from .api import Api
-<<<<<<< HEAD
-from .exceptions import InvalidParameterException
-=======
 from .exceptions import InvalidParameterException, CDMVersionException
->>>>>>> devel
-
 
 class Cloud(Api):
     """This class contains methods for the managment of Cloud related functionality on the Rubrik cluster."""
