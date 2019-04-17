@@ -433,13 +433,11 @@ class Cluster(Api):
         if isinstance(search_domain, list) is False:
             raise InvalidParameterException("The 'server_ip' argument must be a list")
 
-        self.log(
-            "cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
-        current_dns_search_domains = self.get(
-            "internal", "/cluster/me/dns_search_domain", timeout=timeout)
+        self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
+        current_dns_search_domains = self.get("internal", "/cluster/me/dns_search_domain", timeout=timeout)
 
-        if sorted(current_dns_search_domains["data"]) == sorted(search_domain):
-            return "No change required. The Rubrik cluster is already configured with the provided DNS servers."
+        if sorted(current_dns_search_domains) == sorted(search_domain):
+            return "No change required. The Rubrik cluster is already configured with the provided DNS Search Domains."
 
         return self.post("internal", "/cluster/me/dns_search_domain", search_domain, timeout)
 
