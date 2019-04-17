@@ -2,7 +2,7 @@
 
 Enable CloudOn for an exsiting AWS S3 archival location.
 ```py
-def azure_cloudon(archive_name, container, storage_account_name, application_id, application_key,
+def azure_cloudon(archive_name, container, storage_account_name, application_id, application_key, tenant_id, region, virtual_network_id, subnet_name, security_group_id, timeout=30)
 ```
 
 ## Arguments

@@ -40,7 +40,6 @@
 * [azure_cloudon](azure_cloudon.md)
 * [azure_cloudout](azure_cloudout.md)
 * [update_aws_native_account](update_aws_native_account.md)
-* [update_aws_s3_cloudout](update_aws_s3_cloudout.md)
 
 ### Data Management Functions
 * [assign_sla](assign_sla.md)

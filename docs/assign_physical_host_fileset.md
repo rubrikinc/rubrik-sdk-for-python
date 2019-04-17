@@ -2,7 +2,7 @@
 
 Assign a Fileset to a Linux or Windows machine. If you have multiple Filesets with identical names, you will need to populate the Filesets properties (i.e this functions keyword arguments) to find a specific match. Filesets with identical names and properties are not supported.
 ```py
-def assign_physical_host_fileset(hostname, fileset_name, operating_system, sla_name, include=None,
+def assign_physical_host_fileset(hostname, fileset_name, operating_system, sla_name, include=None, exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30)
 ```
 
 ## Arguments

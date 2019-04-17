@@ -2,7 +2,7 @@
 
 Create a Fileset for a Linux or Windows machine.
 ```py
-def create_physical_fileset(name, operating_system, include, exclude, exclude_exception,
+def create_physical_fileset(name, operating_system, include, exclude, exclude_exception, follow_network_shares=False, backup_hidden_folders=False, timeout=15)
 ```
 
 ## Arguments

@@ -2,7 +2,7 @@
 
 The Rubrik cluster uses email to send all notifications to local Rubrik cluster user accounts that have the Admin role. To do this the Rubrik cluster transfers the email messages to an SMTP server for delivery. This function will configure the Rubrik cluster with account information for the SMTP server to permit the Rubrik cluster to use the SMTP server for sending outgoing email.
 ```py
-def configure_smtp_settings(hostname, port, from_email, smtp_username,
+def configure_smtp_settings(hostname, port, from_email, smtp_username, smtp_password, encryption="NONE", timeout=15)
 ```
 
 ## Arguments

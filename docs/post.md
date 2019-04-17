@@ -2,7 +2,7 @@
 
 Send a POST request to the provided Rubrik API endpoint.
 ```py
-def post(api_version, api_endpoint, config,
+def post(api_version, api_endpoint, config, timeout=15, authentication=True)
 ```
 
 ## Arguments
