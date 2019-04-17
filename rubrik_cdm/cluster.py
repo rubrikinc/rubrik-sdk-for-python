@@ -328,7 +328,7 @@ class Cluster(Api):
 
             if current_syslog_config == config:
                 return "No change required. The Rubrik cluster is already configured to use the syslog server '{}' on port '{}' using the '{}' protocol.".format(
-                    syslog_hostname, port, protocol)
+                    syslog_ip, port, protocol)
 
             self.log("cluster_syslog: Clearing the existing syslog configuration.")
             self.delete("internal", "/syslog/1")
