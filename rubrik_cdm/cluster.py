@@ -469,8 +469,7 @@ class Cluster(Api):
             raise InvalidParameterException("cluster_smtp_settings() encryption argument must be one of the following: {}.".format(
                 valid_encryption))
 
-        self.log(
-            "cluster_smtp_settings: Determing the current SMTP settings on the Rubrik cluster.")
+        self.log("cluster_smtp_settings: Determing the current SMTP settings on the Rubrik cluster.")
         current_smtp_settings = self.get("internal", "/smtp_instance", timeout=timeout)
 
         config = {}
@@ -512,18 +511,16 @@ class Cluster(Api):
             dict -- When wait_for_completion is True, the full API response of the job status
         """
 
-        self.log(
-            "refresh_vcenter: Searching the Rubrik cluster for the provided vCenter Server.")
+        self.log("refresh_vcenter: Searching the Rubrik cluster for the provided vCenter Server.")
         vcenter_id = self.object_id(vcenter_ip, "vcenter", timeout=timeout)
 
         self.log("refresh_vcenter: Refresh vCenter.")
-
         api_request = self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
 
         if wait_for_completion:
             return self.job_status(api_request["links"][0]["href"])
 
-        return self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
+        return api_request
 
     def create_user(self, username, password, first_name=None, last_name=None,
                     email_address=None, contact_number=None, timeout=15):
@@ -579,12 +576,12 @@ class Cluster(Api):
             dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
         """
 
-        if float(self.cluster_version(timeout)[:3]) < 5.0:
+        if self.minimum_installed_cdm_version(5.0) is False:
             raise CDMVersionException(5.0)
 
         self.log("read_only_authorization: Searching for the current users on the Rubrik cluster")
         current_users = self.get("internal", "/user?username={}".format(username), timeout=timeout)
-        if len(current_users) < 0:
+        if len(current_users) < 1:
             raise InvalidParameterException(
                 "The user '{}' does not exsit on the Rubrik cluster.".format(username))
 
