@@ -184,6 +184,8 @@ class Cloud(_API):
         if current_archive_name == None:
             sys.exit("Error: `current_archive_name` has not been provided.")
 
+        update_config = None
+
         self.log("update_aws_s3_cloudout: Searching the Rubrik cluster for S3 archival locations named {}.".format(current_archive_name))
         archives_on_cluster = self.get('internal', '/archive/object_store', timeout=timeout)
 
