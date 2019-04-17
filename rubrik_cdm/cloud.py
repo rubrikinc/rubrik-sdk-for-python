@@ -19,6 +19,7 @@ import sys
 import os
 import re
 from .api import Api
+from .exceptions import InvalidParameterException
 
 _API = Api
 
@@ -182,7 +183,7 @@ class Cloud(_API):
             'onezone_ia']
 
         if current_archive_name == None:
-            sys.exit("Error: `current_archive_name` has not been provided.")
+            raise InvalidParameterException("Error: `current_archive_name` has not been provided.")
 
         update_config = None
 
@@ -202,7 +203,7 @@ class Cloud(_API):
                 archive_id = archive['id']
         
         if update_config is None:
-            sys.exit("Error: No S3 archival location with name '{}' exists.".format(current_archive_name))
+            raise InvalidParameterException("Error: No S3 archival location with name '{}' exists.".format(current_archive_name))
         
         if new_archive_name:
             update_config['name'] = new_archive_name
@@ -216,7 +217,7 @@ class Cloud(_API):
         if storage_class and storage_class in valid_storage_classes:
             update_config['storageClass'] = storage_class.upper()
         elif storage_class and storage_class not in valid_storage_classes:
-            sys.exit('Error: The `storage_class` must be None or one of the following: {}'.format(valid_storage_classes))
+           raise InvalidParameterException('Error: The `storage_class` must be None or one of the following: {}'.format(valid_storage_classes))
 
         self.log("update_aws_s3_cloudout: Updating the AWS S3 archive location named {}.".format(current_archive_name))
         return self.patch('internal', '/archive/object_store/{}'.format(archive_id), update_config, timeout)
