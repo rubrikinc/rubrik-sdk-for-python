@@ -181,6 +181,7 @@ class Data_Management(_API):
             'physical_host',
             'fileset_template',
             'managed_volume',
+            'vcenter',
             'ahv']
 
         if object_type not in valid_object_type:
