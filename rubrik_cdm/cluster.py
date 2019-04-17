@@ -170,10 +170,8 @@ class Cluster(Api):
             tuple -- The full API response for `POST /v1/vmware/vcenter` and the job status URL which can be used to monitor progress of the adding the vCenter to the Rubrik cluster. (api_response, job_status_url)
         """
 
-        self.log(
-            "add_vcenter: Searching the Rubrik cluster for the vCenter '{}'.".format(vcenter_ip))
-        current_vcenter = self.get(
-            "v1", "/vmware/vcenter?primary_cluster_id=local", timeout=timeout)
+        self.log("add_vcenter: Searching the Rubrik cluster for the vCenter '{}'.".format(vcenter_ip))
+        current_vcenter = self.get("v1", "/vmware/vcenter?primary_cluster_id=local", timeout=timeout)
 
         for vcenter in current_vcenter["data"]:
             if vcenter["hostname"] == vcenter_ip:
@@ -191,8 +189,7 @@ class Cluster(Api):
         if ca_certificate is not None:
             config["caCerts"] = ca_certificate
 
-        self.log(
-            "add_vcenter: Adding vCenter '{}' to the Rubrik cluster.".format(vcenter_ip))
+        self.log("add_vcenter: Adding vCenter '{}' to the Rubrik cluster.".format(vcenter_ip))
         add_vcenter = self.post("v1", "/vmware/vcenter", config, timeout)
 
         return add_vcenter, add_vcenter['links'][0]['href']

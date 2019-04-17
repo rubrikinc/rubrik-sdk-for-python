@@ -172,9 +172,9 @@ def test_end_user_authorization_invalid_end_user(rubrik, mocker):
         rubrik.end_user_authorization("object_name", "end_user", "vmware")
 
 
-def test_end_user_authorization_idempotence(rubrik, mocker, monkeypatch):
+def test_end_user_authorization_idempotence(rubrik, mocker):
 
-    def patch_object_id(api_version, api_endpoint, timeout):
+    def patch_object_id():
         return "VirtualMachine:::e6a7e6f1-6050-1ee33-9ba6-8e284e2801de-vm-38297"
 
     def patch_internal_user_username():
@@ -226,7 +226,8 @@ def test_end_user_authorization_idempotence(rubrik, mocker, monkeypatch):
             "total": 0
         }
 
-    monkeypatch.setattr(rubrik, "object_id", patch_object_id)
+    object_id_patch = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True)
+    object_id_patch.return_value = patch_object_id()
 
     get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
     get_patch.side_effect = [patch_internal_user_username(), patch_internal_authorization_role_end_user_principals()]
@@ -235,9 +236,9 @@ def test_end_user_authorization_idempotence(rubrik, mocker, monkeypatch):
         == 'No change required. The End User "end_user" is already authorized to interact with the "object_name" VM.'
 
 
-def test_end_user_authorization(rubrik, mocker, monkeypatch):
+def test_end_user_authorization(rubrik, mocker):
 
-    def patch_object_id(api_version, api_endpoint, timeout):
+    def patch_object_id():
         return "VirtualMachine:::e6a7e6f1-6050-1ee33-9ba6-8e284e2801de-vm-38297"
 
     def patch_internal_user_username():
@@ -312,7 +313,8 @@ def test_end_user_authorization(rubrik, mocker, monkeypatch):
             "total": 1
         }
 
-    monkeypatch.setattr(rubrik, "object_id", patch_object_id)
+    object_id_patch = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True)
+    object_id_patch.return_value = patch_object_id()
 
     get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
     get_patch.side_effect = [patch_internal_user_username(), patch_internal_authorization_role_end_user_principals()]
@@ -346,8 +348,59 @@ def test_add_vcenter_idempotence(rubrik, mocker):
             "total": 1
         }
 
-    get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
-    get_patch.return_value = patch_vmware_vcenter_primary_cluster_id()
+    get_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    get_get.return_value = patch_vmware_vcenter_primary_cluster_id()
 
     assert rubrik.add_vcenter("vCenter-Hostname", "vcenter_username", "vcenter_password") == \
         "No change required. The vCenter 'vCenter-Hostname' has already been added to the Rubrik cluster."
+
+
+def test_add_vcenter(rubrik, mocker):
+
+    def patch_vmware_vcenter_primary_cluster_id():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "caCerts": "string",
+                    "configuredSlaDomainId": "string",
+                    "id": "string",
+                    "name": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "hostname": "string",
+                    "username": "string",
+                    "conflictResolutionAuthz": "AllowAutoConflictResolution",
+                    "configuredSlaDomainPolarisManagedId": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    def patch_vmware_vcenter():
+        return {
+            "id": "string",
+            "status": "string",
+            "progress": 0,
+            "startTime": "2019-04-17T02:46:12.097Z",
+            "endTime": "2019-04-17T02:46:12.097Z",
+            "nodeId": "string",
+            "error": {
+                "message": "string"
+            },
+            "links": [
+                {
+                    "href": "www.example.com",
+                    "rel": "string"
+                }
+            ]
+        }
+
+    get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    get_patch.return_value = patch_vmware_vcenter_primary_cluster_id()
+
+    get_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    get_post.return_value = patch_vmware_vcenter()
+
+    assert rubrik.add_vcenter("vCenter-Hostname", "vcenter_username", "vcenter_password") == \
+        (patch_vmware_vcenter(), "www.example.com")
