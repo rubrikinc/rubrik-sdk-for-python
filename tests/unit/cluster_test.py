@@ -1,46 +1,45 @@
 import pytest
 from rubrik_cdm.exceptions import InvalidParameterException
+from rubrik_cdm import Connect
+from unittest.mock import patch
 
 
-@pytest.mark.unit
-def test_cluster_version(rubrik, monkeypatch):
+def test_cluster_version(rubrik, mocker):
 
-    # Result of self.get('v1', '/cluster/me/version', timeout=timeout)
-    def patch_get_v1_cluster_me_version(api_version, api_endpoint, timeout):
+    def patch_get_v1_cluster_me_version():
         return {'version': '5.0.1-1280'}
 
-    # Monkey match rubrik.cluster_version to equal the patch_cluster_version() result
-    monkeypatch.setattr(rubrik, "get", patch_get_v1_cluster_me_version)
+    get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    get_patch.return_value = patch_get_v1_cluster_me_version()
 
     assert rubrik.cluster_version() == "5.0.1-1280"
 
 
-@pytest.mark.unit
-def test_minimum_installed_cdm_version_met(rubrik, monkeypatch):
+def test_minimum_installed_cdm_version_met(rubrik, mocker):
 
-    def patch_cluster_version(timeout):
+    def patch_cluster_version():
         return "5.0.1-1280"
 
-    # Test to validate the version of CDM meets the minimum requirements
-    monkeypatch.setattr(rubrik, "cluster_version", patch_cluster_version)
+    cluster_version_patch = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True)
+    cluster_version_patch.return_value = patch_cluster_version()
+
     assert rubrik.minimum_installed_cdm_version("5.0") is True
 
 
-@pytest.mark.unit
-def test_minimum_installed_cdm_version_not_met(rubrik, monkeypatch):
+def test_minimum_installed_cdm_version_not_met(rubrik, mocker):
 
-    def patch_cluster_version(timeout):
+    def patch_cluster_version():
         return "5.0.1-1280"
 
-    # Test to validate the version of CDM does not meet the minimum requirements
-    monkeypatch.setattr(rubrik, "cluster_version", patch_cluster_version)
+    cluster_version_patch = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True)
+    cluster_version_patch.return_value = patch_cluster_version()
+
     assert rubrik.minimum_installed_cdm_version("5.2") is False
 
 
-@pytest.mark.unit
-def test_cluster_node_ip(rubrik, monkeypatch):
+def test_cluster_node_ip(rubrik, mocker):
 
-    def patch_internal_cluster_me_node(api_version, api_endpoint, timeout):
+    def patch_internal_cluster_me_node():
         return {
             "hasMore": True,
             "data": [
@@ -88,15 +87,15 @@ def test_cluster_node_ip(rubrik, monkeypatch):
             "total": 0
         }
 
-    # Test to validate the version of CDM does not meet the minimum requirements
-    monkeypatch.setattr(rubrik, "get", patch_internal_cluster_me_node)
+    get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    get_patch.return_value = patch_internal_cluster_me_node()
+
     assert rubrik.cluster_node_ip() == ["192.168.1.1", "192.168.1.2", "192.168.1.3"]
 
 
-@pytest.mark.unit
-def test_cluster_node_name(rubrik, monkeypatch):
+def test_cluster_node_name(rubrik, mocker):
 
-    def patch_internal_cluster_me_node(api_version, api_endpoint, timeout):
+    def patch_internal_cluster_me_node():
         return {
             "hasMore": True,
             "data": [
@@ -144,30 +143,183 @@ def test_cluster_node_name(rubrik, monkeypatch):
             "total": 0
         }
 
-    # Test to validate the version of CDM does not meet the minimum requirements
-    monkeypatch.setattr(rubrik, "get", patch_internal_cluster_me_node)
+    get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    get_patch.return_value = patch_internal_cluster_me_node()
+
     assert rubrik.cluster_node_name() == ["RVM000A000001", "RVM000A000002", "RVM000A000003"]
 
 
-@pytest.mark.unit
-def test_end_user_authorization_invalid_object(rubrik, monkeypatch):
+def test_end_user_authorization_invalid_object(rubrik):
 
     with pytest.raises(InvalidParameterException):
-        rubrik.end_user_authorization("object_name", "end_user", "not_a_supported_object_type", 1)
-        # assert rubrik.end_user_authorization() == ["RVM000A000001", "RVM000A000002", "RVM000A000003"]
+        rubrik.end_user_authorization("object_name", "end_user", "not_a_supported_object_type")
 
 
-@pytest.mark.unit
-def test_end_user_authorization_invalid_end_user(rubrik, monkeypatch):
+def test_end_user_authorization_invalid_end_user(rubrik, mocker):
+
+    def patch_object_id():
+        return "VirtualMachine:::e6a7e6f1-6050-1ee33-9ba6-8e284e2801de-vm-38297"
+
+    def patch_internal_user_username():
+        return []
+
+    object_patch = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True)
+    object_patch.return_value = patch_object_id()
+
+    get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    get_patch.return_value = patch_internal_user_username()
+
+    with pytest.raises(InvalidParameterException):
+        rubrik.end_user_authorization("object_name", "end_user", "vmware")
+
+
+def test_end_user_authorization_idempotence(rubrik, mocker, monkeypatch):
 
     def patch_object_id(api_version, api_endpoint, timeout):
         return "VirtualMachine:::e6a7e6f1-6050-1ee33-9ba6-8e284e2801de-vm-38297"
 
-    def patch_internal_user_username(api_version, api_endpoint, timeout):
-        return []
+    def patch_internal_user_username():
+        return [
+            {
+                "id": "User:::119283ae-22ea-13f3-bfe2-9387cdf1d4a",
+                "authDomainId": "string",
+                "username": "string",
+                "firstName": "string",
+                "lastName": "string",
+                "emailAddress": "string",
+                "contactNumber": "string",
+                "mfaServerId": "string"
+            }
+        ]
+
+    def patch_internal_authorization_role_end_user_principals():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "principal": "string",
+                    "privileges": {
+                        "destructiveRestore": [
+                            "string"
+                        ],
+                        "restore": [
+                            "VirtualMachine:::e6a7e6f1-6050-1ee33-9ba6-8e284e2801de-vm-38297"
+                        ],
+                        "onDemandSnapshot": [
+                            "string"
+                        ],
+                        "restoreWithoutDownload": [
+                            "string"
+                        ],
+                        "viewEvent": [
+                            "string"
+                        ],
+                        "provisionOnInfra": [
+                            "string"
+                        ],
+                        "viewReport": [
+                            "string"
+                        ]
+                    },
+                    "organizationId": "string"
+                }
+            ],
+            "total": 0
+        }
 
     monkeypatch.setattr(rubrik, "object_id", patch_object_id)
-    monkeypatch.setattr(rubrik, "get", patch_internal_user_username)
 
-    with pytest.raises(InvalidParameterException):
-        rubrik.end_user_authorization("object_name", "end_user", "not_a_supported_object_type", 1)
+    get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    get_patch.side_effect = [patch_internal_user_username(), patch_internal_authorization_role_end_user_principals()]
+
+    assert rubrik.end_user_authorization("object_name", "end_user", "vmware", 1) \
+        == 'No change required. The End User "end_user" is already authorized to interact with the "object_name" VM.'
+
+
+def test_end_user_authorization(rubrik, mocker, monkeypatch):
+
+    def patch_object_id(api_version, api_endpoint, timeout):
+        return "VirtualMachine:::e6a7e6f1-6050-1ee33-9ba6-8e284e2801de-vm-38297"
+
+    def patch_internal_user_username():
+        return [
+            {
+                "id": "User:::119283ae-22ea-13f3-bfe2-9387cdf1d4a",
+                "authDomainId": "string",
+                "username": "string",
+                "firstName": "string",
+                "lastName": "string",
+                "emailAddress": "string",
+                "contactNumber": "string",
+                "mfaServerId": "string"
+            }
+        ]
+
+    def patch_internal_authorization_role_end_user_principals():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "principal": "string",
+                    "privileges": {
+                        "destructiveRestore": [
+                            "string"
+                        ],
+                        "restore": [
+                            "VirtualMachine:::e6a7e6r3-6050-1ee33-9ba6-8e284e2801de"
+                        ],
+                        "onDemandSnapshot": [
+                            "string"
+                        ],
+                        "restoreWithoutDownload": [
+                            "string"
+                        ],
+                        "viewEvent": [
+                            "string"
+                        ],
+                        "provisionOnInfra": [
+                            "string"
+                        ],
+                        "viewReport": [
+                            "string"
+                        ]
+                    },
+                    "organizationId": "string"
+                }
+            ],
+            "total": 0
+        }
+
+    def patch_internal_authorization_role_end_user():
+        return {
+            "hasMore": False,
+            "data": [
+                {
+                    "principal": "User:::119283ae-22ea-13f3-bfe2-9387cdf1d4a",
+                    "privileges": {
+                        "destructiveRestore": [],
+                        "restore": [
+                            "VirtualMachine:::e6a7e6f1-6050-1ee33-9ba6-8e284e2801de-vm-38297-not-present"
+                        ],
+                        "onDemandSnapshot": [],
+                        "restoreWithoutDownload": [],
+                        "viewEvent": [],
+                        "provisionOnInfra": [],
+                        "viewReport": []
+                    },
+                    "organizationId": "Organization:::05e3ee0b-5ec1-e33b-88a5-d916855aff5f"
+                }
+            ],
+            "total": 1
+        }
+
+    monkeypatch.setattr(rubrik, "object_id", patch_object_id)
+
+    get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    get_patch.side_effect = [patch_internal_user_username(), patch_internal_authorization_role_end_user_principals()]
+
+    post_patch = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    post_patch.return_value = patch_internal_authorization_role_end_user()
+
+    assert rubrik.end_user_authorization("object_name", "end_user", "vmware") \
+        == patch_internal_authorization_role_end_user()

@@ -26,3 +26,8 @@ class APICallException(RubrikException):
 class InvalidParameterException(RubrikException):
     """Base class for exceptions in this module."""
     pass
+
+
+class TypeException(RubrikException):
+    """Base class for exceptions in this module."""
+    pass

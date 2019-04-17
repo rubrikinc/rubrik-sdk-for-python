@@ -232,8 +232,7 @@ class Data_Management(_API):
 
         self.log("object_id: Getting the object id for the {} object '{}'.".format(
             object_type, object_name))
-        api_request = self.get(object_summary_api_version,
-                               object_summary_api_endpoint, timeout=timeout)
+        api_request = self.get(object_summary_api_version, object_summary_api_endpoint, timeout=timeout)
 
         if api_request['total'] == 0:
             raise InvalidParameterException("The {} object '{}' was not found on the Rubrik cluster.".format(
@@ -246,6 +245,8 @@ class Data_Management(_API):
                     name_value = 'name'
                 else:
                     name_value = 'hostname'
+
+            name_value = 'name'
 
             for item in api_request['data']:
                 if item[name_value] == object_name:
