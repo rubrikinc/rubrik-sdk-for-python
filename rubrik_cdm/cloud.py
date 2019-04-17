@@ -39,7 +39,7 @@ class Cloud(_API):
             kms_master_key_id {str} -- The AWS KMS master key ID that will be used to encrypt the archive data. If set to the default `None` keyword argument, you will need to provide a `rsa_key` instead. (default: {None})
             rsa_key {str} -- The RSA key that will be used to encrypt the archive data. A key can be generated through `openssl genrsa -out rubrik_encryption_key.pem 2048`. If set to the default `None` keyword argument, you will need to provide a `kms_master_key_id` instead.  (default: {None})
             archive_name {str} -- The name of the archive location used in the Rubrik GUI. If set to 'default' the following naming convention will be used: "AWS:S3:`aws_bucket_name`" (default: {'default'})
-            storage_class {str} -- The AWS storage class you wish to use. (default: {'standard'}) (choices: {standard, 'standard_ia, reduced_redundancy})
+            storage_class {str} -- The AWS storage class you wish to use. (default: {'standard'}) (choices: {standard, 'standard_ia, reduced_redundancy, onezone_ia})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {180})
 
 
@@ -71,7 +71,8 @@ class Cloud(_API):
         valid_storage_classes = [
             'standard',
             'standard_ia',
-            'reduced_redundancy']
+            'reduced_redundancy',
+            'onezone_ia']
 
         if re.compile(r'[_\/*?%.:|<>]').findall(aws_bucket_name):
             sys.exit(
@@ -156,6 +157,67 @@ class Cloud(_API):
 
         self.log("aws_s3_cloudout: Creating the AWS S3 archive location.")
         return self.post('internal', '/archive/object_store', config, timeout)
+
+    def update_aws_s3_cloudout(self, current_archive_name, new_archive_name=None, aws_access_key=None, aws_secret_key=None, storage_class=None, timeout=180):
+        """Update an AWS S3 archival location on the Rubrik cluster.
+
+        Keyword Arguments:
+            current_archive_name {str} -- The name of the current archive to be updated.
+            new_archive_name {str} -- Desired name for the updated archive location. If set to default `None` keyword argument, no change will be made. (default: {None})
+            aws_access_key {str} -- The access key of a AWS account with the required permissions. If set to the default `None` keyword argument, no change will be made. (default: {None})
+            aws_secret_key {str} -- The secret key of a AWS account with the required permissions. If set to the default `None` keyword argument, no change will be made. (default: {None})
+            storage_class {str} -- The AWS storage class you wish to use. If set to the default `None` keyword argument, no change will be made. (default: {None}) (choices: {standard, 'standard_ia, reduced_redundancy, onezone_ia})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {180})
+
+
+        Returns:
+            str -- No change required. The '`name`' archival location is already configured on the Rubrik cluster.
+            dict -- The full API response for `POST /internal/archive/object_store'`.
+        """
+
+        valid_storage_classes = [
+            'standard',
+            'standard_ia',
+            'reduced_redundancy',
+            'onezone_ia']
+
+        if current_archive_name == None:
+            sys.exit("Error: `current_archive_name` has not been provided.")
+
+        self.log("update_aws_s3_cloudout: Searching the Rubrik cluster for S3 archival locations named {}.".format(current_archive_name))
+        archives_on_cluster = self.get('internal', '/archive/object_store', timeout=timeout)
+
+        for archive in archives_on_cluster['data']:
+            # If present, remove the Cloud On Configuration for comparison
+            archive_definition = archive['definition']
+            try:
+                del archive_definition['defaultComputeNetworkConfig']
+            except BaseException:
+                pass
+            if archive['definition']['objectStoreType'] == 'S3' and archive['definition']['name'] == current_archive_name:
+                self.log("update_aws_s3_cloudout: Found matching S3 archival location named {}.".format(current_archive_name))
+                update_config = archive_definition
+                archive_id = archive['id']
+        
+        if update_config is None:
+            sys.exit("Error: No S3 archival location with name '{}' exists.".format(current_archive_name))
+        
+        if new_archive_name:
+            update_config['name'] = new_archive_name
+
+        if aws_access_key:
+            update_config['accessKey'] = aws_access_key
+
+        if aws_secret_key:
+            update_config['secretKey'] = aws_secret_key
+
+        if storage_class and storage_class in valid_storage_classes:
+            update_config['storageClass'] = storage_class.upper()
+        elif storage_class and storage_class not in valid_storage_classes:
+            sys.exit('Error: The `storage_class` must be None or one of the following: {}'.format(valid_storage_classes))
+
+        self.log("update_aws_s3_cloudout: Updating the AWS S3 archive location named {}.".format(current_archive_name))
+        return self.patch('internal', '/archive/object_store/{}'.format(archive_id), update_config, timeout)
 
     def aws_s3_cloudon(self, archive_name, vpc_id, subnet_id, security_group_id, timeout=30):
         """Enable CloudOn for an exsiting AWS S3 archival location.
