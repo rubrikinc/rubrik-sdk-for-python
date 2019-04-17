@@ -23,7 +23,7 @@ try:
 except ImportError:
     from urllib.parse import quote  # Python 3+
 from random import choice
-from rubrik_cdm.exceptions import APICallException, InvalidParameterException, RubrikException
+from .exceptions import APICallException, InvalidParameterException, RubrikException
 
 
 class Api():
