@@ -322,3 +322,32 @@ def test_end_user_authorization(rubrik, mocker, monkeypatch):
 
     assert rubrik.end_user_authorization("object_name", "end_user", "vmware") \
         == patch_internal_authorization_role_end_user()
+
+
+def test_add_vcenter_idempotence(rubrik, mocker):
+
+    def patch_vmware_vcenter_primary_cluster_id():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "caCerts": "string",
+                    "configuredSlaDomainId": "string",
+                    "id": "string",
+                    "name": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "hostname": "vCenter-Hostname",
+                    "username": "string",
+                    "conflictResolutionAuthz": "AllowAutoConflictResolution",
+                    "configuredSlaDomainPolarisManagedId": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    get_patch = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    get_patch.return_value = patch_vmware_vcenter_primary_cluster_id()
+
+    assert rubrik.add_vcenter("vCenter-Hostname", "vcenter_username", "vcenter_password") == \
+        "No change required. The vCenter 'vCenter-Hostname' has already been added to the Rubrik cluster."
