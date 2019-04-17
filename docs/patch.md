@@ -2,7 +2,7 @@
 
 Send a PATCH request to the provided Rubrik API endpoint.
 ```py
-def patch(api_version, api_endpoint, config, timeout=15, authentication=True)
+def patch(api_version, api_endpoint, config,
 ```
 
 ## Arguments

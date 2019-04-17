@@ -2,7 +2,7 @@
 
 Create a NAS Fileset.
 ```py
-def create_nas_fileset(name, share_type, include, exclude, exclude_exception, follow_network_shares=False, timeout=15)
+def create_nas_fileset(name, share_type, include, exclude,
 ```
 
 ## Arguments

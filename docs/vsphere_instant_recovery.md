@@ -2,7 +2,7 @@
 
 Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 ```py
-def vsphere_instant_recovery(vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15)
+def vsphere_instant_recovery(vm_name, date='latest', time='latest', host='current', remove_network_devices=False,
 ```
 
 ## Arguments

@@ -2,7 +2,7 @@
 
 Issues a bootstrap request to a specified Rubrik cluster
 ```py
-def setup_cluster(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30)
+def setup_cluster(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,
 ```
 
 ## Arguments

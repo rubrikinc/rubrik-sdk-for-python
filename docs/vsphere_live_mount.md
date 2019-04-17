@@ -2,7 +2,7 @@
 
 Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 ```py
-def vsphere_live_mount(vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15)
+def vsphere_live_mount(vm_name, date='latest', time='latest', host='current',
 ```
 
 ## Arguments
