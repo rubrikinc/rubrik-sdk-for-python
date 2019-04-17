@@ -366,7 +366,6 @@ class Cluster(Api):
             node_ip_combined = {}
             for i in range(0, len(node_names)):
                 node_ip_combined[node_names[i]] = interfaces[i]
-            print(node_ip_combined)
         elif isinstance(ips, dict):
             node_ip_combined = ips
         else:
@@ -409,12 +408,10 @@ class Cluster(Api):
         if isinstance(server_ip, list) is False:
             raise InvalidParameterException("The 'server_ip' argument must be a list")
 
-        self.log(
-            "cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
-        current_dns_servers = self.get(
-            "internal", "/cluster/me/dns_nameserver", timeout=timeout)
+        self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
+        current_dns_servers = self.get("internal", "/cluster/me/dns_nameserver", timeout=timeout)
 
-        if sorted(current_dns_servers["data"]) == sorted(server_ip):
+        if sorted(current_dns_servers) == sorted(server_ip):
             return "No change required. The Rubrik cluster is already configured with the provided DNS servers."
 
         return self.post("internal", "/cluster/me/dns_nameserver", server_ip, timeout)
