@@ -8,7 +8,7 @@ def test_cluster_version(rubrik, mocker):
     def mock_get_v1_cluster_me_version():
         return {'version': '5.0.1-1280'}
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_cluster_me_version()
 
     assert rubrik.cluster_version() == "5.0.1-1280"
@@ -19,7 +19,7 @@ def test_minimum_installed_cdm_version_met(rubrik, mocker):
     def mock_self_cluster_version():
         return "5.0.1-1280"
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True)
+    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = mock_self_cluster_version()
 
     assert rubrik.minimum_installed_cdm_version("5.0") is True
@@ -30,7 +30,7 @@ def test_minimum_installed_cdm_version_not_met(rubrik, mocker):
     def mock_self_cluster_version():
         return "5.0.1-1280"
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True)
+    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = mock_self_cluster_version()
 
     assert rubrik.minimum_installed_cdm_version("5.2") is False
@@ -86,7 +86,7 @@ def test_cluster_node_ip(rubrik, mocker):
             "total": 0
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_internal_cluster_me_node()
 
     assert rubrik.cluster_node_ip() == ["192.168.1.1", "192.168.1.2", "192.168.1.3"]
@@ -142,7 +142,7 @@ def test_cluster_node_name(rubrik, mocker):
             "total": 0
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_internal_cluster_me_node()
 
     assert rubrik.cluster_node_name() == ["RVM000A000001", "RVM000A000002", "RVM000A000003"]
@@ -162,10 +162,10 @@ def test_end_user_authorization_invalid_end_user(rubrik, mocker):
     def mock_internal_user_username():
         return []
 
-    mock_object_id = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True)
+    mock_object_id = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True, spec_set=True)
     mock_object_id.return_value = mock_self_object_id
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_internal_user_username()
 
     with pytest.raises(InvalidParameterException):
@@ -226,10 +226,10 @@ def test_end_user_authorization_idempotence(rubrik, mocker):
             "total": 0
         }
 
-    mock_object_id = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True)
+    mock_object_id = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True, spec_set=True)
     mock_object_id.return_value = mock_self_object_id()
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.side_effect = [mock_internal_user_username(), mock_internal_authorization_role_end_user_principals()]
 
     assert rubrik.end_user_authorization("object_name", "end_user", "vmware", 1) \
@@ -313,13 +313,13 @@ def test_end_user_authorization(rubrik, mocker):
             "total": 1
         }
 
-    mock_object_id = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True)
+    mock_object_id = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True, spec_set=True)
     mock_object_id.return_value = mock_self_object_id()
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.side_effect = [mock_internal_user_username(), mock_internal_authorization_role_end_user_principals()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_internal_authorization_role_end_user()
 
     assert rubrik.end_user_authorization("object_name", "end_user", "vmware") \
@@ -348,7 +348,7 @@ def test_add_vcenter_idempotence(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_v1_vmware_vcenter_primary_cluster_id()
 
     assert rubrik.add_vcenter("vCenter-Hostname", "vcenter_username", "vcenter_password") == \
@@ -396,10 +396,10 @@ def test_add_vcenter(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_v1_vmware_vcenter_primary_cluster_id()
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_v1_vmware_vcenter()
 
     assert rubrik.add_vcenter("vCenter-Hostname", "vcenter_username", "vcenter_password") == \
@@ -430,7 +430,7 @@ def test_configure_timezone_idempotence(rubrik, mocker):
             "latestEulaVersion": "string"
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_cluster_me()
 
     assert rubrik.configure_timezone("America/Chicago") \
@@ -471,10 +471,10 @@ def test_configure_timezone(rubrik, mocker):
             "latestEulaVersion": "string"
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_cluster_me()
 
-    mock_patch = mocker.patch('rubrik_cdm.Connect.patch', autospec=True)
+    mock_patch = mocker.patch('rubrik_cdm.Connect.patch', autospec=True, spec_set=True)
     mock_patch.return_value = mock_patch_v1_cluster_me()
 
     assert rubrik.configure_timezone("America/Chicago") == mock_patch_v1_cluster_me()
@@ -508,7 +508,7 @@ def test_configure_syslog_invalid_idempotence(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_syslog()
 
     assert rubrik.configure_syslog("syslog_ip", "TCP") == \
@@ -542,13 +542,13 @@ def test_configure_syslog(rubrik, mocker):
             "id": "string"
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_syslog()
 
-    mock_delete = mocker.patch('rubrik_cdm.Connect.delete', autospec=True)
+    mock_delete = mocker.patch('rubrik_cdm.Connect.delete', autospec=True, spec_set=True)
     mock_delete.return_value = mock_delete_internal_syslog_id()
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_syslog()
 
     assert rubrik.configure_syslog("syslog_ip_new", "TCP") == mock_post_internal_syslog()
@@ -610,7 +610,7 @@ def test_configure_vlan_invalid_number_of_vlans(rubrik, mocker):
             "total": 0
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_internal_cluster_me_node()
 
     with pytest.raises(InvalidParameterException):
@@ -688,10 +688,10 @@ def test_configure_vlan(rubrik, mocker):
     def mock_post_internal_cluster_me_vlan():
         return {'status_code': '204'}
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.side_effect = [mock_internal_cluster_me_node(), mock_internal_cluster_me_vlan()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_cluster_me_vlan()
 
     assert rubrik.configure_vlan("100", "netmask", ["IP_1", "IP_2", "IP_3"]) == mock_post_internal_cluster_me_vlan()
@@ -710,7 +710,7 @@ def test_configure_dns_servers_idempotence(rubrik, mocker):
             "server_1"
         ]
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_cluster_me_dns_nameserver()
 
     assert rubrik.configure_dns_servers(["server_1"]) == \
@@ -728,10 +728,10 @@ def test_configure_dns_servers(rubrik, mocker):
     def mock_post_internal_cluster_me_dns_nameserver():
         return {'status_code': '204'}
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_cluster_me_dns_nameserver()
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_cluster_me_dns_nameserver()
 
     assert rubrik.configure_dns_servers(["server_1"]) == mock_post_internal_cluster_me_dns_nameserver()
@@ -750,7 +750,7 @@ def test_configure_search_domain_idempotence(rubrik, mocker):
             "domain.1",
         ]
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_cluster_me_dns_search_domain()
 
     assert rubrik.configure_search_domain(["domain.1"]) == \
@@ -767,10 +767,10 @@ def test_configure_search_domain(rubrik, mocker):
     def mock_post_internal_cluster_me_dns_search_domain():
         return {'status_code': '204'}
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_cluster_me_dns_search_domain()
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_cluster_me_dns_search_domain()
 
     assert rubrik.configure_search_domain(["domain.1"]) == mock_post_internal_cluster_me_dns_search_domain()
@@ -801,7 +801,7 @@ def test_configure_smtp_settings_idempotence(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_smtp_instance()
 
     assert rubrik.configure_smtp_settings("hostname", "0", "from_email", "smtp_username", "smtp_password", "NONE") == \
@@ -836,10 +836,10 @@ def test_configure_smtp_settings_new(rubrik, mocker):
             "fromEmailId": "string"
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_smtp_instance()
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_smtp_instance()
 
     assert rubrik.configure_smtp_settings("hostname", "0", "from_email", "smtp_username", "smtp_password", "NONE") == \
@@ -874,10 +874,10 @@ def test_configure_smtp_settings_update(rubrik, mocker):
             "fromEmailId": "string"
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_smtp_instance()
 
-    mock_patch = mocker.patch('rubrik_cdm.Connect.patch', autospec=True)
+    mock_patch = mocker.patch('rubrik_cdm.Connect.patch', autospec=True, spec_set=True)
     mock_patch.return_value = mock_patch_internal_smtp_instance_id()
 
     assert rubrik.configure_smtp_settings("hostname", "0", "from_email", "smtp_username", "smtp_password", "NONE") == \
@@ -908,10 +908,10 @@ def test_refresh_vcenter_no_wait(rubrik, mocker):
             ]
         }
 
-    mock_get_object_id = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True)
+    mock_get_object_id = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True, spec_set=True)
     mock_get_object_id.return_value = mock_object_id()
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vmware_vcenter_id_refresh()
 
     assert rubrik.refresh_vcenter("vcenter_ip", False) == mock_post_v1_vmware_vcenter_id_refresh()
@@ -937,10 +937,10 @@ def test_refresh_vcenter_wait_for_completion(rubrik, mocker):
             ]
         }
 
-    mock_get_object_id = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True)
+    mock_get_object_id = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True, spec_set=True)
     mock_get_object_id.return_value = mock_object_id()
 
-    mock_common_api = mocker.patch('rubrik_cdm.Connect._common_api', autospec=True)
+    mock_common_api = mocker.patch('rubrik_cdm.Connect._common_api', autospec=True, spec_set=True)
     mock_common_api.return_value = mock_job_status()
 
     assert rubrik.refresh_vcenter("vcenter_ip", True) == mock_job_status()
@@ -962,7 +962,7 @@ def test_create_user_idempotence(rubrik, mocker):
             }
         ]
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_user()
 
     assert rubrik.create_user("username", "password") == \
@@ -988,10 +988,10 @@ def test_create_user(rubrik, mocker):
             "mfaServerId": "string"
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_user()
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_user()
 
     assert rubrik.create_user("username", "password") == mock_post_internal_user()
@@ -999,7 +999,7 @@ def test_create_user(rubrik, mocker):
 
 def test_read_only_authorization_minimum_installed_cdm_version(rubrik, mocker):
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True)
+    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "4.1.2"
 
     with pytest.raises(CDMVersionException):
@@ -1011,10 +1011,10 @@ def test_read_only_authorization_invalid_user(rubrik, mocker):
     def mock_get_internal_user():
         return []
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True)
+    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0.1"
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_user()
 
     with pytest.raises(InvalidParameterException):
@@ -1054,10 +1054,10 @@ def test_read_only_authorization_idempotence(rubrik, mocker):
             "total": 0
         }
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True)
+    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0.1"
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_internal_user(),
                             mock_get_internal_authorization_role_read_only_admin_principals()]
 
@@ -1115,14 +1115,14 @@ def test_read_only_authorization(rubrik, mocker):
             "total": 1
         }
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True)
+    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0.1"
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_internal_user(),
                             mock_get_internal_authorization_role_read_only_admin_principals()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_authorization_role_read_only_admin()
 
     assert rubrik.read_only_authorization("username") == mock_post_internal_authorization_role_read_only_admin()
