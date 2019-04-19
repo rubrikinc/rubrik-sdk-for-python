@@ -62,14 +62,14 @@ class Api():
         else:
             sys.exit('Error: "authentication" must be either True or False')
 
-        # Create required header for the special case of a bootstrap
-        if api_endpoint == '/cluster/me/bootstrap':
+        # Create required header for the special case of a bootstrap including Host attribute
+        if '/cluster/me/bootstrap' in api_endpoint:
             header = {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Host': '[' + self.ipv6_addr + ']'
             }
-            self.log('Boostrap header: ' + str(header))
+            self.log('Created boostrap header: ' + str(header))
 
         try:
             # Determine which call type is being used and then set the relevant
@@ -79,7 +79,7 @@ class Api():
                 if params is not None:
                     request_url = request_url + "?" + '&'.join("{}={}".format(key, val)
                                                                for (key, val) in params.items())
-                request_url = quote(request_url, '://?=&')
+                request_url = quote(request_url, '://?=&[]')
                 self.log('GET {}'.format(request_url))
                 api_request = requests.get(
                     request_url, verify=False, headers=header, timeout=timeout)

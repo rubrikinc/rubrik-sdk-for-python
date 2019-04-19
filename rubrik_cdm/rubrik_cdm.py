@@ -188,14 +188,13 @@ class Bootstrap(_API):
         self.node_ip = node_ip
         self.log("User Provided Node IP: {}".format(self.node_ip))
 
-        # node_ip = [self.node_ip]
-        # Attempt to resolve the provided address
-        # ip_info = resolve_ipv6(node_ip)
+        # Attempt to resolve and/or obtain scope for supplied address
         try:
             ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET6)
         except socket.gaierror:
             sys.exit(
                 'Error: Could not resolve link-local IPv6 address for cluster or invalid IP.')
+   
         # Extract address from response
         self.ipv6_addr = ip_info[0][4][0]
         # Extract scope from response
@@ -330,26 +329,11 @@ class Bootstrap(_API):
         self.log('status: Getting the status of the Rubrik Cluster bootstrap.')
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(
             request_id)
+        self.log(bootstrap_status_api_endpoint)
         api_request = self.get(
             'internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
 
         return api_request
-
-    def resolve_ipv6(address):
-        """Attempts to resolve IPv6 address for bootstrap, and returns a list of 5-tuples including address and scope
-        See https://docs.python.org/3/library/socket.html#socket.socket for additional info
-
-        Keyword Arguments:
-            address {str} -- FQDN or valid IPv6 address
-
-        Returns:
-            list -- list of 5-tuples including address and scope
-        """
-        try:
-            ipinfo = socket.getaddrinfo(address, 443, socket.AF_INET6)
-            return ipinfo
-        except socket.gaierror:
-            self.log('Error: Could not resolve link-local IPv6 address for cluster or invalid IP.')
 
     @staticmethod
     def log(log_message):
