@@ -183,8 +183,6 @@ class Bootstrap(_API):
         if enable_logging:
             logging.getLogger().setLevel(logging.DEBUG)
 
-        # self.ipv6_addr = ""
-        # self.ipv6_scope = ""
         self.node_ip = node_ip
         self.log("User Provided Node IP: {}".format(self.node_ip))
 
