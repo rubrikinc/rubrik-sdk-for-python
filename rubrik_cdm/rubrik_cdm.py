@@ -183,8 +183,8 @@ class Bootstrap(_API):
         if enable_logging:
             logging.getLogger().setLevel(logging.DEBUG)
 
-        self.ipv6_addr = ""
-        self.ipv6_scope = ""
+        # self.ipv6_addr = ""
+        # self.ipv6_scope = ""
         self.node_ip = node_ip
         self.log("User Provided Node IP: {}".format(self.node_ip))
 
@@ -200,7 +200,7 @@ class Bootstrap(_API):
         # Extract scope from response
         self.ipv6_scope = str(ip_info[0][4][3])
         # Properly format link-local IPv6 address with scope
-        self.node_ip = '[' + self.ipv6_addr + '%' + self.ipv6_scope + ']'
+        self.node_ip = ('[{}%{}]').format(self.ipv6_addr, self.ipv6_scope)
         self.log("Resolved Node IP: {}".format(self.node_ip))
 
     def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,

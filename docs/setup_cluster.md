@@ -5,6 +5,25 @@ Issues a bootstrap request to a specified Rubrik cluster
 def setup_cluster(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30)
 ```
 
+## Useage
+
+By default, an un-bootstrapped Rubrik Cluster will respond to [multicast DNS](https://en.wikipedia.org/wiki/Multicast_DNS) (mDNS) queries directed to `[node_serial_number].local`. It is important that mDNS resolution is working properly on system the SDK is called from if you wish to supply `[node_serial_number].local` to the `bootstrap()` funtion as the `node_ip` value. Note that `bootstrap()` is used instead of `connect()` in when bootstrapping. 
+
+mDNS resolution is not well supported on Windows, but it can be accomplished by installing the Apple Bonjour service, included with [iTunes](https://www.apple.com/itunes/) or [Bonjour Print Services](https://support.apple.com/kb/DL999?locale=en_US). mDNS is better supported on Linux and macOS, but you should verify working name resolution before using this function. If mDNS name resolution is not working on linux, you can determine the link-local IPv6 address of the un-bootstraped node(s) with the command `avahi-resolve --name [node_serial_number].local` or by using the [python-zeroconf](https://pypi.org/project/zeroconf/) library. The link-local IPv6 address can then be passed to the `bootstrap()` function instead of the mDNS name.
+
+## Troubleshooting
+
+Enable logging by passing `enable_logging=True` to the boostrap function. Example:
+
+```
+bootstrap = rubrik_cdm.Bootstrap(node_ip, enable_logging=True)
+```
+
+mDNS name resolution can be verified on systemd-based linux systems using the command `systemd-resolve --status`. The resulting command should display `MulticastDNS setting: resolve` or ``MulticastDNS setting: yes`. Additional information can be found at the links below.
+
+* https://wiki.archlinux.org/index.php/Systemd-resolved
+* https://wiki.archlinux.org/index.php/Systemd-networkd
+
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
@@ -16,7 +35,7 @@ def setup_cluster(cluster_name, admin_email, admin_password, management_gateway,
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| node_config  | dict  | The Node Name and IP formatted as a dictionary.  |         |    None     |
+| node_config  | dict  | The Node IPs formatted as a dictionary.  |         |    None     |
 | enable_encryption  | bool  | Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False.  |         |    True     |
 | dns_search_domains  | str  | The search domain that the DNS Service will use to resolve hostnames that are not fully qualified.  |         |    None     |
 | dns_nameservers  | list  | IPv4 addresses of DNS servers.  |         |    [8.8.8.8]     |
@@ -32,18 +51,20 @@ def setup_cluster(cluster_name, admin_email, admin_password, management_gateway,
 ```py
 import rubrik_cdm
 
-node_ip = '172.22.13.66'
+node_ip = 'VRVW4217DB4E3.local'
+# Alternatively:
+# node_ip = 'fe80::250:56ff:fe97:31cf'
 bootstrap = rubrik_cdm.Bootstrap(node_ip)
 
 node_config = {}
-node_config['1'] = node_ip
+node_config['1'] = '172.22.7.23'
 node_config['2'] = '172.22.18.241'
 node_config['3'] = '172.22.9.68'
 node_config['4'] = '172.22.12.154'
 
 cluster_name = 'Python-SDK'
 admin_email = 'Drew.Russell@rubrik.com'
-admin_password = 'RubrikGoForward'
+admin_password = 'A c0mpl3x p@ssw0rd!'
 management_gateway = '172.22.0.1'
 management_subnet_mask = '255.255.240.0'
 
