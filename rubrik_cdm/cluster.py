@@ -170,10 +170,8 @@ class Cluster(Api):
             tuple -- The full API response for `POST /v1/vmware/vcenter` and the job status URL which can be used to monitor progress of the adding the vCenter to the Rubrik cluster. (api_response, job_status_url)
         """
 
-        self.log(
-            "add_vcenter: Searching the Rubrik cluster for the vCenter '{}'.".format(vcenter_ip))
-        current_vcenter = self.get(
-            "v1", "/vmware/vcenter?primary_cluster_id=local", timeout=timeout)
+        self.log("add_vcenter: Searching the Rubrik cluster for the vCenter '{}'.".format(vcenter_ip))
+        current_vcenter = self.get("v1", "/vmware/vcenter?primary_cluster_id=local", timeout=timeout)
 
         for vcenter in current_vcenter["data"]:
             if vcenter["hostname"] == vcenter_ip:
@@ -191,8 +189,7 @@ class Cluster(Api):
         if ca_certificate is not None:
             config["caCerts"] = ca_certificate
 
-        self.log(
-            "add_vcenter: Adding vCenter '{}' to the Rubrik cluster.".format(vcenter_ip))
+        self.log("add_vcenter: Adding vCenter '{}' to the Rubrik cluster.".format(vcenter_ip))
         add_vcenter = self.post("v1", "/vmware/vcenter", config, timeout)
 
         return add_vcenter, add_vcenter['links'][0]['href']
@@ -331,7 +328,7 @@ class Cluster(Api):
 
             if current_syslog_config == config:
                 return "No change required. The Rubrik cluster is already configured to use the syslog server '{}' on port '{}' using the '{}' protocol.".format(
-                    syslog_hostname, port, protocol)
+                    syslog_ip, port, protocol)
 
             self.log("cluster_syslog: Clearing the existing syslog configuration.")
             self.delete("internal", "/syslog/1")
@@ -369,7 +366,6 @@ class Cluster(Api):
             node_ip_combined = {}
             for i in range(0, len(node_names)):
                 node_ip_combined[node_names[i]] = interfaces[i]
-            print(node_ip_combined)
         elif isinstance(ips, dict):
             node_ip_combined = ips
         else:
@@ -412,12 +408,10 @@ class Cluster(Api):
         if isinstance(server_ip, list) is False:
             raise InvalidParameterException("The 'server_ip' argument must be a list")
 
-        self.log(
-            "cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
-        current_dns_servers = self.get(
-            "internal", "/cluster/me/dns_nameserver", timeout=timeout)
+        self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
+        current_dns_servers = self.get("internal", "/cluster/me/dns_nameserver", timeout=timeout)
 
-        if sorted(current_dns_servers["data"]) == sorted(server_ip):
+        if sorted(current_dns_servers) == sorted(server_ip):
             return "No change required. The Rubrik cluster is already configured with the provided DNS servers."
 
         return self.post("internal", "/cluster/me/dns_nameserver", server_ip, timeout)
@@ -439,13 +433,11 @@ class Cluster(Api):
         if isinstance(search_domain, list) is False:
             raise InvalidParameterException("The 'server_ip' argument must be a list")
 
-        self.log(
-            "cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
-        current_dns_search_domains = self.get(
-            "internal", "/cluster/me/dns_search_domain", timeout=timeout)
+        self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
+        current_dns_search_domains = self.get("internal", "/cluster/me/dns_search_domain", timeout=timeout)
 
-        if sorted(current_dns_search_domains["data"]) == sorted(search_domain):
-            return "No change required. The Rubrik cluster is already configured with the provided DNS servers."
+        if sorted(current_dns_search_domains) == sorted(search_domain):
+            return "No change required. The Rubrik cluster is already configured with the provided DNS Search Domains."
 
         return self.post("internal", "/cluster/me/dns_search_domain", search_domain, timeout)
 
@@ -477,8 +469,7 @@ class Cluster(Api):
             raise InvalidParameterException("cluster_smtp_settings() encryption argument must be one of the following: {}.".format(
                 valid_encryption))
 
-        self.log(
-            "cluster_smtp_settings: Determing the current SMTP settings on the Rubrik cluster.")
+        self.log("cluster_smtp_settings: Determing the current SMTP settings on the Rubrik cluster.")
         current_smtp_settings = self.get("internal", "/smtp_instance", timeout=timeout)
 
         config = {}
@@ -520,18 +511,16 @@ class Cluster(Api):
             dict -- When wait_for_completion is True, the full API response of the job status
         """
 
-        self.log(
-            "refresh_vcenter: Searching the Rubrik cluster for the provided vCenter Server.")
+        self.log("refresh_vcenter: Searching the Rubrik cluster for the provided vCenter Server.")
         vcenter_id = self.object_id(vcenter_ip, "vcenter", timeout=timeout)
 
         self.log("refresh_vcenter: Refresh vCenter.")
-
         api_request = self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
 
         if wait_for_completion:
             return self.job_status(api_request["links"][0]["href"])
 
-        return self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
+        return api_request
 
     def create_user(self, username, password, first_name=None, last_name=None,
                     email_address=None, contact_number=None, timeout=15):
@@ -587,12 +576,12 @@ class Cluster(Api):
             dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
         """
 
-        if float(self.cluster_version(timeout)[:3]) < 5.0:
+        if self.minimum_installed_cdm_version(5.0) is False:
             raise CDMVersionException(5.0)
 
         self.log("read_only_authorization: Searching for the current users on the Rubrik cluster")
         current_users = self.get("internal", "/user?username={}".format(username), timeout=timeout)
-        if len(current_users) < 0:
+        if len(current_users) < 1:
             raise InvalidParameterException(
                 "The user '{}' does not exsit on the Rubrik cluster.".format(username))
 
