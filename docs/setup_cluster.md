@@ -19,7 +19,7 @@ Enable logging by passing `enable_logging=True` to the bootstrap function. Examp
 bootstrap = rubrik_cdm.Bootstrap(node_ip, enable_logging=True)
 ```
 
-mDNS name resolution can be verified on systemd-based linux systems using the command `systemd-resolve --status`. The resulting command should display `MulticastDNS setting: resolve` or ``MulticastDNS setting: yes`. Additional information can be found at the links below.
+mDNS name resolution can be verified on systemd-based linux systems using the command `systemd-resolve --status`. The resulting command should display `MulticastDNS setting: resolve` or `MulticastDNS setting: yes`. Additional information can be found at the links below.
 
 * https://wiki.archlinux.org/index.php/Systemd-resolved
 * https://wiki.archlinux.org/index.php/Systemd-networkd
