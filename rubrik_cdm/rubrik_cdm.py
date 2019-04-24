@@ -185,21 +185,34 @@ class Bootstrap(_API):
 
         self.node_ip = node_ip
         self.log("User Provided Node IP: {}".format(self.node_ip))
-
-        # Attempt to resolve and/or obtain scope for supplied address
+        node_resolution = False
+        
         try:
+            # Attempt to resolve and/or obtain scope for supplied address
             ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET6)
+            # Extract address from response
+            self.ipv6_addr = ip_info[0][4][0]
+            # Extract scope from response
+            self.ipv6_scope = str(ip_info[0][4][3])
+            # Properly format link-local IPv6 address with scope
+            self.node_ip = ('[{}%{}]').format(self.ipv6_addr, self.ipv6_scope)
+            self.log("Resolved Node IP: {}".format(self.node_ip))
+            node_resolution = True
         except socket.gaierror:
-            sys.exit(
-                'Error: Could not resolve link-local IPv6 address for cluster or invalid IP.')
-   
-        # Extract address from response
-        self.ipv6_addr = ip_info[0][4][0]
-        # Extract scope from response
-        self.ipv6_scope = str(ip_info[0][4][3])
-        # Properly format link-local IPv6 address with scope
-        self.node_ip = ('[{}%{}]').format(self.ipv6_addr, self.ipv6_scope)
-        self.log("Resolved Node IP: {}".format(self.node_ip))
+            self.log('Could not resolve link-local IPv6 address for cluster.')
+
+        # IPv6 resolution failed, verify IPv4
+        if ipv6_addr != "":
+            ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
+            self.log("Resolved Node IP: {}".format(self.node_ip))
+            node_resolution = True
+        except socket.gaierror:
+            self.log('Could not resolve IPv4 address for cluster.')
+
+        if node_resolution = False:
+                sys.exit(
+                    "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
+                )
 
     def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,
                       enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):

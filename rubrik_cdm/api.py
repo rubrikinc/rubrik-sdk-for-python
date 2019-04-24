@@ -64,12 +64,20 @@ class Api():
 
         # Create required header for the special case of a bootstrap including Host attribute
         if '/cluster/me/bootstrap' in api_endpoint:
-            header = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Host': '[' + self.ipv6_addr + ']'
-            }
-            self.log('Created boostrap header: ' + str(header))
+            if ipv6_addr != "":
+                header = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Host': '[' + self.ipv6_addr + ']'
+                }
+                self.log('Created boostrap header: ' + str(header))
+            else:
+                header = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Host': self.node_ip
+                }
+                self.log('Created boostrap header: ' + str(header))
 
         try:
             # Determine which call type is being used and then set the relevant
