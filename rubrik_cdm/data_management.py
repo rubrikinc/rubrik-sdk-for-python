@@ -756,3 +756,40 @@ class Data_Management(_API):
                         sla, object_type))
 
             return vm_name_id
+            
+    def get_all_hosts(self, timeout=60):
+        """Gets information regarding every Rubrik host in the cluster.
+        
+        Returns:
+            dict -- The result of the API call `GET /host`
+        """
+        self.log('get_all_hosts: getting a list of all hosts in the Rubrik cluster.')
+        current_hosts = self.get('v1', '/host', timeout=timeout)
+
+        return current_hosts
+
+    def register_agent(self, name=None,vm_id=None, timeout=60):
+        """
+        Finds the VM requested and registers it.
+
+        Arguments:
+            name {str} -- The name of the rubrik host that you want to register. This will get the VM ID that is then used to register the host.
+            vm_id {str} -- The ID of the rubrik host. This is used if you do not input a name
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The result of the call for `/vmware/vm/*/register_agent`
+        """
+        if name is None and vm_id is None:
+            return "There is no name or vm_id that has been input. Please enter one."
+        model = []
+        self.log('register_agent: getting VMs that match input name, if not using VMID')
+        if name is not None:
+            vminfo = self.get('v1','/vmware/vm?name={}'.format(name),timeout=timeout)
+            for vms in vminfo['data']:
+                if name.lower() == vms['name'].lower():
+                    vm_id = vms['id']
+        self.log('register_agent: registering the agent')
+        registration = self.post('v1','/vmware/vm/{}/register_agent'.format(vm_id), model, timeout=timeout)
+
+        return registration

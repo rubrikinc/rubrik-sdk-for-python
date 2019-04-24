@@ -602,3 +602,19 @@ class Cluster(Api):
 
         self.log("read_only_authorization: Granting read-only privilages to user '{}'.".format(username))
         return self.post("internal", "/authorization/role/read_only_admin", config, timeout)
+
+    def get_all_vcenters(self, timeout=60):
+        """Thie function will call the cluster API and get a list of all hosts within the cluster.
+        
+        Arguments:
+            None
+        Returns:
+            dict -- the full API response for `GET /vmware/vcenter`
+        
+        """
+
+        self.log('get_all_vcenters: getting a list of all hosts in the Rubrik cluster.')
+        try:
+            current_hosts = self.get('v1', '/vmware/vcenter', timeout=timeout)  
+        except SystemExit as error:
+            return error
