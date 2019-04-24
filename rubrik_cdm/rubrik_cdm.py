@@ -186,6 +186,7 @@ class Bootstrap(_API):
         self.node_ip = node_ip
         self.log("User Provided Node IP: {}".format(self.node_ip))
         node_resolution = False
+        self.ipv6_addr = ""
         
         try:
             # Attempt to resolve and/or obtain scope for supplied address
@@ -210,15 +211,14 @@ class Bootstrap(_API):
             self.log('Could not resolve link-local IPv6 address for cluster.')
 
         # IPv6 resolution failed, verify IPv4
-        '''
-        if self.ipv6_addr != "":
+        if node_resolution == False:
             try:
                 ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
                 self.log("Resolved Node IP: {}".format(self.node_ip))
                 node_resolution = True
             except socket.gaierror:
                 self.log('Could not resolve IPv4 address for cluster.')
-        '''
+
 
         if node_resolution == False:
                 sys.exit(

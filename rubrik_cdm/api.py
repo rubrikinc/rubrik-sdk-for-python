@@ -25,7 +25,6 @@ except ImportError:
     from urllib.parse import quote  # Python 3+
 from random import choice
 
-
 class Api():
     """This class contains the base API methods that can be called independently or internally in standalone functions."""
 
@@ -75,7 +74,7 @@ class Api():
                 header = {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'Host': self.node_ip
+                    #'Host': self.node_ip
                 }
                 self.log('Created boostrap header: ' + str(header))
 
