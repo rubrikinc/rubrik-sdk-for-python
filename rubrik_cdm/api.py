@@ -64,7 +64,7 @@ class Api():
 
         # Create required header for the special case of a bootstrap including Host attribute
         if '/cluster/me/bootstrap' in api_endpoint:
-            if ipv6_addr != "":
+            if self.ipv6_addr != "":
                 header = {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',

@@ -192,24 +192,35 @@ class Bootstrap(_API):
             ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET6)
             # Extract address from response
             self.ipv6_addr = ip_info[0][4][0]
-            # Extract scope from response
-            self.ipv6_scope = str(ip_info[0][4][3])
-            # Properly format link-local IPv6 address with scope
-            self.node_ip = ('[{}%{}]').format(self.ipv6_addr, self.ipv6_scope)
-            self.log("Resolved Node IP: {}".format(self.node_ip))
-            node_resolution = True
+            if '::ffff' in self.ipv6_addr:
+                self.ipv6_addr = ""
+                self.log('Resolved IPv4 address')
+                #ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
+            else:
+                self.log('Resolved IPv6 address')
+                # Extract scope from response
+                self.ipv6_scope = str(ip_info[0][4][3])
+                # Properly format link-local IPv6 address with scope
+                self.node_ip = ('[{}%{}]').format(self.ipv6_addr, self.ipv6_scope)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
         except socket.gaierror:
             self.log('Could not resolve link-local IPv6 address for cluster.')
 
         # IPv6 resolution failed, verify IPv4
-        if ipv6_addr != "":
-            ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
-            self.log("Resolved Node IP: {}".format(self.node_ip))
-            node_resolution = True
-        except socket.gaierror:
-            self.log('Could not resolve IPv4 address for cluster.')
+        '''
+        if self.ipv6_addr != "":
+            try:
+                ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
+            except socket.gaierror:
+                self.log('Could not resolve IPv4 address for cluster.')
+        '''
 
-        if node_resolution = False:
+        if node_resolution == False:
                 sys.exit(
                     "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
                 )
