@@ -74,7 +74,6 @@ class Api():
                 header = {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    #'Host': self.node_ip
                 }
                 self.log('Created boostrap header: ' + str(header))
 
