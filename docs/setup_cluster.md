@@ -95,7 +95,7 @@ node_ip = '172.22.7.23'
 bootstrap = rubrik_cdm.Bootstrap(node_ip)
 
 node_config = {}
-node_config['1'] = '172.22.7.23'
+node_config['1'] = node_ip
 node_config['2'] = '172.22.18.241'
 node_config['3'] = '172.22.9.68'
 node_config['4'] = '172.22.12.154'
