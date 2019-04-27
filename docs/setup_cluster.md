@@ -15,7 +15,7 @@ By default, an un-bootstrapped Rubrik Cluster will respond to [multicast DNS](ht
 | --- |
 
 
-mDNS resolution is not well supported on Windows, but it can be accomplished by installing the Apple Bonjour service, included with [iTunes](https://www.apple.com/itunes/) or [Bonjour Print Services](https://support.apple.com/kb/DL999?locale=en_US). mDNS is better supported on Linux and macOS, but you should verify working name resolution before using this function. If mDNS name resolution is not working on linux, you can determine the link-local IPv6 address of the un-bootstrapped node(s) with the command `avahi-resolve --name [node_serial_number].local` or by using the [python-zeroconf](https://pypi.org/project/zeroconf/) library. The link-local IPv6 address can then be passed to the `bootstrap()` function instead of the mDNS name.
+mDNS resolution is not well supported on Windows, but it can be accomplished by installing the Apple Bonjour service, included with [iTunes](https://www.apple.com/itunes/) or [Bonjour Print Services](https://support.apple.com/kb/DL999?locale=en_US). mDNS is better supported on Linux and macOS, but you should verify working name resolution before using this function. If mDNS name resolution is not working on Linux, you can determine the link-local IPv6 address of the un-bootstrapped node(s) with the command `avahi-resolve --name [node_serial_number].local` or by using the [python-zeroconf](https://pypi.org/project/zeroconf/) library. The link-local IPv6 address can then be passed to the `Bootstrap()` function instead of the mDNS name.
 
 ### Cloud cluster
 
@@ -29,7 +29,7 @@ Enable logging by passing `enable_logging=True` to the bootstrap function. Examp
 bootstrap = rubrik_cdm.Bootstrap(node_ip, enable_logging=True)
 ```
 
-mDNS name resolution can be verified on systemd-based linux systems using the command `systemd-resolve --status`. The resulting command should display `MulticastDNS setting: resolve` or `MulticastDNS setting: yes`. Additional information can be found at the links below.
+mDNS name resolution can be verified on systemd-based Linux systems using the command `systemd-resolve --status`. The resulting command should display `MulticastDNS setting: resolve` or `MulticastDNS setting: yes`. Additional information can be found at the links below.
 
 * https://wiki.archlinux.org/index.php/Systemd-resolved
 * https://wiki.archlinux.org/index.php/Systemd-networkd
