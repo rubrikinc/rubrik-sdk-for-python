@@ -9,7 +9,11 @@ def setup_cluster(cluster_name, admin_email, admin_password, management_gateway,
 
 ### Physical Cluster or Virtual Appliance
 
-By default, an un-bootstrapped Rubrik Cluster will respond to [multicast DNS](https://en.wikipedia.org/wiki/Multicast_DNS) (mDNS) queries directed to `[node_serial_number].local`. It is important that mDNS resolution is working properly on system the SDK is called from if you wish to supply `[node_serial_number].local` to the `bootstrap()` function as the `node_ip` value. Note that `bootstrap()` is used instead of `connect()` when bootstrapping. 
+By default, an un-bootstrapped Rubrik Cluster will respond to [multicast DNS](https://en.wikipedia.org/wiki/Multicast_DNS) (mDNS) queries directed to `[node_serial_number].local`. It is important that mDNS resolution is working properly on system the SDK is called from if you wish to supply `[node_serial_number].local` to the `bootstrap()` function as the `node_ip` value. 
+
+| Note: When bootstrapping a cluster, `Bootstrap()` is used instead of `Connect()` to establish the connection to the cluster. |
+| --- |
+
 
 mDNS resolution is not well supported on Windows, but it can be accomplished by installing the Apple Bonjour service, included with [iTunes](https://www.apple.com/itunes/) or [Bonjour Print Services](https://support.apple.com/kb/DL999?locale=en_US). mDNS is better supported on Linux and macOS, but you should verify working name resolution before using this function. If mDNS name resolution is not working on linux, you can determine the link-local IPv6 address of the un-bootstrapped node(s) with the command `avahi-resolve --name [node_serial_number].local` or by using the [python-zeroconf](https://pypi.org/project/zeroconf/) library. The link-local IPv6 address can then be passed to the `bootstrap()` function instead of the mDNS name.
 
