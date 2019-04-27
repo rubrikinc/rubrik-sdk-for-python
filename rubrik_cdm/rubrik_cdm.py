@@ -22,6 +22,7 @@ import os
 import logging
 from random import choice
 import time
+import socket
 
 from .api import Api
 from .cluster import Cluster
@@ -179,14 +180,50 @@ class Bootstrap(_API):
     def __init__(self, node_ip, enable_logging=False):
         """Constructor for the Bootstrap class which is used to initialize the class variables.
         """
-
         if enable_logging:
             logging.getLogger().setLevel(logging.DEBUG)
 
         self.node_ip = node_ip
         self.log("User Provided Node IP: {}".format(self.node_ip))
+        node_resolution = False
+        self.ipv6_addr = ""
+        
+        try:
+            # Attempt to resolve and/or obtain scope for supplied address
+            ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET6)
+            # Extract address from response
+            self.ipv6_addr = ip_info[0][4][0]
+            if '::ffff' in self.ipv6_addr:
+                self.ipv6_addr = ""
+                self.log('Resolved IPv4 address')
+                #ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
+            else:
+                self.log('Resolved IPv6 address')
+                # Extract scope from response
+                self.ipv6_scope = str(ip_info[0][4][3])
+                # Properly format link-local IPv6 address with scope
+                self.node_ip = ('[{}%{}]').format(self.ipv6_addr, self.ipv6_scope)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
+        except socket.gaierror:
+            self.log('Could not resolve link-local IPv6 address for cluster.')
 
-        node_ip = [self.node_ip]
+        # IPv6 resolution failed, verify IPv4
+        if node_resolution == False:
+            try:
+                ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
+            except socket.gaierror:
+                self.log('Could not resolve IPv4 address for cluster.')
+
+
+        if node_resolution == False:
+                sys.exit(
+                    "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
+                )
 
     def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,
                       enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
@@ -314,6 +351,7 @@ class Bootstrap(_API):
         self.log('status: Getting the status of the Rubrik Cluster bootstrap.')
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(
             request_id)
+        self.log(bootstrap_status_api_endpoint)
         api_request = self.get(
             'internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
 
