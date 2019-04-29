@@ -112,3 +112,4 @@ venv.bak/
 dev.py
 .vscode/launch.json
 .vscode/settings.json
+rubrik_cdm/.vscode/settings.json
