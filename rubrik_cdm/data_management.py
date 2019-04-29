@@ -16,7 +16,7 @@ This module contains the Rubrik SDK Data_Management class.
 """
 import re
 from .api import Api
-from rubrik_cdm.exceptions import CDMVersionException, InvalidParameterException
+from .exceptions import CDMVersionException, InvalidParameterException
 
 
 _API = Api
@@ -222,10 +222,10 @@ class Data_Management(_API):
             'physical_host',
             'fileset_template',
             'managed_volume',
-            'ahv',
             'mssql_db',
             'mssql_instance'
-        ]
+            'vcenter',
+            'ahv']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -285,8 +285,7 @@ class Data_Management(_API):
 
         self.log("object_id: Getting the object id for the {} object '{}'.".format(
             object_type, object_name))
-        api_request = self.get(object_summary_api_version,
-                               object_summary_api_endpoint, timeout=timeout)
+        api_request = self.get(object_summary_api_version, object_summary_api_endpoint, timeout=timeout)
 
         if api_request['total'] == 0:
             raise InvalidParameterException("The {} object '{}' was not found on the Rubrik cluster.".format(
@@ -303,6 +302,12 @@ class Data_Management(_API):
                 for item in api_request['data']:
                     if item[name_value] == object_name:
                         object_ids.append(item['id'])
+            
+            name_value = 'name'
+
+            for item in api_request['data']:
+                if item[name_value] == object_name:
+                    object_ids.append(item['id'])
 
             if len(object_ids) > 1:
                 raise InvalidParameterException(
