@@ -20,6 +20,7 @@ import re
 from .api import Api
 from .exceptions import InvalidParameterException, CDMVersionException
 
+
 class Cloud(Api):
     """This class contains methods for the managment of Cloud related functionality on the Rubrik cluster."""
 
@@ -60,8 +61,8 @@ class Cloud(Api):
             'eu-west-2',
             'eu-west-3',
             'sa-east-1',
-            'us-gov-west-1'
-            'us-west-1'
+            'us-gov-west-1',
+            'us-west-1',
             'us-east-1',
             'us-east-2',
             'us-west-2']
@@ -111,9 +112,7 @@ class Cloud(Api):
             raise InvalidParameterException(
                 "Both `kms_master_key_id` or `rsa_key` have been populated. You may only use one.")
 
-        self.log("aws_s3_cloudout: Searching the Rubrik cluster for archival locations.")
-        archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout=timeout)
+        archives_on_cluster = self.get('internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['name'] = archive_name
@@ -143,8 +142,12 @@ class Cloud(Api):
             archive_definition = archive['definition']
             try:
                 del archive_definition['defaultComputeNetworkConfig']
+                del archive_definition['isComputeEnabled']
+                del archive_definition['isConsolidationEnabled']
+                del archive_definition['encryptionType']
             except BaseException:
                 pass
+
             if archive_definition == redacted_archive_definition:
                 return "No change required. The '{}' archival location is already configured on the Rubrik cluster.".format(
                     archive_name)
@@ -155,7 +158,8 @@ class Cloud(Api):
         self.log("aws_s3_cloudout: Creating the AWS S3 archive location.")
         return self.post('internal', '/archive/object_store', config, timeout)
 
-    def update_aws_s3_cloudout(self, current_archive_name, new_archive_name=None, aws_access_key=None, aws_secret_key=None, storage_class=None, timeout=180):
+    def update_aws_s3_cloudout(self, current_archive_name, new_archive_name=None,
+                               aws_access_key=None, aws_secret_key=None, storage_class=None, timeout=180):
         """Update an AWS S3 archival location on the Rubrik cluster.
 
         Keyword Arguments:
@@ -178,12 +182,13 @@ class Cloud(Api):
             'reduced_redundancy',
             'onezone_ia']
 
-        if current_archive_name == None:
+        if current_archive_name is None:
             raise InvalidParameterException("Error: `current_archive_name` has not been provided.")
 
         update_config = None
 
-        self.log("update_aws_s3_cloudout: Searching the Rubrik cluster for S3 archival locations named {}.".format(current_archive_name))
+        self.log("update_aws_s3_cloudout: Searching the Rubrik cluster for S3 archival locations named {}.".format(
+            current_archive_name))
         archives_on_cluster = self.get('internal', '/archive/object_store', timeout=timeout)
 
         for archive in archives_on_cluster['data']:
@@ -197,10 +202,11 @@ class Cloud(Api):
                 self.log("update_aws_s3_cloudout: Found matching S3 archival location named {}.".format(current_archive_name))
                 update_config = archive_definition
                 archive_id = archive['id']
-        
+
         if update_config is None:
-            raise InvalidParameterException("Error: No S3 archival location with name '{}' exists.".format(current_archive_name))
-        
+            raise InvalidParameterException(
+                "Error: No S3 archival location with name '{}' exists.".format(current_archive_name))
+
         if new_archive_name:
             update_config['name'] = new_archive_name
 
@@ -213,7 +219,8 @@ class Cloud(Api):
         if storage_class and storage_class in valid_storage_classes:
             update_config['storageClass'] = storage_class.upper()
         elif storage_class and storage_class not in valid_storage_classes:
-           raise InvalidParameterException('Error: The `storage_class` must be None or one of the following: {}'.format(valid_storage_classes))
+            raise InvalidParameterException(
+                'Error: The `storage_class` must be None or one of the following: {}'.format(valid_storage_classes))
 
         self.log("update_aws_s3_cloudout: Updating the AWS S3 archive location named {}.".format(current_archive_name))
         return self.patch('internal', '/archive/object_store/{}'.format(archive_id), update_config, timeout)
