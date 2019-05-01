@@ -140,13 +140,12 @@ class Cloud(Api):
         for archive in archives_on_cluster['data']:
             # If present, remove the Cloud On Configuration for comparison
             archive_definition = archive['definition']
-            try:
-                del archive_definition['defaultComputeNetworkConfig']
-                del archive_definition['isComputeEnabled']
-                del archive_definition['isConsolidationEnabled']
-                del archive_definition['encryptionType']
-            except BaseException:
-                pass
+            for value in ["encryptionType", "defaultComputeNetworkConfig",
+                          "isComputeEnabled", "isConsolidationEnabled"]:
+                try:
+                    del archive_definition[value]
+                except BaseException:
+                    pass
 
             if archive_definition == redacted_archive_definition:
                 return "No change required. The '{}' archival location is already configured on the Rubrik cluster.".format(
@@ -343,7 +342,8 @@ class Cloud(Api):
             if archive_definition == redacted_archive_definition:
                 return "No change required. The '{}' archival location is already configured on the Rubrik cluster.".format(
                     archive_name)
-            if archive['definition']['objectStoreType'] == 'Azure' and archive['definition']['name'] == archive_name:
+
+            if archive_definition['objectStoreType'] == 'Azure' and archive_definition['name'] == archive_name:
                 raise InvalidParameterException("Archival location with name '{}' already exists. Please enter a unique `name`.".format(
                     archive_name))
 
