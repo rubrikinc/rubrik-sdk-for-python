@@ -183,7 +183,7 @@ class Cloud(Api):
             'onezone_ia']
 
         if current_archive_name is None:
-            raise InvalidParameterException("Error: `current_archive_name` has not been provided.")
+            raise InvalidParameterException("`current_archive_name` has not been provided.")
 
         update_config = None
 
@@ -220,7 +220,7 @@ class Cloud(Api):
             update_config['storageClass'] = storage_class.upper()
         elif storage_class and storage_class not in valid_storage_classes:
             raise InvalidParameterException(
-                'Error: The `storage_class` must be None or one of the following: {}'.format(valid_storage_classes))
+                'The `storage_class` must be None or one of the following: {}'.format(valid_storage_classes))
 
         self.log("update_aws_s3_cloudout: Updating the AWS S3 archive location named {}.".format(current_archive_name))
         return self.patch('internal', '/archive/object_store/{}'.format(archive_id), update_config, timeout)
