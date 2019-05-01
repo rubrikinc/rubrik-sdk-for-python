@@ -482,3 +482,108 @@ def test_azure_cloudout_invalid_instance_type(rubrik):
     error_message = error.value.args[0]
 
     assert error_message == "The `instance_type` argument must be one of the following: ['default', 'china', 'germany', 'government']"
+
+
+def test_azure_cloudout_idempotence(rubrik, mocker):
+
+    def mock_get_internal_archive_object_store():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "polarisManagedId": "string",
+                    "definition": {
+                        "objectStoreType": "Azure",
+                        "name": "archive_name",
+                        "accessKey": "storage_account_name",
+                        "bucket": "container",
+                        "isComputeEnabled": True,
+                        "isConsolidationEnabled": True,
+                        "encryptionType": "RSA_KEY_ENCRYPTION"
+                    },
+
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_archive_object_store()
+
+    assert rubrik.azure_cloudout("container", "azure_access_key", "storage_account_name", "rsa_key", "archive_name") \
+        == "No change required. The 'archive_name' archival location is already configured on the Rubrik cluster."
+
+
+def test_azure_cloudout_invalid_archive_name(rubrik, mocker):
+
+    def mock_get_internal_archive_object_store():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "polarisManagedId": "string",
+                    "definition": {
+                        "objectStoreType": "Azure",
+                        "name": "archive_name",
+                        "accessKey": "string",
+                        "bucket": "string",
+                        "isComputeEnabled": True,
+                        "isConsolidationEnabled": True,
+                        "encryptionType": "RSA_KEY_ENCRYPTION"
+                    },
+
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_archive_object_store()
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.azure_cloudout("container", "azure_access_key", "storage_account_name", "rsa_key", "archive_name")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "Archival location with name 'archive_name' already exists. Please enter a unique `name`."
+
+
+def test_azure_cloudout(rubrik, mocker):
+
+    def mock_get_internal_archive_object_store():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "polarisManagedId": "string",
+                    "definition": {
+                        "objectStoreType": "Azure",
+                        "name": "string",
+                        "accessKey": "storage_account_name",
+                        "bucket": "container",
+                        "isComputeEnabled": True,
+                        "isConsolidationEnabled": True,
+                        "encryptionType": "RSA_KEY_ENCRYPTION"
+                    },
+
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_patch_internal_archive_object_store():
+        return {
+            "jobInstanceId": "string"
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_archive_object_store()
+
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post.return_value = mock_patch_internal_archive_object_store()
+
+    assert rubrik.azure_cloudout("container", "azure_access_key", "storage_account_name",
+                                 "rsa_key", "archive_name") == mock_patch_internal_archive_object_store()
