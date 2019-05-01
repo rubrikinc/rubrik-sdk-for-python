@@ -182,6 +182,10 @@ class Cloud(Api):
             'reduced_redundancy',
             'onezone_ia']
 
+        if storage_class is not None and storage_class not in valid_storage_classes:
+            raise InvalidParameterException(
+                'The `storage_class` must be one of the following: {}'.format(valid_storage_classes))
+
         update_config = None
 
         self.log("update_aws_s3_cloudout: Searching the Rubrik cluster for S3 archival locations named {}.".format(
@@ -202,7 +206,7 @@ class Cloud(Api):
 
         if update_config is None:
             raise InvalidParameterException(
-                "Error: No S3 archival location with name '{}' exists.".format(current_archive_name))
+                "No S3 archival location with name '{}' exists.".format(current_archive_name))
 
         if new_archive_name:
             update_config['name'] = new_archive_name
@@ -213,11 +217,8 @@ class Cloud(Api):
         if aws_secret_key:
             update_config['secretKey'] = aws_secret_key
 
-        if storage_class and storage_class in valid_storage_classes:
+        if storage_class:
             update_config['storageClass'] = storage_class.upper()
-        elif storage_class and storage_class not in valid_storage_classes:
-            raise InvalidParameterException(
-                'The `storage_class` must be None or one of the following: {}'.format(valid_storage_classes))
 
         self.log("update_aws_s3_cloudout: Updating the AWS S3 archive location named {}.".format(current_archive_name))
         return self.patch('internal', '/archive/object_store/{}'.format(archive_id), update_config, timeout)
@@ -239,10 +240,8 @@ class Cloud(Api):
             dict -- The full API response for `PATCH /internal/archive/object_store/{id}`.
         """
 
-        self.log(
-            "aws_s3_cloudon: Searching the Rubrik cluster for archival locations.")
-        archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout=timeout)
+        self.log("aws_s3_cloudon: Searching the Rubrik cluster for archival locations.")
+        archives_on_cluster = self.get('internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['defaultComputeNetworkConfig'] = {}
@@ -259,10 +258,8 @@ class Cloud(Api):
                         return "No change required. The '{}' archival location is already configured for CloudOn.".format(
                             archive_name)
                 except KeyError:
-                    self.log(
-                        "aws_s3_cloudon: Updating the archive location for CloudOn.")
-                    return self.patch(
-                        'internal', "/archive/object_store/{}".format(archive['id']), config, timeout)
+                    self.log("aws_s3_cloudon: Updating the archive location for CloudOn.")
+                    return self.patch('internal', "/archive/object_store/{}".format(archive['id']), config, timeout)
 
         raise InvalidParameterException(
             "The Rubrik cluster does not have an archive location named '{}'.".format(archive_name))
