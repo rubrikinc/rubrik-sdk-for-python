@@ -182,9 +182,6 @@ class Cloud(Api):
             'reduced_redundancy',
             'onezone_ia']
 
-        if current_archive_name is None:
-            raise InvalidParameterException("`current_archive_name` has not been provided.")
-
         update_config = None
 
         self.log("update_aws_s3_cloudout: Searching the Rubrik cluster for S3 archival locations named {}.".format(
