@@ -299,10 +299,8 @@ class Cloud(Api):
         if archive_name == 'default':
             archive_name = 'Azure:{}'.format(container)
 
-        self.log(
-            "azure_cloudout: Searching the Rubrik cluster for archival locations.")
-        archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout=timeout)
+        self.log("azure_cloudout: Searching the Rubrik cluster for archival locations.")
+        archives_on_cluster = self.get('internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['name'] = archive_name
@@ -335,12 +333,12 @@ class Cloud(Api):
         for archive in archives_on_cluster['data']:
             # If present, remove the Cloud On Configuration for comparison
             archive_definition = archive['definition']
-            try:
-                del archive_definition['defaultComputeNetworkConfig']
-                del archive_definition['isComputeEnabled']
-                del archive_definition['azureComputeSummary']
-            except BaseException:
-                pass
+            for value in ["encryptionType", "defaultComputeNetworkConfig",
+                          "isComputeEnabled", "isConsolidationEnabled", "azureComputeSummary"]:
+                try:
+                    del archive_definition[value]
+                except BaseException:
+                    pass
 
             if archive_definition == redacted_archive_definition:
                 return "No change required. The '{}' archival location is already configured on the Rubrik cluster.".format(
