@@ -404,13 +404,10 @@ class Cloud(Api):
             "koreasouth"]
 
         if region not in valid_regions:
-            raise InvalidParameterException(
-                'The `region` must be one of the following: {}'.format(valid_regions))
+            raise InvalidParameterException('The `region` must be one of the following: {}'.format(valid_regions))
 
-        self.log(
-            "azure_cloudon: Searching the Rubrik cluster for archival locations.")
-        archives_on_cluster = self.get(
-            'internal', '/archive/object_store', timeout=timeout)
+        self.log("azure_cloudon: Searching the Rubrik cluster for archival locations.")
+        archives_on_cluster = self.get('internal', '/archive/object_store', timeout=timeout)
 
         config = {}
         config['name'] = archive_name
@@ -419,8 +416,7 @@ class Cloud(Api):
 
         config['azureComputeSummary'] = {}
         config['azureComputeSummary']["tenantId"] = tenant_id
-        config['azureComputeSummary']["subscriptionId"] = virtual_network_id.split(
-            "/")[2]
+        config['azureComputeSummary']["subscriptionId"] = virtual_network_id.split("/")[2]
         config['azureComputeSummary']["clientId"] = application_id
         config['azureComputeSummary']["region"] = region
         config['azureComputeSummary']["generalPurposeStorageAccountName"] = storage_account_name
@@ -442,8 +438,7 @@ class Cloud(Api):
 
         redacted_archive_definition['azureComputeSummary'] = {}
         redacted_archive_definition['azureComputeSummary']["tenantId"] = tenant_id
-        redacted_archive_definition['azureComputeSummary']["subscriptionId"] = virtual_network_id.split(
-            "/")[2]
+        redacted_archive_definition['azureComputeSummary']["subscriptionId"] = virtual_network_id.split("/")[2]
         redacted_archive_definition['azureComputeSummary']["clientId"] = application_id
         redacted_archive_definition['azureComputeSummary']["region"] = region
         redacted_archive_definition['azureComputeSummary']["generalPurposeStorageAccountName"] = storage_account_name
@@ -460,13 +455,11 @@ class Cloud(Api):
                     return "No change required. The '{}' archival location is already configured for CloudOn.".format(
                         archive_name)
                 else:
-                    self.log(
-                        "azure_cloudon: Updating the archive location for CloudOn.")
-                    return self.patch(
-                        'internal', "/archive/object_store/{}".format(archive['id']), config, timeout)
+                    self.log("azure_cloudon: Updating the archive location for CloudOn.")
+                    return self.patch('internal', "/archive/object_store/{}".format(archive['id']), config, timeout)
 
-        raise InvalidParameterException("The Rubrik cluster does not have an archive location named '{}'.".format(
-            archive_name))
+        raise InvalidParameterException(
+            "The Rubrik cluster does not have an archive location named '{}'.".format(archive_name))
 
     def add_aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None,
                                aws_regions=None, regional_bolt_network_configs=None, timeout=30):
@@ -532,29 +525,24 @@ class Cloud(Api):
         # verify supplied regions are in the supported list of regions for
         # cloud native protection
         if any(aws_region not in valid_aws_regions for aws_region in aws_regions):
-            raise InvalidParameterException('The list `aws_regions` may only contain the following values: {}'.format(
-                valid_aws_regions))
+            raise InvalidParameterException(
+                'The list `aws_regions` may only contain the following values: {}'.format(valid_aws_regions))
 
         # verify that our regional_bolt_network_configs are either None or in a
         # list
-        if isinstance(
-                regional_bolt_network_configs,
-                list) is False and regional_bolt_network_configs is not None:
-            raise InvalidParameterException(
-                "Parameter `regional_bolt_network_configs` must be a list if defined.")
+        if isinstance(regional_bolt_network_configs, list) is False and regional_bolt_network_configs is not None:
+            raise InvalidParameterException("Parameter `regional_bolt_network_configs` must be a list if defined.")
 
         if regional_bolt_network_configs is not None:
 
             # verify our list of bolt_network_configs only contains dicts
             for bolt_network_config in regional_bolt_network_configs:
                 if isinstance(bolt_network_config, dict) is False:
-                    raise InvalidParameterException(
-                        "List `regional_bolt_network_configs` can only contain dicts.")
+                    raise InvalidParameterException("List `regional_bolt_network_configs` can only contain dicts.")
 
                 # verify that all the required paramteters are provided in all
                 # regional_bolt_network_configs
-                if any(
-                    requiredkey not in bolt_network_config for requiredkey in [
+                if any(requiredkey not in bolt_network_config for requiredkey in [
                         'region',
                         'vNetId',
                         'subnetId',
@@ -562,25 +550,21 @@ class Cloud(Api):
                     raise InvalidParameterException(
                         "Each `regional_bolt_network_config` dict must contain the following keys: 'region', 'vNetId', 'subnetId', 'securityGroupId'.")
 
-        self.log(
-            "aws_native_account: Searching the Rubrik cluster for cloud native sources.")
+        self.log("aws_native_account: Searching the Rubrik cluster for cloud native sources.")
         cloud_native_on_cluster = self.get('internal', '/aws/account', timeout=timeout)
 
         for cloud_source in cloud_native_on_cluster['data']:
 
             # verify a cloud native source with this name does not exist
             # already
-            self.log(
-                "aws_native_account: Validating no conflict with `{}`".format(
-                    cloud_source['id']))
+            self.log("aws_native_account: Validating no conflict with `{}`".format(cloud_source['id']))
             if cloud_source['name'] == aws_account_name:
                 raise InvalidParameterException("Cloud native source with name '{}' already exists. Please enter a unique `aws_account_name`.".format(
                     aws_account_name))
 
             # idempotent return if a cloud native source with this access key
             # already exists
-            cloud_source_detail = self.get(
-                'internal', '/aws/account/{}'.format(cloud_source['id']), timeout=timeout)
+            cloud_source_detail = self.get('internal', '/aws/account/{}'.format(cloud_source['id']), timeout=timeout)
             if cloud_source_detail['accessKey'] == aws_access_key:
                 return "No change required. Cloud native source with access key '{}' is already configured on the Rubrik cluster.".format(
                     aws_access_key)
@@ -623,12 +607,9 @@ class Cloud(Api):
         if not isinstance(config, dict):
             raise InvalidParameterException("The 'config' argument must be a dictionary.")
 
-        self.log(
-            "update_aws_native_account: Checking the Rubrik cluster for the AWS Native Account.")
-        account_id = self.object_id(
-            aws_account_name, "aws_native", timeout=timeout)
+        self.log("update_aws_native_account: Checking the Rubrik cluster for the AWS Native Account.")
+        account_id = self.object_id(aws_account_name, "aws_native", timeout=timeout)
 
-        self.log(
-            "update_aws_native_account: Updating the AWS Native Account.")
+        self.log("update_aws_native_account: Updating the AWS Native Account.")
 
         return self.patch("internal", "/aws/account/{}".format(account_id), config)
