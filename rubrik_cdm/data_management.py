@@ -25,7 +25,8 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15):
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None,
+                           host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15):
         """Initiate an on-demand snapshot.
 
         Arguments:
@@ -120,7 +121,8 @@ class Data_Management(_API):
                 "on_demand_snapshot: Searching the Rubrik cluster for the MS SQL '{}'.".format(object_name))
 
             mssql_host = self.object_id(sql_host, 'physical_host', timeout=timeout)
-            mssql_instance = self.get('v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
+            mssql_instance = self.get(
+                'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
 
             for instance in mssql_instance['data']:
                 if instance['name'] == sql_instance:
@@ -225,7 +227,8 @@ class Data_Management(_API):
             'mssql_db',
             'mssql_instance'
             'vcenter',
-            'ahv']
+            'ahv',
+            'aws_native']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -283,8 +286,7 @@ class Data_Management(_API):
             object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/vmware/vcenter'
 
-        self.log("object_id: Getting the object id for the {} object '{}'.".format(
-            object_type, object_name))
+        self.log("object_id: Getting the object id for the {} object '{}'.".format(object_type, object_name))
         api_request = self.get(object_summary_api_version, object_summary_api_endpoint, timeout=timeout)
 
         if api_request['total'] == 0:
@@ -302,7 +304,7 @@ class Data_Management(_API):
                 for item in api_request['data']:
                     if item[name_value] == object_name:
                         object_ids.append(item['id'])
-            
+
             name_value = 'name'
 
             for item in api_request['data']:

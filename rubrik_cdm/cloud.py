@@ -450,8 +450,29 @@ class Cloud(Api):
         redacted_archive_definition['defaultComputeNetworkConfig']['securityGroupId'] = security_group_id
 
         for archive in archives_on_cluster['data']:
+
+            archive_definition = archive['definition']
+            for value in ["isConsolidationEnabled", "encryptionType"]:
+                try:
+                    del archive_definition[value]
+                except BaseException:
+                    pass
+
+            try:
+                del archive_definition["azureComputeSummary"]["environment"]
+            except BaseException:
+                pass
+
+            try:
+                del archive_definition["defaultComputeNetworkConfig"]["resourceGroupId"]
+            except BaseException:
+                pass
+
             if archive['definition']['objectStoreType'] == 'Azure' and archive['definition']['name'] == archive_name:
+                # raise InvalidParameterException(archive['definition'])
+
                 if archive['definition'] == redacted_archive_definition:
+
                     return "No change required. The '{}' archival location is already configured for CloudOn.".format(
                         archive_name)
                 else:
@@ -502,14 +523,14 @@ class Cloud(Api):
 
         # verify we are on cdm 4.2 or newer, required for cloud native
         # protection
-        if float(self.cluster_version()[:3]) < 4.2:
+        if self.minimum_installed_cdm_version(4.2) is False:
             raise CDMVersionException(4.2)
 
         # check for regions and credentials in environment variables if not
         # provided explicitly
         if aws_regions is None:
             aws_regions = [os.environ.get('AWS_DEFAULT_REGION')]
-            if aws_regions is None:
+            if aws_regions == [None]:
                 raise InvalidParameterException("`aws_region` has not been provided.")
 
         if aws_access_key is None:
@@ -531,14 +552,14 @@ class Cloud(Api):
         # verify that our regional_bolt_network_configs are either None or in a
         # list
         if isinstance(regional_bolt_network_configs, list) is False and regional_bolt_network_configs is not None:
-            raise InvalidParameterException("Parameter `regional_bolt_network_configs` must be a list if defined.")
+            raise InvalidParameterException("`regional_bolt_network_configs` must be a list if defined.")
 
         if regional_bolt_network_configs is not None:
 
             # verify our list of bolt_network_configs only contains dicts
             for bolt_network_config in regional_bolt_network_configs:
                 if isinstance(bolt_network_config, dict) is False:
-                    raise InvalidParameterException("List `regional_bolt_network_configs` can only contain dicts.")
+                    raise InvalidParameterException("The `regional_bolt_network_configs` list can only contain dicts.")
 
                 # verify that all the required paramteters are provided in all
                 # regional_bolt_network_configs
@@ -601,7 +622,7 @@ class Cloud(Api):
 
         # verify we are on cdm 4.2 or newer, required for cloud native
         # protection
-        if float(self.cluster_version()[:3]) < 4.2:
+        if self.minimum_installed_cdm_version(4.2) is False:
             raise CDMVersionException(4.2)
 
         if not isinstance(config, dict):
@@ -611,5 +632,4 @@ class Cloud(Api):
         account_id = self.object_id(aws_account_name, "aws_native", timeout=timeout)
 
         self.log("update_aws_native_account: Updating the AWS Native Account.")
-
         return self.patch("internal", "/aws/account/{}".format(account_id), config)
