@@ -277,7 +277,6 @@ class Data_Management(_API):
             object_summary_api_version = 'v1'
             object_summary_api_endpoint = '/mssql/instance?primary_cluster_id=local&root_id={}'.format(
                 object_name)
-            print(object_summary_api_endpoint)
         elif object_type == 'aws_native':
             object_summary_api_version = 'internal'
             object_summary_api_endpoint = '/aws/account?name={}'.format(
