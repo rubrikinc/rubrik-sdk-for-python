@@ -1,6 +1,6 @@
-# add_physical_host
+# bulk_add_physical_host
 
-Add a physical host to the Rubrik cluster.
+Bulk add physical hosts to the Rubrik cluster.
 ```py
 def bulk_add_physical_host(hostnames, timeout=60)
 ```
