@@ -55,40 +55,34 @@ class Data_Management(_API):
         if host_os is not None:
             if host_os not in valid_host_os_type:
                 raise InvalidParameterException("The on_demand_snapshot() host_os argument must be one of the following: {}.".format(
-                    valid_object_type))
+                    valid_host_os_type))
 
         if object_type == 'vmware':
-            self.log(
-                "on_demand_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
             if sla_name == 'current':
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the vSphere VM '{}'.".format(object_name))
 
-                vm_summary = self.get(
-                    'v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+                vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
                 sla_id = vm_summary['effectiveSlaDomainId']
 
             elif sla_name != 'current':
-                self.log(
-                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
 
-            self.log(
-                "on_demand_snapshot: Initiating snapshot for the vSphere VM '{}'.".format(object_name))
-            api_request = self.post(
-                'v1', '/vmware/vm/{}/snapshot'.format(vm_id), config, timeout)
+            self.log("on_demand_snapshot: Initiating snapshot for the vSphere VM '{}'.".format(object_name))
+            api_request = self.post('v1', '/vmware/vm/{}/snapshot'.format(vm_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
         elif object_type == 'ahv':
 
-            self.log(
-                "on_demand_snapshot: Searching the Rubrik cluster for the AHV VM '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the AHV VM '{}'.".format(object_name))
 
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
@@ -96,29 +90,24 @@ class Data_Management(_API):
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the AHV VM '{}'.".format(object_name))
 
-                vm_summary = self.get(
-                    'internal', '/nutanix/vm/{}'.format(vm_id), timeout)
+                vm_summary = self.get('internal', '/nutanix/vm/{}'.format(vm_id), timeout)
                 sla_id = vm_summary['effectiveSlaDomainId']
 
             elif sla_name != 'current':
-                self.log(
-                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
 
-            self.log(
-                "on_demand_snapshot: Initiating snapshot for the AHV VM '{}'.".format(object_name))
-            api_request = self.post(
-                'internal', '/nutanix/vm/{}/snapshot'.format(vm_id), config, timeout)
+            self.log("on_demand_snapshot: Initiating snapshot for the AHV VM '{}'.".format(object_name))
+            api_request = self.post('internal', '/nutanix/vm/{}/snapshot'.format(vm_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
         elif object_type == 'mssql_db':
 
-            self.log(
-                "on_demand_snapshot: Searching the Rubrik cluster for the MS SQL '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the MS SQL '{}'.".format(object_name))
 
             mssql_host = self.object_id(sql_host, 'physical_host', timeout=timeout)
             mssql_instance = self.get(
@@ -138,22 +127,18 @@ class Data_Management(_API):
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(object_name))
 
-                mssql_summary = self.get(
-                    'v1', '/mssql/db/{}'.format(mssql_id), timeout)
+                mssql_summary = self.get('v1', '/mssql/db/{}'.format(mssql_id), timeout)
                 sla_id = mssql_summary['effectiveSlaDomainId']
 
             elif sla_name != 'current':
-                self.log(
-                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
 
-            self.log(
-                "on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(object_name))
-            api_request = self.post(
-                'v1', '/mssql/db/{}/snapshot'.format(mssql_id), config, timeout)
+            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(object_name))
+            api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(mssql_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -171,13 +156,13 @@ class Data_Management(_API):
 
             self.log(
                 "on_demand_snapshot: Searching the Rubrik cluster for the Fileset Template '{}'.".format(fileset))
-            fileset_template_id = self.object_id(
-                fileset, 'fileset_template', host_os, timeout=timeout)
+            fileset_template_id = self.object_id(fileset, 'fileset_template', host_os, timeout=timeout)
 
-            self.log(
-                "on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
-            fileset_summary = self.get(
-                'v1', '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id, fileset_template_id), timeout=timeout)
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
+            fileset_summary = self.get('v1',
+                                       '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id,
+                                                                                                                           fileset_template_id),
+                                       timeout=timeout)
 
             if fileset_summary['total'] == 0:
                 raise InvalidParameterException(
@@ -189,17 +174,14 @@ class Data_Management(_API):
             if sla_name == 'current':
                 sla_id = fileset_summary['data'][0]['effectiveSlaDomainId']
             elif sla_name != 'current':
-                self.log(
-                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
 
-            self.log(
-                "on_demand_snapshot: Initiating snapshot for the Physical Host '{}'.".format(object_name))
-            api_request = self.post(
-                'v1', '/fileset/{}/snapshot'.format(fileset_id), config, timeout)
+            self.log("on_demand_snapshot: Initiating snapshot for the Physical Host '{}'.".format(object_name))
+            api_request = self.post('v1', '/fileset/{}/snapshot'.format(fileset_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
