@@ -52,6 +52,7 @@
 
 ### Physical Host Functions
 * [add_physical_host](add_physical_host.md)
+* [bulk add physical hosts](bulk_add_physical_host.md)
 * [assign_physical_host_fileset](assign_physical_host_fileset.md)
 * [create_nas_fileset](create_nas_fileset.md)
 * [create_physical_fileset](create_physical_fileset.md)
