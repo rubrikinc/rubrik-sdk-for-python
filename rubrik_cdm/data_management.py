@@ -385,8 +385,7 @@ class Data_Management(_API):
         """
 
         if isinstance(remove_network_devices, bool) is False:
-            raise InvalidParameterException(
-                "The 'remove_network_devices' argument must be True or False.")
+            raise InvalidParameterException("The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
             raise InvalidParameterException("The 'power_on' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
@@ -403,8 +402,7 @@ class Data_Management(_API):
             number_of_snapshots = len(vm_summary['snapshots'])
             snapshot_id = vm_summary['snapshots'][number_of_snapshots - 1]['id']
         else:
-            self.log(
-                "vsphere_live_mount: Converting the provided date/time into UTC.")
+            self.log("vsphere_live_mount: Converting the provided date/time into UTC.")
             snapshot_date_time = self._date_time_conversion(date, time)
 
             current_snapshots = {}
@@ -433,10 +431,11 @@ class Data_Management(_API):
             config['removeNetworkDevices'] = remove_network_devices
             config['powerOn'] = power_on
 
-            self.log("vsphere_live_mount: Live Mounting the snapshot taken on {} at {} for vSphere VM '{}'.".format(
-                date,
-                time,
-                vm_name))
+            self.log(
+                "vsphere_live_mount: Live Mounting the snapshot taken on {} at {} for vSphere VM '{}'.".format(
+                    date,
+                    time,
+                    vm_name))
 
             return self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config, timeout)
 
@@ -532,7 +531,7 @@ class Data_Management(_API):
 
             return self.post('v1', '/vmware/vm/snapshot/{}/instant_recover'.format(snapshot_id), config, timeout)
 
-    def _date_time_conversion(self, date, time):
+    def _date_time_conversion(self, date, time, timeout=30):
         """All date values returned by the Rubrik API are stored in Coordinated Universal Time (UTC)
         and need to be converted to the timezone configured on the Rubrik cluster in order to match
         the values provided by the end user in various functions. This internal function will handle that
@@ -567,8 +566,7 @@ class Data_Management(_API):
         cluster_summary = self.get('v1', '/cluster/me', timeout=timeout)
         cluster_timezone = cluster_summary['timezone']['timezone']
 
-        self.log(
-            "_date_time_conversion: Converting the provided time to the 24-hour clock.")
+        self.log("_date_time_conversion: Converting the provided time to the 24-hour clock.")
         snapshot_time_24_hour_clock = datetime.strftime(snapshot_time, "%H:%M")
 
         self.log("_date_time_conversion: Creating a combined date/time variable.")
