@@ -49,12 +49,12 @@ class Data_Management(_API):
         valid_host_os_type = ['Linux', 'Windows']
 
         if object_type not in valid_object_type:
-            raise InvalidParameterException("The on_demand_snapshot() object_type argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The on_demand_snapshot() `object_type` argument must be one of the following: {}.".format(
                 valid_object_type))
 
         if host_os is not None:
             if host_os not in valid_host_os_type:
-                raise InvalidParameterException("The on_demand_snapshot() host_os argument must be one of the following: {}.".format(
+                raise InvalidParameterException("The on_demand_snapshot() `host_os` argument must be one of the following: {}.".format(
                     valid_host_os_type))
 
         if object_type == 'vmware':
@@ -107,9 +107,11 @@ class Data_Management(_API):
 
         elif object_type == 'mssql_db':
 
-            self.log("on_demand_snapshot: Searching the Rubrik cluster for the MS SQL '{}'.".format(object_name))
+            self.log(
+                "on_demand_snapshot: Searching the Rubrik cluster for the MS SQL '{}'.".format(object_name))
 
             mssql_host = self.object_id(sql_host, 'physical_host', timeout=timeout)
+
             mssql_instance = self.get(
                 'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
 
@@ -137,7 +139,8 @@ class Data_Management(_API):
             config = {}
             config['slaId'] = sla_id
 
-            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(object_name))
+            self.log(
+                "on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(object_name))
             api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(mssql_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
@@ -145,24 +148,21 @@ class Data_Management(_API):
         elif object_type == 'physical_host':
             if host_os is None:
                 raise InvalidParameterException(
-                    "The on_demand_snapshot() host_os argument must be populated when taking a Physical host snapshot.")
+                    "The on_demand_snapshot() `host_os` argument must be populated when taking a Physical host snapshot.")
             elif fileset is None:
                 raise InvalidParameterException(
-                    "The on_demand_snapshot() fileset argument must be populated when taking a Physical host snapshot.")
+                    "The on_demand_snapshot() `fileset` argument must be populated when taking a Physical host snapshot.")
 
-            self.log(
-                "on_demand_snapshot: Searching the Rubrik cluster for the Physical Host '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the Physical Host '{}'.".format(object_name))
             host_id = self.object_id(object_name, object_type, timeout=timeout)
 
-            self.log(
-                "on_demand_snapshot: Searching the Rubrik cluster for the Fileset Template '{}'.".format(fileset))
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the Fileset Template '{}'.".format(fileset))
             fileset_template_id = self.object_id(fileset, 'fileset_template', host_os, timeout=timeout)
 
             self.log("on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
-            fileset_summary = self.get('v1',
-                                       '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id,
-                                                                                                                           fileset_template_id),
-                                       timeout=timeout)
+            api_endpoint = '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(
+                host_id, fileset_template_id)
+            fileset_summary = self.get('v1', api_endpoint, timeout=timeout)
 
             if fileset_summary['total'] == 0:
                 raise InvalidParameterException(
@@ -207,7 +207,7 @@ class Data_Management(_API):
             'fileset_template',
             'managed_volume',
             'mssql_db',
-            'mssql_instance'
+            'mssql_instance',
             'vcenter',
             'ahv',
             'aws_native']
@@ -281,12 +281,8 @@ class Data_Management(_API):
                     name_value = 'name'
                 else:
                     name_value = 'hostname'
-
-                for item in api_request['data']:
-                    if item[name_value] == object_name:
-                        object_ids.append(item['id'])
-
-            name_value = 'name'
+            else:
+                name_value = 'name'
 
             for item in api_request['data']:
                 if item[name_value] == object_name:
