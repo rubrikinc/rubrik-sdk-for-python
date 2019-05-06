@@ -1573,6 +1573,7 @@ def test_on_demand_snapshot_physical_host_current_sla(rubrik, mocker):
     assert rubrik.on_demand_snapshot("object_name", "physical_host", host_os="Linux", fileset="fileset") == \
         (mock_post_v1_fileset_id_snapshot(), "href_string")
 
+
 def test_on_demand_snapshot_physical_host_specific_sla(rubrik, mocker):
 
     def mock_get_v1_host():
@@ -1713,3 +1714,906 @@ def test_on_demand_snapshot_physical_host_specific_sla(rubrik, mocker):
 
     assert rubrik.on_demand_snapshot("object_name", "physical_host", host_os="Linux", fileset="fileset") == \
         (mock_post_v1_fileset_id_snapshot(), "href_string")
+
+
+def test_object_id_invalid_object_type(rubrik):
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.object_id("object_name", "not_a_valid_object_type")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The object_id() object_type argument must be one of the following: ['vmware', 'sla', 'vmware_host', 'physical_host', 'fileset_template', 'managed_volume', 'mssql_db', 'mssql_instance', 'vcenter', 'ahv', 'aws_native']."
+
+
+def test_object_id_invalid_fileset_template(rubrik):
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.object_id("object_name", "fileset_template")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "You must provide the Fileset Tempalte OS type."
+
+
+def test_object_id_invalid_fileset_template_type(rubrik):
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.object_id("object_name", "fileset_template", host_os="not_a_valid_host_os")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The host_os must be either 'Linux' or 'Windows'."
+
+
+@pytest.mark.parametrize('sla_name', ["forever", "unprotected"])
+def test_object_id_sla_forever_or_unprotected(rubrik, sla_name):
+
+    assert rubrik.object_id(sla_name, "sla") == "UNPROTECTED"
+
+
+def test_object_id_not_found(rubrik, mocker):
+
+    def mock_get_v1_vmware_vm():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "moid": "string",
+                    "vcenterId": "string",
+                    "hostName": "string",
+                    "hostId": "string",
+                    "clusterName": "string",
+                    "snapshotConsistencyMandate": "UNKNOWN",
+                    "powerStatus": "string",
+                    "protectionDate": "2019-05-06T04:23:38.418Z",
+                    "ipAddress": "string",
+                    "agentStatus": {
+                        "agentStatus": "string",
+                        "disconnectReason": "string"
+                    },
+                    "toolsInstalled": True,
+                    "guestOsName": "string",
+                    "isReplicationEnabled": True,
+                    "folderPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "infraPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "vmwareToolsInstalled": True,
+                    "isRelic": True,
+                    "guestCredentialAuthorizationStatus": "string",
+                    "cloudInstantiationSpec": {
+                        "imageRetentionInSeconds": 0
+                    },
+                    "parentAppInfo": {
+                        "id": "string",
+                        "isProtectedThruHierarchy": True
+                    }
+                }
+            ],
+            "total": 0
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_vmware_vm()
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.object_id("object_name", "vmware")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The vmware object 'object_name' was not found on the Rubrik cluster."
+
+
+def test_object_id_not_in_object_ids_list(rubrik, mocker):
+
+    def mock_get_v1_vmware_vm():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "moid": "string",
+                    "vcenterId": "string",
+                    "hostName": "string",
+                    "hostId": "string",
+                    "clusterName": "string",
+                    "snapshotConsistencyMandate": "UNKNOWN",
+                    "powerStatus": "string",
+                    "protectionDate": "2019-05-06T04:23:38.418Z",
+                    "ipAddress": "string",
+                    "agentStatus": {
+                        "agentStatus": "string",
+                        "disconnectReason": "string"
+                    },
+                    "toolsInstalled": True,
+                    "guestOsName": "string",
+                    "isReplicationEnabled": True,
+                    "folderPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "infraPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "vmwareToolsInstalled": True,
+                    "isRelic": True,
+                    "guestCredentialAuthorizationStatus": "string",
+                    "cloudInstantiationSpec": {
+                        "imageRetentionInSeconds": 0
+                    },
+                    "parentAppInfo": {
+                        "id": "string",
+                        "isProtectedThruHierarchy": True
+                    }
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_vmware_vm()
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.object_id("object_name", "vmware")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The vmware object 'object_name' was not found on the Rubrik cluster."
+
+
+def test_object_id_multiple_objects_found(rubrik, mocker):
+
+    def mock_get_v1_vmware_vm():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "object_name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "moid": "string",
+                    "vcenterId": "string",
+                    "hostName": "string",
+                    "hostId": "string",
+                    "clusterName": "string",
+                    "snapshotConsistencyMandate": "UNKNOWN",
+                    "powerStatus": "string",
+                    "protectionDate": "2019-05-06T04:23:38.418Z",
+                    "ipAddress": "string",
+                    "agentStatus": {
+                        "agentStatus": "string",
+                        "disconnectReason": "string"
+                    },
+                    "toolsInstalled": True,
+                    "guestOsName": "string",
+                    "isReplicationEnabled": True,
+                    "folderPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "infraPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "vmwareToolsInstalled": True,
+                    "isRelic": True,
+                    "guestCredentialAuthorizationStatus": "string",
+                    "cloudInstantiationSpec": {
+                        "imageRetentionInSeconds": 0
+                    },
+                    "parentAppInfo": {
+                        "id": "string",
+                        "isProtectedThruHierarchy": True
+                    }
+                },
+                {
+                    "id": "string",
+                    "name": "object_name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "moid": "string",
+                    "vcenterId": "string",
+                    "hostName": "string",
+                    "hostId": "string",
+                    "clusterName": "string",
+                    "snapshotConsistencyMandate": "UNKNOWN",
+                    "powerStatus": "string",
+                    "protectionDate": "2019-05-06T04:23:38.418Z",
+                    "ipAddress": "string",
+                    "agentStatus": {
+                        "agentStatus": "string",
+                        "disconnectReason": "string"
+                    },
+                    "toolsInstalled": True,
+                    "guestOsName": "string",
+                    "isReplicationEnabled": True,
+                    "folderPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "infraPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "vmwareToolsInstalled": True,
+                    "isRelic": True,
+                    "guestCredentialAuthorizationStatus": "string",
+                    "cloudInstantiationSpec": {
+                        "imageRetentionInSeconds": 0
+                    },
+                    "parentAppInfo": {
+                        "id": "string",
+                        "isProtectedThruHierarchy": True
+                    }
+                }
+            ],
+            "total": 2
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_vmware_vm()
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.object_id("object_name", "vmware")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "Multiple vmware objects named 'object_name' were found on the Rubrik cluster. Unable to return a specific object id."
+
+
+def test_object_id_vmware(rubrik, mocker):
+
+    def mock_get_v1_vmware_vm():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "string",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "moid": "string",
+                    "vcenterId": "string",
+                    "hostName": "string",
+                    "hostId": "string",
+                    "clusterName": "string",
+                    "snapshotConsistencyMandate": "UNKNOWN",
+                    "powerStatus": "string",
+                    "protectionDate": "2019-05-06T04:23:38.418Z",
+                    "ipAddress": "string",
+                    "agentStatus": {
+                        "agentStatus": "string",
+                        "disconnectReason": "string"
+                    },
+                    "toolsInstalled": True,
+                    "guestOsName": "string",
+                    "isReplicationEnabled": True,
+                    "folderPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "infraPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "vmwareToolsInstalled": True,
+                    "isRelic": True,
+                    "guestCredentialAuthorizationStatus": "string",
+                    "cloudInstantiationSpec": {
+                        "imageRetentionInSeconds": 0
+                    },
+                    "parentAppInfo": {
+                        "id": "string",
+                        "isProtectedThruHierarchy": True
+                    }
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_vmware_vm()
+
+    assert rubrik.object_id("string", "vmware") == "string_id"
+
+
+def test_object_id_sla(rubrik, mocker):
+
+    def mock_get_v1_sla_domain():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "primaryClusterId": "string",
+                    "name": "string",
+                    "frequencies": [
+                        {
+                            "timeUnit": "string",
+                            "frequency": 0,
+                            "retention": 0
+                        }
+                    ],
+                    "allowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "firstFullAllowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "localRetentionLimit": 0,
+                    "maxLocalRetentionLimit": 0,
+                    "archivalSpecs": [
+                        {
+                            "locationId": "string",
+                            "archivalThreshold": 0
+                        }
+                    ],
+                    "replicationSpecs": [
+                        {
+                            "locationId": "string",
+                            "retentionLimit": 0
+                        }
+                    ],
+                    "numDbs": 0,
+                    "numOracleDbs": 0,
+                    "numFilesets": 0,
+                    "numHypervVms": 0,
+                    "numNutanixVms": 0,
+                    "numManagedVolumes": 0,
+                    "numStorageArrayVolumeGroups": 0,
+                    "numWindowsVolumeGroups": 0,
+                    "numLinuxHosts": 0,
+                    "numShares": 0,
+                    "numWindowsHosts": 0,
+                    "numVms": 0,
+                    "numEc2Instances": 0,
+                    "numVcdVapps": 0,
+                    "numProtectedObjects": 0,
+                    "isDefault": True,
+                    "uiColor": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_sla_domain()
+
+    assert rubrik.object_id("string", "sla") == "string_id"
+
+
+def test_object_id_vmware_host(rubrik, mocker):
+
+    def mock_get_v1_vmware_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "string",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "datacenterId": "string",
+                    "computeClusterId": "string",
+                    "datastores": [
+                        {
+                            "id": "string",
+                            "name": "string",
+                            "capacity": 0,
+                            "dataStoreType": "string",
+                            "dataCenterName": "string",
+                            "isLocal": True
+                        }
+                    ],
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_vmware_host()
+
+    assert rubrik.object_id("string", "vmware_host") == "string_id"
+
+
+def test_object_id_fileset_template(rubrik, mocker):
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "name": "string",
+                    "includes": [
+                        "string"
+                    ],
+                    "excludes": [
+                        "string"
+                    ],
+                    "exceptions": [
+                        "string"
+                    ],
+                    "operatingSystemType": "UnixLike",
+                    "shareType": "NFS",
+                    "preBackupScript": "string",
+                    "postBackupScript": "string",
+                    "backupScriptTimeout": 0,
+                    "backupScriptErrorHandling": "string",
+                    "isArrayEnabled": True,
+                    "id": "string_id",
+                    "primaryClusterId": "string",
+                    "isArchived": True,
+                    "hostCount": 0,
+                    "shareCount": 0
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_fileset_template()
+
+    assert rubrik.object_id("string", "fileset_template", host_os="Linux") == "string_id"
+
+
+def test_object_id_managed_volume(rubrik, mocker):
+
+    def mock_get_internal_managed_volume():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "string",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "snapshotCount": 0,
+                    "pendingSnapshotCount": 0,
+                    "isRelic": True,
+                    "applicationTag": "Oracle",
+                    "numChannels": 0,
+                    "volumeSize": 0,
+                    "usedSize": 0,
+                    "state": "ExportRequested",
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "mainExport": {
+                        "isActive": True,
+                        "channels": [
+                            {
+                                "ipAddress": "string",
+                                "mountPoint": "string"
+                            }
+                        ],
+                        "config": {
+                            "hostPatterns": [
+                                "string"
+                            ],
+                            "nodeHint": [
+                                "string"
+                            ],
+                            "smbDomainName": "string",
+                            "smbValidUsers": [
+                                "string"
+                            ],
+                            "smbValidIps": [
+                                "string"
+                            ],
+                            "subnet": "string",
+                            "shareType": "NFS"
+                        }
+                    },
+                    "isWritable": True,
+                    "links": [
+                        {
+                            "href": "string",
+                            "rel": "string"
+                        }
+                    ],
+                    "isDeleted": True,
+                    "shareType": "NFS",
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_managed_volume()
+
+    assert rubrik.object_id("string", "managed_volume") == "string_id"
+
+
+def test_object_id_ahv(rubrik, mocker):
+
+    def mock_get_internal_nutanix_vm():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "string",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "nutanixClusterId": "string",
+                    "nutanixClusterName": "string",
+                    "isRelic": True,
+                    "snapshotConsistencyMandate": "Automatic",
+                    "agentStatus": {
+                        "agentStatus": "string",
+                        "disconnectReason": "string"
+                    },
+                    "operatingSystemType": "AIX"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_nutanix_vm()
+
+    assert rubrik.object_id("string", "ahv") == "string_id"
+
+
+def test_object_id_mssql_db(rubrik, mocker):
+
+    def mock_get_v1_mssql_db():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "string",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "rootProperties": {
+                        "rootType": "Host",
+                        "rootId": "string",
+                        "rootName": "string"
+                    },
+                    "instanceId": "string",
+                    "instanceName": "string",
+                    "isRelic": True,
+                    "copyOnly": True,
+                    "logBackupFrequencyInSeconds": 0,
+                    "logBackupRetentionHours": 0,
+                    "isLiveMount": True,
+                    "isLogShippingSecondary": True,
+                    "recoveryModel": "SIMPLE",
+                    "state": "string",
+                    "hasPermissions": True,
+                    "isInAvailabilityGroup": True,
+                    "replicas": [
+                        {
+                            "instanceId": "string",
+                            "instanceName": "string",
+                            "recoveryModel": "SIMPLE",
+                            "state": "string",
+                            "hasPermissions": True,
+                            "isStandby": True,
+                            "recoveryForkGuid": "string",
+                            "isArchived": True,
+                            "isDeleted": True,
+                            "availabilityInfo": {
+                                "role": "PRIMARY"
+                            },
+                            "rootProperties": {
+                                "rootType": "Host",
+                                "rootId": "string",
+                                "rootName": "string"
+                            }
+                        }
+                    ],
+                    "availabilityGroupId": "string",
+                    "unprotectableReasons": [
+                        {
+                            "unprotectableType": "InsufficientPermissions",
+                            "message": "string"
+                        }
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_mssql_db()
+
+    assert rubrik.object_id("string", "mssql_db") == "string_id"
+
+
+def test_object_id_mssql_instance(rubrik, mocker):
+
+    def mock_get_v1_mssql_instance():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "logBackupFrequencyInSeconds": 0,
+                    "logRetentionHours": 0,
+                    "copyOnly": True,
+                    "id": "string_id",
+                    "internalTimestamp": 0,
+                    "name": "string",
+                    "primaryClusterId": "string",
+                    "rootProperties": {
+                        "rootType": "Host",
+                        "rootId": "string",
+                        "rootName": "string"
+                    },
+                    "clusterInstanceAddress": "string",
+                    "protectionDate": "2019-05-06",
+                    "version": "string",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "unprotectableReasons": [
+                        {
+                            "unprotectableType": "InsufficientPermissions",
+                            "message": "string"
+                        }
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_mssql_instance()
+
+    assert rubrik.object_id("string", "mssql_instance") == "string_id"
+
+
+def test_object_id_aws_native(rubrik, mocker):
+
+    def mock_get_internal_aws_account():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "string",
+                    "primaryClusterId": "string",
+                    "status": "Connected"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_aws_account()
+
+    assert rubrik.object_id("string", "aws_native") == "string_id"
+
+
+def test_object_id_vcenter(rubrik, mocker):
+
+    def mock_get_v1_vmware_vcenter():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "caCerts": "string",
+                    "configuredSlaDomainId": "string",
+                    "id": "string_id",
+                    "name": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "hostname": "string",
+                    "username": "string",
+                    "conflictResolutionAuthz": "AllowAutoConflictResolution",
+                    "configuredSlaDomainPolarisManagedId": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_vmware_vcenter()
+
+    assert rubrik.object_id("string", "vcenter") == "string_id"
+
+
+def test_object_id_physical_host_cdm_4_x(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "hostname": "string",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+    mock_cluster_version.return_value = "4.0"
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_host()
+
+    assert rubrik.object_id("string", "physical_host") == "string_id"
+
+
+def test_object_id_physical_host_cdm_5_x(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "string",
+                    "hostname": "string",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+    mock_cluster_version.return_value = "5.0"
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_host()
+
+    assert rubrik.object_id("string", "physical_host") == "string_id"

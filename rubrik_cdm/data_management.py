@@ -293,10 +293,7 @@ class Data_Management(_API):
             object_ids = []
             # Define the "object name" to search for
             if object_type == 'physical_host':
-                if self.minimum_installed_cdm_version(5.0, timeout):
-                    name_value = 'name'
-                else:
-                    name_value = 'hostname'
+                name_value = filter_field_name
             else:
                 name_value = 'name'
 
@@ -306,18 +303,15 @@ class Data_Management(_API):
 
             if len(object_ids) > 1:
                 raise InvalidParameterException(
-                    "Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(
-                        object_type, object_name))
+                    "Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(object_type, object_name))
             elif len(object_ids) == 0:
                 raise InvalidParameterException(
-                    "The {} object '{}' was not found on the Rubrik cluster.".format(
-                        object_type, object_name))
+                    "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
             else:
                 return object_ids[0]
 
             raise InvalidParameterException(
-                "The {} object '{}' was not found on the Rubrik cluster.".format(
-                    object_type, object_name))
+                "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
     def assign_sla(self, object_name, sla_name, object_type, timeout=30):
         """Assign a Rubrik object to an SLA Domain.
