@@ -263,14 +263,10 @@ class Data_Management(_API):
                 "api_version": "internal",
                 "api_endpoint": "/aws/account?name={}".format(object_name)
             },
-            "": {
-                "api_version": "v1",
-                "api_endpoint": ""
-            },
             "vcenter": {
                 "api_version": "v1",
                 "api_endpoint": "/vmware/vcenter"
-            },
+            }
         }
 
         if object_type == 'physical_host':
