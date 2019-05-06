@@ -216,59 +216,79 @@ class Data_Management(_API):
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
                 valid_object_type))
 
-        if object_type == 'vmware':
-            object_summary_api_version = 'v1'
-            object_summary_api_endpoint = '/vmware/vm?primary_cluster_id=local&is_relic=false&name={}'.format(
-                object_name)
-        elif object_type == 'sla':
-            if object_name.upper() == "FOREVER" or object_name.upper() == "UNPROTECTED":
-                return "UNPROTECTED"
-            object_summary_api_version = 'v1'
-            object_summary_api_endpoint = '/sla_domain?primary_cluster_id=local&name={}'.format(
-                object_name)
-        elif object_type == 'vmware_host':
-            object_summary_api_version = 'v1'
-            object_summary_api_endpoint = '/vmware/host?primary_cluster_id=local'
-        elif object_type == 'physical_host':
-            object_summary_api_version = 'v1'
-            if self.minimum_installed_cdm_version(5.0, timeout) is True:
-                object_summary_api_endpoint = '/host?primary_cluster_id=local&name={}'.format(object_name)
-            else:
-                object_summary_api_endpoint = '/host?primary_cluster_id=local&hostname={}'.format(object_name)
-        elif object_type == 'fileset_template':
+        if object_type == 'fileset_template':
             if host_os is None:
                 raise InvalidParameterException("You must provide the Fileset Tempalte OS type.")
             elif host_os not in ['Linux', 'Windows']:
                 raise InvalidParameterException("The host_os must be either 'Linux' or 'Windows'.")
-            object_summary_api_version = 'v1'
-            object_summary_api_endpoint = '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
-                host_os, object_name)
-        elif object_type == 'managed_volume':
-            object_summary_api_version = 'internal'
-            object_summary_api_endpoint = '/managed_volume?is_relic=false&primary_cluster_id=local&name={}'.format(
-                object_name)
-        elif object_type == 'ahv':
-            object_summary_api_version = 'internal'
-            object_summary_api_endpoint = '/nutanix/vm?primary_cluster_id=local&is_relic=false&name={}'.format(
-                object_name)
-        elif object_type == 'mssql_db':
-            object_summary_api_version = 'v1'
-            object_summary_api_endpoint = '/mssql/db?primary_cluster_id=local&is_relic=false&instance_id={}'.format(
-                object_name)
-        elif object_type == 'mssql_instance':
-            object_summary_api_version = 'v1'
-            object_summary_api_endpoint = '/mssql/instance?primary_cluster_id=local&root_id={}'.format(
-                object_name)
-        elif object_type == 'aws_native':
-            object_summary_api_version = 'internal'
-            object_summary_api_endpoint = '/aws/account?name={}'.format(
-                object_name)
-        elif object_type == 'vcenter':
-            object_summary_api_version = 'v1'
-            object_summary_api_endpoint = '/vmware/vcenter'
+
+        if object_type == 'sla':
+            if object_name.upper() == "FOREVER" or object_name.upper() == "UNPROTECTED":
+                return "UNPROTECTED"
+
+        api_call = {
+            "vmware": {
+                "api_version": "v1",
+                "api_endpoint": "/vmware/vm?primary_cluster_id=local&is_relic=false&name={}".format(object_name)
+            },
+            "sla": {
+                "api_version": "v1",
+                "api_endpoint": "/sla_domain?primary_cluster_id=local&name={}".format(object_name)
+            },
+            "vmware_host": {
+                "api_version": "v1",
+                "api_endpoint": "/vmware/host?primary_cluster_id=local"
+            },
+            "fileset_template": {
+                "api_version": "v1",
+                "api_endpoint": "/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}".format(host_os, object_name)
+            },
+            "managed_volume": {
+                "api_version": "internal",
+                "api_endpoint": "/managed_volume?is_relic=false&primary_cluster_id=local&name={}".format(object_name)
+            },
+            "ahv": {
+                "api_version": "internal",
+                "api_endpoint": "/nutanix/vm?primary_cluster_id=local&is_relic=false&name={}".format(object_name)
+            },
+            "mssql_db": {
+                "api_version": "v1",
+                "api_endpoint": "/mssql/db?primary_cluster_id=local&is_relic=false&instance_id={}".format(object_name)
+            },
+            "mssql_instance": {
+                "api_version": "v1",
+                "api_endpoint": "/mssql/instance?primary_cluster_id=local&root_id={}".format(object_name)
+            },
+            "aws_native": {
+                "api_version": "internal",
+                "api_endpoint": "/aws/account?name={}".format(object_name)
+            },
+            "": {
+                "api_version": "v1",
+                "api_endpoint": ""
+            },
+            "vcenter": {
+                "api_version": "v1",
+                "api_endpoint": "/vmware/vcenter"
+            },
+        }
+
+        if object_type == 'physical_host':
+            if self.minimum_installed_cdm_version(5.0, timeout) is True:
+                filter_field_name = "name"
+            else:
+                filter_field_name = "hostname"
+
+            api_call["physical_host"] = {
+                "api_version": "v1",
+                "api_endpoint": "/host?primary_cluster_id=local&{}={}".format(filter_field_name, object_name)
+            }
 
         self.log("object_id: Getting the object id for the {} object '{}'.".format(object_type, object_name))
-        api_request = self.get(object_summary_api_version, object_summary_api_endpoint, timeout=timeout)
+        api_request = self.get(
+            api_call[object_type]["api_version"],
+            api_call[object_type]["api_endpoint"],
+            timeout=timeout)
 
         if api_request['total'] == 0:
             raise InvalidParameterException("The {} object '{}' was not found on the Rubrik cluster.".format(
