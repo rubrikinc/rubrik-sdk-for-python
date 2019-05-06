@@ -393,12 +393,10 @@ class Data_Management(_API):
             raise InvalidParameterException(
                 "The date and time arguments most both be 'latest' or a specific date and time.")
 
-        self.log(
-            "vsphere_live_mount: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        self.log("vsphere_live_mount: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
-        self.log(
-            "vsphere_live_mount: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
+        self.log("vsphere_live_mount: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
         vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
 
         if date == 'latest' and time == 'latest':
@@ -422,9 +420,8 @@ class Data_Management(_API):
         try:
             snapshot_id
         except NameError:
-            raise InvalidParameterException(
-                "The vSphere VM '{}' does not have a snapshot taken on {} at {}.".format(
-                    vm_name, date, time))
+            raise InvalidParameterException("The vSphere VM '{}' does not have a snapshot taken on {} at {}.".format(
+                vm_name, date, time))
         else:
             if host == 'current':
                 host_id = vm_summary['hostId']
@@ -436,16 +433,12 @@ class Data_Management(_API):
             config['removeNetworkDevices'] = remove_network_devices
             config['powerOn'] = power_on
 
-            self.log(
-                "vsphere_live_mount: Live Mounting the snapshot taken on {} at {} for vSphere VM '{}'.".format(
-                    date,
-                    time,
-                    vm_name))
+            self.log("vsphere_live_mount: Live Mounting the snapshot taken on {} at {} for vSphere VM '{}'.".format(
+                date,
+                time,
+                vm_name))
 
-            return self.post(
-                'v1',
-                '/vmware/vm/snapshot/{}/mount'.format(snapshot_id),
-                config, timeout)
+            return self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config, timeout)
 
     def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False,
                                  power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):
