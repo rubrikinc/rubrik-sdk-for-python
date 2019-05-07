@@ -637,27 +637,21 @@ class Data_Management(_API):
 
         if object_type == 'vmware':
 
-            self.log(
-                "resume_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+            self.log("resume_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
-            self.log(
-                "resume_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-            api_request = self.get(
-                'v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+            self.log("resume_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
+            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
 
             if not api_request['blackoutWindowStatus']['isSnappableBlackoutActive']:
                 return "No change required. The '{}' object '{}' is currently not paused.".format(
                     object_type, object_name)
             else:
-                self.log(
-                    "resume_snapshots: Resuming Snaphots for the vSphere VM '{}'.".format(object_name))
-
+                self.log("resume_snapshots: Resuming Snaphots for the vSphere VM '{}'.".format(object_name))
                 config = {}
                 config['isVmPaused'] = False
 
-                return self.patch(
-                    'v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
+                return self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
 
     def begin_managed_volume_snapshot(self, name, timeout=30):
         """Open a managed volume for writes. All writes to the managed volume until the snapshot is ended will be part of its snapshot.
