@@ -547,7 +547,6 @@ class Data_Management(_API):
         except ValueError:
             raise InvalidParameterException(
                 "The date argument '{}' must be formatd as 'Month-Date-Year' (ex: 8-9-2018).".format(date))
-
         # Validate the Time formating
         try:
             snapshot_time = datetime.strptime(time, '%I:%M %p')

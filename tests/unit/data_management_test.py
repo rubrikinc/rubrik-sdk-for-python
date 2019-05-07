@@ -5931,6 +5931,30 @@ def test_vsphere_instant_recovery_specific_host(rubrik, mocker):
                                      host="host") == mock_post_v1_vmware_vm_snapshot_id_instant_recover()
 
 
+def test__date_time_conversion(rubrik, mocker):
+
+    def mock_get_v1_cluster_me():
+        return {
+            "id": "string",
+            "version": "string",
+            "apiVersion": "string",
+            "name": "string",
+            "timezone": {
+                "timezone": "America/Los_Angeles"
+            },
+            "geolocation": {
+                "address": "string"
+            },
+            "acceptedEulaVersion": "string",
+            "latestEulaVersion": "string"
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_cluster_me()
+
+    assert rubrik._date_time_conversion("1-15-2014", "1:30 AM") == "2014-01-15T09:30"
+
+
 def test_pause_snapshots_invalid_object_type(rubrik):
     with pytest.raises(InvalidParameterException) as error:
         rubrik.pause_snapshots("object_name", "not_a_valid_object_type")
