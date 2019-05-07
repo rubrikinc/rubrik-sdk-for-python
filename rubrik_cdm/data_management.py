@@ -738,15 +738,17 @@ class Data_Management(_API):
         valid_object_type = ['vmware']
 
         if object_type not in valid_object_type:
-            raise InvalidParameterException("The get_sla_object() object_type argument must be one of the following: {}.".format(
-                valid_object_type))
+            raise InvalidParameterException(
+                "The get_sla_object() object_type argument must be one of the following: {}.".format(valid_object_type))
 
         if object_type == 'vmware':
 
             sla_id = self.object_id(sla, "sla", timeout=timeout)
 
             all_vms_in_sla = self.get(
-                "v1", "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(sla_id), timeout=timeout)
+                "v1",
+                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(sla_id),
+                timeout=timeout)
 
             vm_name_id = {}
             for vm in all_vms_in_sla["data"]:
