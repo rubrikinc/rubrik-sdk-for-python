@@ -462,43 +462,37 @@ class Data_Management(_API):
         """
 
         if isinstance(remove_network_devices, bool) is False:
-            raise InvalidParameterException(
-                "The 'remove_network_devices' argument must be True or False.")
+            raise InvalidParameterException("The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
             raise InvalidParameterException("The 'power_on' argument must be True or False.")
         elif isinstance(disable_network, bool) is False:
             raise InvalidParameterException("The 'disable_network' argument must be True or False.")
         elif isinstance(keep_mac_addresses, bool) is False:
-            raise InvalidParameterException(
-                "The 'keep_mac_addresses' argument must be True or False.")
+            raise InvalidParameterException("The 'keep_mac_addresses' argument must be True or False.")
         elif isinstance(preserve_moid, bool) is False:
             raise InvalidParameterException("The 'preserve_moid' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
             raise InvalidParameterException(
                 "The date and time arguments most both be 'latest' or a specific date and time.")
 
-        self.log(
-            "vsphere_instant_recovery: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        self.log("vsphere_instant_recovery: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
-        self.log(
-            "vsphere_instant_recovery: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
+        self.log("vsphere_instant_recovery: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
         vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
 
         if date == 'latest' and time == 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
             snapshot_id = vm_summary['snapshots'][number_of_snapshots - 1]['id']
         else:
-            self.log(
-                "vsphere_instant_recovery: Converting the provided date/time into UTC.")
+            self.log("vsphere_instant_recovery: Converting the provided date/time into UTC.")
             snapshot_date_time = self._date_time_conversion(date, time)
 
             current_snapshots = {}
             for snapshot in vm_summary['snapshots']:
                 current_snapshots[snapshot['id']] = snapshot['date']
 
-            self.log(
-                "vsphere_instant_recovery: Searching for the provided snapshot.")
+            self.log("vsphere_instant_recovery: Searching for the provided snapshot.")
             for id, date_time in current_snapshots.items():
                 if snapshot_date_time in date_time:
                     snapshot_id = id
@@ -523,11 +517,10 @@ class Data_Management(_API):
             config['keepMacAddresses'] = keep_mac_addresses
             config['preserveMoid'] = preserve_moid
 
-            self.log(
-                "vsphere_instant_recovery: Instantly Recovering the snapshot taken on {} at {} for vSphere VM '{}'.".format(
-                    date,
-                    time,
-                    vm_name))
+            self.log("vsphere_instant_recovery: Instantly Recovering the snapshot taken on {} at {} for vSphere VM '{}'.".format(
+                date,
+                time,
+                vm_name))
 
             return self.post('v1', '/vmware/vm/snapshot/{}/instant_recover'.format(snapshot_id), config, timeout)
 
