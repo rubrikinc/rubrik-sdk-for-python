@@ -667,27 +667,18 @@ class Data_Management(_API):
             dict -- The full API response for `POST /managed_volume/{id}/begin_snapshot`.
         """
 
-        self.log(
-            "begin_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
-        managed_volume_id = self.object_id(
-            name, 'managed_volume', timeout=timeout)
+        self.log("begin_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
+        managed_volume_id = self.object_id(name, 'managed_volume', timeout=timeout)
 
-        self.log(
-            "begin_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
-        managed_volume_summary = self.get(
-            'internal', '/managed_volume/{}'.format(managed_volume_id), timeout=timeout)
+        self.log("begin_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
+        managed_volume_summary = self.get('internal', '/managed_volume/{}'.format(managed_volume_id), timeout=timeout)
 
         if not managed_volume_summary['isWritable']:
-            self.log(
-                "begin_managed_volume_snapshot: Setting the Managed Volume '{}' to a writeable state.".format(name))
-            return self.post(
-                'internal',
-                '/managed_volume/{}/begin_snapshot'.format(managed_volume_id),
-                config={},
-                timeout=timeout)
+            self.log("begin_managed_volume_snapshot: Setting the Managed Volume '{}' to a writeable state.".format(name))
+            return self.post('internal', '/managed_volume/{}/begin_snapshot'.format(managed_volume_id),
+                             config={}, timeout=timeout)
         else:
-            return "No change required. The Managed Volume '{}' is already assigned in a writeable state.".format(
-                name)
+            return "No change required. The Managed Volume '{}' is already assigned in a writeable state.".format(name)
 
     def end_managed_volume_snapshot(self, name, sla_name='current', timeout=30):
         """Close a managed volume for writes. A snapshot will be created containing all writes since the last begin snapshot call.
@@ -704,15 +695,11 @@ class Data_Management(_API):
             dict -- The full API response for `POST /managed_volume/{id}/end_snapshot`.
         """
 
-        self.log(
-            "end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
-        managed_volume_id = self.object_id(
-            name, 'managed_volume', timeout=timeout)
+        self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
+        managed_volume_id = self.object_id(name, 'managed_volume', timeout=timeout)
 
-        self.log(
-            "end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
-        managed_volume_summary = self.get(
-            "internal", "/managed_volume/{}".format(managed_volume_id), timeout=timeout)
+        self.log("end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
+        managed_volume_summary = self.get("internal", "/managed_volume/{}".format(managed_volume_id), timeout=timeout)
 
         if not managed_volume_summary['isWritable']:
             return "No change required. The Managed Volume 'name' is already assigned in a read only state."
@@ -725,8 +712,7 @@ class Data_Management(_API):
                     "The Managed Volume '{}' does not have a SLA assigned currently assigned. You must populate the sla_name argument.".format(name))
             config = {}
         else:
-            self.log(
-                "end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+            self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
             sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
