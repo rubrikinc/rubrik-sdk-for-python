@@ -4561,9 +4561,9 @@ def test_vsphere_live_mount_specific_date_time(rubrik, mocker):
     mock_post.return_value = mock_post_v1_vmware_vm_snapshot_id_mount()
 
     assert rubrik.vsphere_live_mount(
-    "vm_name",
-    date="1-15-2014",
-     time="1:30 AM") == mock_post_v1_vmware_vm_snapshot_id_mount()
+        "vm_name",
+        date="1-15-2014",
+        time="1:30 AM") == mock_post_v1_vmware_vm_snapshot_id_mount()
 
 
 def test_vsphere_live_mount_specific_host(rubrik, mocker):
@@ -5584,9 +5584,9 @@ def test_vsphere_instant_recovery_specific_date_time(rubrik, mocker):
     mock_post.return_value = mock_post_v1_vmware_vm_snapshot_id_instant_recover()
 
     assert rubrik.vsphere_live_mount(
-    "vm_name",
-    date="1-15-2014",
-     time="1:30 AM") == mock_post_v1_vmware_vm_snapshot_id_instant_recover()
+        "vm_name",
+        date="1-15-2014",
+        time="1:30 AM") == mock_post_v1_vmware_vm_snapshot_id_instant_recover()
 
 
 def test_vsphere_instant_recovery_specific_host(rubrik, mocker):
@@ -6221,7 +6221,8 @@ def test_pause_snapshots_idempotence(rubrik, mocker):
     mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    assert rubrik.pause_snapshots("object_name", "vmware") == "No change required. The vmware VM 'object_name' is already paused."
+    assert rubrik.pause_snapshots("object_name",
+                                  "vmware") == "No change required. The vmware VM 'object_name' is already paused."
 
 
 def test_pause_snapshots(rubrik, mocker):
@@ -7017,7 +7018,9 @@ def test_resume_snapshots_idempotence(rubrik, mocker):
     mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    assert rubrik.resume_snapshots("object_name", "vmware") == "No change required. The 'vmware' object 'object_name' is currently not paused."
+    assert rubrik.resume_snapshots(
+        "object_name",
+        "vmware") == "No change required. The 'vmware' object 'object_name' is currently not paused."
 
 
 def test_resume_snapshots(rubrik, mocker):
@@ -7669,7 +7672,8 @@ def test_begin_managed_volume_snapshot_idempotence(rubrik, mocker):
     mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
 
-    assert rubrik.begin_managed_volume_snapshot("name") == "No change required. The Managed Volume 'name' is already assigned in a writeable state."
+    assert rubrik.begin_managed_volume_snapshot(
+        "name") == "No change required. The Managed Volume 'name' is already assigned in a writeable state."
 
 
 def test_begin_managed_volume_snapshot(rubrik, mocker):
@@ -7978,7 +7982,8 @@ def test_end_managed_volume_snapshot_idempotence(rubrik, mocker):
     mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
 
-    assert rubrik.end_managed_volume_snapshot("name") == "No change required. The Managed Volume 'name' is already assigned in a read only state."
+    assert rubrik.end_managed_volume_snapshot(
+        "name") == "No change required. The Managed Volume 'name' is already assigned in a read only state."
 
 
 def test_end_managed_volume_snapshot_invalid_current_sla_unassigned(rubrik, mocker):
@@ -8135,7 +8140,7 @@ def test_end_managed_volume_snapshot_invalid_current_sla_unassigned(rubrik, mock
 
     assert error_message == "The Managed Volume 'name' does not have a SLA assigned currently assigned. You must populate the sla_name argument."
 
-  
+
 def test_end_managed_volume_snapshot_invalid_current_sla_unprotected(rubrik, mocker):
 
     def mock_get_internal_managed_volume():
@@ -8473,6 +8478,7 @@ def test_end_managed_volume_snapshot_current_sla(rubrik, mocker):
 
     assert rubrik.end_managed_volume_snapshot("name") == mock_post_internal_managed_volume_id_begin_snapshot()
 
+
 def test_end_managed_volume_snapshot_specific_sla(rubrik, mocker):
 
     def mock_get_internal_managed_volume():
@@ -8719,9 +8725,252 @@ def test_end_managed_volume_snapshot_specific_sla(rubrik, mocker):
         }
 
     mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id(), mock_get_v1_sla_domain()]
+    mock_get.side_effect = [
+        mock_get_internal_managed_volume(),
+        mock_get_internal_managed_volume_id(),
+        mock_get_v1_sla_domain()]
 
     mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_managed_volume_id_begin_snapshot()
 
     assert rubrik.end_managed_volume_snapshot("name", "Gold") == mock_post_internal_managed_volume_id_begin_snapshot()
+
+
+def test_get_sla_objects_invalid_object_type(rubrik):
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.get_sla_objects("Gold", "not_a_valid_object_type")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The get_sla_object() object_type argument must be one of the following: ['vmware']."
+
+
+def test_get_sla_objects_not_protecting_objects(rubrik, mocker):
+
+    def mock_get_v1_sla_domain():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "name": "Gold",
+                    "frequencies": [
+                        {
+                            "timeUnit": "string",
+                            "frequency": 0,
+                            "retention": 0
+                        }
+                    ],
+                    "allowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "firstFullAllowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "localRetentionLimit": 0,
+                    "maxLocalRetentionLimit": 0,
+                    "archivalSpecs": [
+                        {
+                            "locationId": "string",
+                            "archivalThreshold": 0
+                        }
+                    ],
+                    "replicationSpecs": [
+                        {
+                            "locationId": "string",
+                            "retentionLimit": 0
+                        }
+                    ],
+                    "numDbs": 0,
+                    "numOracleDbs": 0,
+                    "numFilesets": 0,
+                    "numHypervVms": 0,
+                    "numNutanixVms": 0,
+                    "numManagedVolumes": 0,
+                    "numStorageArrayVolumeGroups": 0,
+                    "numWindowsVolumeGroups": 0,
+                    "numLinuxHosts": 0,
+                    "numShares": 0,
+                    "numWindowsHosts": 0,
+                    "numVms": 0,
+                    "numEc2Instances": 0,
+                    "numVcdVapps": 0,
+                    "numProtectedObjects": 0,
+                    "isDefault": True,
+                    "uiColor": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_vmware_vm():
+        return {
+            "hasMore": False,
+            "data": [],
+            "total": 0
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_sla_domain(), mock_get_v1_vmware_vm()]
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.get_sla_objects("Gold", "vmware")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The SLA 'Gold' is currently not protecting any vmware objects."
+
+
+def test_get_sla_objects(rubrik, mocker):
+
+    def mock_get_v1_sla_domain():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "name": "Gold",
+                    "frequencies": [
+                        {
+                            "timeUnit": "string",
+                            "frequency": 0,
+                            "retention": 0
+                        }
+                    ],
+                    "allowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "firstFullAllowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "localRetentionLimit": 0,
+                    "maxLocalRetentionLimit": 0,
+                    "archivalSpecs": [
+                        {
+                            "locationId": "string",
+                            "archivalThreshold": 0
+                        }
+                    ],
+                    "replicationSpecs": [
+                        {
+                            "locationId": "string",
+                            "retentionLimit": 0
+                        }
+                    ],
+                    "numDbs": 0,
+                    "numOracleDbs": 0,
+                    "numFilesets": 0,
+                    "numHypervVms": 0,
+                    "numNutanixVms": 0,
+                    "numManagedVolumes": 0,
+                    "numStorageArrayVolumeGroups": 0,
+                    "numWindowsVolumeGroups": 0,
+                    "numLinuxHosts": 0,
+                    "numShares": 0,
+                    "numWindowsHosts": 0,
+                    "numVms": 0,
+                    "numEc2Instances": 0,
+                    "numVcdVapps": 0,
+                    "numProtectedObjects": 0,
+                    "isDefault": True,
+                    "uiColor": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_vmware_vm():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "sla_id",
+                    "name": "object_name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "moid": "string",
+                    "vcenterId": "string",
+                    "hostName": "string",
+                    "hostId": "string",
+                    "clusterName": "string",
+                    "snapshotConsistencyMandate": "UNKNOWN",
+                    "powerStatus": "string",
+                    "protectionDate": "2019-05-05T18:57:06.133Z",
+                    "ipAddress": "string",
+                    "agentStatus": {
+                        "agentStatus": "string",
+                        "disconnectReason": "string"
+                    },
+                    "toolsInstalled": True,
+                    "guestOsName": "string",
+                    "isReplicationEnabled": True,
+                    "folderPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "infraPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "vmwareToolsInstalled": True,
+                    "isRelic": True,
+                    "guestCredentialAuthorizationStatus": "string",
+                    "cloudInstantiationSpec": {
+                        "imageRetentionInSeconds": 0
+                    },
+                    "parentAppInfo": {
+                        "id": "string",
+                        "isProtectedThruHierarchy": True
+                    }
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_sla_domain(), mock_get_v1_vmware_vm()]
+
+    assert rubrik.get_sla_objects("Gold", "vmware") == {'object_name': 'sla_id'}
