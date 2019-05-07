@@ -6725,7 +6725,7 @@ def test_pause_snapshots(rubrik, mocker):
     mock_patch.return_value = mock_patch_v1_vmware_vm_id()
 
     assert rubrik.pause_snapshots("object_name", "vmware") == mock_patch_v1_vmware_vm_id()
- 
+
 
 def test_resume_snapshots_invalid_object_type(rubrik):
     with pytest.raises(InvalidParameterException) as error:
@@ -7018,8 +7018,8 @@ def test_resume_snapshots_idempotence(rubrik, mocker):
     mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
     assert rubrik.resume_snapshots("object_name", "vmware") == "No change required. The 'vmware' object 'object_name' is currently not paused."
-    
- 
+
+
 def test_resume_snapshots(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
@@ -7520,3 +7520,1208 @@ def test_resume_snapshots(rubrik, mocker):
     mock_patch.return_value = mock_patch_v1_vmware_vm_id()
 
     assert rubrik.resume_snapshots("object_name", "vmware") == mock_patch_v1_vmware_vm_id()
+
+
+def test_begin_managed_volume_snapshot_idempotence(rubrik, mocker):
+
+    def mock_get_internal_managed_volume():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "snapshotCount": 0,
+                    "pendingSnapshotCount": 0,
+                    "isRelic": True,
+                    "applicationTag": "Oracle",
+                    "numChannels": 0,
+                    "volumeSize": 0,
+                    "usedSize": 0,
+                    "state": "ExportRequested",
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "mainExport": {
+                        "isActive": True,
+                        "channels": [
+                            {
+                                "ipAddress": "string",
+                                "mountPoint": "string"
+                            }
+                        ],
+                        "config": {
+                            "hostPatterns": [
+                                "string"
+                            ],
+                            "nodeHint": [
+                                "string"
+                            ],
+                            "smbDomainName": "string",
+                            "smbValidUsers": [
+                                "string"
+                            ],
+                            "smbValidIps": [
+                                "string"
+                            ],
+                            "subnet": "string",
+                            "shareType": "NFS"
+                        }
+                    },
+                    "isWritable": True,
+                    "links": [
+                        {
+                            "href": "string",
+                            "rel": "string"
+                        }
+                    ],
+                    "isDeleted": True,
+                    "shareType": "NFS",
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_internal_managed_volume_id():
+        return {
+            "id": "string",
+            "name": "string",
+            "configuredSlaDomainId": "string",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "slaAssignment": "Derived",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "effectiveSlaSourceObjectId": "string",
+            "effectiveSlaSourceObjectName": "string",
+            "snapshotCount": 0,
+            "pendingSnapshotCount": 0,
+            "isRelic": True,
+            "applicationTag": "Oracle",
+            "numChannels": 0,
+            "volumeSize": 0,
+            "usedSize": 0,
+            "state": "ExportRequested",
+            "hostPatterns": [
+                "string"
+            ],
+            "mainExport": {
+                "isActive": True,
+                "channels": [
+                    {
+                        "ipAddress": "string",
+                        "mountPoint": "string"
+                    }
+                ],
+                "config": {
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "nodeHint": [
+                        "string"
+                    ],
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ],
+                    "subnet": "string",
+                    "shareType": "NFS"
+                }
+            },
+            "isWritable": True,
+            "links": [
+                {
+                    "href": "string",
+                    "rel": "string"
+                }
+            ],
+            "isDeleted": True,
+            "shareType": "NFS",
+            "smbDomainName": "string",
+            "smbValidUsers": [
+                "string"
+            ],
+            "smbValidIps": [
+                "string"
+            ]
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+
+    assert rubrik.begin_managed_volume_snapshot("name") == "No change required. The Managed Volume 'name' is already assigned in a writeable state."
+
+
+def test_begin_managed_volume_snapshot(rubrik, mocker):
+
+    def mock_get_internal_managed_volume():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "snapshotCount": 0,
+                    "pendingSnapshotCount": 0,
+                    "isRelic": True,
+                    "applicationTag": "Oracle",
+                    "numChannels": 0,
+                    "volumeSize": 0,
+                    "usedSize": 0,
+                    "state": "ExportRequested",
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "mainExport": {
+                        "isActive": True,
+                        "channels": [
+                            {
+                                "ipAddress": "string",
+                                "mountPoint": "string"
+                            }
+                        ],
+                        "config": {
+                            "hostPatterns": [
+                                "string"
+                            ],
+                            "nodeHint": [
+                                "string"
+                            ],
+                            "smbDomainName": "string",
+                            "smbValidUsers": [
+                                "string"
+                            ],
+                            "smbValidIps": [
+                                "string"
+                            ],
+                            "subnet": "string",
+                            "shareType": "NFS"
+                        }
+                    },
+                    "isWritable": True,
+                    "links": [
+                        {
+                            "href": "string",
+                            "rel": "string"
+                        }
+                    ],
+                    "isDeleted": True,
+                    "shareType": "NFS",
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_internal_managed_volume_id():
+        return {
+            "id": "string",
+            "name": "string",
+            "configuredSlaDomainId": "string",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "slaAssignment": "Derived",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "effectiveSlaSourceObjectId": "string",
+            "effectiveSlaSourceObjectName": "string",
+            "snapshotCount": 0,
+            "pendingSnapshotCount": 0,
+            "isRelic": True,
+            "applicationTag": "Oracle",
+            "numChannels": 0,
+            "volumeSize": 0,
+            "usedSize": 0,
+            "state": "ExportRequested",
+            "hostPatterns": [
+                "string"
+            ],
+            "mainExport": {
+                "isActive": True,
+                "channels": [
+                    {
+                        "ipAddress": "string",
+                        "mountPoint": "string"
+                    }
+                ],
+                "config": {
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "nodeHint": [
+                        "string"
+                    ],
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ],
+                    "subnet": "string",
+                    "shareType": "NFS"
+                }
+            },
+            "isWritable": False,
+            "links": [
+                {
+                    "href": "string",
+                    "rel": "string"
+                }
+            ],
+            "isDeleted": True,
+            "shareType": "NFS",
+            "smbDomainName": "string",
+            "smbValidUsers": [
+                "string"
+            ],
+            "smbValidIps": [
+                "string"
+            ]
+        }
+
+    def mock_post_internal_managed_volume_id_begin_snapshot():
+        return {
+            "snapshotId": "string",
+            "ownerId": "string"
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post.return_value = mock_post_internal_managed_volume_id_begin_snapshot()
+
+    assert rubrik.begin_managed_volume_snapshot("name") == mock_post_internal_managed_volume_id_begin_snapshot()
+
+
+def test_end_managed_volume_snapshot_idempotence(rubrik, mocker):
+
+    def mock_get_internal_managed_volume():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "snapshotCount": 0,
+                    "pendingSnapshotCount": 0,
+                    "isRelic": True,
+                    "applicationTag": "Oracle",
+                    "numChannels": 0,
+                    "volumeSize": 0,
+                    "usedSize": 0,
+                    "state": "ExportRequested",
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "mainExport": {
+                        "isActive": True,
+                        "channels": [
+                            {
+                                "ipAddress": "string",
+                                "mountPoint": "string"
+                            }
+                        ],
+                        "config": {
+                            "hostPatterns": [
+                                "string"
+                            ],
+                            "nodeHint": [
+                                "string"
+                            ],
+                            "smbDomainName": "string",
+                            "smbValidUsers": [
+                                "string"
+                            ],
+                            "smbValidIps": [
+                                "string"
+                            ],
+                            "subnet": "string",
+                            "shareType": "NFS"
+                        }
+                    },
+                    "isWritable": False,
+                    "links": [
+                        {
+                            "href": "string",
+                            "rel": "string"
+                        }
+                    ],
+                    "isDeleted": True,
+                    "shareType": "NFS",
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_internal_managed_volume_id():
+        return {
+            "id": "string",
+            "name": "string",
+            "configuredSlaDomainId": "string",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "slaAssignment": "Derived",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "effectiveSlaSourceObjectId": "string",
+            "effectiveSlaSourceObjectName": "string",
+            "snapshotCount": 0,
+            "pendingSnapshotCount": 0,
+            "isRelic": True,
+            "applicationTag": "Oracle",
+            "numChannels": 0,
+            "volumeSize": 0,
+            "usedSize": 0,
+            "state": "ExportRequested",
+            "hostPatterns": [
+                "string"
+            ],
+            "mainExport": {
+                "isActive": True,
+                "channels": [
+                    {
+                        "ipAddress": "string",
+                        "mountPoint": "string"
+                    }
+                ],
+                "config": {
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "nodeHint": [
+                        "string"
+                    ],
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ],
+                    "subnet": "string",
+                    "shareType": "NFS"
+                }
+            },
+            "isWritable": False,
+            "links": [
+                {
+                    "href": "string",
+                    "rel": "string"
+                }
+            ],
+            "isDeleted": True,
+            "shareType": "NFS",
+            "smbDomainName": "string",
+            "smbValidUsers": [
+                "string"
+            ],
+            "smbValidIps": [
+                "string"
+            ]
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+
+    assert rubrik.end_managed_volume_snapshot("name") == "No change required. The Managed Volume 'name' is already assigned in a read only state."
+
+
+def test_end_managed_volume_snapshot_invalid_current_sla_unassigned(rubrik, mocker):
+
+    def mock_get_internal_managed_volume():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "snapshotCount": 0,
+                    "pendingSnapshotCount": 0,
+                    "isRelic": True,
+                    "applicationTag": "Oracle",
+                    "numChannels": 0,
+                    "volumeSize": 0,
+                    "usedSize": 0,
+                    "state": "ExportRequested",
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "mainExport": {
+                        "isActive": True,
+                        "channels": [
+                            {
+                                "ipAddress": "string",
+                                "mountPoint": "string"
+                            }
+                        ],
+                        "config": {
+                            "hostPatterns": [
+                                "string"
+                            ],
+                            "nodeHint": [
+                                "string"
+                            ],
+                            "smbDomainName": "string",
+                            "smbValidUsers": [
+                                "string"
+                            ],
+                            "smbValidIps": [
+                                "string"
+                            ],
+                            "subnet": "string",
+                            "shareType": "NFS"
+                        }
+                    },
+                    "isWritable": False,
+                    "links": [
+                        {
+                            "href": "string",
+                            "rel": "string"
+                        }
+                    ],
+                    "isDeleted": True,
+                    "shareType": "NFS",
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_internal_managed_volume_id():
+        return {
+            "id": "string",
+            "name": "string",
+            "configuredSlaDomainId": "string",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "slaAssignment": "Unassigned",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "effectiveSlaSourceObjectId": "string",
+            "effectiveSlaSourceObjectName": "string",
+            "snapshotCount": 0,
+            "pendingSnapshotCount": 0,
+            "isRelic": True,
+            "applicationTag": "Oracle",
+            "numChannels": 0,
+            "volumeSize": 0,
+            "usedSize": 0,
+            "state": "ExportRequested",
+            "hostPatterns": [
+                "string"
+            ],
+            "mainExport": {
+                "isActive": True,
+                "channels": [
+                    {
+                        "ipAddress": "string",
+                        "mountPoint": "string"
+                    }
+                ],
+                "config": {
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "nodeHint": [
+                        "string"
+                    ],
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ],
+                    "subnet": "string",
+                    "shareType": "NFS"
+                }
+            },
+            "isWritable": True,
+            "links": [
+                {
+                    "href": "string",
+                    "rel": "string"
+                }
+            ],
+            "isDeleted": True,
+            "shareType": "NFS",
+            "smbDomainName": "string",
+            "smbValidUsers": [
+                "string"
+            ],
+            "smbValidIps": [
+                "string"
+            ]
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.end_managed_volume_snapshot("name")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The Managed Volume 'name' does not have a SLA assigned currently assigned. You must populate the sla_name argument."
+
+  
+def test_end_managed_volume_snapshot_invalid_current_sla_unprotected(rubrik, mocker):
+
+    def mock_get_internal_managed_volume():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "snapshotCount": 0,
+                    "pendingSnapshotCount": 0,
+                    "isRelic": True,
+                    "applicationTag": "Oracle",
+                    "numChannels": 0,
+                    "volumeSize": 0,
+                    "usedSize": 0,
+                    "state": "ExportRequested",
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "mainExport": {
+                        "isActive": True,
+                        "channels": [
+                            {
+                                "ipAddress": "string",
+                                "mountPoint": "string"
+                            }
+                        ],
+                        "config": {
+                            "hostPatterns": [
+                                "string"
+                            ],
+                            "nodeHint": [
+                                "string"
+                            ],
+                            "smbDomainName": "string",
+                            "smbValidUsers": [
+                                "string"
+                            ],
+                            "smbValidIps": [
+                                "string"
+                            ],
+                            "subnet": "string",
+                            "shareType": "NFS"
+                        }
+                    },
+                    "isWritable": False,
+                    "links": [
+                        {
+                            "href": "string",
+                            "rel": "string"
+                        }
+                    ],
+                    "isDeleted": True,
+                    "shareType": "NFS",
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_internal_managed_volume_id():
+        return {
+            "id": "string",
+            "name": "string",
+            "configuredSlaDomainId": "string",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "slaAssignment": "string",
+            "effectiveSlaDomainId": "UNPROTECTED",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "effectiveSlaSourceObjectId": "string",
+            "effectiveSlaSourceObjectName": "string",
+            "snapshotCount": 0,
+            "pendingSnapshotCount": 0,
+            "isRelic": True,
+            "applicationTag": "Oracle",
+            "numChannels": 0,
+            "volumeSize": 0,
+            "usedSize": 0,
+            "state": "ExportRequested",
+            "hostPatterns": [
+                "string"
+            ],
+            "mainExport": {
+                "isActive": True,
+                "channels": [
+                    {
+                        "ipAddress": "string",
+                        "mountPoint": "string"
+                    }
+                ],
+                "config": {
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "nodeHint": [
+                        "string"
+                    ],
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ],
+                    "subnet": "string",
+                    "shareType": "NFS"
+                }
+            },
+            "isWritable": True,
+            "links": [
+                {
+                    "href": "string",
+                    "rel": "string"
+                }
+            ],
+            "isDeleted": True,
+            "shareType": "NFS",
+            "smbDomainName": "string",
+            "smbValidUsers": [
+                "string"
+            ],
+            "smbValidIps": [
+                "string"
+            ]
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.end_managed_volume_snapshot("name")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The Managed Volume 'name' does not have a SLA assigned currently assigned. You must populate the sla_name argument."
+
+
+def test_end_managed_volume_snapshot_current_sla(rubrik, mocker):
+
+    def mock_get_internal_managed_volume():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "snapshotCount": 0,
+                    "pendingSnapshotCount": 0,
+                    "isRelic": True,
+                    "applicationTag": "Oracle",
+                    "numChannels": 0,
+                    "volumeSize": 0,
+                    "usedSize": 0,
+                    "state": "ExportRequested",
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "mainExport": {
+                        "isActive": True,
+                        "channels": [
+                            {
+                                "ipAddress": "string",
+                                "mountPoint": "string"
+                            }
+                        ],
+                        "config": {
+                            "hostPatterns": [
+                                "string"
+                            ],
+                            "nodeHint": [
+                                "string"
+                            ],
+                            "smbDomainName": "string",
+                            "smbValidUsers": [
+                                "string"
+                            ],
+                            "smbValidIps": [
+                                "string"
+                            ],
+                            "subnet": "string",
+                            "shareType": "NFS"
+                        }
+                    },
+                    "isWritable": False,
+                    "links": [
+                        {
+                            "href": "string",
+                            "rel": "string"
+                        }
+                    ],
+                    "isDeleted": True,
+                    "shareType": "NFS",
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_internal_managed_volume_id():
+        return {
+            "id": "string",
+            "name": "string",
+            "configuredSlaDomainId": "string",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "slaAssignment": "string",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "effectiveSlaSourceObjectId": "string",
+            "effectiveSlaSourceObjectName": "string",
+            "snapshotCount": 0,
+            "pendingSnapshotCount": 0,
+            "isRelic": True,
+            "applicationTag": "Oracle",
+            "numChannels": 0,
+            "volumeSize": 0,
+            "usedSize": 0,
+            "state": "ExportRequested",
+            "hostPatterns": [
+                "string"
+            ],
+            "mainExport": {
+                "isActive": True,
+                "channels": [
+                    {
+                        "ipAddress": "string",
+                        "mountPoint": "string"
+                    }
+                ],
+                "config": {
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "nodeHint": [
+                        "string"
+                    ],
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ],
+                    "subnet": "string",
+                    "shareType": "NFS"
+                }
+            },
+            "isWritable": True,
+            "links": [
+                {
+                    "href": "string",
+                    "rel": "string"
+                }
+            ],
+            "isDeleted": True,
+            "shareType": "NFS",
+            "smbDomainName": "string",
+            "smbValidUsers": [
+                "string"
+            ],
+            "smbValidIps": [
+                "string"
+            ]
+        }
+
+    def mock_post_internal_managed_volume_id_begin_snapshot():
+        return {
+            "id": "string",
+            "date": "2019-05-07T00:59:46.025Z",
+            "expirationDate": "2019-05-07T00:59:46.025Z",
+            "sourceObjectType": "string",
+            "isOnDemandSnapshot": True,
+            "cloudState": 0,
+            "consistencyLevel": "string",
+            "indexState": 0,
+            "replicationLocationIds": [
+                "string"
+            ],
+            "archivalLocationIds": [
+                "string"
+            ],
+            "slaId": "string",
+            "slaName": "string",
+            "links": {
+                "exportLink": {
+                    "href": "string",
+                    "rel": "string"
+                },
+                "self": {
+                    "href": "string",
+                    "rel": "string"
+                }
+            }
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post.return_value = mock_post_internal_managed_volume_id_begin_snapshot()
+
+    assert rubrik.end_managed_volume_snapshot("name") == mock_post_internal_managed_volume_id_begin_snapshot()
+
+def test_end_managed_volume_snapshot_specific_sla(rubrik, mocker):
+
+    def mock_get_internal_managed_volume():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "snapshotCount": 0,
+                    "pendingSnapshotCount": 0,
+                    "isRelic": True,
+                    "applicationTag": "Oracle",
+                    "numChannels": 0,
+                    "volumeSize": 0,
+                    "usedSize": 0,
+                    "state": "ExportRequested",
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "mainExport": {
+                        "isActive": True,
+                        "channels": [
+                            {
+                                "ipAddress": "string",
+                                "mountPoint": "string"
+                            }
+                        ],
+                        "config": {
+                            "hostPatterns": [
+                                "string"
+                            ],
+                            "nodeHint": [
+                                "string"
+                            ],
+                            "smbDomainName": "string",
+                            "smbValidUsers": [
+                                "string"
+                            ],
+                            "smbValidIps": [
+                                "string"
+                            ],
+                            "subnet": "string",
+                            "shareType": "NFS"
+                        }
+                    },
+                    "isWritable": False,
+                    "links": [
+                        {
+                            "href": "string",
+                            "rel": "string"
+                        }
+                    ],
+                    "isDeleted": True,
+                    "shareType": "NFS",
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_internal_managed_volume_id():
+        return {
+            "id": "string",
+            "name": "string",
+            "configuredSlaDomainId": "string",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "slaAssignment": "string",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "effectiveSlaSourceObjectId": "string",
+            "effectiveSlaSourceObjectName": "string",
+            "snapshotCount": 0,
+            "pendingSnapshotCount": 0,
+            "isRelic": True,
+            "applicationTag": "Oracle",
+            "numChannels": 0,
+            "volumeSize": 0,
+            "usedSize": 0,
+            "state": "ExportRequested",
+            "hostPatterns": [
+                "string"
+            ],
+            "mainExport": {
+                "isActive": True,
+                "channels": [
+                    {
+                        "ipAddress": "string",
+                        "mountPoint": "string"
+                    }
+                ],
+                "config": {
+                    "hostPatterns": [
+                        "string"
+                    ],
+                    "nodeHint": [
+                        "string"
+                    ],
+                    "smbDomainName": "string",
+                    "smbValidUsers": [
+                        "string"
+                    ],
+                    "smbValidIps": [
+                        "string"
+                    ],
+                    "subnet": "string",
+                    "shareType": "NFS"
+                }
+            },
+            "isWritable": True,
+            "links": [
+                {
+                    "href": "string",
+                    "rel": "string"
+                }
+            ],
+            "isDeleted": True,
+            "shareType": "NFS",
+            "smbDomainName": "string",
+            "smbValidUsers": [
+                "string"
+            ],
+            "smbValidIps": [
+                "string"
+            ]
+        }
+
+    def mock_get_v1_sla_domain():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "name": "Gold",
+                    "frequencies": [
+                        {
+                            "timeUnit": "string",
+                            "frequency": 0,
+                            "retention": 0
+                        }
+                    ],
+                    "allowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "firstFullAllowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "localRetentionLimit": 0,
+                    "maxLocalRetentionLimit": 0,
+                    "archivalSpecs": [
+                        {
+                            "locationId": "string",
+                            "archivalThreshold": 0
+                        }
+                    ],
+                    "replicationSpecs": [
+                        {
+                            "locationId": "string",
+                            "retentionLimit": 0
+                        }
+                    ],
+                    "numDbs": 0,
+                    "numOracleDbs": 0,
+                    "numFilesets": 0,
+                    "numHypervVms": 0,
+                    "numNutanixVms": 0,
+                    "numManagedVolumes": 0,
+                    "numStorageArrayVolumeGroups": 0,
+                    "numWindowsVolumeGroups": 0,
+                    "numLinuxHosts": 0,
+                    "numShares": 0,
+                    "numWindowsHosts": 0,
+                    "numVms": 0,
+                    "numEc2Instances": 0,
+                    "numVcdVapps": 0,
+                    "numProtectedObjects": 0,
+                    "isDefault": True,
+                    "uiColor": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_post_internal_managed_volume_id_begin_snapshot():
+        return {
+            "id": "string",
+            "date": "2019-05-07T00:59:46.025Z",
+            "expirationDate": "2019-05-07T00:59:46.025Z",
+            "sourceObjectType": "string",
+            "isOnDemandSnapshot": True,
+            "cloudState": 0,
+            "consistencyLevel": "string",
+            "indexState": 0,
+            "replicationLocationIds": [
+                "string"
+            ],
+            "archivalLocationIds": [
+                "string"
+            ],
+            "slaId": "string",
+            "slaName": "string",
+            "links": {
+                "exportLink": {
+                    "href": "string",
+                    "rel": "string"
+                },
+                "self": {
+                    "href": "string",
+                    "rel": "string"
+                }
+            }
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id(), mock_get_v1_sla_domain()]
+
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post.return_value = mock_post_internal_managed_volume_id_begin_snapshot()
+
+    assert rubrik.end_managed_volume_snapshot("name", "Gold") == mock_post_internal_managed_volume_id_begin_snapshot()
