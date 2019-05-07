@@ -599,27 +599,20 @@ class Data_Management(_API):
 
         if object_type == 'vmware':
 
-            self.log(
-                "pause_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+            self.log("pause_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
-            self.log(
-                "pause_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-            api_request = self.get(
-                'v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+            self.log("pause_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
+            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
 
             if api_request['blackoutWindowStatus']['isSnappableBlackoutActive']:
-                return "No change required. The '{}' '{}' is already paused.".format(
-                    object_type, object_name)
+                return "No change required. The {} VM '{}' is already paused.".format(object_type, object_name)
             else:
-                self.log(
-                    "pause_snapshots: Pausing Snaphots for the vSphere VM '{}'.".format(object_name))
-
+                self.log("pause_snapshots: Pausing Snaphots for the vSphere VM '{}'.".format(object_name))
                 config = {}
                 config['isVmPaused'] = True
 
-                return self.patch(
-                    'v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
+                return self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
 
     def resume_snapshots(self, object_name, object_type, timeout=180):
         """Resume all snapshot activity for the provided object.
