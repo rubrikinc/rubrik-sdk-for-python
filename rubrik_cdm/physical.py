@@ -17,6 +17,7 @@ This module contains the Rubrik SDK Physical class.
 
 import sys
 from .api import Api
+from .exceptions import InvalidParameterException
 
 _API = Api
 
@@ -28,7 +29,7 @@ class Physical(_API):
         """Add a physical host to the Rubrik cluster.
 
         Arguments:
-            hostname {str} -- The hostname or IP Address of the physical host you want to add to the Rubrik cluster.
+            hostname {str} or [list] -- The hostname(s) or IP Address(es) of the physical host you want to add to the Rubrik cluster.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {60})
@@ -37,21 +38,51 @@ class Physical(_API):
             str -- No change requird. The host '`hostname`' is already connected to the Rubrik cluster.
             dict -- The full API response for `POST /v1/host`.
         """
+        count_of_hosts = len(hostname)
+
+        if(count_of_hosts == 0):
+            raise InvalidParameterException("The provided hostname list is empty")
 
         self.log('Searching the Rubrik cluster for the current hosts.')
         current_hosts = self.get('v1', '/host', timeout=timeout)
 
-        for host in current_hosts['data']:
-            if host['hostname'] == hostname:
-                return "No change requird. The host '{}' is already connected to the Rubrik cluster.".format(
-                    hostname)
+        if isinstance(hostname, list):
 
-        config = {}
-        config['hostname'] = hostname
-        config['hasAgent'] = True
+            for host in current_hosts['data']:
+                for single_host in hostname:
+                    if host['hostname'] == single_host:
+                        hostname.remove(single_host)
+                        self.log("The host '{}' is already connected to the Rubrik cluster. '{}' skipped.".format(
+                            single_host, single_host))
 
-        self.log("Adding the host '{}' to the Rubrik cluster.".format(hostname))
-        return self.post('v1', '/host', config, timeout)
+            config = []
+
+            self.log("Adding '{}' Physical Host(s)".format(count_of_hosts))
+
+            if count_of_hosts != 0:
+                for hosts in hostname:
+                    config += [{
+                        'hostname': hosts,
+                        'hasAgent': True
+                    }]
+
+                self.log("Adding the following physical host(s): '{}'".format(hostname))
+                return self.post('internal', '/host/bulk', config, timeout)
+            else:
+                return "No Change Required. All Hosts Already added or supplied list was empty"
+        else:
+            for host in current_hosts['data']:
+                if host['hostname'] == hostname:
+                    return "No change required. The host '{}' is already connected to the Rubrik cluster.".format(
+                        hostname)
+
+            config = {}
+            config['hostname'] = hostname
+            config['hasAgent'] = True
+
+            self.log("Adding the host '{}' to the Rubrik cluster.".format(hostname))
+            return self.post('v1', '/host', config, timeout)
+
 
     def delete_physical_host(self, hostname, timeout=120):
         """Delete a physical host from the Rubrik cluster.
