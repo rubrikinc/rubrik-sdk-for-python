@@ -37,7 +37,9 @@ class Physical(_API):
             str -- No change requird. The host '`hostname`' is already connected to the Rubrik cluster.
             dict -- The full API response for `POST /v1/host`.
         """
-        if(len(hostname) == 0):
+        count_of_hosts = len(hostname)
+
+        if(count_of_hosts == 0):
             self.log("No Change Required. No host(s) provided.")
         else:
             if isinstance(hostname, list):
@@ -52,7 +54,6 @@ class Physical(_API):
                                 single_host, single_host))
 
                 config = []
-                count_of_hosts = len(hostname)
 
                 self.log("Adding '{}' Physical Host(s)".format(count_of_hosts))
 
@@ -66,7 +67,7 @@ class Physical(_API):
                     self.log("Adding the following physical host(s): '{}'".format(hostname))
                     return self.post('internal', '/host/bulk', config, timeout)
                 else:
-                    return "All Hosts Already added or supplied list was empty"
+                    return "No Change Required. All Hosts Already added or supplied list was empty"
             else:
                 self.log('Searching the Rubrik cluster for the current hosts.')
                 current_hosts = self.get('v1', '/host', timeout=timeout)
