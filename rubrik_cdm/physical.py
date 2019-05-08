@@ -17,6 +17,7 @@ This module contains the Rubrik SDK Physical class.
 
 import sys
 from .api import Api
+from .exceptions import InvalidParameterException
 
 _API = Api
 
@@ -40,7 +41,7 @@ class Physical(_API):
         count_of_hosts = len(hostname)
 
         if(count_of_hosts == 0):
-            self.log("No Change Required. No host(s) provided.")
+            raise InvalidParameterException("The provided hostname list is empty")
         else:
             if isinstance(hostname, list):
                 self.log('Searching the Rubrik cluster for the current hosts.')
@@ -50,7 +51,7 @@ class Physical(_API):
                     for single_host in hostname:
                         if host['hostname'] == single_host:
                             hostname.remove(single_host)
-                            self.log("No change required. The host '{}' is already connected to the Rubrik cluster. '{}' skipped.".format(
+                            self.log("The host '{}' is already connected to the Rubrik cluster. '{}' skipped.".format(
                                 single_host, single_host))
 
                 config = []
