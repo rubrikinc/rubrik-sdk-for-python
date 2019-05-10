@@ -225,7 +225,7 @@ class Bootstrap(_API):
                     "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
                 )
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, ipmo_config=None,
                       enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
         """Issues a bootstrap request to a specified Rubrik cluster
 
@@ -238,6 +238,7 @@ class Bootstrap(_API):
 
         Keyword Arguments:
             node_config {dict} -- The Node Name and IP formatted as a dictionary. (default: {None})
+            ipmi_config {dict} -- The Node IPMI configuration and IP formatted as a dictionary. (default: {None})
             enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
             dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {['8.8.8.8']})
@@ -252,6 +253,10 @@ class Bootstrap(_API):
         if node_config is None or isinstance(node_config, dict) is not True:
             sys.exit(
                 'Error: You must provide a valid dictionary for "node_config".')
+            
+        if ipmi_config is None or isinstance(ipmi_config, dict) is not True:
+            sys.exit(
+                'Error: You must provide a valid dictionary for "ipmi_config".')
 
         if dns_search_domains is None:
             dns_search_domains = []
