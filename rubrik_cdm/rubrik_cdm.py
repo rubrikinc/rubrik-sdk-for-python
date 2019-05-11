@@ -225,7 +225,8 @@ class Bootstrap(_API):
                     "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
                 )
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, ipmo_config=None,
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,
+                      ipmi_config=None, ipmi_gateway=None, ipmi_subnet_mask=None, data_config=None, data_gateway=None, data_subnet_mask=None,
                       enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
         """Issues a bootstrap request to a specified Rubrik cluster
 
@@ -238,7 +239,8 @@ class Bootstrap(_API):
 
         Keyword Arguments:
             node_config {dict} -- The Node Name and IP formatted as a dictionary. (default: {None})
-            ipmi_config {dict} -- The Node IPMI configuration and IP formatted as a dictionary. (default: {None})
+            ipmi_config {dict} -- The IPMI IP formatted as a dictionary. (default: {None})
+            data_config {dict} -- The Data Network IP formatted as a dictionary. (default: {None})
             enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
             dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {['8.8.8.8']})
@@ -253,10 +255,30 @@ class Bootstrap(_API):
         if node_config is None or isinstance(node_config, dict) is not True:
             sys.exit(
                 'Error: You must provide a valid dictionary for "node_config".')
-            
-        if ipmi_config is None or isinstance(ipmi_config, dict) is not True:
+
+        if (ipmi_config is None or isinstance(ipmi_config, dict) is not True) and (ipmi_gateway is not None or ipmi_subnet_mask is not None):
             sys.exit(
                 'Error: You must provide a valid dictionary for "ipmi_config".')
+
+        if ipmi_config is not None and ipmi_gateway is None:
+            sys.exit(
+                'Error: You must provide a valid address for "ipmi_gateway".')
+
+        if ipmi_config is not None and ipmi_subnet_mask is None:
+            sys.exit(
+                'Error: You must provide a valid address for "ipmi_subnet_mask".')
+
+        if (data_config is None or isinstance(data_config, dict) is not True) and (data_gateway is not None or data_subnet_mask is not None):
+            sys.exit(
+                'Error: You must provide a valid dictionary for "data_config".')
+
+        if data_config is not None and data_gateway is None:
+            sys.exit(
+                'Error: You must provide a valid address for "data_gateway".')
+        
+            if data_config is not None and data_subnet_mask is None:
+            sys.exit(
+                'Error: You must provide a valid address for "data_subnet_mask".')
 
         if dns_search_domains is None:
             dns_search_domains = []
@@ -293,6 +315,20 @@ class Bootstrap(_API):
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['netmask'] = management_subnet_mask
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
+            
+        if ipmi_config is not None:
+            for node_name, ipmi_ip in ipmi_config.items():
+                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig'] = {}
+                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['netmask'] = ipmi_subnet_mask
+                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['gateway'] = ipmi_gateway
+                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['address'] = ipmi_ip
+
+        if data_config is not None:
+            for node_name, data_ip in data_config.items():
+                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig'] = {}
+                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['netmask'] = data_subnet_mask
+                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['gateway'] = data_gateway
+                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['address'] = data_ip
 
         while True:
 
