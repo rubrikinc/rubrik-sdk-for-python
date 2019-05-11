@@ -2,7 +2,10 @@
 
 Issues a bootstrap request to a specified Rubrik cluster
 ```py
-def setup_cluster(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30)
+def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, 
+node_config=None, ipmi_config=None, ipmi_gateway=None, ipmi_subnet_mask=None, data_config=None, data_gateway=None,
+data_subnet_mask=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None,
+wait_for_completion=True, timeout=30)
 ```
 
 ## Useage
@@ -42,10 +45,16 @@ mDNS name resolution can be verified on systemd-based Linux systems using the co
 | admin_password  | str  |  Password for the admin account. |         |
 | management_gateway  | str  |  IP address assigned to the management network gateway |         |
 | management_subnet_mask  | str  | Subnet mask assigned to the management network. |         |
+| ipmi_gateway  | str  |  IP address assigned to the ipmi network gateway |         |
+| ipmi_subnet_mask  | str  | Subnet mask assigned to the ipmi network. |         |
+| data_gateway  | str  |  IP address assigned to the data network gateway |         |
+| data_subnet_mask  | str  | Subnet mask assigned to the data network. |         |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
 | node_config  | dict  | The Node IPs formatted as a dictionary.  |         |    None     |
+| ipmi_config  | dict  | The Node IPMI IPs formatted as a dictionary.  |         |    None     |
+| data_config  | dict  | The Node Data Network IPs formatted as a dictionary.  |         |    None     |
 | enable_encryption  | bool  | Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False.  |         |    True     |
 | dns_search_domains  | str  | The search domain that the DNS Service will use to resolve hostnames that are not fully qualified.  |         |    None     |
 | dns_nameservers  | list  | IPv4 addresses of DNS servers.  |         |    [8.8.8.8]     |
@@ -71,21 +80,38 @@ node_ip = 'VRVW4217DB4E3.local'
 bootstrap = rubrik_cdm.Bootstrap(node_ip)
 
 node_config = {}
-node_config['1'] = '192.168.0.10
-node_config['2'] = '192.168.0.11'
-node_config['3'] = '192.168.0.12'
-node_config['4'] = '192.168.0.13'
+node_config['RVMHMabcd002059'] = '192.168.0.10'
+node_config['RVMHMabcd002088'] = '192.168.0.11'
+node_config['RVMHMabcd000065'] = '192.168.0.12'
+node_config['RVMHMabcd001185'] = '192.168.0.13'
+
+ipmi_config = {}
+ipmi_config['RVMHMabcd002059'] = '192.168.1.10'
+ipmi_config['RVMHMabcd002088'] = '192.168.1.11'
+ipmi_config['RVMHMabcd000065'] = '192.168.1.12'
+ipmi_config['RVMHMabcd001185'] = '192.168.1.13'
+
+data_config = None
 
 cluster_name = 'Python-SDK'
 admin_email = 'Drew.Russell@rubrik.com'
 admin_password = 'A c0mpl3x p@ssw0rd!'
+
 management_gateway = '192.168.0.1'
 management_subnet_mask = '255.255.255.0'
 
+ipmi_gateway = '192.168.1.1'
+ipmi_subnet_mask = '255.255.255.0'
+
+data_gateway = None
+data_subnet_mask = None
+
 enable_encryption = False
 
-setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, management_gateway,
-                                        management_subnet_mask, node_config, enable_encryption)
+setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, management_gateway, 
+                            management_subnet_mask, node_config, ipmi_config, ipmi_gateway, ipmi_subnet_mask, 
+                            data_config, data_gateway, data_subnet_mask, enable_encryption, dns_search_domains,
+                            dns_nameservers, ntp_servers, wait_for_completion)
 
 print(setup_cluster)
 ```
@@ -104,16 +130,28 @@ node_config['2'] = '172.22.18.241'
 node_config['3'] = '172.22.9.68'
 node_config['4'] = '172.22.12.154'
 
+ipmi_config = None
+data_config = None
+
 cluster_name = 'Python-SDK'
 admin_email = 'Drew.Russell@rubrik.com'
 admin_password = 'A c0mpl3x p@ssw0rd!'
+
 management_gateway = '172.22.0.1'
 management_subnet_mask = '255.255.240.0'
 
+ipmi_gateway = None
+ipmi_subnet_mask = None
+
+data_gateway = None
+data_subnet_mask = None
+
 enable_encryption = False
 
-setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, management_gateway,
-                                        management_subnet_mask, node_config, enable_encryption)
+setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, management_gateway, 
+                            management_subnet_mask, node_config, ipmi_config, ipmi_gateway, ipmi_subnet_mask, 
+                            data_config, data_gateway, data_subnet_mask, enable_encryption, dns_search_domains,
+                            dns_nameservers, ntp_servers, wait_for_completion)
 
 print(setup_cluster)
 ```
