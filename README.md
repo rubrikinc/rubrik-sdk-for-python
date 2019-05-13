@@ -1,5 +1,7 @@
 # Rubrik SDK for Python
 
+[![CircleCI](https://circleci.com/gh/rubrikinc/rubrik-sdk-for-python/tree/devel.svg?style=svg)](https://circleci.com/gh/rubrikinc/rubrik-sdk-for-python/tree/devel)
+
 This project provides a Python package that makes it easy to interact with the Rubrik CDM API.
 
 The SDK has been tested against Python 2.7.6 and Python 3.6.4.
