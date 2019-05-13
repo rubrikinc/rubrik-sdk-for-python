@@ -25,8 +25,7 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None,
-                           host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15):
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15):  # pylint: ignore
         """Initiate an on-demand snapshot.
 
         Arguments:
@@ -56,7 +55,6 @@ class Data_Management(_API):
             if host_os not in valid_host_os_type:
                 raise InvalidParameterException("The on_demand_snapshot() `host_os` argument must be one of the following: {}.".format(
                     valid_host_os_type))
-
 
         if object_type == 'vmware':
             self.log("on_demand_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
@@ -408,8 +406,7 @@ class Data_Management(_API):
 
                 return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout)
 
-    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current',
-                           remove_network_devices=False, power_on=True, timeout=15):
+    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):  # pylint: ignore
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -482,8 +479,7 @@ class Data_Management(_API):
 
             return self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config, timeout)
 
-    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False,
-                                 power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):
+    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):  # pylint: ignore
         """Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:

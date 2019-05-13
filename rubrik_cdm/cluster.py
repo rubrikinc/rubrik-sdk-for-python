@@ -151,8 +151,7 @@ class Cluster(Api):
                 config,
                 timeout=timeout)
 
-    def add_vcenter(self, vcenter_ip, vcenter_username, vcenter_password,
-                    vm_linking=True, ca_certificate=None, timeout=30):
+    def add_vcenter(self, vcenter_ip, vcenter_username, vcenter_password, vm_linking=True, ca_certificate=None, timeout=30):  # pylint: ignore
         """Add a new vCenter to the Rubrik cluster.
 
         Arguments:
@@ -441,8 +440,7 @@ class Cluster(Api):
 
         return self.post("internal", "/cluster/me/dns_search_domain", search_domain, timeout)
 
-    def configure_smtp_settings(self, hostname, port, from_email, smtp_username,
-                                smtp_password, encryption="NONE", timeout=15):
+    def configure_smtp_settings(self, hostname, port, from_email, smtp_username, smtp_password, encryption="NONE", timeout=15):  # pylint: ignore
         """The Rubrik cluster uses email to send all notifications to local Rubrik cluster user accounts that have the Admin role. To do this the Rubrik cluster transfers the email messages to an SMTP server for delivery.
         This function will configure the Rubrik cluster with account information for the SMTP server to permit the Rubrik cluster to use the SMTP server for sending outgoing email.
 
@@ -522,8 +520,7 @@ class Cluster(Api):
 
         return api_request
 
-    def create_user(self, username, password, first_name=None, last_name=None,
-                    email_address=None, contact_number=None, timeout=15):
+    def create_user(self, username, password, first_name=None, last_name=None, email_address=None, contact_number=None, timeout=15):  # pylint: ignore
         """Create a new user on the Rubrik cluster
 
         Arguments:

@@ -25,14 +25,14 @@ except ImportError:
 from random import choice
 from .exceptions import APICallException, InvalidParameterException, RubrikException
 
+
 class Api():
     """This class contains the base API methods that can be called independently or internally in standalone functions."""
 
     def __init__(self, node_ip):
         super().__init__(node_ip)
 
-    def _common_api(self, call_type, api_version, api_endpoint, config=None,
-                    job_status_url=None, timeout=15, authentication=True, params=None):
+    def _common_api(self, call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=15, authentication=True, params=None):  # pylint: ignore
         """Internal method that consolidates the base API functions.
 
         Arguments:
@@ -151,8 +151,7 @@ class Api():
             except BaseException:
                 return {'status_code': api_request.status_code}
 
-    def get(self, api_version, api_endpoint, timeout=15,
-            authentication=True, params=None):
+    def get(self, api_version, api_endpoint, timeout=15, authentication=True, params=None):
         """Send a GET request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -178,8 +177,7 @@ class Api():
             authentication=authentication,
             params=params)
 
-    def post(self, api_version, api_endpoint, config,
-             timeout=15, authentication=True):
+    def post(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Send a POST request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -204,8 +202,7 @@ class Api():
             timeout=timeout,
             authentication=authentication)
 
-    def patch(self, api_version, api_endpoint, config,
-              timeout=15, authentication=True):
+    def patch(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Send a PATCH request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -230,8 +227,7 @@ class Api():
             timeout=timeout,
             authentication=authentication)
 
-    def delete(self, api_version, api_endpoint, timeout=15,
-               authentication=True, params=None):
+    def delete(self, api_version, api_endpoint, timeout=15, authentication=True, params=None):
         """Send a DELETE request to the provided Rubrik API endpoint.
 
         Arguments:

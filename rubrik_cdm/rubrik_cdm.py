@@ -201,7 +201,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                     "Error: The API Endpoint should not end with '/' unless proceeded by '='. (ex. /cluster/me or /fileset/snapshot/<id>/browse?path=/)")
 
 
-
 class Bootstrap(_API):
     """This class contains all functions related to the Bootstrapping of a Rubrik Cluster.
 
@@ -219,7 +218,7 @@ class Bootstrap(_API):
         self.log("User Provided Node IP: {}".format(self.node_ip))
         node_resolution = False
         self.ipv6_addr = ""
-        
+
         try:
             # Attempt to resolve and/or obtain scope for supplied address
             ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET6)
@@ -251,14 +250,12 @@ class Bootstrap(_API):
             except socket.gaierror:
                 self.log('Could not resolve IPv4 address for cluster.')
 
-
         if node_resolution == False:
-                sys.exit(
-                    "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
-                )
+            sys.exit(
+                "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
+            )
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,
-                      enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:

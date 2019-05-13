@@ -80,7 +80,6 @@ class Physical(Api):
             self.log("Adding the host '{}' to the Rubrik cluster.".format(hostname))
             return self.post('v1', '/host', config, timeout)
 
-
     def delete_physical_host(self, hostname, timeout=120):
         """Delete a physical host from the Rubrik cluster.
 
@@ -114,8 +113,7 @@ class Physical(Api):
             "Deleting the host '{}' from the Rubrik cluster.".format(hostname))
         return self.delete('v1', '/host/{}'.format(host_id), timeout=timeout)
 
-    def create_physical_fileset(self, name, operating_system, include, exclude, exclude_exception,
-                                follow_network_shares=False, backup_hidden_folders=False, timeout=15):
+    def create_physical_fileset(self, name, operating_system, include, exclude, exclude_exception, follow_network_shares=False, backup_hidden_folders=False, timeout=15):  # pylint: ignore
         """Create a Fileset for a Linux or Windows machine.
 
         Arguments:
@@ -197,8 +195,7 @@ class Physical(Api):
             model,
             timeout=timeout)
 
-    def create_nas_fileset(self, name, share_type, include, exclude,
-                           exclude_exception, follow_network_shares=False, timeout=15):
+    def create_nas_fileset(self, name, share_type, include, exclude, exclude_exception, follow_network_shares=False, timeout=15):  # pylint: ignore
         """Create a NAS Fileset.
 
         Arguments:
@@ -274,8 +271,7 @@ class Physical(Api):
             model,
             timeout=timeout)
 
-    def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None,
-                                     exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):
+    def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None, exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):  # pylint: ignore
         """Assign a Fileset to a Linux or Windows machine. If you have multiple Filesets with identical names, you will need to populate the Filesets properties (i.e this functions keyword arguments)
         to find a specific match. Filesets with identical names and properties are not supported.
 

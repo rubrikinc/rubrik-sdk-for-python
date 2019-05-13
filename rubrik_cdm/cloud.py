@@ -24,8 +24,7 @@ from .exceptions import InvalidParameterException, CDMVersionException
 class Cloud(Api):
     """This class contains methods for the managment of Cloud related functionality on the Rubrik cluster."""
 
-    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None,
-                        aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=180):
+    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=180):  # pylint: ignore
         """Add a new AWS S3 archival location to the Rubrik cluster.
 
         Arguments:
@@ -157,8 +156,7 @@ class Cloud(Api):
         self.log("aws_s3_cloudout: Creating the AWS S3 archive location.")
         return self.post('internal', '/archive/object_store', config, timeout)
 
-    def update_aws_s3_cloudout(self, current_archive_name, new_archive_name=None,
-                               aws_access_key=None, aws_secret_key=None, storage_class=None, timeout=180):
+    def update_aws_s3_cloudout(self, current_archive_name, new_archive_name=None, aws_access_key=None, aws_secret_key=None, storage_class=None, timeout=180):  # pylint: ignore
         """Update an AWS S3 archival location on the Rubrik cluster.
 
         Keyword Arguments:
@@ -262,8 +260,7 @@ class Cloud(Api):
         raise InvalidParameterException(
             "The Rubrik cluster does not have an archive location named '{}'.".format(archive_name))
 
-    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key,
-                       archive_name='default', instance_type='default', timeout=180):
+    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=180):  # pylint: ignore
         """Add a new Azure archival location to the Rubrik cluster.
 
         Arguments:
@@ -349,8 +346,7 @@ class Cloud(Api):
         self.log("azure_cloudout: Creating the Azure archive location.")
         return self.post('internal', '/archive/object_store', config)
 
-    def azure_cloudon(self, archive_name, container, storage_account_name, application_id, application_key,
-                      tenant_id, region, virtual_network_id, subnet_name, security_group_id, timeout=30):
+    def azure_cloudon(self, archive_name, container, storage_account_name, application_id, application_key, tenant_id, region, virtual_network_id, subnet_name, security_group_id, timeout=30):  # pylint: ignore
         """Enable CloudOn for an exsiting AWS S3 archival location.
 
         Arguments:
@@ -481,8 +477,7 @@ class Cloud(Api):
         raise InvalidParameterException(
             "The Rubrik cluster does not have an archive location named '{}'.".format(archive_name))
 
-    def add_aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None,
-                               aws_regions=None, regional_bolt_network_configs=None, timeout=30):
+    def add_aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None, aws_regions=None, regional_bolt_network_configs=None, timeout=30):  # pylint: ignore
         """Add a new AWS account to EC2 native protection on the Rubrik cluster.
 
         Arguments:
@@ -618,7 +613,6 @@ class Cloud(Api):
         Returns:
             dict -- The full API response for `PATCH /aws/account/{id}'`.
         """
-
         # verify we are on cdm 4.2 or newer, required for cloud native
         # protection
         if self.minimum_installed_cdm_version(4.2) is False:
