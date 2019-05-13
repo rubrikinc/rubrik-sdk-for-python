@@ -27,7 +27,10 @@
 * [configure_syslog](configure_syslog.md)
 * [configure_timezone](configure_timezone.md)
 * [configure_vlan](configure_vlan.md)
+* [create_user](create_user.md)
 * [end_user_authorization](end_user_authorization.md)
+* [minimum_installed_cdm_version](minimum_installed_cdm_version.md)
+* [read_only_authorization](read_only_authorization.md)
 * [refresh_vcenter](refresh_vcenter.md)
 
 ### Cloud Functions
@@ -37,6 +40,7 @@
 * [azure_cloudon](azure_cloudon.md)
 * [azure_cloudout](azure_cloudout.md)
 * [update_aws_native_account](update_aws_native_account.md)
+* [update_aws_s3_cloudout](update_aws_s3_cloudout.md)
 
 ### Data Management Functions
 * [assign_sla](assign_sla.md)
@@ -59,6 +63,7 @@
 
 ### SDK Helper Functions
 * [log](log.md)
+* [exceptions](exceptions.md)
 
 ### Internal Functions
 * [_api_validation](_api_validation.md)

@@ -17,13 +17,13 @@ This module contains the Rubrik SDK API class.
 
 import requests
 import json
-import sys
 import time
 try:
     from urllib import quote  # Python 2.X
 except ImportError:
     from urllib.parse import quote  # Python 3+
 from random import choice
+from .exceptions import APICallException, InvalidParameterException, RubrikException
 
 class Api():
     """This class contains the base API methods that can be called independently or internally in standalone functions."""
@@ -59,7 +59,7 @@ class Api():
         elif authentication is False:
             header = self._header()
         else:
-            sys.exit('Error: "authentication" must be either True or False')
+            raise InvalidParameterException('"authentication" must be either True or False')
 
         # Create required header for the special case of a bootstrap including Host attribute
         if '/cluster/me/bootstrap' in api_endpoint:
@@ -95,12 +95,7 @@ class Api():
                     self.node_ip, api_version, api_endpoint)
                 self.log('POST {}'.format(request_url))
                 self.log('Config: {}'.format(config))
-                api_request = requests.post(
-                    request_url,
-                    verify=False,
-                    headers=header,
-                    data=config,
-                    timeout=timeout)
+                api_request = requests.post(request_url, verify=False, headers=header, data=config, timeout=timeout)
                 self.log('Response: {}'.format(api_request.text))
             elif call_type == 'PATCH':
                 config = json.dumps(config)
@@ -116,13 +111,12 @@ class Api():
                     request_url = request_url + "?" + '&'.join("{}={}".format(key, val)
                                                                for (key, val) in params.items())
                 self.log('DELETE {}'.format(request_url))
-                api_request = requests.delete(
-                    request_url, verify=False, headers=header, timeout=timeout)
+                api_request = requests.delete(request_url, verify=False, headers=header, timeout=timeout)
             elif call_type == 'JOB_STATUS':
                 self.log('JOB STATUS for {}'.format(job_status_url))
                 api_request = requests.get(job_status_url, verify=False, headers=header, timeout=timeout)
             else:
-                sys.exit('Error: the _common_api() call_type must be one of the following: {}'.format(
+                raise InvalidParameterException('the _common_api() call_type must be one of the following: {}'.format(
                     ['GET', 'POST', 'PATCH', 'DELETE', 'JOB_STATUS']))
 
             self.log(str(api_request) + "\n")
@@ -137,19 +131,20 @@ class Api():
             except BaseException:
                 api_request.raise_for_status()
         except requests.exceptions.ConnectTimeout:
-            sys.exit(
-                "Error: Unable to establish a connection to the Rubrik cluster.")
+            raise APICallException("Unable to establish a connection to the Rubrik cluster.")
+        except requests.exceptions.ConnectionError:
+            raise APICallException("Unable to establish a connection to the Rubrik cluster.")
         except requests.exceptions.ReadTimeout:
-            sys.exit("Error: The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
+            raise APICallException(
+                "The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
         except requests.exceptions.RequestException as error:
-            # If "error_message" has be defined sys.exit that message else
-            # sys.exit the request exception error
+            # If "error_message" has be defined raise that message else raise the request exception error
             try:
                 error_message
             except NameError:
-                sys.exit(error)
+                raise APICallException(error)
             else:
-                sys.exit('Error: ' + error_message)
+                raise APICallException('' + error_message)
         else:
             try:
                 return api_request.json()
@@ -280,8 +275,8 @@ class Api():
         """
 
         if not isinstance(wait_for_completion, bool):
-            sys.exit(
-                'Error: The job_status() wait_for_completion argument must be True or False.')
+            raise InvalidParameterException(
+                'The job_status() wait_for_completion argument must be True or False.')
 
         if wait_for_completion:
             self.log('Job Status: Waiting for the job to complete.')
@@ -315,7 +310,7 @@ class Api():
                     time.sleep(10)
                     continue
                 else:
-                    sys.exit('Error: {}'.format(str(api_call)))
+                    raise RubrikException('{}'.format(str(api_call)))
 
         else:
             api_call = self._common_api(

@@ -1,0 +1,40 @@
+version: 2.0
+
+jobs:
+
+ python-2.7:
+    docker:
+      - image: circleci/python:2.7.14
+    working_directory: ~/rubrik-sdk-for-python
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: |
+            sudo pip install tox
+      - run:
+          name: Execute Unit Tests
+          command: |
+            tox tests/unit -e py27
+
+ python-3.7:
+    docker:
+      - image: circleci/python:3.7.3
+    working_directory: ~/rubrik-sdk-for-python
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: |
+            sudo pip install tox
+      - run:
+          name: Execute Unit Tests
+          command: |
+            tox tests/unit -e py37
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - python-2.7
+      - python-3.7
