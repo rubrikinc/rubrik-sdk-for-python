@@ -19,15 +19,16 @@ class CDMVersionException(RubrikException):
 
 
 class APICallException(RubrikException):
-    """Base class for exceptions in this module."""
+    """Exception related to the underlying API call being made to the Rubrik cluster."""
     pass
 
 
 class InvalidParameterException(RubrikException):
-    """Base class for exceptions in this module."""
+    """Exception related to the parameters provided in the function. This can be related an issue with the value itself
+    or the value provided not being found on the cluster."""
     pass
 
 
 class TypeException(RubrikException):
-    """Base class for exceptions in this module."""
+    """Exception related to the wrong Python type being provided in the function parameters"""
     pass
