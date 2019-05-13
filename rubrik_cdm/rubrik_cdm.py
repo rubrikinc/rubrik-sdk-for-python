@@ -1,15 +1,22 @@
 # Copyright 2018 Rubrik, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License prop
-#  http://www.apache.org/licenses/LICENSE-2.0
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
 
 """
 This module contains the Rubrik SDK Connect class.
@@ -21,6 +28,7 @@ import os
 import logging
 from random import choice
 import time
+import socket
 
 from .api import Api
 from .cluster import Cluster
@@ -200,7 +208,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                     "Error: The API Endpoint should not end with '/' unless proceeded by '='. (ex. /cluster/me or /fileset/snapshot/<id>/browse?path=/)")
 
 
-
 class Bootstrap(_API):
     """This class contains all functions related to the Bootstrapping of a Rubrik Cluster.
 
@@ -211,17 +218,51 @@ class Bootstrap(_API):
     def __init__(self, node_ip, enable_logging=False):
         """Constructor for the Bootstrap class which is used to initialize the class variables.
         """
-
         if enable_logging:
             logging.getLogger().setLevel(logging.DEBUG)
 
         self.node_ip = node_ip
         self.log("User Provided Node IP: {}".format(self.node_ip))
+        node_resolution = False
+        self.ipv6_addr = ""
 
-        node_ip = [self.node_ip]
+        try:
+            # Attempt to resolve and/or obtain scope for supplied address
+            ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET6)
+            # Extract address from response
+            self.ipv6_addr = ip_info[0][4][0]
+            if '::ffff' in self.ipv6_addr:
+                self.ipv6_addr = ""
+                self.log('Resolved IPv4 address')
+                #ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
+            else:
+                self.log('Resolved IPv6 address')
+                # Extract scope from response
+                self.ipv6_scope = str(ip_info[0][4][3])
+                # Properly format link-local IPv6 address with scope
+                self.node_ip = ('[{}%{}]').format(self.ipv6_addr, self.ipv6_scope)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
+        except socket.gaierror:
+            self.log('Could not resolve link-local IPv6 address for cluster.')
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,
-                      enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
+        # IPv6 resolution failed, verify IPv4
+        if node_resolution == False:
+            try:
+                ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
+            except socket.gaierror:
+                self.log('Could not resolve IPv4 address for cluster.')
+
+        if node_resolution == False:
+            sys.exit(
+                "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
+            )
+
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
@@ -346,6 +387,7 @@ class Bootstrap(_API):
         self.log('status: Getting the status of the Rubrik Cluster bootstrap.')
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(
             request_id)
+        self.log(bootstrap_status_api_endpoint)
         api_request = self.get(
             'internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
 

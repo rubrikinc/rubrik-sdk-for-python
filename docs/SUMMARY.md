@@ -63,6 +63,7 @@
 
 ### SDK Helper Functions
 * [log](log.md)
+* [exceptions](exceptions.md)
 
 ### Internal Functions
 * [_api_validation](_api_validation.md)
