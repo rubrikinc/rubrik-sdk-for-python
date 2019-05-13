@@ -171,8 +171,7 @@ class Cloud(Api):
 
 
         Returns:
-            str -- No change required. The '`name`' archival location is already configured on the Rubrik cluster.
-            dict -- The full API response for `POST /internal/archive/object_store'`.
+            dict -- The full API response for `PATCH /internal/archive/object_store/{id}'`.
         """
 
         valid_storage_classes = [
