@@ -361,7 +361,7 @@ class Data_Management(_API):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, timeout=30):
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds, log_retention_hours, copy_only, timeout=30):
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
@@ -377,7 +377,7 @@ class Data_Management(_API):
             dict -- The full API reponse for `POST /internal/sla_domain/{sla_id}/assign`.
         """
 
-        valid_object_type = ['vmware']
+        valid_object_type = ['vmware', 'mssql_host']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -412,6 +412,58 @@ class Data_Management(_API):
                 config['managedIds'] = [vm_id]
 
                 return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout)
+
+        elif object_type == 'mssql_host':
+
+            host_id = ''
+            mssql_id = ''
+            db_sla_lst = []
+
+            self.log('Searching the Rubrik cluster for the current hosts.')
+            current_hosts = self.get('v1', '/host?operating_system_type=Windows&primary_cluster_id=local', timeout=timeout)
+
+            for rubrik_host in current_hosts['data']:
+                if rubrik_host['name'] == object_name:
+                    host_id = rubrik_host['id']
+
+            if(host_id):
+                self.log("assign_sla: Searching the Rubrik cluster for the MSSQL Instance '{}'.".format(object_name))
+                mssql_instances = self.get('v1','/mssql/instance?root_id={}'.format(host_id), timeout=timeout)
+
+                for mssql_instance in mssql_instances['data']:
+                    mssql_id = mssql_instance['id']
+                    mssql_instance_name = mssql_instance['name']
+
+                    self.log("assign_sla: Determing the SLA Domain currently assigned to the MSSQL Instance '{}'.".format(mssql_instance_name))
+
+                    mssql_summary = self.get('v1', '/mssql/instance/{}'.format(mssql_id), timeout=timeout)
+
+                    if (sla_id == mssql_summary['configuredSlaDomainId'] and log_backup_frequency_in_seconds == mssql_summary['logBackupFrequencyInSeconds'] and
+                    log_retention_hours == mssql_summary['logRetentionHours'] and copy_only == mssql_summary['copyOnly']):
+                        return "No change required. The MSSQL Instance '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
+                               " logBackupFrequencyInSeconds: {}, logRetentionHours: {} and Copy Only: {}.".format(
+                            object_name, sla_name, log_backup_frequency_in_seconds, log_retention_hours, copy_only)
+
+                    else:
+                        self.log("assign_sla: Assigning the MSSQL Instance '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+
+                        config = {}
+                        if log_backup_frequency_in_seconds is not None:
+                            config['logBackupFrequencyInSeconds'] = log_backup_frequency_in_seconds
+                        if log_retention_hours is not None:
+                            config['logRetentionHours'] = log_retention_hours
+                        if copy_only is not None:
+                            config['copyOnly'] = copy_only
+
+                        config['configuredSlaDomainId'] = sla_id
+
+                        patch_resp = self.patch("v1", "/mssql/instance/{}".format(mssql_id), config, timeout)
+                        db_sla_lst.append(patch_resp)
+            else:
+                raise InvalidParameterException(
+                    "Host ID not found for instance '{}'").format(object_name)
+
+            return db_sla_lst
 
     def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):  # pylint: ignore
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
