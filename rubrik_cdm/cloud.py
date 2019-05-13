@@ -18,7 +18,7 @@ This module contains the Rubrik SDK Cloud class.
 import os
 import re
 from .api import Api
-from .exceptions import InvalidParameterException, CDMVersionException
+from .exceptions import InvalidParameterException, CDMVersionException, InvalidTypeException
 
 
 class Cloud(Api):
@@ -546,7 +546,7 @@ class Cloud(Api):
         # verify that our regional_bolt_network_configs are either None or in a
         # list
         if isinstance(regional_bolt_network_configs, list) is False and regional_bolt_network_configs is not None:
-            raise InvalidParameterException("`regional_bolt_network_configs` must be a list if defined.")
+            raise InvalidTypeException("`regional_bolt_network_configs` must be a list if defined.")
 
         if regional_bolt_network_configs is not None:
 

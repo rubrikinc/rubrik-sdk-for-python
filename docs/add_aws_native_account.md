@@ -2,14 +2,17 @@
 
 Add a new AWS account to EC2 native protection on the Rubrik cluster.
 ```py
-def add_aws_native_account(aws_account_name, aws_access_key=None, aws_secret_key=None, aws_regions=None, regional_bolt_network_configs=None, timeout=30)
+def add_aws_native_account(aws_account_name, aws_access_key=None, aws_secret_key=None,
 ```
 
 ## Arguments
+
 | Name             | Type | Description                                                                                                | Choices |
 |------------------|------|------------------------------------------------------------------------------------------------------------|---------|
 | aws_account_name | str  | The name of the AWS account you wish to protect. This is the name that will be displayed in the Rubrik UI. |         |
+
 ## Keyword Arguments
+
 | Name                          | Type          | Description                                                                                                                                                                                           | Choices                                                                                                                                                                                                                         | Default |
 |-------------------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|
 | aws_access_key                | str           | The access key of a AWS account with the required permissions. If set to the default `None` keyword argument, we will look for a `AWS_ACCESS_KEY_ID` environment variable to pull the value from.     |                                                                                                                                                                                                                                 | None    |
@@ -19,11 +22,27 @@ def add_aws_native_account(aws_account_name, aws_access_key=None, aws_secret_key
 | timeout                       | int           | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.                                                                                          |                                                                                                                                                                                                                                 | 30      |
 
 ## Returns
+
 | Type | Return Value                                                                                                          |
 |------|-----------------------------------------------------------------------------------------------------------------------|
 | str  | No change required. Cloud native source with access key `aws_access_key` is already configured on the Rubrik cluster. |
 | dict | The full API response for `POST /internal/aws/account'`.                                                              |
+
+## Exceptions
+
+| Type                      | Message                                                                                                                      |
+|---------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| CDMVersionException       | The Rubrik cluster must be running CDM version 4.2 or later.                                                                 |
+| InvalidParameterException | `aws_region` has not been provided.                                                                                          |
+| InvalidParameterException | `aws_access_key` has not been provided.                                                                                      |
+| InvalidParameterException | `aws_secret_key` has not been provided.                                                                                      |
+| InvalidTypeException      | `regional_bolt_network_configs` must be a list if defined.                                                                   |
+| InvalidParameterException | Each `regional_bolt_network_config` dict must contain the following keys: 'region', 'vNetId', 'subnetId', 'securityGroupId'. |
+| InvalidParameterException | Cloud native source with name '`aws_account_name`' already exists. Please enter a unique `aws_account_name`.                 |
+
+
 ## Example
+
 ```py
 import rubrik_cdm
 rubrik = rubrik_cdm.Connect()
@@ -32,14 +51,9 @@ name = 'pythonsdkdemo'
 accessKey = 'AWS_ACCESS_KEY'
 secretKey = 'AWS_SECRET_KEY'
 regions = ['us-east-1']
-regional_bolt_network_configs = [
-    {
-        "region": "us-east-1",
-        "vNetId": "vpc-a46e72c2",
-        "subnetId": "subnet-f0cc9695",
-        "securityGroupId": "sg-66091b19"
-    }
-]
+regional_bolt_network_configs = [{"region": "us-east-1", "vNetId": "vpc-a46e72c2",
+                                  "subnetId": "subnet-f0cc9695", "securityGroupId": "sg-66091b19"}]
 
-nativeaccount = rubrik.add_aws_native_account(name, accessKey, secretKey, regions, regional_bolt_network_configs)
+nativeaccount = rubrik.add_aws_native_account(
+    name, accessKey, secretKey, regions, regional_bolt_network_configs)
 ```
