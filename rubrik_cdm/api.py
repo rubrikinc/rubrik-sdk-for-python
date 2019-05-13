@@ -25,7 +25,6 @@ except ImportError:
 from random import choice
 from .exceptions import APICallException, InvalidParameterException, RubrikException
 
-
 class Api():
     """This class contains the base API methods that can be called independently or internally in standalone functions."""
 
@@ -62,6 +61,22 @@ class Api():
         else:
             raise InvalidParameterException('"authentication" must be either True or False')
 
+        # Create required header for the special case of a bootstrap including Host attribute
+        if '/cluster/me/bootstrap' in api_endpoint:
+            if self.ipv6_addr != "":
+                header = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Host': '[' + self.ipv6_addr + ']'
+                }
+                self.log('Created boostrap header: ' + str(header))
+            else:
+                header = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
+                self.log('Created boostrap header: ' + str(header))
+
         try:
             # Determine which call type is being used and then set the relevant
             # variables for that call type
@@ -70,7 +85,7 @@ class Api():
                 if params is not None:
                     request_url = request_url + "?" + '&'.join("{}={}".format(key, val)
                                                                for (key, val) in params.items())
-                request_url = quote(request_url, '://?=&')
+                request_url = quote(request_url, '://?=&[]')
                 self.log('GET {}'.format(request_url))
                 api_request = requests.get(
                     request_url, verify=False, headers=header, timeout=timeout)
@@ -81,6 +96,7 @@ class Api():
                 self.log('POST {}'.format(request_url))
                 self.log('Config: {}'.format(config))
                 api_request = requests.post(request_url, verify=False, headers=header, data=config, timeout=timeout)
+                self.log('Response: {}'.format(api_request.text))
             elif call_type == 'PATCH':
                 config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(
