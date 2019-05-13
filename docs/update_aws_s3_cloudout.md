@@ -16,9 +16,9 @@ def update_aws_s3_cloudout(current_archive_name, new_archive_name=None, aws_acce
 | timeout              | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.                          |                                                       | 180     |
 
 ## Returns
-| Type | Return Value                                                            |
-|------|-------------------------------------------------------------------------|
-| dict | The full API response for `PATCH /internal/archive/object_store/{id}'`. |
+| Type | Return Value                                                           |
+|------|------------------------------------------------------------------------|
+| dict | The full API response for `PATCH /internal/archive/object_store/{id}`. |
 
 ## Example
 ```py
