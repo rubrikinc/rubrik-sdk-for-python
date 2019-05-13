@@ -38,7 +38,7 @@ class Physical(Api):
         count_of_hosts = len(hostname)
 
         if(count_of_hosts == 0):
-            raise InvalidParameterException("The provided hostname list is empty")
+            raise InvalidParameterException("The provided hostname list is empty.")
 
         self.log('Searching the Rubrik cluster for the current hosts.')
         current_hosts = self.get('v1', '/host', timeout=timeout)

@@ -40,7 +40,6 @@ def add_aws_native_account(aws_account_name, aws_access_key=None, aws_secret_key
 | InvalidParameterException | Each `regional_bolt_network_config` dict must contain the following keys: 'region', 'vNetId', 'subnetId', 'securityGroupId'. |
 | InvalidParameterException | Cloud native source with name '`aws_account_name`' already exists. Please enter a unique `aws_account_name`.                 |
 
-
 ## Example
 
 ```py
