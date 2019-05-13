@@ -30,5 +30,5 @@ class InvalidParameterException(RubrikException):
 
 
 class TypeException(RubrikException):
-    """Exception related to the wrong Python type being provided in the function parameters"""
+    """Exception related to the wrong Python type being provided in the function parameters."""
     pass
