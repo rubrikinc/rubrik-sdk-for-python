@@ -452,7 +452,7 @@ class Data_Management(_API):
                     if (sla_id == mssql_summary['configuredSlaDomainId'] and log_backup_frequency_in_seconds == mssql_summary['logBackupFrequencyInSeconds'] and
                             log_retention_hours == mssql_summary['logRetentionHours'] and copy_only == mssql_summary['copyOnly']):
                         return "No change required. The MSSQL Instance '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
-                               " logBackupFrequencyInSeconds: {}, logRetentionHours: {} and Copy Only: {}.".format(
+                               " log_backup_frequency_in_seconds: {}, log_retention_hours: {} and copy_only: {}.".format(
                                    object_name, sla_name, log_backup_frequency_in_seconds, log_retention_hours, copy_only)
 
                     else:
