@@ -1,15 +1,22 @@
 # Copyright 2018 Rubrik, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License prop
-#  http://www.apache.org/licenses/LICENSE-2.0
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
 
 """
 This module contains the Rubrik SDK Cloud class.
@@ -18,14 +25,13 @@ This module contains the Rubrik SDK Cloud class.
 import os
 import re
 from .api import Api
-from .exceptions import InvalidParameterException, CDMVersionException
+from .exceptions import InvalidParameterException, CDMVersionException, InvalidTypeException
 
 
 class Cloud(Api):
     """This class contains methods for the managment of Cloud related functionality on the Rubrik cluster."""
 
-    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None,
-                        aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=180):
+    def aws_s3_cloudout(self, aws_bucket_name, archive_name='default', aws_region=None, aws_access_key=None, aws_secret_key=None, kms_master_key_id=None, rsa_key=None, storage_class='standard', timeout=180):  # pylint: ignore
         """Add a new AWS S3 archival location to the Rubrik cluster.
 
         Arguments:
@@ -157,8 +163,7 @@ class Cloud(Api):
         self.log("aws_s3_cloudout: Creating the AWS S3 archive location.")
         return self.post('internal', '/archive/object_store', config, timeout)
 
-    def update_aws_s3_cloudout(self, current_archive_name, new_archive_name=None,
-                               aws_access_key=None, aws_secret_key=None, storage_class=None, timeout=180):
+    def update_aws_s3_cloudout(self, current_archive_name, new_archive_name=None, aws_access_key=None, aws_secret_key=None, storage_class=None, timeout=180):  # pylint: ignore
         """Update an AWS S3 archival location on the Rubrik cluster.
 
         Keyword Arguments:
@@ -262,8 +267,7 @@ class Cloud(Api):
         raise InvalidParameterException(
             "The Rubrik cluster does not have an archive location named '{}'.".format(archive_name))
 
-    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key,
-                       archive_name='default', instance_type='default', timeout=180):
+    def azure_cloudout(self, container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=180):  # pylint: ignore
         """Add a new Azure archival location to the Rubrik cluster.
 
         Arguments:
@@ -349,8 +353,7 @@ class Cloud(Api):
         self.log("azure_cloudout: Creating the Azure archive location.")
         return self.post('internal', '/archive/object_store', config)
 
-    def azure_cloudon(self, archive_name, container, storage_account_name, application_id, application_key,
-                      tenant_id, region, virtual_network_id, subnet_name, security_group_id, timeout=30):
+    def azure_cloudon(self, archive_name, container, storage_account_name, application_id, application_key, tenant_id, region, virtual_network_id, subnet_name, security_group_id, timeout=30):  # pylint: ignore
         """Enable CloudOn for an exsiting AWS S3 archival location.
 
         Arguments:
@@ -468,7 +471,6 @@ class Cloud(Api):
                 pass
 
             if archive['definition']['objectStoreType'] == 'Azure' and archive['definition']['name'] == archive_name:
-                # raise InvalidParameterException(archive['definition'])
 
                 if archive['definition'] == redacted_archive_definition:
 
@@ -481,8 +483,7 @@ class Cloud(Api):
         raise InvalidParameterException(
             "The Rubrik cluster does not have an archive location named '{}'.".format(archive_name))
 
-    def add_aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None,
-                               aws_regions=None, regional_bolt_network_configs=None, timeout=30):
+    def add_aws_native_account(self, aws_account_name, aws_access_key=None, aws_secret_key=None, aws_regions=None, regional_bolt_network_configs=None, timeout=30):  # pylint: ignore
         """Add a new AWS account to EC2 native protection on the Rubrik cluster.
 
         Arguments:
@@ -551,14 +552,14 @@ class Cloud(Api):
         # verify that our regional_bolt_network_configs are either None or in a
         # list
         if isinstance(regional_bolt_network_configs, list) is False and regional_bolt_network_configs is not None:
-            raise InvalidParameterException("`regional_bolt_network_configs` must be a list if defined.")
+            raise InvalidTypeException("`regional_bolt_network_configs` must be a list if defined.")
 
         if regional_bolt_network_configs is not None:
 
             # verify our list of bolt_network_configs only contains dicts
             for bolt_network_config in regional_bolt_network_configs:
                 if isinstance(bolt_network_config, dict) is False:
-                    raise InvalidParameterException("The `regional_bolt_network_configs` list can only contain dicts.")
+                    raise InvalidTypeException("The `regional_bolt_network_configs` list can only contain dicts.")
 
                 # verify that all the required paramteters are provided in all
                 # regional_bolt_network_configs
@@ -616,16 +617,15 @@ class Cloud(Api):
 
 
         Returns:
-            dict -- The full API response for `PATCH /aws/account/{id}'`.
+            dict -- The full API response for `PATCH /aws/account/{id}`.
         """
-
         # verify we are on cdm 4.2 or newer, required for cloud native
         # protection
         if self.minimum_installed_cdm_version(4.2) is False:
             raise CDMVersionException(4.2)
 
         if not isinstance(config, dict):
-            raise InvalidParameterException("The 'config' argument must be a dictionary.")
+            raise InvalidTypeException("The 'config' argument must be a dictionary.")
 
         self.log("update_aws_native_account: Checking the Rubrik cluster for the AWS Native Account.")
         account_id = self.object_id(aws_account_name, "aws_native", timeout=timeout)

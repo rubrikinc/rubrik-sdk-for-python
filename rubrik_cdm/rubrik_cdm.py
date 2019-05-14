@@ -1,15 +1,22 @@
 # Copyright 2018 Rubrik, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License prop
-#  http://www.apache.org/licenses/LICENSE-2.0
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
 
 """
 This module contains the Rubrik SDK Connect class.
@@ -28,7 +35,7 @@ from .cluster import Cluster
 from .data_management import Data_Management
 from .physical import Physical
 from .cloud import Cloud
-from .exceptions import InvalidParameterException, RubrikException, APICallException
+from .exceptions import InvalidParameterException, RubrikException, APICallException, InvalidTypeException
 
 
 _CLUSTER = Cluster
@@ -191,7 +198,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         # Validate the API Endpoint Syntax
         if not isinstance(api_endpoint, str):
-            raise InvalidParameterException("The API Endpoint must be a string.")
+            raise InvalidTypeException("The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
             raise InvalidParameterException(
                 "The API Endpoint should begin with '/'. (ex: /cluster/me)")
@@ -199,7 +206,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             if api_endpoint[-2] != "=":
                 raise InvalidParameterException(
                     "Error: The API Endpoint should not end with '/' unless proceeded by '='. (ex. /cluster/me or /fileset/snapshot/<id>/browse?path=/)")
-
 
 
 class Bootstrap(_API):
@@ -219,7 +225,7 @@ class Bootstrap(_API):
         self.log("User Provided Node IP: {}".format(self.node_ip))
         node_resolution = False
         self.ipv6_addr = ""
-        
+
         try:
             # Attempt to resolve and/or obtain scope for supplied address
             ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET6)
@@ -251,14 +257,12 @@ class Bootstrap(_API):
             except socket.gaierror:
                 self.log('Could not resolve IPv4 address for cluster.')
 
-
         if node_resolution == False:
-                sys.exit(
-                    "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
-                )
+            sys.exit(
+                "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
+            )
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,
-                      enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
@@ -282,24 +286,24 @@ class Bootstrap(_API):
         """
 
         if node_config is None or isinstance(node_config, dict) is not True:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 'You must provide a valid dictionary for "node_config".')
 
         if dns_search_domains is None:
             dns_search_domains = []
         elif isinstance(dns_search_domains, list) is not True:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 'You must provide a valid list for "dns_search_domains".')
 
         if dns_nameservers is None:
             dns_nameservers = ['8.8.8.8']
         elif isinstance(dns_nameservers, list) is not True:
-            raise InvalidParameterException('You must provide a valid list for "dns_nameservers".')
+            raise InvalidTypeException('You must provide a valid list for "dns_nameservers".')
 
         if ntp_servers is None:
             ntp_servers = ['pool.ntp.org']
         elif isinstance(ntp_servers, list) is not True:
-            raise InvalidParameterException('You must provide a valid list for "ntp_servers".')
+            raise InvalidTypeException('You must provide a valid list for "ntp_servers".')
 
         bootstrap_config = {}
         bootstrap_config["enableSoftwareEncryptionAtRest"] = enable_encryption
@@ -432,7 +436,7 @@ class Bootstrap(_API):
 
         # Validate the API Endpoint Syntax
         if not isinstance(api_endpoint, str):
-            raise InvalidParameterException("The API Endpoint must be a string.")
+            raise InvalidTypeException("The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
             raise InvalidParameterException(
                 "The API Endpoint should begin with '/'. (ex: /cluster/me)")

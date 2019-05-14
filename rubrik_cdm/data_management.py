@@ -1,22 +1,29 @@
 # Copyright 2018 Rubrik, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License prop
-#  http://www.apache.org/licenses/LICENSE-2.0
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
 
 """
 This module contains the Rubrik SDK Data_Management class.
 """
 import re
 from .api import Api
-from .exceptions import CDMVersionException, InvalidParameterException
+from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException
 
 
 _API = Api
@@ -25,8 +32,7 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None,
-                           host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15):
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15):  # pylint: ignore
         """Initiate an on-demand snapshot.
 
         Arguments:
@@ -56,7 +62,6 @@ class Data_Management(_API):
             if host_os not in valid_host_os_type:
                 raise InvalidParameterException("The on_demand_snapshot() `host_os` argument must be one of the following: {}.".format(
                     valid_host_os_type))
-
 
         if object_type == 'vmware':
             self.log("on_demand_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
@@ -356,28 +361,35 @@ class Data_Management(_API):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, timeout=30):
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object you wish to assign to an SLA Domain.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
-            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware})
+            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host})
 
         Keyword Arguments:
-            timeout {str} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+            log_backup_frequency_in_seconds {str} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
+            log_retention_hours {int} -- The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
+            copy_only {int} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
+            timeout {bool} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
             dict -- The full API reponse for `POST /internal/sla_domain/{sla_id}/assign`.
         """
 
-        valid_object_type = ['vmware']
+        valid_object_type = ['vmware', 'mssql_host']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
                 "The assign_sla() object_type argument must be one of the following: {}.".format(valid_object_type))
 
+        if object_type == "mssql_host":
+            if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
         # Determine if 'do not protect' or 'clear' are the SLA Domain Name
         do_not_protect_regex = re.findall('\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
         clear_regex = re.findall('\\bclear\\b', sla_name, flags=re.IGNORECASE)
@@ -408,8 +420,65 @@ class Data_Management(_API):
 
                 return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout)
 
-    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current',
-                           remove_network_devices=False, power_on=True, timeout=15):
+        elif object_type == 'mssql_host':
+
+            host_id = ''
+            mssql_id = ''
+            db_sla_lst = []
+
+            self.log('Searching the Rubrik cluster for the current hosts.')
+            current_hosts = self.get(
+                'v1',
+                '/host?operating_system_type=Windows&primary_cluster_id=local',
+                timeout=timeout)
+
+            for rubrik_host in current_hosts['data']:
+                if rubrik_host['name'] == object_name:
+                    host_id = rubrik_host['id']
+
+            if(host_id):
+                self.log("assign_sla: Searching the Rubrik cluster for the MSSQL Instance '{}'.".format(object_name))
+                mssql_instances = self.get('v1', '/mssql/instance?root_id={}'.format(host_id), timeout=timeout)
+
+                for mssql_instance in mssql_instances['data']:
+                    mssql_id = mssql_instance['id']
+                    mssql_instance_name = mssql_instance['name']
+
+                    self.log(
+                        "assign_sla: Determing the SLA Domain currently assigned to the MSSQL Instance '{}'.".format(mssql_instance_name))
+
+                    mssql_summary = self.get('v1', '/mssql/instance/{}'.format(mssql_id), timeout=timeout)
+
+                    if (sla_id == mssql_summary['configuredSlaDomainId'] and log_backup_frequency_in_seconds == mssql_summary['logBackupFrequencyInSeconds'] and
+                            log_retention_hours == mssql_summary['logRetentionHours'] and copy_only == mssql_summary['copyOnly']):
+                        return "No change required. The MSSQL Instance '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
+                               " log_backup_frequency_in_seconds: {}, log_retention_hours: {} and copy_only: {}.".format(
+                                   object_name, sla_name, log_backup_frequency_in_seconds, log_retention_hours, copy_only)
+
+                    else:
+                        self.log(
+                            "assign_sla: Assigning the MSSQL Instance '{}' to the '{}' SLA Domain.".format(
+                                object_name, sla_name))
+
+                        config = {}
+                        if log_backup_frequency_in_seconds is not None:
+                            config['logBackupFrequencyInSeconds'] = log_backup_frequency_in_seconds
+                        if log_retention_hours is not None:
+                            config['logRetentionHours'] = log_retention_hours
+                        if copy_only is not None:
+                            config['copyOnly'] = copy_only
+
+                        config['configuredSlaDomainId'] = sla_id
+
+                        patch_resp = self.patch("v1", "/mssql/instance/{}".format(mssql_id), config, timeout)
+                        db_sla_lst.append(patch_resp)
+            else:
+                raise InvalidParameterException(
+                    "Host ID not found for instance '{}'").format(object_name)
+
+            return db_sla_lst
+
+    def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):  # pylint: ignore
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -428,9 +497,9 @@ class Data_Management(_API):
         """
 
         if isinstance(remove_network_devices, bool) is False:
-            raise InvalidParameterException("The 'remove_network_devices' argument must be True or False.")
+            raise InvalidTypeException("The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
-            raise InvalidParameterException("The 'power_on' argument must be True or False.")
+            raise InvalidTypeException("The 'power_on' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
             raise InvalidParameterException(
                 "The date and time arguments most both be 'latest' or a specific date and time.")
@@ -482,8 +551,7 @@ class Data_Management(_API):
 
             return self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config, timeout)
 
-    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False,
-                                 power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):
+    def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):  # pylint: ignore
         """Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
 
         Arguments:
@@ -505,15 +573,15 @@ class Data_Management(_API):
         """
 
         if isinstance(remove_network_devices, bool) is False:
-            raise InvalidParameterException("The 'remove_network_devices' argument must be True or False.")
+            raise InvalidTypeException("The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
-            raise InvalidParameterException("The 'power_on' argument must be True or False.")
+            raise InvalidTypeException("The 'power_on' argument must be True or False.")
         elif isinstance(disable_network, bool) is False:
-            raise InvalidParameterException("The 'disable_network' argument must be True or False.")
+            raise InvalidTypeException("The 'disable_network' argument must be True or False.")
         elif isinstance(keep_mac_addresses, bool) is False:
-            raise InvalidParameterException("The 'keep_mac_addresses' argument must be True or False.")
+            raise InvalidTypeException("The 'keep_mac_addresses' argument must be True or False.")
         elif isinstance(preserve_moid, bool) is False:
-            raise InvalidParameterException("The 'preserve_moid' argument must be True or False.")
+            raise InvalidTypeException("The 'preserve_moid' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
             raise InvalidParameterException(
                 "The date and time arguments most both be 'latest' or a specific date and time.")

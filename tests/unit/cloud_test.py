@@ -1,5 +1,5 @@
 import pytest
-from rubrik_cdm.exceptions import InvalidParameterException, CDMVersionException
+from rubrik_cdm.exceptions import InvalidParameterException, CDMVersionException, InvalidTypeException
 from rubrik_cdm import Connect
 
 
@@ -685,7 +685,7 @@ def test_update_aws_native_account_invalid_config(rubrik, mocker):
     mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = mock_self_cluster_version()
 
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(InvalidTypeException) as error:
         rubrik.update_aws_native_account("aws_account_name", "not_a_dictionary")
 
     error_message = error.value.args[0]
@@ -841,7 +841,7 @@ def test_add_aws_native_account_invalid_regional_bolt_network_configs_list(rubri
     mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = mock_self_cluster_version()
 
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(InvalidTypeException) as error:
         rubrik.add_aws_native_account(
             "aws_account_name",
             "aws_access_key",
@@ -862,7 +862,7 @@ def test_add_aws_native_account_invalid_regional_bolt_network_configs_list_dict(
     mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = mock_self_cluster_version()
 
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(InvalidTypeException) as error:
         rubrik.add_aws_native_account(
             "aws_account_name",
             "aws_access_key",

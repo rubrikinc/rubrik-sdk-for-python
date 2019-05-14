@@ -1,15 +1,22 @@
 # Copyright 2018 Rubrik, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License prop
-#  http://www.apache.org/licenses/LICENSE-2.0
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
 
 """
 This module contains the Rubrik SDK API class.
@@ -23,7 +30,8 @@ try:
 except ImportError:
     from urllib.parse import quote  # Python 3+
 from random import choice
-from .exceptions import APICallException, InvalidParameterException, RubrikException
+from .exceptions import APICallException, InvalidParameterException, RubrikException, InvalidTypeException
+
 
 class Api():
     """This class contains the base API methods that can be called independently or internally in standalone functions."""
@@ -31,8 +39,7 @@ class Api():
     def __init__(self, node_ip):
         super().__init__(node_ip)
 
-    def _common_api(self, call_type, api_version, api_endpoint, config=None,
-                    job_status_url=None, timeout=15, authentication=True, params=None):
+    def _common_api(self, call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=15, authentication=True, params=None):  # pylint: ignore
         """Internal method that consolidates the base API functions.
 
         Arguments:
@@ -59,7 +66,7 @@ class Api():
         elif authentication is False:
             header = self._header()
         else:
-            raise InvalidParameterException('"authentication" must be either True or False')
+            raise InvalidTypeException('"authentication" must be either True or False')
 
         # Create required header for the special case of a bootstrap including Host attribute
         if '/cluster/me/bootstrap' in api_endpoint:
@@ -151,8 +158,7 @@ class Api():
             except BaseException:
                 return {'status_code': api_request.status_code}
 
-    def get(self, api_version, api_endpoint, timeout=15,
-            authentication=True, params=None):
+    def get(self, api_version, api_endpoint, timeout=15, authentication=True, params=None):
         """Send a GET request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -178,8 +184,7 @@ class Api():
             authentication=authentication,
             params=params)
 
-    def post(self, api_version, api_endpoint, config,
-             timeout=15, authentication=True):
+    def post(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Send a POST request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -204,8 +209,7 @@ class Api():
             timeout=timeout,
             authentication=authentication)
 
-    def patch(self, api_version, api_endpoint, config,
-              timeout=15, authentication=True):
+    def patch(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Send a PATCH request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -230,8 +234,7 @@ class Api():
             timeout=timeout,
             authentication=authentication)
 
-    def delete(self, api_version, api_endpoint, timeout=15,
-               authentication=True, params=None):
+    def delete(self, api_version, api_endpoint, timeout=15, authentication=True, params=None):
         """Send a DELETE request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -275,7 +278,7 @@ class Api():
         """
 
         if not isinstance(wait_for_completion, bool):
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 'The job_status() wait_for_completion argument must be True or False.')
 
         if wait_for_completion:
