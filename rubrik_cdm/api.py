@@ -30,7 +30,7 @@ try:
 except ImportError:
     from urllib.parse import quote  # Python 3+
 from random import choice
-from .exceptions import APICallException, InvalidParameterException, RubrikException
+from .exceptions import APICallException, InvalidParameterException, RubrikException, InvalidTypeException
 
 
 class Api():
@@ -66,7 +66,7 @@ class Api():
         elif authentication is False:
             header = self._header()
         else:
-            raise InvalidParameterException('"authentication" must be either True or False')
+            raise InvalidTypeException('"authentication" must be either True or False')
 
         # Create required header for the special case of a bootstrap including Host attribute
         if '/cluster/me/bootstrap' in api_endpoint:
@@ -278,7 +278,7 @@ class Api():
         """
 
         if not isinstance(wait_for_completion, bool):
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 'The job_status() wait_for_completion argument must be True or False.')
 
         if wait_for_completion:

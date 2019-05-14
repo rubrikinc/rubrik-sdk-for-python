@@ -35,7 +35,7 @@ from .cluster import Cluster
 from .data_management import Data_Management
 from .physical import Physical
 from .cloud import Cloud
-from .exceptions import InvalidParameterException, RubrikException, APICallException
+from .exceptions import InvalidParameterException, RubrikException, APICallException, InvalidTypeException
 
 
 _CLUSTER = Cluster
@@ -198,7 +198,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         # Validate the API Endpoint Syntax
         if not isinstance(api_endpoint, str):
-            raise InvalidParameterException("The API Endpoint must be a string.")
+            raise InvalidTypeException("The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
             raise InvalidParameterException(
                 "The API Endpoint should begin with '/'. (ex: /cluster/me)")
@@ -286,24 +286,24 @@ class Bootstrap(_API):
         """
 
         if node_config is None or isinstance(node_config, dict) is not True:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 'You must provide a valid dictionary for "node_config".')
 
         if dns_search_domains is None:
             dns_search_domains = []
         elif isinstance(dns_search_domains, list) is not True:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 'You must provide a valid list for "dns_search_domains".')
 
         if dns_nameservers is None:
             dns_nameservers = ['8.8.8.8']
         elif isinstance(dns_nameservers, list) is not True:
-            raise InvalidParameterException('You must provide a valid list for "dns_nameservers".')
+            raise InvalidTypeException('You must provide a valid list for "dns_nameservers".')
 
         if ntp_servers is None:
             ntp_servers = ['pool.ntp.org']
         elif isinstance(ntp_servers, list) is not True:
-            raise InvalidParameterException('You must provide a valid list for "ntp_servers".')
+            raise InvalidTypeException('You must provide a valid list for "ntp_servers".')
 
         bootstrap_config = {}
         bootstrap_config["enableSoftwareEncryptionAtRest"] = enable_encryption
@@ -436,7 +436,7 @@ class Bootstrap(_API):
 
         # Validate the API Endpoint Syntax
         if not isinstance(api_endpoint, str):
-            raise InvalidParameterException("The API Endpoint must be a string.")
+            raise InvalidTypeException("The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
             raise InvalidParameterException(
                 "The API Endpoint should begin with '/'. (ex: /cluster/me)")

@@ -23,7 +23,7 @@ This module contains the Rubrik SDK Cluster class.
 """
 
 from .api import Api
-from .exceptions import InvalidParameterException, CDMVersionException
+from .exceptions import InvalidParameterException, CDMVersionException, InvalidTypeException
 
 
 class Cluster(Api):
@@ -282,7 +282,7 @@ class Cluster(Api):
         """
 
         if isinstance(ntp_server, list) is False:
-            raise InvalidParameterException("The 'ntp_server' argument must be a list object.")
+            raise InvalidTypeException("The 'ntp_server' argument must be a list object.")
 
         self.log("cluster_ntp: Determing the current cluster NTP settings")
         cluster_ntp = self.get("internal", "/cluster/me/ntp_server", timeout=timeout)
@@ -412,7 +412,7 @@ class Cluster(Api):
         """
 
         if isinstance(server_ip, list) is False:
-            raise InvalidParameterException("The 'server_ip' argument must be a list")
+            raise InvalidTypeException("The 'server_ip' argument must be a list")
 
         self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
         current_dns_servers = self.get("internal", "/cluster/me/dns_nameserver", timeout=timeout)
@@ -437,7 +437,7 @@ class Cluster(Api):
         """
 
         if isinstance(search_domain, list) is False:
-            raise InvalidParameterException("The 'server_ip' argument must be a list")
+            raise InvalidTypeException("The 'server_ip' argument must be a list")
 
         self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
         current_dns_search_domains = self.get("internal", "/cluster/me/dns_search_domain", timeout=timeout)

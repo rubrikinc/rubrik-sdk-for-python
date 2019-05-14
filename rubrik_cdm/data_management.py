@@ -23,7 +23,7 @@ This module contains the Rubrik SDK Data_Management class.
 """
 import re
 from .api import Api
-from .exceptions import CDMVersionException, InvalidParameterException
+from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException
 
 
 _API = Api
@@ -497,9 +497,9 @@ class Data_Management(_API):
         """
 
         if isinstance(remove_network_devices, bool) is False:
-            raise InvalidParameterException("The 'remove_network_devices' argument must be True or False.")
+            raise InvalidTypeException("The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
-            raise InvalidParameterException("The 'power_on' argument must be True or False.")
+            raise InvalidTypeException("The 'power_on' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
             raise InvalidParameterException(
                 "The date and time arguments most both be 'latest' or a specific date and time.")
@@ -573,15 +573,15 @@ class Data_Management(_API):
         """
 
         if isinstance(remove_network_devices, bool) is False:
-            raise InvalidParameterException("The 'remove_network_devices' argument must be True or False.")
+            raise InvalidTypeException("The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
-            raise InvalidParameterException("The 'power_on' argument must be True or False.")
+            raise InvalidTypeException("The 'power_on' argument must be True or False.")
         elif isinstance(disable_network, bool) is False:
-            raise InvalidParameterException("The 'disable_network' argument must be True or False.")
+            raise InvalidTypeException("The 'disable_network' argument must be True or False.")
         elif isinstance(keep_mac_addresses, bool) is False:
-            raise InvalidParameterException("The 'keep_mac_addresses' argument must be True or False.")
+            raise InvalidTypeException("The 'keep_mac_addresses' argument must be True or False.")
         elif isinstance(preserve_moid, bool) is False:
-            raise InvalidParameterException("The 'preserve_moid' argument must be True or False.")
+            raise InvalidTypeException("The 'preserve_moid' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
             raise InvalidParameterException(
                 "The date and time arguments most both be 'latest' or a specific date and time.")

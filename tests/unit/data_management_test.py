@@ -1,5 +1,5 @@
 import pytest
-from rubrik_cdm.exceptions import InvalidParameterException, CDMVersionException
+from rubrik_cdm.exceptions import InvalidParameterException, CDMVersionException, InvalidTypeException
 from rubrik_cdm import Connect
 
 
@@ -3913,7 +3913,7 @@ def test_assign_sla(rubrik, mocker):
 
 
 def test_vsphere_live_mount_invalid_remove_network_devices(rubrik):
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(InvalidTypeException) as error:
         rubrik.vsphere_live_mount("vm_name", remove_network_devices="not_a_valid_remove_network_devices")
 
     error_message = error.value.args[0]
@@ -3922,7 +3922,7 @@ def test_vsphere_live_mount_invalid_remove_network_devices(rubrik):
 
 
 def test_vsphere_live_mount_invalid_power_on(rubrik):
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(InvalidTypeException) as error:
         rubrik.vsphere_live_mount("vm_name", power_on="not_a_valid_remove_network_devices")
 
     error_message = error.value.args[0]
@@ -4909,7 +4909,7 @@ def test_vsphere_live_mount_specific_host(rubrik, mocker):
 
 
 def test_vsphere_instant_recovery_invalid_remove_network_devices(rubrik):
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(InvalidTypeException) as error:
         rubrik.vsphere_instant_recovery("vm_name", remove_network_devices="not_a_valid_remove_network_devices")
 
     error_message = error.value.args[0]
@@ -4918,7 +4918,7 @@ def test_vsphere_instant_recovery_invalid_remove_network_devices(rubrik):
 
 
 def test_vsphere_instant_recovery_invalid_power_on(rubrik):
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(InvalidTypeException) as error:
         rubrik.vsphere_instant_recovery("vm_name", power_on="not_a_valid_remove_network_devices")
 
     error_message = error.value.args[0]
@@ -4927,7 +4927,7 @@ def test_vsphere_instant_recovery_invalid_power_on(rubrik):
 
 
 def test_vsphere_instant_recovery_invalid_disable_network(rubrik):
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(InvalidTypeException) as error:
         rubrik.vsphere_instant_recovery("vm_name", disable_network="not_a_valid_disable_network")
 
     error_message = error.value.args[0]
@@ -4936,7 +4936,7 @@ def test_vsphere_instant_recovery_invalid_disable_network(rubrik):
 
 
 def test_vsphere_instant_recovery_invalid_keep_mac_addresses(rubrik):
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(InvalidTypeException) as error:
         rubrik.vsphere_instant_recovery("vm_name", keep_mac_addresses="not_a_valid_keep_mac_addresses")
 
     error_message = error.value.args[0]
@@ -4945,7 +4945,7 @@ def test_vsphere_instant_recovery_invalid_keep_mac_addresses(rubrik):
 
 
 def test_vsphere_instant_recovery_invalid_preserve_moid(rubrik):
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(InvalidTypeException) as error:
         rubrik.vsphere_instant_recovery("vm_name", preserve_moid="not_a_valid_preserve_moid")
 
     error_message = error.value.args[0]

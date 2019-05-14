@@ -471,7 +471,6 @@ class Cloud(Api):
                 pass
 
             if archive['definition']['objectStoreType'] == 'Azure' and archive['definition']['name'] == archive_name:
-                # raise InvalidParameterException(archive['definition'])
 
                 if archive['definition'] == redacted_archive_definition:
 
@@ -560,7 +559,7 @@ class Cloud(Api):
             # verify our list of bolt_network_configs only contains dicts
             for bolt_network_config in regional_bolt_network_configs:
                 if isinstance(bolt_network_config, dict) is False:
-                    raise InvalidParameterException("The `regional_bolt_network_configs` list can only contain dicts.")
+                    raise InvalidTypeException("The `regional_bolt_network_configs` list can only contain dicts.")
 
                 # verify that all the required paramteters are provided in all
                 # regional_bolt_network_configs
@@ -626,7 +625,7 @@ class Cloud(Api):
             raise CDMVersionException(4.2)
 
         if not isinstance(config, dict):
-            raise InvalidParameterException("The 'config' argument must be a dictionary.")
+            raise InvalidTypeException("The 'config' argument must be a dictionary.")
 
         self.log("update_aws_native_account: Checking the Rubrik cluster for the AWS Native Account.")
         account_id = self.object_id(aws_account_name, "aws_native", timeout=timeout)

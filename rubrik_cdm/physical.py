@@ -23,7 +23,7 @@ This module contains the Rubrik SDK Physical class.
 """
 
 from .api import Api
-from .exceptions import InvalidParameterException
+from .exceptions import InvalidParameterException, InvalidTypeException
 
 
 class Physical(Api):
@@ -147,17 +147,17 @@ class Physical(Api):
                 valid_operating_system))
 
         if isinstance(follow_network_shares, bool) is False:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 "The 'follow_network_shares' argument must be True or False.")
         elif isinstance(backup_hidden_folders, bool) is False:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 "The 'backup_hidden_folders' argument must be True or False.")
         elif isinstance(include, list) is False:
-            raise InvalidParameterException("The 'include' argument must be a list object.")
+            raise InvalidTypeException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
-            raise InvalidParameterException("The 'exclude' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 "The 'exclude_exception' argument must be a list object.")
 
         config = {}
@@ -228,14 +228,14 @@ class Physical(Api):
                 valid_share_type))
 
         if isinstance(follow_network_shares, bool) is False:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 "The 'follow_network_shares' argument must be True or False.")
         elif isinstance(include, list) is False:
-            raise InvalidParameterException("The 'include' argument must be a list object.")
+            raise InvalidTypeException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
-            raise InvalidParameterException("The 'exclude' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 "The 'exclude_exception' argument must be a list object.")
 
         config = {}
@@ -318,17 +318,17 @@ class Physical(Api):
             exclude_exception = []
 
         if isinstance(follow_network_shares, bool) is False:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 "The 'follow_network_shares' argument must be True or False.")
         elif isinstance(backup_hidden_folders, bool) is False:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 "The 'backup_hidden_folders' argument must be True or False.")
         elif isinstance(include, list) is False:
-            raise InvalidParameterException("The 'include' argument must be a list object.")
+            raise InvalidTypeException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
-            raise InvalidParameterException("The 'exclude' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 "The 'exclude_exception' argument must be a list object.")
 
         self.log(

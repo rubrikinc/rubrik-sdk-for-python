@@ -1,5 +1,5 @@
 import pytest
-from rubrik_cdm.exceptions import InvalidParameterException, CDMVersionException
+from rubrik_cdm.exceptions import InvalidParameterException, CDMVersionException, InvalidTypeException
 from rubrik_cdm import Connect
 
 
@@ -482,7 +482,7 @@ def test_configure_timezone(rubrik, mocker):
 
 def test_configure_ntp_invalid_type(rubrik):
 
-    with pytest.raises(InvalidParameterException):
+    with pytest.raises(InvalidTypeException):
         rubrik.configure_ntp("not_a_list")
 
 
@@ -699,7 +699,7 @@ def test_configure_vlan(rubrik, mocker):
 
 def test_configure_dns_servers_invalid_server_ip(rubrik):
 
-    with pytest.raises(InvalidParameterException):
+    with pytest.raises(InvalidTypeException):
         rubrik.configure_dns_servers("not_a_valid_server_ip_type")
 
 
@@ -739,7 +739,7 @@ def test_configure_dns_servers(rubrik, mocker):
 
 def test_configure_search_domain_invalid_search_domain(rubrik):
 
-    with pytest.raises(InvalidParameterException):
+    with pytest.raises(InvalidTypeException):
         rubrik.configure_search_domain("not_a_valid_search_domain_type")
 
 
