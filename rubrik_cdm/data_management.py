@@ -422,10 +422,6 @@ class Data_Management(_API):
 
         elif object_type == 'mssql_host':
 
-            if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
-                raise InvalidParameterException(
-                    "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
-
             host_id = ''
             mssql_id = ''
             db_sla_lst = []
