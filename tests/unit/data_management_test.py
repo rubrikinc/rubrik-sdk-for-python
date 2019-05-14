@@ -2625,7 +2625,7 @@ def test_assign_sla_invalid_object_type(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The assign_sla() object_type argument must be one of the following: ['vmware']."
+    assert error_message == "The assign_sla() object_type argument must be one of the following: ['vmware', 'mssql_host']."
 
 
 def test_assign_sla_idempotence_specific_sla(rubrik, mocker):
