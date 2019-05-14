@@ -361,7 +361,7 @@ class Data_Management(_API):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds, log_retention_hours, copy_only, timeout=30):
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
@@ -383,6 +383,10 @@ class Data_Management(_API):
             raise InvalidParameterException(
                 "The assign_sla() object_type argument must be one of the following: {}.".format(valid_object_type))
 
+        if object_type == "mssql_host":
+            if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
         # Determine if 'do not protect' or 'clear' are the SLA Domain Name
         do_not_protect_regex = re.findall('\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
         clear_regex = re.findall('\\bclear\\b', sla_name, flags=re.IGNORECASE)
@@ -415,12 +419,19 @@ class Data_Management(_API):
 
         elif object_type == 'mssql_host':
 
+            if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
+
             host_id = ''
             mssql_id = ''
             db_sla_lst = []
 
             self.log('Searching the Rubrik cluster for the current hosts.')
-            current_hosts = self.get('v1', '/host?operating_system_type=Windows&primary_cluster_id=local', timeout=timeout)
+            current_hosts = self.get(
+                'v1',
+                '/host?operating_system_type=Windows&primary_cluster_id=local',
+                timeout=timeout)
 
             for rubrik_host in current_hosts['data']:
                 if rubrik_host['name'] == object_name:
@@ -428,24 +439,27 @@ class Data_Management(_API):
 
             if(host_id):
                 self.log("assign_sla: Searching the Rubrik cluster for the MSSQL Instance '{}'.".format(object_name))
-                mssql_instances = self.get('v1','/mssql/instance?root_id={}'.format(host_id), timeout=timeout)
+                mssql_instances = self.get('v1', '/mssql/instance?root_id={}'.format(host_id), timeout=timeout)
 
                 for mssql_instance in mssql_instances['data']:
                     mssql_id = mssql_instance['id']
                     mssql_instance_name = mssql_instance['name']
 
-                    self.log("assign_sla: Determing the SLA Domain currently assigned to the MSSQL Instance '{}'.".format(mssql_instance_name))
+                    self.log(
+                        "assign_sla: Determing the SLA Domain currently assigned to the MSSQL Instance '{}'.".format(mssql_instance_name))
 
                     mssql_summary = self.get('v1', '/mssql/instance/{}'.format(mssql_id), timeout=timeout)
 
                     if (sla_id == mssql_summary['configuredSlaDomainId'] and log_backup_frequency_in_seconds == mssql_summary['logBackupFrequencyInSeconds'] and
-                    log_retention_hours == mssql_summary['logRetentionHours'] and copy_only == mssql_summary['copyOnly']):
+                            log_retention_hours == mssql_summary['logRetentionHours'] and copy_only == mssql_summary['copyOnly']):
                         return "No change required. The MSSQL Instance '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
                                " logBackupFrequencyInSeconds: {}, logRetentionHours: {} and Copy Only: {}.".format(
-                            object_name, sla_name, log_backup_frequency_in_seconds, log_retention_hours, copy_only)
+                                   object_name, sla_name, log_backup_frequency_in_seconds, log_retention_hours, copy_only)
 
                     else:
-                        self.log("assign_sla: Assigning the MSSQL Instance '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+                        self.log(
+                            "assign_sla: Assigning the MSSQL Instance '{}' to the '{}' SLA Domain.".format(
+                                object_name, sla_name))
 
                         config = {}
                         if log_backup_frequency_in_seconds is not None:
