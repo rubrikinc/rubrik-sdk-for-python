@@ -617,7 +617,7 @@ class Cloud(Api):
 
 
         Returns:
-            dict -- The full API response for `PATCH /aws/account/{id}'`.
+            dict -- The full API response for `PATCH /aws/account/{id}`.
         """
         # verify we are on cdm 4.2 or newer, required for cloud native
         # protection
