@@ -367,10 +367,13 @@ class Data_Management(_API):
         Arguments:
             object_name {str} -- The name of the Rubrik object you wish to assign to an SLA Domain.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
-            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware})
+            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host})
 
         Keyword Arguments:
-            timeout {str} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+            log_backup_frequency_in_seconds {str} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
+            log_retention_hours {int} -- The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
+            copy_only {int} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
+            timeout {bool} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
