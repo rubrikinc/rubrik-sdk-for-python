@@ -145,51 +145,8 @@ class Data_Management(_API):
             config = {}
             config['slaId'] = sla_id
 
-            self.log(
-                "on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(object_name))
             api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(mssql_id), config, timeout)
-
-            snapshot_status_url = api_request['links'][0]['href']
-
-        elif object_type == 'mssql_db':
-
-            self.log(
-                "on_demand_snapshot: Searching the Rubrik cluster for the MS SQL '{}'.".format(object_name))
-
-            mssql_host = self.object_id(sql_host, 'physical_host', timeout=timeout)
-            mssql_instance = self.get(
-                'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
-
-            for instance in mssql_instance['data']:
-                if instance['name'] == sql_instance:
-                    sql_db_id = instance['id']
-
-            mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_db_id), timeout)
-
-            for db in mssql_db['data']:
-                if db['name'] == sql_db:
-                    mssql_id = db['id']
-
-            if sla_name == 'current':
-                self.log(
-                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(object_name))
-
-                mssql_summary = self.get(
-                    'v1', '/mssql/db/{}'.format(mssql_id), timeout)
-                sla_id = mssql_summary['effectiveSlaDomainId']
-
-            elif sla_name != 'current':
-                self.log(
-                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
-
-            config = {}
-            config['slaId'] = sla_id
-
-            self.log(
-                "on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(object_name))
-            api_request = self.post(
-                'v1', '/mssql/db/{}/snapshot'.format(mssql_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
