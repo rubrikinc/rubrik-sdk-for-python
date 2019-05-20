@@ -564,3 +564,27 @@ class Cluster(_API):
             self.log("support_tunnel: Support tunnel disabled.")
 
         return self.patch("internal", "/node/{}/support_tunnel".format(node_id), config, timeout)
+
+    def guest_credential(self, username, password, domain=None, timeout=15):
+        """Create new guest OS credential.
+
+        Arguments:
+            username {str} -- Username for the account used to login to the VM guest OS.
+            password {str} -- Password for the account used to login to the VM guest OS.
+
+        Keyword Arguments:
+            domain {int} -- Domain name for the account used to login to the VM guest OS. (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The ful API response for `POST /vmware/guest_credential`
+        """
+
+        config = {}
+        config["username"] = username
+        config["password"] = password
+        config["domain"] = domain
+
+        self.log(
+            "guest_credentials: Adding new guest OS credentials '{}{}' to the Rubrik cluster.".format(config["domain"],config["username"]))
+        return self.post("internal", "/vmware/guest_credential", config, timeout)
