@@ -586,5 +586,5 @@ class Cluster(_API):
         config["domain"] = domain
 
         self.log(
-            "guest_credentials: Adding new guest OS credentials '{}{}' to the Rubrik cluster.".format(config["domain"],config["username"]))
+            "guest_credential: Adding new guest OS credentials '{}{}' to the Rubrik cluster.".format(config["domain"],config["username"]))
         return self.post("internal", "/vmware/guest_credential", config, timeout)
