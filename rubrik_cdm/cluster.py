@@ -529,3 +529,38 @@ class Cluster(_API):
             return self.job_status(api_request["links"][0]["href"])
 
         return self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
+
+    def support_tunnel(self, isTunnelEnabled=True, inactivityTimeout=0, timeout=15):
+        """Enable/disable the support tunnel on the connected node.
+
+        Arguments:
+            isTunnelEnabled {bool} -- Pass true to open the support tunnel, and false to close.. (default: {True})
+
+        Keyword Arguments:
+            inactivityTimeout {int} -- Tunnel inactivity timeout in seconds. (default: {0})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full API response for `PATCH /node/{id}/support_tunnel`
+        """
+
+        node_id = "me"
+        config = {}
+        config["isTunnelEnabled"] = isTunnelEnabled
+        config["inactivityTimeout"] = inactivityTimeout
+
+        support_tunnel_status = self.get(
+            "internal", "/node/{}/support_tunnel".format(node_id), timeout=timeout)
+
+        if isTunnelEnabled == True:
+            if support_tunnel_status["isTunnelEnabled"] == True:
+                self.log("support_tunnel: Support tunnel already enabled: {}.".format(support_tunnel_status["port"]))
+                return "Support tunnel already enabled: {}.".format(support_tunnel_status["port"])
+            self.log("support_tunnel: Support tunnel enabled.")
+        elif isTunnelEnabled == False:
+            if support_tunnel_status["isTunnelEnabled"] == False:
+                self.log("support_tunnel: Support tunnel is already disabled.")
+                return "Support tunnel already disabled."
+            self.log("support_tunnel: Support tunnel disabled.")
+
+        return self.patch("internal", "/node/{}/support_tunnel".format(node_id), config, timeout)
