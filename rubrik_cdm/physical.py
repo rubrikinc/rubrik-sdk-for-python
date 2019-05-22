@@ -212,19 +212,17 @@ class Physical(Api):
         valid_share_type = ['NFS', 'SMB']
 
         if share_type not in valid_share_type:
-            raise InvalidParameterException("The create_fileset() share_type argument must be one of the following: {}.".format(
-                valid_share_type))
+            raise InvalidParameterException(
+                "The create_fileset() share_type argument must be one of the following: {}.".format(valid_share_type))
 
         if isinstance(follow_network_shares, bool) is False:
-            raise InvalidTypeException(
-                "The 'follow_network_shares' argument must be True or False.")
+            raise InvalidTypeException("The 'follow_network_shares' argument must be True or False.")
         elif isinstance(include, list) is False:
             raise InvalidTypeException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
             raise InvalidTypeException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            raise InvalidTypeException(
-                "The 'exclude_exception' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude_exception' argument must be a list object.")
 
         config = {}
         config['name'] = name
@@ -234,20 +232,16 @@ class Physical(Api):
         config['allowBackupHiddenFoldersInNetworkMounts'] = follow_network_shares
         config['shareType'] = share_type
 
-        self.log(
-            "create_fileset: Searching the Rubrik cluster for all current NAS Filesets.")
+        self.log("create_fileset: Searching the Rubrik cluster for all current NAS Filesets.")
         current_filesets = self.get(
             'v1', '/fileset_template?primary_cluster_id=local&operating_system_type=NONE&name={}'.format(name), timeout=timeout)
 
         current_config = {}
         if current_filesets['data']:
             current_config['name'] = current_filesets['data'][0]['name']
-            current_config['includes'] = sorted(
-                current_filesets['data'][0]['includes'])
-            current_config['excludes'] = sorted(
-                current_filesets['data'][0]['excludes'])
-            current_config['exceptions'] = sorted(
-                current_filesets['data'][0]['exceptions'])
+            current_config['includes'] = sorted(current_filesets['data'][0]['includes'])
+            current_config['excludes'] = sorted(current_filesets['data'][0]['excludes'])
+            current_config['exceptions'] = sorted(current_filesets['data'][0]['exceptions'])
             current_config['allowBackupHiddenFoldersInNetworkMounts'] = current_filesets['data'][0]['allowBackupHiddenFoldersInNetworkMounts']
             current_config['shareType'] = current_filesets['data'][0]['shareType']
 
@@ -260,11 +254,7 @@ class Physical(Api):
         model.append(config)
 
         self.log("create_fileset: Creating the '{}' Fileset.".format(name))
-        return self.post(
-            'internal',
-            '/fileset_template/bulk',
-            model,
-            timeout=timeout)
+        return self.post('internal', '/fileset_template/bulk', model, timeout=timeout)
 
     def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None, exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):  # pylint: ignore
         """Assign a Fileset to a Linux or Windows machine. If you have multiple Filesets with identical names, you will need to populate the Filesets properties (i.e this functions keyword arguments)
