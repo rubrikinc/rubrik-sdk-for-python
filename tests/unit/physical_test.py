@@ -269,6 +269,109 @@ def test_add_physical_host_list(rubrik, mocker):
     mock_post.return_value = mock_post_v1_host()
 
     assert rubrik.add_physical_host("hostname") == mock_post_v1_host()
+
+
+def test_delete_physical_host_idempotence(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "hostname": "string",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_host()
+
+    assert rubrik.delete_physical_host("hostname") == \
+        "No change required. The host 'hostname' is not connected to the Rubrik cluster."
+
+
+def test_delete_physical_host(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "hostname": "hostname",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                },
+                {
+                    "id": "string",
+                    "name": "string",
+                    "hostname": "string",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 2
+        }
+
+    def mock_delete_v1_host_id():
+        return {"status_code: 204"}
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_host()
+
+    mock_delete = mocker.patch('rubrik_cdm.Connect.delete', autospec=True, spec_set=True)
+    mock_delete.return_value = mock_delete_v1_host_id()
+
+    assert rubrik.delete_physical_host("hostname") == mock_delete_v1_host_id()
+
 #######
 #######
 #######
