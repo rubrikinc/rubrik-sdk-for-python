@@ -296,25 +296,24 @@ class Physical(Api):
             exclude_exception = []
 
         if isinstance(follow_network_shares, bool) is False:
-            raise InvalidTypeException(
-                "The 'follow_network_shares' argument must be True or False.")
+            raise InvalidTypeException("The 'follow_network_shares' argument must be True or False.")
         elif isinstance(backup_hidden_folders, bool) is False:
-            raise InvalidTypeException(
-                "The 'backup_hidden_folders' argument must be True or False.")
+            raise InvalidTypeException("The 'backup_hidden_folders' argument must be True or False.")
         elif isinstance(include, list) is False:
             raise InvalidTypeException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
             raise InvalidTypeException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            raise InvalidTypeException(
-                "The 'exclude_exception' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude_exception' argument must be a list object.")
 
         self.log(
             "assign_physical_host_fileset: Searching the Rubrik cluster for the {} physical host {}.".format(
                 operating_system,
                 hostname))
-        current_hosts = self.get(
-            'v1', '/host?operating_system_type={}&primary_cluster_id=local&hostname={}'.format(operating_system, hostname), timeout=timeout)
+        current_hosts = self.get('v1',
+                                 '/host?operating_system_type={}&primary_cluster_id=local&hostname={}'.format(operating_system,
+                                                                                                              hostname),
+                                 timeout=timeout)
 
         if current_hosts['total'] >= 1:
             for host in current_hosts['data']:
@@ -325,19 +324,16 @@ class Physical(Api):
             host_id
         except NameError:
             raise InvalidParameterException(
-                "The Rubrik cluster is not connected to a {} physical host named '{}'.".format(
-                    operating_system, hostname))
+                "The Rubrik cluster is not connected to a {} physical host named '{}'.".format(operating_system, hostname))
 
-        self.log("assign_physical_host_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(
-            operating_system))
+        self.log("assign_physical_host_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(operating_system))
         current_filesets_templates = self.get(
             'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(operating_system, fileset_name), timeout=timeout)
 
         number_of_matches = 0
         if current_filesets_templates['total'] == 0:
-            raise InvalidParameterException(
-                "The Rubrik cluster does not have a {} Fileset named '{}'.".format(
-                    operating_system, fileset_name))
+            raise InvalidParameterException("The Rubrik cluster does not have a {} Fileset named '{}'.".format(
+                operating_system, fileset_name))
         elif current_filesets_templates['total'] > 1:
             for fileset_template in current_filesets_templates['data']:
                 if fileset_template['name'] == fileset_name:
@@ -390,12 +386,10 @@ class Physical(Api):
                 if fileset_temmplate['name'] == fileset_name:
                     fileset_template_id = fileset_temmplate['id']
 
-        self.log(
-            "assign_physical_host_fileset: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+        self.log("assign_physical_host_fileset: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
         sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
-        self.log("assign_physical_host_fileset: Getting the properties of the {} Fileset.".format(
-            fileset_name))
+        self.log("assign_physical_host_fileset: Getting the properties of the {} Fileset.".format(fileset_name))
         current_fileset = self.get(
             'v1', '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id, fileset_template_id), timeout=timeout)
 
@@ -415,8 +409,7 @@ class Physical(Api):
 
             config = {}
             config['configuredSlaDomainId'] = sla_id
-            assign_sla = self.patch(
-                'v1', '/fileset/{}'.format(fileset_id), config, timeout)
+            assign_sla = self.patch('v1', '/fileset/{}'.format(fileset_id), config, timeout)
 
             return (create_fileset, assign_sla)
         elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] != sla_id:
@@ -430,11 +423,7 @@ class Physical(Api):
             fileset_id = current_fileset['data'][0]['id']
             config = {}
             config['configuredSlaDomainId'] = sla_id
-            return self.patch(
-                'v1',
-                '/fileset/{}'.format(fileset_id),
-                config,
-                timeout)
+            return self.patch('v1', '/fileset/{}'.format(fileset_id), config, timeout)
 
         elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] == sla_id:
             return "No change required. The {} Fileset '{}' is already assigned to the SLA Domain '{}' on the physical host '{}'.".format(
