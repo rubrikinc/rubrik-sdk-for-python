@@ -372,6 +372,160 @@ def test_delete_physical_host(rubrik, mocker):
 
     assert rubrik.delete_physical_host("hostname") == mock_delete_v1_host_id()
 
+
+def test_create_physical_fileset_invalid_operating_system(rubrik):
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.create_physical_fileset("name", "not_a_valid_operating_system",
+                                       "include", "exclude", "exclude_exception")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The create_physical_fileset() operating_system argument must be one of the following: ['Linux', 'Windows']."
+
+
+def test_create_physical_fileset_invalid_follow_network_shares(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.create_physical_fileset("name", "Linux",
+                                       "include", "exclude", "exclude_exception", follow_network_shares="not_a_valid_follow_network_shares")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'follow_network_shares' argument must be True or False."
+
+
+def test_create_physical_fileset_invalid_backup_hidden_folders(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.create_physical_fileset("name", "Linux",
+                                       "include", "exclude", "exclude_exception", backup_hidden_folders="not_a_valid_backup_hidden_folders")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'backup_hidden_folders' argument must be True or False."
+
+
+def test_create_physical_fileset_invalid_include(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.create_physical_fileset("name", "Linux", "not_a_valid_include", "exclude", "exclude_exception")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'include' argument must be a list object."
+
+
+def test_create_physical_fileset_invalid_exclude(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.create_physical_fileset("name", "Linux", [""], "not_a_valid_exclude", "exclude_exception")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'exclude' argument must be a list object."
+
+
+def test_create_physical_fileset_invalid_exclude_exception(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.create_physical_fileset("name", "Linux", [""], [""], "not_a_valid_exclude_exception")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'exclude_exception' argument must be a list object."
+
+
+def test_create_physical_fileset_idempotence(rubrik, mocker):
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "name": "name",
+                    "includes": [
+                        "includes"
+                    ],
+                    "excludes": [
+                        "excludes"
+                    ],
+                    "exceptions": [
+                        "exceptions"
+                    ],
+                    "operatingSystemType": "Linux",
+                    "shareType": "NFS",
+                    "preBackupScript": "string",
+                    "postBackupScript": "string",
+                    "backupScriptTimeout": 0,
+                    "backupScriptErrorHandling": "string",
+                    "isArrayEnabled": True,
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "isArchived": True,
+                    "hostCount": 0,
+                    "shareCount": 0
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_fileset_template()
+
+    assert rubrik.create_physical_fileset("name", "Linux", ["includes"], ["excludes"], ["exceptions"], True, True) == \
+        "No change required. The Rubrik cluster already has a Linux Fileset named 'name' configured with the provided variables."
+
+
+def test_create_physical_fileset(rubrik, mocker):
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [],
+            "total": 1
+        }
+
+    def mock_post_v1_fileset_template_bulk():
+        return {
+            "allowBackupNetworkMounts": True,
+            "allowBackupHiddenFoldersInNetworkMounts": True,
+            "useWindowsVss": True,
+            "name": "string",
+            "includes": [
+                "string"
+            ],
+            "excludes": [
+                "string"
+            ],
+            "exceptions": [
+                "string"
+            ],
+            "operatingSystemType": "UnixLike",
+            "shareType": "NFS",
+            "preBackupScript": "string",
+            "postBackupScript": "string",
+            "backupScriptTimeout": 0,
+            "backupScriptErrorHandling": "string",
+            "isArrayEnabled": True,
+            "id": "string",
+            "primaryClusterId": "string",
+            "isArchived": True,
+            "hostCount": 0,
+            "shareCount": 0
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_fileset_template()
+
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post.return_value = mock_post_v1_fileset_template_bulk()
+
+    assert rubrik.create_physical_fileset("name", "Linux", ["includes"], ["excludes"], ["exceptions"], True, True) == \
+        mock_post_v1_fileset_template_bulk()
 #######
 #######
 #######
