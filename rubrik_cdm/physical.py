@@ -167,10 +167,10 @@ class Physical(Api):
         config['allowBackupNetworkMounts'] = follow_network_shares
         config['operatingSystemType'] = operating_system
 
-        self.log("create_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(
-            operating_system))
+        self.log("create_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(operating_system))
         current_filesets = self.get(
-            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(operating_system, name), timeout=timeout)
+            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
+                operating_system, name), timeout=timeout)
 
         current_config = {}
         if current_filesets['data']:
@@ -194,11 +194,7 @@ class Physical(Api):
         model.append(config)
 
         self.log("create_fileset: Creating the '{}' Fileset.".format(name))
-        return self.post(
-            'internal',
-            '/fileset_template/bulk',
-            model,
-            timeout=timeout)
+        return self.post('internal', '/fileset_template/bulk', model, timeout=timeout)
 
     def create_nas_fileset(self, name, share_type, include, exclude, exclude_exception, follow_network_shares=False, timeout=15):  # pylint: ignore
         """Create a NAS Fileset.
