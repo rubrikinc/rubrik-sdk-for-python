@@ -42,9 +42,8 @@ class Physical(Api):
             str -- No change requird. The host '`hostname`' is already connected to the Rubrik cluster.
             dict -- The full API response for `POST /v1/host`.
         """
-        count_of_hosts = len(hostname)
 
-        if(count_of_hosts == 0):
+        if(len(hostname) == 0):
             raise InvalidParameterException("The provided hostname list is empty.")
 
         self.log('Searching the Rubrik cluster for the current hosts.')
@@ -61,9 +60,9 @@ class Physical(Api):
 
             config = []
 
-            self.log("Adding '{}' Physical Host(s)".format(count_of_hosts))
+            self.log("Adding '{}' Physical Host(s)".format(len(hostname)))
 
-            if count_of_hosts != 0:
+            if len(hostname) != 0:
                 for hosts in hostname:
                     config += [{
                         'hostname': hosts,
