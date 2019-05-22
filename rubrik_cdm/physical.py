@@ -145,18 +145,15 @@ class Physical(Api):
                 valid_operating_system))
 
         if isinstance(follow_network_shares, bool) is False:
-            raise InvalidTypeException(
-                "The 'follow_network_shares' argument must be True or False.")
+            raise InvalidTypeException("The 'follow_network_shares' argument must be True or False.")
         elif isinstance(backup_hidden_folders, bool) is False:
-            raise InvalidTypeException(
-                "The 'backup_hidden_folders' argument must be True or False.")
+            raise InvalidTypeException("The 'backup_hidden_folders' argument must be True or False.")
         elif isinstance(include, list) is False:
             raise InvalidTypeException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
             raise InvalidTypeException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            raise InvalidTypeException(
-                "The 'exclude_exception' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude_exception' argument must be a list object.")
 
         config = {}
         config['name'] = name
@@ -175,12 +172,9 @@ class Physical(Api):
         current_config = {}
         if current_filesets['data']:
             current_config['name'] = current_filesets['data'][0]['name']
-            current_config['includes'] = sorted(
-                current_filesets['data'][0]['includes'])
-            current_config['excludes'] = sorted(
-                current_filesets['data'][0]['excludes'])
-            current_config['exceptions'] = sorted(
-                current_filesets['data'][0]['exceptions'])
+            current_config['includes'] = sorted(current_filesets['data'][0]['includes'])
+            current_config['excludes'] = sorted(current_filesets['data'][0]['excludes'])
+            current_config['exceptions'] = sorted(current_filesets['data'][0]['exceptions'])
             current_config['allowBackupHiddenFoldersInNetworkMounts'] = current_filesets['data'][0]['allowBackupHiddenFoldersInNetworkMounts']
             current_config['operatingSystemType'] = current_filesets['data'][0]['operatingSystemType']
             current_config['allowBackupNetworkMounts'] = current_filesets['data'][0]['allowBackupNetworkMounts']
