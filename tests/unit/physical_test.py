@@ -526,6 +526,158 @@ def test_create_physical_fileset(rubrik, mocker):
 
     assert rubrik.create_physical_fileset("name", "Linux", ["includes"], ["excludes"], ["exceptions"], True, True) == \
         mock_post_v1_fileset_template_bulk()
+
+
+def test_create_nas_fileset_invalid_share_type(rubrik):
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.create_nas_fileset("name", "not_a_valid_share_type", "include", "exclude", "exclude_exception")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The create_fileset() share_type argument must be one of the following: ['NFS', 'SMB']."
+
+
+def test_create_nas_fileset_invalid_follow_network_shares(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.create_nas_fileset(
+            "name",
+            "NFS",
+            "include",
+            "exclude",
+            "exclude_exception",
+            "not_a_valid_follow_network_share")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'follow_network_shares' argument must be True or False."
+
+
+def test_create_nas_fileset_invalid_include(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.create_nas_fileset(
+            "name", "NFS", "not_a_valid_include", "exclude", "exclude_exception")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'include' argument must be a list object."
+
+
+def test_create_nas_fileset_invalid_exclude(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.create_nas_fileset(
+            "name", "NFS", [""], "not_a_valid_exclude", "exclude_exception")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'exclude' argument must be a list object."
+
+
+def test_create_nas_fileset_invalid_exclude_exception(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.create_nas_fileset(
+            "name", "NFS", [""], [""], "not_a_valid_exclude_exception")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'exclude_exception' argument must be a list object."
+
+
+def test_create_nas_fileset_idempotence(rubrik, mocker):
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "name": "name",
+                    "includes": [
+                        "includes"
+                    ],
+                    "excludes": [
+                        "excludes"
+                    ],
+                    "exceptions": [
+                        "exceptions"
+                    ],
+                    "operatingSystemType": "Linux",
+                    "shareType": "NFS",
+                    "preBackupScript": "string",
+                    "postBackupScript": "string",
+                    "backupScriptTimeout": 0,
+                    "backupScriptErrorHandling": "string",
+                    "isArrayEnabled": True,
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "isArchived": True,
+                    "hostCount": 0,
+                    "shareCount": 0
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_fileset_template()
+
+    assert rubrik.create_nas_fileset("name", "NFS", ["includes"], ["excludes"], ["exceptions"], True) == \
+        "No change required. The Rubrik cluster already has a NAS Fileset named 'name' configured with the provided variables."
+
+
+def test_create_nas_fileset(rubrik, mocker):
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [],
+            "total": 1
+        }
+
+    def mock_post_v1_fileset_template_bulk():
+        return {
+            "allowBackupNetworkMounts": True,
+            "allowBackupHiddenFoldersInNetworkMounts": True,
+            "useWindowsVss": True,
+            "name": "string",
+            "includes": [
+                "string"
+            ],
+            "excludes": [
+                "string"
+            ],
+            "exceptions": [
+                "string"
+            ],
+            "operatingSystemType": "UnixLike",
+            "shareType": "NFS",
+            "preBackupScript": "string",
+            "postBackupScript": "string",
+            "backupScriptTimeout": 0,
+            "backupScriptErrorHandling": "string",
+            "isArrayEnabled": True,
+            "id": "string",
+            "primaryClusterId": "string",
+            "isArchived": True,
+            "hostCount": 0,
+            "shareCount": 0
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_fileset_template()
+
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post.return_value = mock_post_v1_fileset_template_bulk()
+
+    assert rubrik.create_nas_fileset("name", "NFS", ["includes"], ["excludes"], ["exceptions"], True) == \
+        mock_post_v1_fileset_template_bulk()
+
 #######
 #######
 #######
