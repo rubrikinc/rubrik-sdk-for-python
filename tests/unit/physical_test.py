@@ -679,6 +679,1171 @@ def test_create_nas_fileset(rubrik, mocker, share):
     assert rubrik.create_nas_fileset("name", share, ["includes"], ["excludes"], ["exceptions"], True) == \
         mock_post_v1_fileset_template_bulk()
 
+
+def test_assign_physical_host_fileset_invalid_operating_system(rubrik):
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.assign_physical_host_fileset("hostname", "fileset_name", "not_a_valid_operting_system", "sla_name")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The assign_physical_host_fileset() operating_system argument must be one of the following: ['Linux', 'Windows']."
+
+
+def test_assign_physical_host_fileset_invalid_follow_network_shares(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.assign_physical_host_fileset(
+            "hostname",
+            "fileset_name",
+            "Linux",
+            "sla_name",
+            follow_network_shares="not_a_valid_follow_network_shares")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'follow_network_shares' argument must be True or False."
+
+
+def test_assign_physical_host_fileset_invalid_backup_hidden_folders(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.assign_physical_host_fileset(
+            "hostname",
+            "fileset_name",
+            "Linux",
+            "sla_name",
+            backup_hidden_folders="not_a_valid_backup_hidden_folders")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'backup_hidden_folders' argument must be True or False."
+
+
+def test_assign_physical_host_fileset_invalid_include(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.assign_physical_host_fileset(
+            "hostname",
+            "fileset_name",
+            "Linux",
+            "sla_name",
+            include="not_a_valid_include")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'include' argument must be a list object."
+
+
+def test_assign_physical_host_fileset_invalid_exclude(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.assign_physical_host_fileset(
+            "hostname",
+            "fileset_name",
+            "Linux",
+            "sla_name",
+            exclude="not_a_valid_exclude")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'exclude' argument must be a list object."
+
+
+def test_assign_physical_host_fileset_invalid_exclude_exception(rubrik):
+
+    with pytest.raises(InvalidTypeException) as error:
+        rubrik.assign_physical_host_fileset(
+            "hostname",
+            "fileset_name",
+            "Linux",
+            "sla_name",
+            exclude_exception="not_a_valid_exclude_exception")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The 'exclude_exception' argument must be a list object."
+
+
+def test_assign_physical_host_fileset_invalid_hostname(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [],
+            "total": 0
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_host()
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.assign_physical_host_fileset("hostname", "fileset_name", "Linux", "sla_name")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The Rubrik cluster is not connected to a Linux physical host named 'hostname'."
+
+
+def test_assign_physical_host_fileset_invalid_hostname_no_match(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [],
+            "total": 0
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_host()
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.assign_physical_host_fileset("hostname", "fileset_name", "Linux", "sla_name")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The Rubrik cluster is not connected to a Linux physical host named 'hostname'."
+
+
+def test_assign_physical_host_fileset_invalid_hostname_close_match(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "hostname": "string",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_host()
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.assign_physical_host_fileset("hostname", "fileset_name", "Linux", "sla_name")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The Rubrik cluster is not connected to a Linux physical host named 'hostname'."
+
+
+def test_assign_physical_host_fileset_invalid_fileset_name(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "hostname": "hostname",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [],
+            "total": 0
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_host(), mock_get_v1_fileset_template()]
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.assign_physical_host_fileset("hostname", "fileset_name", "Linux", "sla_name")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The Rubrik cluster does not have a Linux Fileset named 'fileset_name'."
+
+
+def test_assign_physical_host_fileset_invalid_fileset_name_multiple_matches_not_specific(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "hostname": "hostname",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 2
+        }
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "name": "fileset_name",
+                    "includes": [
+                        "string"
+                    ],
+                    "excludes": [
+                        "string"
+                    ],
+                    "exceptions": [
+                        "string"
+                    ],
+                    "operatingSystemType": "UnixLike",
+                    "shareType": "NFS",
+                    "preBackupScript": "string",
+                    "postBackupScript": "string",
+                    "backupScriptTimeout": 0,
+                    "backupScriptErrorHandling": "string",
+                    "isArrayEnabled": True,
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "isArchived": True,
+                    "hostCount": 0,
+                    "shareCount": 0
+                },
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "name": "fileset_name",
+                    "includes": [
+                        "string"
+                    ],
+                    "excludes": [
+                        "string"
+                    ],
+                    "exceptions": [
+                        "string"
+                    ],
+                    "operatingSystemType": "UnixLike",
+                    "shareType": "NFS",
+                    "preBackupScript": "string",
+                    "postBackupScript": "string",
+                    "backupScriptTimeout": 0,
+                    "backupScriptErrorHandling": "string",
+                    "isArrayEnabled": True,
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "isArchived": True,
+                    "hostCount": 0,
+                    "shareCount": 0
+                }
+            ],
+            "total": 2
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_host(), mock_get_v1_fileset_template()]
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.assign_physical_host_fileset("hostname", "fileset_name", "Linux", "sla_name")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The Rubrik cluster contains multiple Linux Filesets named 'fileset_name'. Please populate all function arguments to find a more specific match."
+
+
+def test_assign_physical_host_fileset_invalid_fileset_name_multiple_matches_specific(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "hostname": "hostname",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 2
+        }
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "name": "fileset_name",
+                    "includes": [
+                        "string"
+                    ],
+                    "excludes": [
+                        "string"
+                    ],
+                    "exceptions": [
+                        "string"
+                    ],
+                    "operatingSystemType": "UnixLike",
+                    "shareType": "NFS",
+                    "preBackupScript": "string",
+                    "postBackupScript": "string",
+                    "backupScriptTimeout": 0,
+                    "backupScriptErrorHandling": "string",
+                    "isArrayEnabled": True,
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "isArchived": True,
+                    "hostCount": 0,
+                    "shareCount": 0
+                },
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "name": "fileset_name",
+                    "includes": [
+                        "string"
+                    ],
+                    "excludes": [
+                        "string"
+                    ],
+                    "exceptions": [
+                        "string"
+                    ],
+                    "operatingSystemType": "UnixLike",
+                    "shareType": "NFS",
+                    "preBackupScript": "string",
+                    "postBackupScript": "string",
+                    "backupScriptTimeout": 0,
+                    "backupScriptErrorHandling": "string",
+                    "isArrayEnabled": True,
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "isArchived": True,
+                    "hostCount": 0,
+                    "shareCount": 0
+                }
+            ],
+            "total": 2
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_host(), mock_get_v1_fileset_template()]
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.assign_physical_host_fileset("hostname", "fileset_name", "Linux", "sla_name", [""], ["", True, True])
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The Rubrik cluster contains multiple Linux Filesets named 'fileset_name' that match all of the populate function arguments. Please use a unique Fileset."
+
+
+def test_assign_physical_host_fileset_patch_sla(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "hostname": "hostname",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 2
+        }
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "name": "fileset_name",
+                    "includes": [
+                        "string"
+                    ],
+                    "excludes": [
+                        "string"
+                    ],
+                    "exceptions": [
+                        "string"
+                    ],
+                    "operatingSystemType": "UnixLike",
+                    "shareType": "NFS",
+                    "preBackupScript": "string",
+                    "postBackupScript": "string",
+                    "backupScriptTimeout": 0,
+                    "backupScriptErrorHandling": "string",
+                    "isArrayEnabled": True,
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "isArchived": True,
+                    "hostCount": 0,
+                    "shareCount": 0
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_sla_domain():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_sla_id",
+                    "primaryClusterId": "string",
+                    "name": "sla_name",
+                    "frequencies": [
+                        {
+                            "timeUnit": "string",
+                            "frequency": 0,
+                            "retention": 0
+                        }
+                    ],
+                    "allowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "firstFullAllowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "localRetentionLimit": 0,
+                    "maxLocalRetentionLimit": 0,
+                    "archivalSpecs": [
+                        {
+                            "locationId": "string",
+                            "archivalThreshold": 0
+                        }
+                    ],
+                    "replicationSpecs": [
+                        {
+                            "locationId": "string",
+                            "retentionLimit": 0
+                        }
+                    ],
+                    "numDbs": 0,
+                    "numOracleDbs": 0,
+                    "numFilesets": 0,
+                    "numHypervVms": 0,
+                    "numNutanixVms": 0,
+                    "numManagedVolumes": 0,
+                    "numStorageArrayVolumeGroups": 0,
+                    "numWindowsVolumeGroups": 0,
+                    "numLinuxHosts": 0,
+                    "numShares": 0,
+                    "numWindowsHosts": 0,
+                    "numVms": 0,
+                    "numEc2Instances": 0,
+                    "numVcdVapps": 0,
+                    "numProtectedObjects": 0,
+                    "isDefault": True,
+                    "uiColor": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_fileset():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "id": "string",
+                    "name": "string",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "hostId": "string",
+                    "shareId": "string",
+                    "hostName": "string",
+                    "templateId": "string",
+                    "templateName": "string",
+                    "operatingSystemType": "string",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "includes": [
+                        "string"
+                    ],
+                    "excludes": [
+                        "string"
+                    ],
+                    "exceptions": [
+                        "string"
+                    ],
+                    "isRelic": True,
+                    "arraySpec": {
+                        "proxyHostId": "string"
+                    },
+                    "isPassthrough": True
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_patch_v1_fileset():
+        return {
+            "configuredSlaDomainId": "string",
+            "allowBackupNetworkMounts": True,
+            "allowBackupHiddenFoldersInNetworkMounts": True,
+            "useWindowsVss": True,
+            "id": "string",
+            "name": "string",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "hostId": "string",
+            "shareId": "string",
+            "hostName": "string",
+            "templateId": "string",
+            "templateName": "string",
+            "operatingSystemType": "string",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "includes": [
+                "string"
+            ],
+            "excludes": [
+                "string"
+            ],
+            "exceptions": [
+                "string"
+            ],
+            "isRelic": True,
+            "arraySpec": {
+                "proxyHostId": "string"
+            },
+            "isPassthrough": True,
+            "protectionDate": "2019-05-23T15:36:06.889Z",
+            "snapshotCount": 0,
+            "archivedSnapshotCount": 0,
+            "snapshots": [
+                {
+                    "id": "string",
+                    "date": "2019-05-23T15:36:06.889Z",
+                    "expirationDate": "2019-05-23T15:36:06.889Z",
+                    "sourceObjectType": "string",
+                    "isOnDemandSnapshot": True,
+                    "cloudState": 0,
+                    "consistencyLevel": "string",
+                    "indexState": 0,
+                    "replicationLocationIds": [
+                        "string"
+                    ],
+                    "archivalLocationIds": [
+                        "string"
+                    ],
+                    "slaId": "string",
+                    "slaName": "string",
+                    "filesetName": "string",
+                    "fileCount": 0
+                }
+            ],
+            "localStorage": 0,
+            "archiveStorage": 0,
+            "preBackupScript": "string",
+            "postBackupScript": "string",
+            "backupScriptTimeout": 0,
+            "backupScriptErrorHandling": "string"
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_host(),
+        mock_get_v1_fileset_template(),
+        mock_get_v1_sla_domain(),
+        mock_get_v1_fileset()]
+
+    mock_patch = mocker.patch('rubrik_cdm.Connect.patch', autospec=True, spec_set=True)
+    mock_patch.return_value = mock_patch_v1_fileset()
+
+    assert rubrik.assign_physical_host_fileset("hostname", "fileset_name", "Linux", "sla_name") == \
+        mock_patch_v1_fileset()
+
+
+def test_assign_physical_host_fileset_idempotence(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "hostname": "hostname",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 2
+        }
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "name": "fileset_name",
+                    "includes": [
+                        "string"
+                    ],
+                    "excludes": [
+                        "string"
+                    ],
+                    "exceptions": [
+                        "string"
+                    ],
+                    "operatingSystemType": "UnixLike",
+                    "shareType": "NFS",
+                    "preBackupScript": "string",
+                    "postBackupScript": "string",
+                    "backupScriptTimeout": 0,
+                    "backupScriptErrorHandling": "string",
+                    "isArrayEnabled": True,
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "isArchived": True,
+                    "hostCount": 0,
+                    "shareCount": 0
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_sla_domain():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_sla_id",
+                    "primaryClusterId": "string",
+                    "name": "sla_name",
+                    "frequencies": [
+                        {
+                            "timeUnit": "string",
+                            "frequency": 0,
+                            "retention": 0
+                        }
+                    ],
+                    "allowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "firstFullAllowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "localRetentionLimit": 0,
+                    "maxLocalRetentionLimit": 0,
+                    "archivalSpecs": [
+                        {
+                            "locationId": "string",
+                            "archivalThreshold": 0
+                        }
+                    ],
+                    "replicationSpecs": [
+                        {
+                            "locationId": "string",
+                            "retentionLimit": 0
+                        }
+                    ],
+                    "numDbs": 0,
+                    "numOracleDbs": 0,
+                    "numFilesets": 0,
+                    "numHypervVms": 0,
+                    "numNutanixVms": 0,
+                    "numManagedVolumes": 0,
+                    "numStorageArrayVolumeGroups": 0,
+                    "numWindowsVolumeGroups": 0,
+                    "numLinuxHosts": 0,
+                    "numShares": 0,
+                    "numWindowsHosts": 0,
+                    "numVms": 0,
+                    "numEc2Instances": 0,
+                    "numVcdVapps": 0,
+                    "numProtectedObjects": 0,
+                    "isDefault": True,
+                    "uiColor": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_fileset():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "id": "string",
+                    "name": "string",
+                    "configuredSlaDomainId": "string_sla_id",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "hostId": "string",
+                    "shareId": "string",
+                    "hostName": "string",
+                    "templateId": "string",
+                    "templateName": "string",
+                    "operatingSystemType": "string",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "includes": [
+                        "string"
+                    ],
+                    "excludes": [
+                        "string"
+                    ],
+                    "exceptions": [
+                        "string"
+                    ],
+                    "isRelic": True,
+                    "arraySpec": {
+                        "proxyHostId": "string"
+                    },
+                    "isPassthrough": True
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_host(),
+        mock_get_v1_fileset_template(),
+        mock_get_v1_sla_domain(),
+        mock_get_v1_fileset()]
+
+    assert rubrik.assign_physical_host_fileset("hostname", "fileset_name", "Linux", "sla_name") == \
+        "No change required. The Linux Fileset 'fileset_name' is already assigned to the SLA Domain 'sla_name' on the physical host 'hostname'."
+
+
+def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "string",
+                    "hostname": "hostname",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 2
+        }
+
+    def mock_get_v1_fileset_template():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "allowBackupNetworkMounts": True,
+                    "allowBackupHiddenFoldersInNetworkMounts": True,
+                    "useWindowsVss": True,
+                    "name": "fileset_name",
+                    "includes": [
+                        "string"
+                    ],
+                    "excludes": [
+                        "string"
+                    ],
+                    "exceptions": [
+                        "string"
+                    ],
+                    "operatingSystemType": "UnixLike",
+                    "shareType": "NFS",
+                    "preBackupScript": "string",
+                    "postBackupScript": "string",
+                    "backupScriptTimeout": 0,
+                    "backupScriptErrorHandling": "string",
+                    "isArrayEnabled": True,
+                    "id": "string",
+                    "primaryClusterId": "string",
+                    "isArchived": True,
+                    "hostCount": 0,
+                    "shareCount": 0
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_sla_domain():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_sla_id",
+                    "primaryClusterId": "string",
+                    "name": "sla_name",
+                    "frequencies": [
+                        {
+                            "timeUnit": "string",
+                            "frequency": 0,
+                            "retention": 0
+                        }
+                    ],
+                    "allowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "firstFullAllowedBackupWindows": [
+                        {
+                            "startTimeAttributes": {
+                                "minutes": 0,
+                                "hour": 0,
+                                "dayOfWeek": 0
+                            },
+                            "durationInHours": 0
+                        }
+                    ],
+                    "localRetentionLimit": 0,
+                    "maxLocalRetentionLimit": 0,
+                    "archivalSpecs": [
+                        {
+                            "locationId": "string",
+                            "archivalThreshold": 0
+                        }
+                    ],
+                    "replicationSpecs": [
+                        {
+                            "locationId": "string",
+                            "retentionLimit": 0
+                        }
+                    ],
+                    "numDbs": 0,
+                    "numOracleDbs": 0,
+                    "numFilesets": 0,
+                    "numHypervVms": 0,
+                    "numNutanixVms": 0,
+                    "numManagedVolumes": 0,
+                    "numStorageArrayVolumeGroups": 0,
+                    "numWindowsVolumeGroups": 0,
+                    "numLinuxHosts": 0,
+                    "numShares": 0,
+                    "numWindowsHosts": 0,
+                    "numVms": 0,
+                    "numEc2Instances": 0,
+                    "numVcdVapps": 0,
+                    "numProtectedObjects": 0,
+                    "isDefault": True,
+                    "uiColor": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_fileset():
+        return {
+            "hasMore": True,
+            "data": [],
+            "total": 0
+        }
+
+    def mock_post_v1_fileset():
+        return {
+            "configuredSlaDomainId": "string",
+            "allowBackupNetworkMounts": True,
+            "allowBackupHiddenFoldersInNetworkMounts": True,
+            "useWindowsVss": True,
+            "id": "string",
+            "name": "string",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "hostId": "string",
+            "shareId": "string",
+            "hostName": "string",
+            "templateId": "string",
+            "templateName": "string",
+            "operatingSystemType": "string",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "includes": [
+                "string"
+            ],
+            "excludes": [
+                "string"
+            ],
+            "exceptions": [
+                "string"
+            ],
+            "isRelic": True,
+            "arraySpec": {
+                "proxyHostId": "string"
+            },
+            "isPassthrough": True,
+            "protectionDate": "2019-05-23T15:36:06.821Z",
+            "snapshotCount": 0,
+            "archivedSnapshotCount": 0,
+            "snapshots": [
+                {
+                    "id": "string",
+                    "date": "2019-05-23T15:36:06.821Z",
+                    "expirationDate": "2019-05-23T15:36:06.821Z",
+                    "sourceObjectType": "string",
+                    "isOnDemandSnapshot": True,
+                    "cloudState": 0,
+                    "consistencyLevel": "string",
+                    "indexState": 0,
+                    "replicationLocationIds": [
+                        "string"
+                    ],
+                    "archivalLocationIds": [
+                        "string"
+                    ],
+                    "slaId": "string",
+                    "slaName": "string",
+                    "filesetName": "string",
+                    "fileCount": 0
+                }
+            ],
+            "localStorage": 0,
+            "archiveStorage": 0,
+            "preBackupScript": "string",
+            "postBackupScript": "string",
+            "backupScriptTimeout": 0,
+            "backupScriptErrorHandling": "string"
+        }
+
+    def mock_patch_v1_fileset():
+        return {
+            "configuredSlaDomainId": "string",
+            "allowBackupNetworkMounts": True,
+            "allowBackupHiddenFoldersInNetworkMounts": True,
+            "useWindowsVss": True,
+            "id": "string",
+            "name": "string",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "hostId": "string",
+            "shareId": "string",
+            "hostName": "string",
+            "templateId": "string",
+            "templateName": "string",
+            "operatingSystemType": "string",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "includes": [
+                "string"
+            ],
+            "excludes": [
+                "string"
+            ],
+            "exceptions": [
+                "string"
+            ],
+            "isRelic": True,
+            "arraySpec": {
+                "proxyHostId": "string"
+            },
+            "isPassthrough": True,
+            "protectionDate": "2019-05-23T15:36:06.889Z",
+            "snapshotCount": 0,
+            "archivedSnapshotCount": 0,
+            "snapshots": [
+                {
+                    "id": "string",
+                    "date": "2019-05-23T15:36:06.889Z",
+                    "expirationDate": "2019-05-23T15:36:06.889Z",
+                    "sourceObjectType": "string",
+                    "isOnDemandSnapshot": True,
+                    "cloudState": 0,
+                    "consistencyLevel": "string",
+                    "indexState": 0,
+                    "replicationLocationIds": [
+                        "string"
+                    ],
+                    "archivalLocationIds": [
+                        "string"
+                    ],
+                    "slaId": "string",
+                    "slaName": "string",
+                    "filesetName": "string",
+                    "fileCount": 0
+                }
+            ],
+            "localStorage": 0,
+            "archiveStorage": 0,
+            "preBackupScript": "string",
+            "postBackupScript": "string",
+            "backupScriptTimeout": 0,
+            "backupScriptErrorHandling": "string"
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_host(),
+        mock_get_v1_fileset_template(),
+        mock_get_v1_sla_domain(),
+        mock_get_v1_fileset()]
+
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post.return_value = mock_post_v1_fileset()
+
+    mock_patch = mocker.patch('rubrik_cdm.Connect.patch', autospec=True, spec_set=True)
+    mock_patch.return_value = mock_patch_v1_fileset()
+
+    assert rubrik.assign_physical_host_fileset("hostname", "fileset_name", "Linux", "sla_name") == \
+        (mock_post_v1_fileset(), mock_patch_v1_fileset())
+
+
 #######
 #######
 #######
