@@ -283,7 +283,7 @@ class Physical(Api):
         valid_operating_system = ['Linux', 'Windows']
 
         if operating_system not in valid_operating_system:
-            raise InvalidParameterException("The create_physical_fileset() operating_system argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The assign_physical_host_fileset() operating_system argument must be one of the following: {}.".format(
                 valid_operating_system))
 
         if include is None:
@@ -328,12 +328,14 @@ class Physical(Api):
 
         self.log("assign_physical_host_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(operating_system))
         current_filesets_templates = self.get(
-            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(operating_system, fileset_name), timeout=timeout)
+            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
+                operating_system, fileset_name), timeout=timeout)
 
         number_of_matches = 0
         if current_filesets_templates['total'] == 0:
-            raise InvalidParameterException("The Rubrik cluster does not have a {} Fileset named '{}'.".format(
-                operating_system, fileset_name))
+            raise InvalidParameterException(
+                "The Rubrik cluster does not have a {} Fileset named '{}'.".format(
+                    operating_system, fileset_name))
         elif current_filesets_templates['total'] > 1:
             for fileset_template in current_filesets_templates['data']:
                 if fileset_template['name'] == fileset_name:
@@ -343,7 +345,6 @@ class Physical(Api):
                 # If there are multiple Filesets with the same name us all of
                 # the possible config values to try and find the correct
                 # Fileset
-                number_of_matches = 0
                 for fileset_template in current_filesets_templates['data']:
                     if fileset_template['name'] == fileset_name \
                             and fileset_template['includes'] == include \
@@ -373,13 +374,10 @@ class Physical(Api):
                                 "The Rubrik cluster contains multiple {} Filesets named '{}' that match all of the populate function arguments. Please use a unique Fileset.".format(
                                     operating_system, fileset_name))
                         else:
+
                             raise InvalidParameterException(
                                 "The Rubrik cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(
                                     operating_system, fileset_name))
-                    raise InvalidParameterException(
-                        "The Rubrik cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(
-                            operating_system,
-                            fileset_name))
 
         if current_filesets_templates['total'] == 1 or number_of_matches == 1:
             for fileset_temmplate in current_filesets_templates['data']:
