@@ -631,7 +631,8 @@ def test_create_nas_fileset_idempotence(rubrik, mocker):
         "No change required. The Rubrik cluster already has a NAS Fileset named 'name' configured with the provided variables."
 
 
-def test_create_nas_fileset(rubrik, mocker):
+@pytest.mark.parametrize('share', ["NFS", "SMB"])
+def test_create_nas_fileset(rubrik, mocker, share):
 
     def mock_get_v1_fileset_template():
         return {
@@ -675,7 +676,7 @@ def test_create_nas_fileset(rubrik, mocker):
     mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_fileset_template_bulk()
 
-    assert rubrik.create_nas_fileset("name", "NFS", ["includes"], ["excludes"], ["exceptions"], True) == \
+    assert rubrik.create_nas_fileset("name", share, ["includes"], ["excludes"], ["exceptions"], True) == \
         mock_post_v1_fileset_template_bulk()
 
 #######
