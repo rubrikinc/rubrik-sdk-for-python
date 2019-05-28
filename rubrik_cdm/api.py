@@ -1,4 +1,4 @@
-# Copyright 2018 Rubrik, Inc.
+ # Copyright 2018 Rubrik, Inc.
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -49,7 +49,7 @@ class Api():
 
         Keyword Arguments:
             params {dict} -- An optional dict containing variables in a key:value format to send with `GET` & `DELETE` API calls (default: {None})
-            config {dict} -- The specified data to send with `POST` and `PATCH` API calls. (default: {None})
+            config {dict} -- The specified data to send with 'DELETE', `POST` and `PATCH` API calls. (default: {None})
             job_status_url {str} -- The job status URL provided by a previous API call. (default: {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
@@ -112,13 +112,14 @@ class Api():
                 self.log('Config: {}'.format(config))
                 api_request = requests.patch(request_url, verify=False, headers=header, data=config, timeout=timeout)
             elif call_type == 'DELETE':
+                config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(
                     self.node_ip, api_version, api_endpoint)
                 if params is not None:
                     request_url = request_url + "?" + '&'.join("{}={}".format(key, val)
                                                                for (key, val) in params.items())
                 self.log('DELETE {}'.format(request_url))
-                api_request = requests.delete(request_url, verify=False, headers=header, timeout=timeout)
+                api_request = requests.delete(request_url, verify=False, headers=header, data=config, timeout=timeout)
             elif call_type == 'JOB_STATUS':
                 self.log('JOB STATUS for {}'.format(job_status_url))
                 api_request = requests.get(job_status_url, verify=False, headers=header, timeout=timeout)
@@ -234,7 +235,7 @@ class Api():
             timeout=timeout,
             authentication=authentication)
 
-    def delete(self, api_version, api_endpoint, timeout=15, authentication=True, params=None):
+    def delete(self, api_version, api_endpoint, timeout=15, authentication=True, config=None, params=None):
         """Send a DELETE request to the provided Rubrik API endpoint.
 
         Arguments:
@@ -242,19 +243,23 @@ class Api():
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
 
         Keyword Arguments:
-            params {dict} -- An optional dict containing variables in a key:value format to send with `GET` & `DELETE` API calls (default: {None})
+            params {dict} -- An optional dict containing variables in a key:value format to send with `GET` & `DELETE` API calls . Mutually exclusive with config (default: {None})
+            config {dict} -- The specified data to send with the API call. Mutually exclusive with params (default: {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
         Returns:
             dict -- The response body of the API call.
         """
+        if config is not None and params is not None:
+            raise InvalidParameterException(
+                "DELETE cannot have both params and config set in the same call.")
 
         return self._common_api(
             'DELETE',
             api_version,
             api_endpoint,
-            config=None,
+            config=config,
             job_status_url=None,
             timeout=timeout,
             authentication=authentication,
