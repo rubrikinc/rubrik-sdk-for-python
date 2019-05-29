@@ -39,7 +39,7 @@ class Physical(Api):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {60})
 
         Returns:
-            str -- No change requird. The host '`hostname`' is already connected to the Rubrik cluster.
+            str -- No change required. The host '`hostname`' is already connected to the Rubrik cluster.
             dict -- The full API response for `POST /v1/host`.
         """
 
