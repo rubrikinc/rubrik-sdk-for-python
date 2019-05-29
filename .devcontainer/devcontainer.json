@@ -1,0 +1,13 @@
+{
+	"name": "Rubrik SDK for Python Development",
+	"dockerFile": "Dockerfile",
+	"context": "..",
+	"extensions": [
+		"ms-python.python",
+		"njpwerner.autodocstring",
+		"github.vscode-pull-request-github"
+	],
+	"settings": {
+		"python.pythonPath": "/usr/local/bin/python"
+	}
+}
