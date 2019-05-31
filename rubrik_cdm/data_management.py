@@ -389,8 +389,14 @@ class Data_Management(_API):
                 '/host?operating_system_type=Windows&primary_cluster_id=local',
                 timeout=timeout)
 
+            # After 5.0, "hostname" is a deprecated field in the results that are returned in "current_hosts"
+            if self.minimum_installed_cdm_version(5.0):
+                current_hosts_name = "name"
+            else:
+                current_hosts_name = "hostname"
+
             for rubrik_host in current_hosts['data']:
-                if rubrik_host['name'] == object_name:
+                if rubrik_host[current_hosts_name] == object_name:
                     host_id = rubrik_host['id']
 
             if(host_id):
