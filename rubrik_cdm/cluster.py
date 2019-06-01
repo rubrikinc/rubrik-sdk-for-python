@@ -100,6 +100,8 @@ class Cluster(Api):
 
         return node_ip_name
 
+
+
     def end_user_authorization(self, object_name, end_user, object_type='vmware', timeout=15):
         """Grant an End User authorization to the provided object.
 
@@ -606,3 +608,10 @@ class Cluster(Api):
 
         self.log("read_only_authorization: Granting read-only privilages to user '{}'.".format(username))
         return self.post("internal", "/authorization/role/read_only_admin", config, timeout)
+
+    def cluster_node_id(self):
+        node_id = self.get('internal', '/node')
+        node_ids = []
+        for val in node_id['data']:
+            node_ids.append(val['id'])
+        return node_ids
