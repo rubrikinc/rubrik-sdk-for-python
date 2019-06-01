@@ -57,8 +57,6 @@ class Api():
         Returns:
             dict -- The full API call response for the provided endpoint.
         """
-        if call_type != 'JOB_STATUS':
-            self._api_validation(api_version, api_endpoint)
 
         # Determine if authentication should be sent as part of the API Header
         if authentication:
@@ -69,20 +67,23 @@ class Api():
             raise InvalidTypeException('"authentication" must be either True or False')
 
         # Create required header for the special case of a bootstrap including Host attribute
-        if '/cluster/me/bootstrap' in api_endpoint:
-            if self.ipv6_addr != "":
-                header = {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Host': '[' + self.ipv6_addr + ']'
-                }
-                self.log('Created boostrap header: ' + str(header))
-            else:
-                header = {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                }
-                self.log('Created boostrap header: ' + str(header))
+        if call_type != 'JOB_STATUS':
+            self._api_validation(api_version, api_endpoint)
+
+            if '/cluster/me/bootstrap' in api_endpoint:
+                if self.ipv6_addr != "":
+                    header = {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Host': '[' + self.ipv6_addr + ']'
+                    }
+                    self.log('Created boostrap header: ' + str(header))
+                else:
+                    header = {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                    self.log('Created boostrap header: ' + str(header))
 
         try:
             # Determine which call type is being used and then set the relevant
