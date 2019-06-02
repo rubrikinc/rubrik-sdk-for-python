@@ -55,7 +55,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         _PHYSICAL {class} - This class contains methods related to the management of the Physical objects in the Rubrik Cluster.
     """
 
-    def __init__(self, node_ip=None, username=None, password=None, api_token=None, enable_logging=False):
+    def __init__(self, node_ip=None, username=None, password=None, domain_display_name=None, api_token=None, enable_logging=False):
         """Constructor for the Connect class which is used to initialize the class variables.
 
         Keyword Arguments:
@@ -112,6 +112,19 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                     self.password = password
                     self.log("Password: *******\n")
 
+                # Domain display name may be specified to force authentication to this domain
+                session_url = 'https://{}/api/internal/session'.format(self.node_ip)
+                ddn = domain_display_name if domain_display_name else os.environ.get('rubrik_cdm_domain')
+                if ddn:
+                    session_url = session_url + '/realm/{}'.format(ddn)
+
+                # Get the web API session token to make future interactions faster
+                response = requests.post(session_url, data='{"initParams": {}}', auth=(self.username, self.password), verify=False)
+
+                # On failure, fall back to basic auth
+                if response.status_code == 200:
+                    self.api_token = response.json()['session']['token']
+                    self.log("API Token: *******\n")
             else:
                 self.api_token = api_token
                 self.log("API Token: *******\n")
