@@ -626,23 +626,24 @@ class Cluster(Api):
         return node_id
 
     def cluster_support_tunnel(self,action):
-        """ Returns a list of node ids from all the nodes in the cluster.
+        """ Function that can check the status, enable or disable the support tunnel.
 
                         Arguments:
-                            None
+                            Action - with state of (Status,Enable,Disable)
 
                         Keyword Arguments:
-                            None
+                            Action with state of "Status" returns the current status of the support tunnel
+                            Action with state of "Enable" checks the status first then enables the support tunnel if needed
+                            Action with state of "Disable" will disable the current tunnel
 
                         Returns:
-                            dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
+                            dict -- The full API response from `POST /internal/node/me/support_tunnel`.
                         """
         if action =="Status":
             self.log("cluster_support_tunnel - Get Status of Cluster Support Tunnel")
-            #print('Checking the Support Tunnel Status')
             tunnel = self.get('internal', '/node/me/support_tunnel')
-            #print(node_id + ' --------- {}'.format(tunnel['isTunnelEnabled']))
             return tunnel
+
         elif action == "Enable":
             self.log("cluster_support_tunnel - Check Status of Cluster Support Tunnel and Enable it if needed")
             check_tunnel = self.cluster_support_tunnel("Status")
@@ -652,8 +653,10 @@ class Cluster(Api):
                 config['inactivityTimeoutInSeconds'] = 0
                 tunnel = self.patch('internal', '/node/me/support_tunnel', config)
                 return tunnel
+
             else:
                 return("Tunnel is already enabled")
+
         elif action == "Disable":
             self.log("cluster_support_tunnel - Disable the Support Tunnel")
             config = {}
