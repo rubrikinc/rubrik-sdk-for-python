@@ -610,8 +610,53 @@ class Cluster(Api):
         return self.post("internal", "/authorization/role/read_only_admin", config, timeout)
 
     def cluster_node_id(self):
+        """ Returns a list of node ids from all the nodes in the cluster.
+
+                Arguments:
+                    None
+
+                Keyword Arguments:
+                    None
+
+                Returns:
+                    dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
+                """
+        self.log("cluster_node_id - Getting all the node ids from the from the cluster")
         node_id = self.get('internal', '/node')
-        node_ids = []
-        for val in node_id['data']:
-            node_ids.append(val['id'])
-        return node_ids
+        return node_id
+
+    def cluster_support_tunnel(self,action):
+        """ Returns a list of node ids from all the nodes in the cluster.
+
+                        Arguments:
+                            None
+
+                        Keyword Arguments:
+                            None
+
+                        Returns:
+                            dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
+                        """
+        if action =="Status":
+            self.log("cluster_support_tunnel - Get Status of Cluster Support Tunnel")
+            #print('Checking the Support Tunnel Status')
+            tunnel = self.get('internal', '/node/me/support_tunnel')
+            #print(node_id + ' --------- {}'.format(tunnel['isTunnelEnabled']))
+            return tunnel
+        elif action == "Enable":
+            self.log("cluster_support_tunnel - Check Status of Cluster Support Tunnel and Enable it if needed")
+            check_tunnel = self.cluster_support_tunnel("Status")
+            if check_tunnel['isTunnelEnabled'] == False:
+                config = {}
+                config['isTunnelEnabled'] = True
+                config['inactivityTimeoutInSeconds'] = 0
+                tunnel = self.patch('internal', '/node/me/support_tunnel', config)
+                return tunnel
+            else:
+                return("Tunnel is already enabled")
+        elif action == "Disable":
+            self.log("cluster_support_tunnel - Disable the Support Tunnel")
+            config = {}
+            config['isTunnelEnabled'] = False
+            tunnel = self.patch('internal', '/node/me/support_tunnel', config)
+            return tunnel
