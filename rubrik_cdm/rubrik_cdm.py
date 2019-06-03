@@ -80,44 +80,92 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         self.log("Node IP: {}".format(self.node_ip))
 
-        # If the api_token has not been provided check for the env variable and then
-        # check for the username and password fields
-        if api_token is None:
-            api_token = os.environ.get('rubrik_cdm_token')
-            if api_token is None:
+        # List to store how the credentials have been provided
+        credentials_manually_provided = []
+        credentials_env_var_provided = []
+        # Combined list of manually provided and env var provided
+        all_credentials_provided = []
 
+        # Flag used to determine if we have enough information to authenticate against the Rubrik cluster
+        credentials_needed_for_authentication = False
+
+        if username:
+            credentials_manually_provided.append("username")
+        else:
+            username = os.environ.get('rubrik_cdm_username')
+            if username is not None:
+                credentials_env_var_provided.append("username")
+
+        if password:
+            credentials_manually_provided.append("password")
+        else:
+            password = os.environ.get('rubrik_cdm_password')
+            if password is not None:
+                credentials_env_var_provided.append("password")
+
+        if api_token:
+            credentials_manually_provided.append("api_token")
+        else:
+            api_token = os.environ.get('rubrik_cdm_token')
+            if api_token is not None:
+                credentials_env_var_provided.append("api_token")
+
+        all_credentials_provided = credentials_manually_provided + credentials_env_var_provided
+
+        if len(credentials_manually_provided) == 3:
+            raise InvalidParameterException(
+                "You have provided both an API token and a username and password for authentication. You may only use one or the other.")
+
+        if "username" in all_credentials_provided and "password" not in all_credentials_provided:
+            raise InvalidParameterException(
+                "When providing the username argument, either manually or through the environment variables, you must also provide a password. Alternatively, starting with CDM 5.0, you may also use API Token instead of username and password.")
+
+        if "password" in all_credentials_provided and "username" not in all_credentials_provided:
+            raise InvalidParameterException(
+                "When providing the password argument, either manually or through the environment variables, you must also provide a username. Alternatively, starting with CDM 5.0, you may also use API Token instead of username and password.")
+
+        if "username" in credentials_manually_provided and "password" in credentials_manually_provided:
+
+            self.username = username
+            self.password = password
+            self.api_token = None
+
+            self.log("Username: {}".format(self.username))
+            self.log("Password: ******")
+
+            credentials_needed_for_authentication = True
+
+        if "api_token" in credentials_manually_provided:
+            self.api_token = api_token
+
+            self.log("API Token: ******")
+
+            credentials_needed_for_authentication = True
+
+        if credentials_needed_for_authentication is False:
+            if len(credentials_env_var_provided) == 3:
+                raise InvalidParameterException(
+                    "You have provided both an API token and a username and password, in your environment variables, for authentication. You may only use one or the other.")
+
+            if "username" in all_credentials_provided and "password" in all_credentials_provided:
+
+                self.username = username
+                self.password = password
                 self.api_token = None
 
-                if username is None:
-                    username = os.environ.get('rubrik_cdm_username')
-                    if username is None:
-                        raise InvalidParameterException(
-                            "The Rubrik CDM Username or an API Token has not been provided.")
-                    else:
-                        self.username = username
-                        self.log("Username: {}".format(self.username))
-                else:
-                    self.username = username
-                    self.log("Username: {}".format(self.username))
+                self.log("Username: {}".format(self.username))
+                self.log("Password: ******")
 
-                if password is None:
-                    password = os.environ.get('rubrik_cdm_password')
-                    if password is None:
-                        raise InvalidParameterException(
-                            "The Rubrik CDM Password or an API Token has not been provided.")
-                    else:
-                        self.password = password
-                        self.log("Password: *******\n")
-                else:
-                    self.password = password
-                    self.log("Password: *******\n")
+                credentials_needed_for_authentication = True
 
-            else:
+            if "api_token" in credentials_env_var_provided and credentials_needed_for_authentication is False:
                 self.api_token = api_token
-                self.log("API Token: *******\n")
-        else:
-            self.api_token = api_token
-            self.log("API Token: *******\n")
+                self.log("API Token: ******")
+                credentials_needed_for_authentication = True
+
+        if credentials_needed_for_authentication is False:
+            raise InvalidParameterException(
+                "You must provide either a username and password or API Token for authentication.")
 
     @staticmethod
     def log(log_message):
@@ -234,7 +282,7 @@ class Bootstrap(_API):
             if '::ffff' in self.ipv6_addr:
                 self.ipv6_addr = ""
                 self.log('Resolved IPv4 address')
-                #ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
+                # ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
                 self.log("Resolved Node IP: {}".format(self.node_ip))
                 node_resolution = True
             else:
