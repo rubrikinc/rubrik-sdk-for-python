@@ -609,7 +609,7 @@ class Cluster(Api):
         self.log("read_only_authorization: Granting read-only privilages to user '{}'.".format(username))
         return self.post("internal", "/authorization/role/read_only_admin", config, timeout)
 
-    def cluster_node_id(self):
+    def cluster_node_id(self,timeout=15):
         """ Returns a list of node ids from all the nodes in the cluster.
 
                 Arguments:
@@ -619,47 +619,49 @@ class Cluster(Api):
                     None
 
                 Returns:
-                    dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
+                    dict -- The full API response from `POST /internal/node`.
                 """
         self.log("cluster_node_id - Getting all the node ids from the from the cluster")
-        node_id = self.get('internal', '/node')
+        node_id = self.get('internal', '/node',timeout)
         return node_id
 
-    def cluster_support_tunnel(self,action):
+    def cluster_support_tunnel(self,action, timeout=15):
         """ Function that can check the status, enable or disable the support tunnel.
 
                         Arguments:
                             Action - with state of (Status,Enable,Disable)
 
                         Keyword Arguments:
-                            Action with state of "Status" returns the current status of the support tunnel
-                            Action with state of "Enable" checks the status first then enables the support tunnel if needed
-                            Action with state of "Disable" will disable the current tunnel
+                            Action with state of "status" returns the current status of the support tunnel
+                            Action with state of "enable" checks the status first then enables the support tunnel if needed
+                            Action with state of "disable" will disable the current tunnel
 
                         Returns:
                             dict -- The full API response from `POST /internal/node/me/support_tunnel`.
                         """
-        if action =="Status":
+        if action not in ["status", "enable", "disable"]:
+            raise InvalidParameterException("The action parameter must be status, enable, or disable")
+        if action.lower() =="status":
             self.log("cluster_support_tunnel - Get Status of Cluster Support Tunnel")
-            tunnel = self.get('internal', '/node/me/support_tunnel')
+            tunnel = self.get('internal', '/node/me/support_tunnel',timeout)
             return tunnel
 
-        elif action == "Enable":
+        elif action.lower() == "enable":
             self.log("cluster_support_tunnel - Check Status of Cluster Support Tunnel and Enable it if needed")
-            check_tunnel = self.cluster_support_tunnel("Status")
-            if check_tunnel['isTunnelEnabled'] == False:
+            check_tunnel = self.cluster_support_tunnel("status")
+            if check_tunnel['isTunnelEnabled'] is False:
                 config = {}
                 config['isTunnelEnabled'] = True
                 config['inactivityTimeoutInSeconds'] = 0
-                tunnel = self.patch('internal', '/node/me/support_tunnel', config)
+                tunnel = self.patch('internal', '/node/me/support_tunnel', config,timeout)
                 return tunnel
 
             else:
                 return("Tunnel is already enabled")
 
-        elif action == "Disable":
+        elif action.lower() == "disable":
             self.log("cluster_support_tunnel - Disable the Support Tunnel")
             config = {}
             config['isTunnelEnabled'] = False
-            tunnel = self.patch('internal', '/node/me/support_tunnel', config)
+            tunnel = self.patch('internal', '/node/me/support_tunnel', config,timeout)
             return tunnel
