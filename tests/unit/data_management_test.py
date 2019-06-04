@@ -1731,7 +1731,7 @@ def test_object_id_invalid_fileset_template(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "You must provide the Fileset Tempalte OS type."
+    assert error_message == "You must provide the Fileset Template OS type."
 
 
 def test_object_id_invalid_fileset_template_type(rubrik):
