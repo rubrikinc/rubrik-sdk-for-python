@@ -198,7 +198,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Authorization': 'Basic ' + authorization,
-                'User-Agent': 'Rubrik Python SDK v1.0.13'
+                'User-Agent': 'Rubrik Python SDK v2.0.1'
             }
 
         else:
@@ -208,7 +208,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Authorization': 'Bearer ' + self.api_token,
-                'User-Agent': 'Rubrik Python SDK v1.0.13'
+                'User-Agent': 'Rubrik Python SDK v2.0.1'
             }
 
         return authorization_header
