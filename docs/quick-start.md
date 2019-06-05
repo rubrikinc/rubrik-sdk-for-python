@@ -15,6 +15,10 @@ Storing credentials in environment variables is a more secure process than direc
 * **`rubrik_cdm_node_ip`** (Contains the IP/FQDN of a Rubrik node)
 * **`rubrik_cdm_username`** (Contains a username with configured access to the Rubrik cluster)
 * **`rubrik_cdm_password`** (Contains the password for the above user)
+* **`rubrik_cdm_token`** (Contains the the API token used for authentication)
+
+| Note: The `rubrik_cdm_username` and `rubrik_cdm_password` must be supplied together and may not be provided if the `rubrik_cdm_token` variable is present|
+| --- |
 
 The way in which to populate these environment variables differs depending on the operating system running Python. Below are examples for Windows, Linux, and Mac OS.
 
@@ -26,6 +30,7 @@ For Microsoft Windows-based operating systems the environment variables can be s
 setx rubrik_cdm_node_ip "192.168.0.100"
 setx rubrik_cdm_username "user@domain.com"
 setx rubrik_cdm_password "SecretPassword"
+setx rubrik_cdm_token "CDMToken"
 ```
 
 #### Setting Environment Variables in macOS and \*nix
@@ -36,13 +41,14 @@ For macOS and \*nix based operating systems the environment variables can be set
 export rubrik_cdm_node_ip=192.168.0.100
 export rubrik_cdm_username=user@domain.com
 export rubrik_cdm_password=SecretPassword
+export rubrik_cdm_token=CDMToken
 ```
 
 In order for the environment variables to persist across terminal sessions, add the above three export commands to the `~\.bash_profile` or ~\.profile file and then run `source ~\.bash_profile` or `source ~\.profile` to ensure the environment variables are present in your current terminal session.
 
 Once set, the `rubrik_cdm.Connect()` function will automatically utilize the data within the environment variables to perform its connection unless credentials are specifically passed in the arguments of the function.
 
-### Authenticate by Providing Username and Password
+### Authenticate by Providing Username and Password or API Token
 
 Although the use of environment variables are recommended, there may be scenarios where directly sending credentials to the `rubrik_cdm.Connect()` function as parameters makes sense. When arguments are provided, any environment variable information, populated or unpopulated, is ignored. To pass connection and credential information, simply call the `rubrik_cdm.connect()` function, passing the node IP, username, and password as follows:
 
@@ -53,6 +59,16 @@ password = "SecretPassword"
 
 rubrik = rubrik_cdm.Connect(node_ip, username, password)
 ```
+
+Or by passing the node IP and API Token as follows:
+
+```
+node_ip = "192.168.0.100"
+api_token = "jf2jma02k3anms0"
+
+rubrik = rubrik_cdm.Connect(node_ip, api_token)
+```
+
 
 Mixing the usage of both environment and hard coded variables is supported. The below example is run under the pretense that the `rubrik_cdm_node_ip` and `rubrik_cdm_password` environment variables have been set, providing only the password to the connect function.
 
