@@ -20,8 +20,75 @@ from .exceptions import InvalidParameterException, CDMVersionException
 
 
 class Cluster(Api):
-    """This class contains methods related to the managment of the Rubrik cluster itself.
+    """This class contains methods related to the management of the Rubrik cluster itself.
     """
+
+    def configure_replication_private(self, username, password, target_ip,
+                              ca_certificate=None, timeout=30):
+        """Configure replication partner as specified by user using PRIVATE NETWORK (direct connection)
+        Keyword Arguments:
+            -MANDATORY:
+            username: Username for the TARGET cluster {string}
+            password: Password for the TARGET cluster {string}
+            target_ip: Address of one of the nodes of the TARGET cluster {string}
+            -OPTIONAL:
+            CaCert: optional CA Certificate
+            timeout: default 30, timeout for eventual API call
+        """
+
+        config = {}
+
+        config['replicationSetup'] = 'Private Network'
+        config['targetClusterAddress'] = target_ip
+        config['username'] = username
+        config['password'] = password
+
+        if ca_certificate is not None:
+            config["caCerts"] = ca_certificate
+
+        self.log("configure_replication: Adding cluster '{}' as private network replication target.".format(target_ip))
+
+        return self.post("internal", "/replication/target", config, timeout)
+
+    def configure_replication_nat(self, username, password, src_gateway, tgt_gateway,
+                              ca_certificate=None, timeout=30):
+        """Configure replication partner as specified by user using NAT
+        Keyword Arguments:
+            -MANDATORY:
+            username: Username for the TARGET cluster {string}
+            password: Password for the TARGET cluster {string}
+            Source/Target NAS gateway needs to be specified as [str IP, [list of portnumber(s)]]
+            -OPTIONAL:
+            CaCert: optional CA Certificate
+            timeout: default 30, timeout for eventual API call
+        """
+
+        config = {}
+
+        # Source/Target gateway need to be specified as [str IP, [list of portnumber(s)]]
+        source_check = isinstance(src_gateway, list) and len(src_gateway) == 2 and isinstance(src_gateway[1], list) and len(src_gateway[1]) > 0
+        target_check = isinstance(tgt_gateway, list) and len(tgt_gateway) == 2 and isinstance(tgt_gateway[1], list) and len(tgt_gateway[1]) > 0
+
+        if not source_check or not target_check:
+            raise InvalidParameterException('The configure_replication() source and target gateways need to be defined as: ["IP STRING", [LIST OF PORT NUMBER(S)]].')
+
+        config['targetGateway'] = {}
+        config['sourceGateway'] = {}
+
+        config['replicationSetup'] = 'NAT'
+        config['sourceGateway']['address'] = src_gateway[0]
+        config['sourceGateway']['ports'] = src_gateway[1]
+        config['targetGateway']['address'] = tgt_gateway[0]
+        config['targetGateway']['ports'] = tgt_gateway[1]
+        config['username'] = username
+        config['password'] = password
+
+        if ca_certificate is not None:
+            config["caCerts"] = ca_certificate
+
+        self.log("configure_replication: Adding cluster behind '{}' as NAT replication target.".format(tgt_gateway))
+
+        return self.post("internal", "/replication/target", config, timeout)
 
     def cluster_version(self, timeout=15):
         """Retrieves the software version of the Rubrik cluster.
