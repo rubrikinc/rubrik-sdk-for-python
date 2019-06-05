@@ -192,12 +192,13 @@ class Data_Management(_API):
 
         return (api_request, snapshot_status_url)
 
-    def object_id(self, object_name, object_type, host_os=None, timeout=15):
+    def object_id(self, object_name, object_type, host_os=None, host_name=None, timeout=15):
         """Get the ID of a Rubrik object by providing its name.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
             object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, aws_native, vcenter})
+            host_name {str} -- Valid and required for oracle_db object type. This is the (or one of the) host names the database is running on.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -215,7 +216,8 @@ class Data_Management(_API):
             'mssql_instance',
             'vcenter',
             'ahv',
-            'aws_native']
+            'aws_native',
+            'oracle_db']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -230,6 +232,10 @@ class Data_Management(_API):
         if object_type == 'sla':
             if object_name.upper() == "FOREVER" or object_name.upper() == "UNPROTECTED":
                 return "UNPROTECTED"
+
+        if object_type == 'oracle_db':
+            if host_name is None:
+                raise InvalidParameterException("You must provide the host or cluster for the Oracle DB object.")
 
         api_call = {
             "vmware": {
@@ -271,6 +277,10 @@ class Data_Management(_API):
             "vcenter": {
                 "api_version": "v1",
                 "api_endpoint": "/vmware/vcenter"
+            },
+            "oracle_db": {
+                "api_version": "internal",
+                "api_endpoint": "/oracle/db"
             }
         }
 
@@ -302,11 +312,20 @@ class Data_Management(_API):
             else:
                 name_value = 'name'
 
+            host_match = False
             for item in api_request['data']:
-                if item[name_value] == object_name:
+                if object_type == 'oracle_db' and item[name_value] == object_name:
+                    for instance in item['instances']:
+                        if host_name in instance.values():
+                            object_ids.append(item['id'])
+                            host_match = True
+                elif item[name_value] == object_name:
                     object_ids.append(item['id'])
 
-            if len(object_ids) > 1:
+            if object_type == 'oracle_db' and not host_match:
+                raise InvalidParameterException(
+                    "The {} object '{}' on the host '{}' was not found on the Rubrik cluster.".format(object_type, object_name, host_name))
+            elif len(object_ids) > 1:
                 raise InvalidParameterException(
                     "Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(object_type, object_name))
             elif len(object_ids) == 0:
