@@ -50,7 +50,7 @@ rubrik = rubrik_cdm.Connect()
 
 setuptools.setup(
     name="rubrik_cdm",
-    version="2.0.0",
+    version="2.0.1",
     author="Rubrik Build",
     description="A Python package for interacting with the Rubrik CDM API.",
     long_description=long_description,
