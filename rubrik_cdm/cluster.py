@@ -609,55 +609,64 @@ class Cluster(Api):
         self.log("read_only_authorization: Granting read-only privilages to user '{}'.".format(username))
         return self.post("internal", "/authorization/role/read_only_admin", config, timeout)
 
-    def cluster_node_id(self,timeout=15):
-        """ Returns a list of node ids from all the nodes in the cluster.
+    def cluster_node_id(self, timeout=15):
+        """Returns a list of node ids from all the nodes in the cluster.
 
-                Arguments:
-                    None
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
-                Keyword Arguments:
-                    None
+        Returns:
+             dict -- The full API response from `POST /internal/node`.
+        """
+        self.log("cluster_node_id - Getting all the node ids from the from the cluster.")
+        return self.get('internal', '/node', timeout)
 
-                Returns:
-                    dict -- The full API response from `POST /internal/node`.
-                """
-        self.log("cluster_node_id - Getting all the node ids from the from the cluster")
-        node_id = self.get('internal', '/node',timeout)
-        return node_id
 
-    def cluster_support_tunnel(self,enabled, timeout=15):
-        """ Function that can check the status, enable or disable the support tunnel.
+    def cluster_support_tunnel(self, enabled=True, timeout=15):
+        """Enable or Disable the support tunnel.
 
-                        Arguments:
-                            enabled - with state of (True or False)
+        Keyword Arguments:
 
-                        Keyword Arguments:
+            enabled (bool) -- The flag that enables or disables the support tunnel. (default: {True})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
-                            enabled with state of True checks the status first then enables the support tunnel if needed
-                            enabled with state of False will disable the current tunnel
 
-                        Returns:
-                            dict -- The full API response from `POST /internal/node/me/support_tunnel`.
-                        """
-        if enabled not in [True, False]:
-            raise InvalidParameterException("The action parameter must be status, enable, or disable")
+        Returns:
+            dict -- The full API response from `POST /internal/node/me/support_tunnel`.
+        """
+
+        if type(enabled) is not bool:
+            raise InvalidParameterException("The enabled parameter must be True or False.")
+
+        self.log("cluster_support_tunnel - Determining status of Cluster Support Tunnel.")
+        check_tunnel = self.get('internal', '/node/me/support_tunnel', timeout)
 
         if enabled is True:
-            self.log("cluster_support_tunnel - Check Status of Cluster Support Tunnel and Enable it if needed")
-            check_tunnel = self.get('internal', '/node/me/support_tunnel', timeout)
+
+
             if check_tunnel['isTunnelEnabled'] is False:
+
                 config = {}
                 config['isTunnelEnabled'] = True
                 config['inactivityTimeoutInSeconds'] = 0
-                tunnel = self.patch('internal', '/node/me/support_tunnel', config,timeout)
-                return tunnel
+
+                self.log("cluster_support_tunnel - Enabling Cluster Support Tunnel.")
+                return self.patch('internal', '/node/me/support_tunnel', config,timeout)
 
             else:
-                return("Tunnel is already enabled")
+                return("No change required. Support Tunnel is already enabled.")
 
         elif enabled is False:
-            self.log("cluster_support_tunnel - Disable the Support Tunnel")
-            config = {}
-            config['isTunnelEnabled'] = False
-            tunnel = self.patch('internal', '/node/me/support_tunnel', config,timeout)
-            return tunnel
+
+            if check_tunnel['isTunnelEnabled'] is False:
+
+                return ("No change required. Support Tunnel is already disabled.")
+
+            else:
+                config = {}
+                config['isTunnelEnabled'] = False
+
+                self.log("cluster_support_tunnel - Disable the Support Tunnel")
+
+                return self.patch('internal', '/node/me/support_tunnel', config,timeout)
+
