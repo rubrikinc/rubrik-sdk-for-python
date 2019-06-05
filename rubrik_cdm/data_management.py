@@ -192,13 +192,13 @@ class Data_Management(_API):
 
         return (api_request, snapshot_status_url)
 
-    def object_id(self, object_name, object_type, host_os=None, host_name=None, timeout=15):
+    def object_id(self, object_name, object_type, host_os=None, hostname=None, timeout=15):
         """Get the ID of a Rubrik object by providing its name.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
             object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, aws_native, vcenter})
-            host_name {str} -- Valid and required for oracle_db object type. This is the (or one of the) host names the database is running on.
+            host_name {str} -- The hostname, or one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -234,7 +234,7 @@ class Data_Management(_API):
                 return "UNPROTECTED"
 
         if object_type == 'oracle_db':
-            if host_name is None:
+            if hostname is None:
                 raise InvalidParameterException("You must provide the host or cluster for the Oracle DB object.")
 
         api_call = {
@@ -316,7 +316,7 @@ class Data_Management(_API):
             for item in api_request['data']:
                 if object_type == 'oracle_db' and item[name_value] == object_name:
                     for instance in item['instances']:
-                        if host_name in instance.values():
+                        if hostname in instance.values():
                             object_ids.append(item['id'])
                             host_match = True
                 elif item[name_value] == object_name:
@@ -324,7 +324,7 @@ class Data_Management(_API):
 
             if object_type == 'oracle_db' and not host_match:
                 raise InvalidParameterException(
-                    "The {} object '{}' on the host '{}' was not found on the Rubrik cluster.".format(object_type, object_name, host_name))
+                    "The {} object '{}' on the host '{}' was not found on the Rubrik cluster.".format(object_type, object_name, hostname))
             elif len(object_ids) > 1:
                 raise InvalidParameterException(
                     "Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(object_type, object_name))
