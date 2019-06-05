@@ -625,30 +625,26 @@ class Cluster(Api):
         node_id = self.get('internal', '/node',timeout)
         return node_id
 
-    def cluster_support_tunnel(self,action, timeout=15):
+    def cluster_support_tunnel(self,enabled, timeout=15):
         """ Function that can check the status, enable or disable the support tunnel.
 
                         Arguments:
-                            Action - with state of (Status,Enable,Disable)
+                            enabled - with state of (True or False)
 
                         Keyword Arguments:
-                            Action with state of "status" returns the current status of the support tunnel
-                            Action with state of "enable" checks the status first then enables the support tunnel if needed
-                            Action with state of "disable" will disable the current tunnel
+
+                            enabled with state of True checks the status first then enables the support tunnel if needed
+                            enabled with state of False will disable the current tunnel
 
                         Returns:
                             dict -- The full API response from `POST /internal/node/me/support_tunnel`.
                         """
-        if action not in ["status", "enable", "disable"]:
+        if enabled not in [True, False]:
             raise InvalidParameterException("The action parameter must be status, enable, or disable")
-        if action.lower() =="status":
-            self.log("cluster_support_tunnel - Get Status of Cluster Support Tunnel")
-            tunnel = self.get('internal', '/node/me/support_tunnel',timeout)
-            return tunnel
 
-        elif action.lower() == "enable":
+        if enabled is True:
             self.log("cluster_support_tunnel - Check Status of Cluster Support Tunnel and Enable it if needed")
-            check_tunnel = self.cluster_support_tunnel("status")
+            check_tunnel = self.get('internal', '/node/me/support_tunnel', timeout)
             if check_tunnel['isTunnelEnabled'] is False:
                 config = {}
                 config['isTunnelEnabled'] = True
@@ -659,7 +655,7 @@ class Cluster(Api):
             else:
                 return("Tunnel is already enabled")
 
-        elif action.lower() == "disable":
+        elif enabled is False:
             self.log("cluster_support_tunnel - Disable the Support Tunnel")
             config = {}
             config['isTunnelEnabled'] = False
