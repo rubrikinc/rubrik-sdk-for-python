@@ -43,7 +43,7 @@ class Data_Management(_API):
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
             host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
-            host_name {str} -- The hostname, or one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
+            host_name {str} -- The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
