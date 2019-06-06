@@ -309,7 +309,17 @@ class Api():
 
                 job_status = api_call['status']
 
-                in_progress_status = ["QUEUED", "RUNNING", "FINISHING", "TO_FINISH", "TO_RETRY", "ACQUIRING", "TO_YIELDING", "YIELDING", "TO_YIELDED", "YIELDED""]
+                in_progress_status = [
+                    "QUEUED",
+                    "RUNNING",
+                    "FINISHING",
+                    "TO_FINISH",
+                    "TO_RETRY",
+                    "ACQUIRING",
+                    "TO_YIELDING",
+                    "YIELDING",
+                    "TO_YIELDED",
+                    "YIELDED"]
 
                 canceling_status = ["CANCELING", "TO_CANCEL"]
 
