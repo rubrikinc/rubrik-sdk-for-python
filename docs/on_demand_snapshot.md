@@ -19,6 +19,7 @@ def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=Non
 | sql_host  | str  | The name of the SQL Host hosting the specified database. Only required when taking a on-demand snapshot of a MSSQL DB.  |    None     |    None      |
 | sql_instance  | str  | The name of the SQL Instance hosting the specified database. Only required when taking a on-demand snapshot of a MSSQL DB.  |    None     |    None      |
 | sql_db  | str  | TThe name of the SQL DB. Only required when taking a on-demand snapshot of a MSSQL DB.  |    None     |    None      |
+| hostname  | str  | The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db  |    None     |    None      |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
@@ -56,4 +57,12 @@ object_name = "AdventureWorks2014"
 object_type = "mssql_db"
 
 snapshot = rubrik.on_demand_snapshot(object_name, object_type, sql_host="hostname.rubrik.com", sql_instance="MSSQLSERVER", sql_db="AdventureWorks2014")
+
+# Oracle DB Snapshot
+object_name = "oratestdb"
+object_type = "oracle_db"
+host = "ora_host_01"
+sla = "OracleTest"
+
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sla_name=sla, hostname=host)
 ```
