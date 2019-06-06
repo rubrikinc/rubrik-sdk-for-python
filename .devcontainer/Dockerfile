@@ -6,7 +6,7 @@
 FROM python:3
 
 # Install the required development packages
-RUN pip install pylint requests python-dateutil pytz coverage pytest-cov pytest-mock tox
+RUN pip install pylint requests python-dateutil pytz coverage pytest-cov pytest-mock tox pep8 autopep8
 
 # Configure apt
 ENV DEBIAN_FRONTEND=noninteractive

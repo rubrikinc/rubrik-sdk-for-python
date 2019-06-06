@@ -1,4 +1,4 @@
- # Copyright 2018 Rubrik, Inc.
+# Copyright 2018 Rubrik, Inc.
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -309,16 +309,37 @@ class Api():
 
                 job_status = api_call['status']
 
+                in_progress_status = ["QUEUED", "RUNNING", "FINISHING", "TO_FINISH", "TO_RETRY", "ACQUIRING", "TO_YIELDING", "YIELDING", "TO_YIELDED", "YIELDED""]
+
+                canceling_status = ["CANCELING", "TO_CANCEL"]
+
+                failing_status = ["TO_UNDO", "UNDOING"]
+
                 if job_status == "SUCCEEDED":
-                    self.log('Job Progress 100%\n')
+                    self.log('Job Complete\n')
                     job_status = api_call['status']
                     break
-                elif job_status == "QUEUED" or "RUNNING":
+                elif job_status == "CANCELED":
+                    self.log('Job Cancelled\n')
+                    job_status = api_call['status']
+                    break
+                elif job_status in in_progress_status:
                     self.log('Job Progress {}%\n'.format(api_call['progress']))
                     job_status = api_call['status']
                     time.sleep(10)
                     continue
+                elif job_status in cancelling_status:
+                    self.log('Job is being Cancelled {}%\n'.format(api_call['progress']))
+                    job_status = api_call['status']
+                    time.sleep(10)
+                    continue
+                elif job_status in failing_status:
+                    self.log('Job Failing {}%\n'.format(api_call['progress']))
+                    job_status = api_call['status']
+                    time.sleep(10)
+                    continue
                 else:
+                    # Job FAILED
                     raise RubrikException('{}'.format(str(api_call)))
 
         else:
