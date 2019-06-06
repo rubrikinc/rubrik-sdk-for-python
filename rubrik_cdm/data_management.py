@@ -32,7 +32,7 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15):  # pylint: ignore
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, timeout=15):  # pylint: ignore
         """Initiate an on-demand snapshot.
 
         Arguments:
@@ -43,6 +43,7 @@ class Data_Management(_API):
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
             host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
+            host_name {str} -- The hostname, or one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -51,7 +52,7 @@ class Data_Management(_API):
 
         """
 
-        valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db']
+        valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db']
         valid_host_os_type = ['Linux', 'Windows']
 
         if object_type not in valid_object_type:
@@ -190,6 +191,33 @@ class Data_Management(_API):
 
             snapshot_status_url = api_request['links'][0]['href']
 
+        elif object_type == 'oracle_db':
+            if hostname is None:
+                raise InvalidParameterException("You must provide the host or one of the hosts in a RAC cluster for the Oracle DB object.")
+
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the Oracle database '{}' on the host '{}'.".format(object_name, hostname))
+            db_id = self.object_id(object_name, object_type, hostname=hostname, timeout=timeout)
+
+            if sla_name == 'current':
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Oracle database '{}'.".format(
+                        object_name))
+
+                oracle_db_summary = self.get('internal', '/oracle/db/{}'.format(db_id), timeout)
+                sla_id = oracle_db_summary['effectiveSlaDomainId']
+
+            elif sla_name != 'current':
+                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+            config = {}
+            config['slaId'] = sla_id
+
+            self.log("on_demand_snapshot: Initiating snapshot for the Oracle database '{}'.".format(object_name))
+            api_request = self.post('internal', '/oracle/db/{}/snapshot'.format(db_id), config, timeout)
+
+            snapshot_status_url = api_request['links'][0]['href']
+
         return (api_request, snapshot_status_url)
 
     def object_id(self, object_name, object_type, host_os=None, hostname=None, timeout=15):
@@ -235,7 +263,7 @@ class Data_Management(_API):
 
         if object_type == 'oracle_db':
             if hostname is None:
-                raise InvalidParameterException("You must provide the host or cluster for the Oracle DB object.")
+                raise InvalidParameterException("You must provide the host or one of the hosts in a RAC cluster for the Oracle DB object.")
 
         api_call = {
             "vmware": {
