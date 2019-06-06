@@ -26,14 +26,15 @@ class Cluster(Api):
     def configure_replication_private(self, username, password, target_ip,
                               ca_certificate=None, timeout=30):
         """Configure replication partner as specified by user using PRIVATE NETWORK (direct connection)
+        Arguments:
+            username {str} -- Username for the TARGET cluster
+            password {str} -- Password for the TARGET cluster
+            target_ip {str} -- Address of one of the nodes of the TARGET cluster {string}
         Keyword Arguments:
-            -MANDATORY:
-            username: Username for the TARGET cluster {string}
-            password: Password for the TARGET cluster {string}
-            target_ip: Address of one of the nodes of the TARGET cluster {string}
-            -OPTIONAL:
-            CaCert: optional CA Certificate
-            timeout: default 30, timeout for eventual API call
+            ca_certificate {str} -- CA certificiate used to perform TLS certificate validation (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+        Returns:
+            dict -- The full API response from `POST /internal/replication/target`.
         """
 
         config = {}
@@ -50,24 +51,26 @@ class Cluster(Api):
 
         return self.post("internal", "/replication/target", config, timeout)
 
-    def configure_replication_nat(self, username, password, src_gateway, tgt_gateway,
+    def configure_replication_nat(self, username, password, source_gateway, target_gateway,
                               ca_certificate=None, timeout=30):
         """Configure replication partner as specified by user using NAT
+        Arguments:
+            username {str} -- Username for the TARGET cluster {string}
+            password {str} -- Password for the TARGET cluster {string}
+            source_gateway {list} -- Specification of source NAT gateway specified as [str IP, [list of portnumber(s)]]
+            target_gateway {list} -- Specification of source NAT gateway specified as [str IP, [list of portnumber(s)]]
         Keyword Arguments:
-            -MANDATORY:
-            username: Username for the TARGET cluster {string}
-            password: Password for the TARGET cluster {string}
-            Source/Target NAS gateway needs to be specified as [str IP, [list of portnumber(s)]]
-            -OPTIONAL:
-            CaCert: optional CA Certificate
-            timeout: default 30, timeout for eventual API call
+            ca_certificate {str} -- CA certificiate used to perform TLS certificate validation (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+        Returns:
+            dict -- The full API response from `POST /internal/replication/target`.
         """
 
         config = {}
 
         # Source/Target gateway need to be specified as [str IP, [list of portnumber(s)]]
-        source_check = isinstance(src_gateway, list) and len(src_gateway) == 2 and isinstance(src_gateway[1], list) and len(src_gateway[1]) > 0
-        target_check = isinstance(tgt_gateway, list) and len(tgt_gateway) == 2 and isinstance(tgt_gateway[1], list) and len(tgt_gateway[1]) > 0
+        source_check = isinstance(source_gateway, list) and len(source_gateway) == 2 and isinstance(source_gateway[1], list) and len(source_gateway[1]) > 0
+        target_check = isinstance(target_gateway, list) and len(target_gateway) == 2 and isinstance(target_gateway[1], list) and len(target_gateway[1]) > 0
 
         if not source_check or not target_check:
             raise InvalidParameterException('The configure_replication() source and target gateways need to be defined as: ["IP STRING", [LIST OF PORT NUMBER(S)]].')
@@ -76,10 +79,10 @@ class Cluster(Api):
         config['sourceGateway'] = {}
 
         config['replicationSetup'] = 'NAT'
-        config['sourceGateway']['address'] = src_gateway[0]
-        config['sourceGateway']['ports'] = src_gateway[1]
-        config['targetGateway']['address'] = tgt_gateway[0]
-        config['targetGateway']['ports'] = tgt_gateway[1]
+        config['sourceGateway']['address'] = source_gateway[0]
+        config['sourceGateway']['ports'] = source_gateway[1]
+        config['targetGateway']['address'] = target_gateway[0]
+        config['targetGateway']['ports'] = target_gateway[1]
         config['username'] = username
         config['password'] = password
 
@@ -121,7 +124,7 @@ class Cluster(Api):
         return True
 
     def cluster_node_ip(self, timeout=15):
-        """Retrive the IP Address for each node in the Rubrik cluster.
+        """Retrieve the IP Address for each node in the Rubrik cluster.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
@@ -141,7 +144,7 @@ class Cluster(Api):
         return node_ip_list
 
     def cluster_node_name(self, timeout=15):
-        """Retrive the name of each node in the Rubrik cluster.
+        """Retrieve the name of each node in the Rubrik cluster.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
