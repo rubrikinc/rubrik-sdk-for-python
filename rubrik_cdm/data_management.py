@@ -344,7 +344,7 @@ class Data_Management(_API):
             for item in api_request['data']:
                 if object_type == 'oracle_db' and item[name_value] == object_name:
                     for instance in item['instances']:
-                        if hostname in instance.values():
+                        if hostname in instance['hostName']:
                             object_ids.append(item['id'])
                             host_match = True
                 elif item[name_value] == object_name:
