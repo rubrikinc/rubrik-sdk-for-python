@@ -223,7 +223,7 @@ class Data_Management(_API):
 
         if object_type == 'fileset_template':
             if host_os is None:
-                raise InvalidParameterException("You must provide the Fileset Tempalte OS type.")
+                raise InvalidParameterException("You must provide the Fileset Template OS type.")
             elif host_os not in ['Linux', 'Windows']:
                 raise InvalidParameterException("The host_os must be either 'Linux' or 'Windows'.")
 

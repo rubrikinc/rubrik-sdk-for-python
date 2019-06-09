@@ -80,57 +80,82 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         self.log("Node IP: {}".format(self.node_ip))
 
-        # If the api_token has not been provided check for the env variable and then
-        # check for the username and password fields
-        if api_token is None:
-            api_token = os.environ.get('rubrik_cdm_token')
-            if api_token is None:
+        # List to store how the credentials have been provided
+        credentials_manually_provided = []
+        credentials_env_var_provided = []
+        # Combined list of manually provided and env var provided
+        all_credentials_provided = []
 
-                self.api_token = None
+        # Flag used to determine if we have enough information to authenticate against the Rubrik cluster
+        credentials_needed_for_authentication = False
 
-                if username is None:
-                    username = os.environ.get('rubrik_cdm_username')
-                    if username is None:
-                        raise InvalidParameterException(
-                            "The Rubrik CDM Username or an API Token has not been provided.")
-                    else:
-                        self.username = username
-                        self.log("Username: {}".format(self.username))
-                else:
-                    self.username = username
-                    self.log("Username: {}".format(self.username))
-
-                if password is None:
-                    password = os.environ.get('rubrik_cdm_password')
-                    if password is None:
-                        raise InvalidParameterException(
-                            "The Rubrik CDM Password or an API Token has not been provided.")
-                    else:
-                        self.password = password
-                        self.log("Password: *******\n")
-                else:
-                    self.password = password
-                    self.log("Password: *******\n")
-
-                # Domain display name may be specified to force authentication to this domain
-                session_url = 'https://{}/api/internal/session'.format(self.node_ip)
-                ddn = domain_display_name if domain_display_name else os.environ.get('rubrik_cdm_domain')
-                if ddn:
-                    session_url = session_url + '/realm/{}'.format(ddn)
-
-                # Get the web API session token to make future interactions faster
-                response = requests.post(session_url, data='{"initParams": {}}', auth=(self.username, self.password), verify=False)
-
-                # On failure, fall back to basic auth
-                if response.status_code == 200:
-                    self.api_token = response.json()['session']['token']
-                    self.log("API Token: *******\n")
-            else:
-                self.api_token = api_token
-                self.log("API Token: *******\n")
+        if username:
+            credentials_manually_provided.append("username")
         else:
+            username = os.environ.get('rubrik_cdm_username')
+            if username is not None:
+                credentials_env_var_provided.append("username")
+
+        if password:
+            credentials_manually_provided.append("password")
+        else:
+            password = os.environ.get('rubrik_cdm_password')
+            if password is not None:
+                credentials_env_var_provided.append("password")
+
+        if api_token:
+            credentials_manually_provided.append("api_token")
+        else:
+            api_token = os.environ.get('rubrik_cdm_token')
+            if api_token is not None:
+                credentials_env_var_provided.append("api_token")
+
+        all_credentials_provided = credentials_manually_provided + credentials_env_var_provided
+
+        if len(credentials_manually_provided) == 3:
+            raise InvalidParameterException(
+                "You have provided both an API token and a username and password for authentication. You may only use one or the other.")
+
+        if "username" in all_credentials_provided and "password" not in all_credentials_provided:
+            raise InvalidParameterException(
+                "When providing the username argument, either manually or through the environment variables, you must also provide a password. Alternatively, starting with CDM 5.0, you may also use API Token instead of username and password.")
+
+        if "password" in all_credentials_provided and "username" not in all_credentials_provided:
+            raise InvalidParameterException(
+                "When providing the password argument, either manually or through the environment variables, you must also provide a username. Alternatively, starting with CDM 5.0, you may also use API Token instead of username and password.")
+
+        if "username" in credentials_manually_provided and "password" in credentials_manually_provided:
+
+            self.api_token, self.username, self.password = self._get_api_token(self.node_ip, username, password, domain_display_name)
+
+            credentials_needed_for_authentication = True
+
+        if "api_token" in credentials_manually_provided:
             self.api_token = api_token
-            self.log("API Token: *******\n")
+
+            self.log("API Token: ******")
+
+            credentials_needed_for_authentication = True
+
+        if credentials_needed_for_authentication is False:
+            if len(credentials_env_var_provided) == 3:
+                raise InvalidParameterException(
+                    "You have provided both an API token and a username and password, in your environment variables, for authentication. You may only use one or the other.")
+
+            if "username" in all_credentials_provided and "password" in all_credentials_provided:
+
+                self.api_token, self.username, self.password = self._get_api_token(self.node_ip, username, password, domain_display_name)
+
+                credentials_needed_for_authentication = True
+
+            if "api_token" in credentials_env_var_provided and credentials_needed_for_authentication is False:
+                self.api_token = api_token
+                self.log("API Token: ******")
+                credentials_needed_for_authentication = True
+
+        if credentials_needed_for_authentication is False:
+            raise InvalidParameterException(
+                "You must provide either a username and password or API Token for authentication.")
 
     @staticmethod
     def log(log_message):
@@ -141,6 +166,62 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         """
         log = logging.getLogger(__name__)
         log.debug(log_message)
+
+    def _get_api_token(self, node_ip, username, password, domain_display_name):
+        """Internal method that tried to get an API token from credentials.
+
+        HTTP Basic Auth requires a new authentication for every API call.
+        This can be slow especially for LDAP users. Hence, try to get a
+        API token for the provided credentials.
+        Arguments:
+            node_ip {str} -- Rubrik CDM node
+            username {str} -- Username
+            password {str} -- Password
+            domain_display_name {str} -- By default, Rubrik CDM will
+                attempt to log into local before trying each of the
+                configured Domain DisplayNames. Providing a
+                domain_display_name will restrict authentication to
+                a single Domain Display Name.
+        Returns:
+            api_token, username, password
+         """
+
+        # Domain display name may be specified to force authentication to this domain
+        session_url = 'https://{}/api/internal/session'.format(node_ip)
+        if domain_display_name is not None:
+            # Rubrik CDM version 5.0 supports Domain Display Name
+            session_url = session_url + '/realm/{}'.format(domain_display_name)
+
+        # Get the web API session token to make future interactions faster.
+        # Creating a API token can fail when using an unsupported configuration: e.g.,
+        #   - specifying Domain Display Name is unsupported until CDM 5.0
+        #   - specifying an invalid Domain Display Name
+        # Increasing the timeout to 5 minutes to work with multifactor authentication.
+        response = requests.post(
+            session_url,
+            data='{"initParams": {}}',
+            auth=(username, password),
+            verify=False,
+            timeout=300)
+
+        # On failure, fall back to HTTP Basic Auth. 
+        api_token = None
+        if response.status_code == 200:
+            result = response.json()
+            if 'session' in result:
+                api_token = result['session']['token']
+            else:
+                # Rubrik CDM Pre-5.0 version
+                if 'token' in result:
+                    api_token = result['token']
+
+        if api_token is None:
+            self.log("Username: {}".format(username))
+            self.log("Password: ******")
+        else:
+            self.log("Transformed Username to API Token")
+
+        return api_token, username, password
 
     def _authorization_header(self):
         """Internal method used to create the authorization header used in the API calls.
@@ -163,7 +244,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Authorization': 'Basic ' + authorization,
-                'User-Agent': 'Rubrik Python SDK v1.0.13'
+                'User-Agent': 'Rubrik Python SDK v2.0.1'
             }
 
         else:
@@ -173,7 +254,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Authorization': 'Bearer ' + self.api_token,
-                'User-Agent': 'Rubrik Python SDK v1.0.13'
+                'User-Agent': 'Rubrik Python SDK v2.0.1'
             }
 
         return authorization_header
@@ -247,7 +328,7 @@ class Bootstrap(_API):
             if '::ffff' in self.ipv6_addr:
                 self.ipv6_addr = ""
                 self.log('Resolved IPv4 address')
-                #ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
+                # ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
                 self.log("Resolved Node IP: {}".format(self.node_ip))
                 node_resolution = True
             else:
