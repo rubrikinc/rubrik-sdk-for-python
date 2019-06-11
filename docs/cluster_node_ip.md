@@ -1,6 +1,6 @@
 # cluster_node_ip
 
-Retrive the IP Address for each node in the Rubrik cluster.
+Retrieve the IP Address for each node in the Rubrik cluster.
 ```py
 def cluster_node_ip(timeout=15)
 ```

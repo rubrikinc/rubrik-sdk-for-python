@@ -1,6 +1,6 @@
 # cluster_node_name
 
-Retrive the name of each node in the Rubrik cluster.
+Retrieve the name of each node in the Rubrik cluster.
 ```py
 def cluster_node_name(timeout=15)
 ```

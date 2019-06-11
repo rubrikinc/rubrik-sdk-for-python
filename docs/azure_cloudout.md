@@ -2,7 +2,7 @@
 
 Add a new Azure archival location to the Rubrik cluster.
 ```py
-def azure_cloudout(container, azure_access_key, storage_account_name, rsa_key, archive_name='default', instance_type='default', timeout=180)
+def azure_cloudout(container, azure_access_key, storage_account_name, rsa_key,
 ```
 
 ## Arguments
