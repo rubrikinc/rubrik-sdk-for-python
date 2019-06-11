@@ -1,18 +1,16 @@
-# configure_replication_nat
+# configure_replication_private
 
-Configure replication partner as specified by user using NAT gateways.
+Configure replication partner as specified by user using PRIVATE NETWORK (direct connection).
 ```py
-def configure_replication_nat(username, password, source_gateway, target_gateway, ca_certificate, timeout)
+def configure_replication_private(username, password, target_ip, ca_certificate=None, timeout)
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
+| target_ip  | str  | The IP address or FQDN of the target Rubrik Cluster to add. |         |
 | username  | str  | The target Rubrik Cluster username used for authentication. |         |
 | password  | str  | The target Rubrik Cluster password used for authentication. |         |
-| source_gateway | list | Specification of source NAT gateway specified as `[str IP, [list of portnumber(s)]]`.  |         |
-| target_gateway | list | Specification of target NAT gateway specified as `[str IP, [list of portnumber(s)]]`.  |         |
-
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
@@ -31,8 +29,7 @@ rubrik = rubrik_cdm.Connect()
 
 remote_cluster_user = "testuser"
 remote_cluster_password = "testpassword"
-src_gateway = ["1.2.3.4",[1234]]
-tgt_gateway = ["2.3.4.5",[1234]]
+remote_cluster_ip = "1.2.3.4"
 
-new_replication = rubrik.configure_replication_nat(remote_cluster_user, remote_cluster_password, src_gateway, tgt_gateway)
+new_replication = rubrik.configure_replication_private(remote_cluster_user, remote_cluster_password, remote_cluster_ip)
 ```

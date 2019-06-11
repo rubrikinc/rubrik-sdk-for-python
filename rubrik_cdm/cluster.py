@@ -28,7 +28,7 @@ class Cluster(Api):
         """Configure cluster geolocation. Overwrites previously set value if different.
 
         Arguments:
-            location {str} -- Geolocation of the cluster
+            location {str} -- Geolocation of the cluster.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
@@ -58,7 +58,7 @@ class Cluster(Api):
 
     def configure_replication_private(self, username, password, target_ip,
                               ca_certificate=None, timeout=30):
-        """Configure replication partner as specified by user using PRIVATE NETWORK (direct connection)
+        """Configure replication partner as specified by user using PRIVATE NETWORK (direct connection).
 
         Arguments:
             username {str} -- Username for the TARGET cluster
@@ -89,7 +89,7 @@ class Cluster(Api):
 
     def configure_replication_nat(self, username, password, source_gateway, target_gateway,
                               ca_certificate=None, timeout=30):
-        """Configure replication partner as specified by user using NAT
+        """Configure replication partner as specified by user using NAT gateways.
 
         Arguments:
             username {str} -- Username for the TARGET cluster {string}
