@@ -37,22 +37,22 @@ class Data_Management(_API):
 
         Arguments:
             object_name {str} -- The name of the Rubrik object to take a on-demand snapshot of.
-            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host, ahv, mssql})
+            object_type {str} -- The Rubrik object type you want to backup. (choices: {VMware, physical_host, ahv, mssql})
 
         Keyword Arguments:
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
             host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
-            host_name {str} -- The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
+            hostname {str} -- The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            tuple -- When object_type is vmware, the full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
+            tuple -- When object_type is VMware, the full API response for `POST /v1/VMware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
             tuple -- When object_type is physical_host, the full API response for `POST /v1/fileset/{}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
 
         """
 
-        valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db']
+        valid_object_type = ['VMware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db']
         valid_host_os_type = ['Linux', 'Windows']
 
         if object_type not in valid_object_type:
@@ -64,7 +64,7 @@ class Data_Management(_API):
                 raise InvalidParameterException("The on_demand_snapshot() `host_os` argument must be one of the following: {}.".format(
                     valid_host_os_type))
 
-        if object_type == 'vmware':
+        if object_type == 'VMware':
             self.log("on_demand_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
@@ -72,7 +72,7 @@ class Data_Management(_API):
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the vSphere VM '{}'.".format(object_name))
 
-                vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+                vm_summary = self.get('v1', '/VMware/vm/{}'.format(vm_id), timeout=timeout)
                 sla_id = vm_summary['effectiveSlaDomainId']
 
             elif sla_name != 'current':
@@ -83,7 +83,7 @@ class Data_Management(_API):
             config['slaId'] = sla_id
 
             self.log("on_demand_snapshot: Initiating snapshot for the vSphere VM '{}'.".format(object_name))
-            api_request = self.post('v1', '/vmware/vm/{}/snapshot'.format(vm_id), config, timeout)
+            api_request = self.post('v1', '/VMware/vm/{}/snapshot'.format(vm_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -225,7 +225,7 @@ class Data_Management(_API):
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, aws_native, vcenter})
+            object_type {str} -- The object type you wish to look up. (choices: {VMware, sla, vmware_host, physical_host, fileset_template, managed_volume, aws_native, vcenter})
             host_name {str} -- The hostname, or one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
@@ -234,7 +234,7 @@ class Data_Management(_API):
         """
 
         valid_object_type = [
-            'vmware',
+            'VMware',
             'sla',
             'vmware_host',
             'physical_host',
@@ -266,9 +266,9 @@ class Data_Management(_API):
                 raise InvalidParameterException("You must provide the host or one of the hosts in a RAC cluster for the Oracle DB object.")
 
         api_call = {
-            "vmware": {
+            "VMware": {
                 "api_version": "v1",
-                "api_endpoint": "/vmware/vm?primary_cluster_id=local&is_relic=false&name={}".format(object_name)
+                "api_endpoint": "/VMware/vm?primary_cluster_id=local&is_relic=false&name={}".format(object_name)
             },
             "sla": {
                 "api_version": "v1",
@@ -276,7 +276,7 @@ class Data_Management(_API):
             },
             "vmware_host": {
                 "api_version": "v1",
-                "api_endpoint": "/vmware/host?primary_cluster_id=local"
+                "api_endpoint": "/VMware/host?primary_cluster_id=local"
             },
             "fileset_template": {
                 "api_version": "v1",
@@ -304,7 +304,7 @@ class Data_Management(_API):
             },
             "vcenter": {
                 "api_version": "v1",
-                "api_endpoint": "/vmware/vcenter"
+                "api_endpoint": "/VMware/vcenter"
             },
             "oracle_db": {
                 "api_version": "internal",
@@ -371,7 +371,7 @@ class Data_Management(_API):
         Arguments:
             object_name {str} -- The name of the Rubrik object you wish to assign to an SLA Domain.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
-            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host})
+            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {VMware, mssql_host})
 
         Keyword Arguments:
             log_backup_frequency_in_seconds {str} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
@@ -384,7 +384,7 @@ class Data_Management(_API):
             dict -- The full API reponse for `POST /internal/sla_domain/{sla_id}/assign`.
         """
 
-        valid_object_type = ['vmware', 'mssql_host']
+        valid_object_type = ['VMware', 'mssql_host']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -406,12 +406,12 @@ class Data_Management(_API):
             self.log("assign_sla: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
             sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
-        if object_type == 'vmware':
+        if object_type == 'VMware':
             self.log("assign_sla: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
             self.log("assign_sla: Determing the SLA Domain currently assigned to the vSphere VM '{}'.".format(object_name))
-            vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+            vm_summary = self.get('v1', '/VMware/vm/{}'.format(vm_id), timeout=timeout)
 
             if sla_id == vm_summary['configuredSlaDomainId']:
                 return "No change required. The vSphere VM '{}' is already assigned to the '{}' SLA Domain.".format(
@@ -503,7 +503,7 @@ class Data_Management(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount`.
+            dict -- The full response of `POST /v1/VMware/vm/snapshot/{snapshot_id}/mount`.
         """
 
         if isinstance(remove_network_devices, bool) is False:
@@ -515,10 +515,10 @@ class Data_Management(_API):
                 "The date and time arguments most both be 'latest' or a specific date and time.")
 
         self.log("vsphere_live_mount: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
-        vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
+        vm_id = self.object_id(vm_name, 'VMware', timeout=timeout)
 
         self.log("vsphere_live_mount: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
-        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+        vm_summary = self.get('v1', '/VMware/vm/{}'.format(vm_id), timeout=timeout)
 
         if date == 'latest' and time == 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
@@ -559,7 +559,7 @@ class Data_Management(_API):
                     time,
                     vm_name))
 
-            return self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config, timeout)
+            return self.post('v1', '/VMware/vm/snapshot/{}/mount'.format(snapshot_id), config, timeout)
 
     def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):  # pylint: ignore
         """Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
@@ -579,7 +579,7 @@ class Data_Management(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/instant_recover`.
+            dict -- The full response of `POST /v1/VMware/vm/snapshot/{snapshot_id}/instant_recover`.
         """
 
         if isinstance(remove_network_devices, bool) is False:
@@ -597,10 +597,10 @@ class Data_Management(_API):
                 "The date and time arguments most both be 'latest' or a specific date and time.")
 
         self.log("vsphere_instant_recovery: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
-        vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
+        vm_id = self.object_id(vm_name, 'VMware', timeout=timeout)
 
         self.log("vsphere_instant_recovery: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
-        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+        vm_summary = self.get('v1', '/VMware/vm/{}'.format(vm_id), timeout=timeout)
 
         if date == 'latest' and time == 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
@@ -643,7 +643,7 @@ class Data_Management(_API):
                 time,
                 vm_name))
 
-            return self.post('v1', '/vmware/vm/snapshot/{}/instant_recover'.format(snapshot_id), config, timeout)
+            return self.post('v1', '/VMware/vm/snapshot/{}/instant_recover'.format(snapshot_id), config, timeout)
 
     def _date_time_conversion(self, date, time, timeout=30):
         """All date values returned by the Rubrik API are stored in Coordinated Universal Time (UTC)
@@ -701,29 +701,29 @@ class Data_Management(_API):
 
         Arguments:
             object_name {str} -- The name of the Rubrik object to pause snapshots for.
-            object_type {str} -- The Rubrik object type you wish to pause snaphots on. (choices: {vmware})
+            object_type {str} -- The Rubrik object type you wish to pause snaphots on. (choices: {VMware})
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {180})
 
         Returns:
             str -- No change required. The '`object_type`' '`object_name`' is already paused.
-            dict -- The full API response for `PATCH /v1/vmware/vm/{vm_id}`.
+            dict -- The full API response for `PATCH /v1/VMware/vm/{vm_id}`.
         """
 
-        valid_object_type = ['vmware']
+        valid_object_type = ['VMware']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The pause_snapshots() object_type argument must be one of the following: {}.".format(
                 valid_object_type))
 
-        if object_type == 'vmware':
+        if object_type == 'VMware':
 
             self.log("pause_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
             self.log("pause_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+            api_request = self.get('v1', '/VMware/vm/{}'.format(vm_id), timeout=timeout)
 
             if api_request['blackoutWindowStatus']['isSnappableBlackoutActive']:
                 return "No change required. The {} VM '{}' is already paused.".format(object_type, object_name)
@@ -732,36 +732,36 @@ class Data_Management(_API):
                 config = {}
                 config['isVmPaused'] = True
 
-                return self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
+                return self.patch('v1', '/VMware/vm/{}'.format(vm_id), config, timeout)
 
     def resume_snapshots(self, object_name, object_type, timeout=180):
         """Resume all snapshot activity for the provided object.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object to resume snapshots for.
-            object_type {str} -- The Rubrik object type you wish to resume snaphots on. (choices: {vmware})
+            object_type {str} -- The Rubrik object type you wish to resume snaphots on. (choices: {VMware})
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {180})
 
         Returns:
             str -- No change required. The 'object_type' object 'object_name' is currently not paused.
-            dict -- The full response for `PATCH /v1/vmware/vm/{vm_id}`.
+            dict -- The full response for `PATCH /v1/VMware/vm/{vm_id}`.
         """
 
-        valid_object_type = ['vmware']
+        valid_object_type = ['VMware']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The resume_snapshots() object_type argument must be one of the following: {}.".format(
                 valid_object_type))
 
-        if object_type == 'vmware':
+        if object_type == 'VMware':
 
             self.log("resume_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
             self.log("resume_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+            api_request = self.get('v1', '/VMware/vm/{}'.format(vm_id), timeout=timeout)
 
             if not api_request['blackoutWindowStatus']['isSnappableBlackoutActive']:
                 return "No change required. The '{}' object '{}' is currently not paused.".format(
@@ -771,7 +771,7 @@ class Data_Management(_API):
                 config = {}
                 config['isVmPaused'] = False
 
-                return self.patch('v1', '/vmware/vm/{}'.format(vm_id), config, timeout)
+                return self.patch('v1', '/VMware/vm/{}'.format(vm_id), config, timeout)
 
     def begin_managed_volume_snapshot(self, name, timeout=30):
         """Open a managed volume for writes. All writes to the managed volume until the snapshot is ended will be part of its snapshot.
@@ -846,7 +846,7 @@ class Data_Management(_API):
 
         Arguments:
             sla {str} -- The name of the SLA Domain you wish to search.
-            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware})
+            object_type {str} -- The object type you wish to search the SLA for. (choices: {VMware})
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {15})
@@ -855,19 +855,19 @@ class Data_Management(_API):
             dict -- The `name:id` of each object in the provided SLA Domain.
         """
 
-        valid_object_type = ['vmware']
+        valid_object_type = ['VMware']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
                 "The get_sla_object() object_type argument must be one of the following: {}.".format(valid_object_type))
 
-        if object_type == 'vmware':
+        if object_type == 'VMware':
 
             sla_id = self.object_id(sla, "sla", timeout=timeout)
 
             all_vms_in_sla = self.get(
                 "v1",
-                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(sla_id),
+                "/VMware/vm?effective_sla_domain_id={}&is_relic=false".format(sla_id),
                 timeout=timeout)
 
             vm_name_id = {}
