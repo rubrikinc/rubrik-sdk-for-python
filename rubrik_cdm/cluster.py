@@ -23,8 +23,7 @@ class Cluster(Api):
     """This class contains methods related to the management of the Rubrik cluster itself.
     """
 
-    def set_cluster_location(self, location,
-                                   timeout=15):
+    def set_cluster_location(self, location, timeout=15):
         """Configure cluster geolocation. Overwrites previously set value if different.
 
         Arguments:
@@ -56,14 +55,13 @@ class Cluster(Api):
 
         return self.patch("v1", "/cluster/me", config, timeout)
 
-    def configure_replication_private(self, username, password, target_ip,
-                              ca_certificate=None, timeout=30):
+    def configure_replication_private(self, username, password, target_ip, ca_certificate=None, timeout=30):
         """Configure replication partner as specified by user using PRIVATE NETWORK (direct connection).
 
         Arguments:
             username {str} -- Username for the TARGET cluster
             password {str} -- Password for the TARGET cluster
-            target_ip {str} -- Address of one of the nodes of the TARGET cluster {string}
+            target_ip {str} -- Address of one of the nodes of the TARGET cluster
 
         Keyword Arguments:
             ca_certificate {str} -- CA certificiate used to perform TLS certificate validation (default: {None})
@@ -87,13 +85,12 @@ class Cluster(Api):
 
         return self.post("internal", "/replication/target", config, timeout)
 
-    def configure_replication_nat(self, username, password, source_gateway, target_gateway,
-                              ca_certificate=None, timeout=30):
+    def configure_replication_nat(self, username, password, source_gateway, target_gateway, ca_certificate=None, timeout=30):
         """Configure replication partner as specified by user using NAT gateways.
 
         Arguments:
-            username {str} -- Username for the TARGET cluster {string}
-            password {str} -- Password for the TARGET cluster {string}
+            username {str} -- Username for the TARGET cluster
+            password {str} -- Password for the TARGET cluster
             source_gateway {list} -- Specification of source NAT gateway specified as [str IP, [list of portnumber(s)]]
             target_gateway {list} -- Specification of source NAT gateway specified as [str IP, [list of portnumber(s)]]
 
