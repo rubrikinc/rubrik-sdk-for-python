@@ -15,7 +15,6 @@ Storing credentials in environment variables is a more secure process than direc
 * **`rubrik_cdm_node_ip`** (Contains the IP/FQDN of a Rubrik node)
 * **`rubrik_cdm_username`** (Contains a username with configured access to the Rubrik cluster)
 * **`rubrik_cdm_password`** (Contains the password for the above user)
-* **`rubrik_cdm_domain`** (Contains the Domain Display Name. If unspecified, the username and password are tried against all the configured authentication domains.)
 
 The way in which to populate these environment variables differs depending on the operating system running Python. Below are examples for Windows, Linux, and Mac OS.
 

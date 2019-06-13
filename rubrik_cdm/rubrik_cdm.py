@@ -55,7 +55,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         _PHYSICAL {class} - This class contains methods related to the management of the Physical objects in the Rubrik Cluster.
     """
 
-    def __init__(self, node_ip=None, username=None, password=None, domain_display_name=None, api_token=None, enable_logging=False):
+    def __init__(self, node_ip=None, username=None, password=None, api_token=None, enable_logging=False):
         """Constructor for the Connect class which is used to initialize the class variables.
 
         Keyword Arguments:
@@ -126,7 +126,12 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         if "username" in credentials_manually_provided and "password" in credentials_manually_provided:
 
-            self.api_token, self.username, self.password = self._get_api_token(self.node_ip, username, password, domain_display_name)
+            self.username = username
+            self.password = password
+            self.api_token = None
+
+            self.log("Username: {}".format(self.username))
+            self.log("Password: ******")
 
             credentials_needed_for_authentication = True
 
@@ -144,7 +149,12 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
             if "username" in all_credentials_provided and "password" in all_credentials_provided:
 
-                self.api_token, self.username, self.password = self._get_api_token(self.node_ip, username, password, domain_display_name)
+                self.username = username
+                self.password = password
+                self.api_token = None
+
+                self.log("Username: {}".format(self.username))
+                self.log("Password: ******")
 
                 credentials_needed_for_authentication = True
 
@@ -166,62 +176,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         """
         log = logging.getLogger(__name__)
         log.debug(log_message)
-
-    def _get_api_token(self, node_ip, username, password, domain_display_name):
-        """Internal method that tried to get an API token from credentials.
-
-        HTTP Basic Auth requires a new authentication for every API call.
-        This can be slow especially for LDAP users. Hence, try to get a
-        API token for the provided credentials.
-        Arguments:
-            node_ip {str} -- Rubrik CDM node
-            username {str} -- Username
-            password {str} -- Password
-            domain_display_name {str} -- By default, Rubrik CDM will
-                attempt to log into local before trying each of the
-                configured Domain DisplayNames. Providing a
-                domain_display_name will restrict authentication to
-                a single Domain Display Name.
-        Returns:
-            api_token, username, password
-         """
-
-        # Domain display name may be specified to force authentication to this domain
-        session_url = 'https://{}/api/internal/session'.format(node_ip)
-        if domain_display_name is not None:
-            # Rubrik CDM version 5.0 supports Domain Display Name
-            session_url = session_url + '/realm/{}'.format(domain_display_name)
-
-        # Get the web API session token to make future interactions faster.
-        # Creating a API token can fail when using an unsupported configuration: e.g.,
-        #   - specifying Domain Display Name is unsupported until CDM 5.0
-        #   - specifying an invalid Domain Display Name
-        # Increasing the timeout to 5 minutes to work with multifactor authentication.
-        response = requests.post(
-            session_url,
-            data='{"initParams": {}}',
-            auth=(username, password),
-            verify=False,
-            timeout=300)
-
-        # On failure, fall back to HTTP Basic Auth. 
-        api_token = None
-        if response.status_code == 200:
-            result = response.json()
-            if 'session' in result:
-                api_token = result['session']['token']
-            else:
-                # Rubrik CDM Pre-5.0 version
-                if 'token' in result:
-                    api_token = result['token']
-
-        if api_token is None:
-            self.log("Username: {}".format(username))
-            self.log("Password: ******")
-        else:
-            self.log("Transformed Username to API Token")
-
-        return api_token, username, password
 
     def _authorization_header(self):
         """Internal method used to create the authorization header used in the API calls.
