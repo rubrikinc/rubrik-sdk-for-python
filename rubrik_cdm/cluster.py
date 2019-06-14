@@ -27,8 +27,114 @@ from .exceptions import InvalidParameterException, CDMVersionException, InvalidT
 
 
 class Cluster(Api):
-    """This class contains methods related to the managment of the Rubrik cluster itself.
+    """This class contains methods related to the management of the Rubrik cluster itself.
     """
+
+    def set_cluster_location(self, location, timeout=15):
+        """Configure cluster geolocation. Overwrites previously set value if different.
+
+        Arguments:
+            location {str} -- Geolocation of the cluster.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            str -- If already configured with the same, the location is returned
+            dict -- The full API response from `PATCH /cluster/me`.
+        """
+
+        if not isinstance(location, str):
+            raise InvalidParameterException('The set_cluster_location() function requires the location to be specified as string.')
+
+        self.log("set_cluster_location: Determing the current cluster location.")
+
+        cluster_summary = self.get("v1", "/cluster/me", timeout=timeout)
+
+        if cluster_summary["geolocation"]["address"] == location:
+            return "No change required. The Rubrik cluster is already configured with '{}' as its location.".format(location)
+
+        config = {}
+        config["geolocation"] = {}
+        config["geolocation"]["address"] = location
+
+        self.log("set_cluster_location: Configuring the Rubrik cluster location.")
+
+        return self.patch("v1", "/cluster/me", config, timeout)
+
+    def configure_replication_private(self, username, password, target_ip, ca_certificate=None, timeout=30):
+        """Configure replication partner as specified by user using PRIVATE NETWORK (direct connection).
+
+        Arguments:
+            username {str} -- Username for the TARGET cluster
+            password {str} -- Password for the TARGET cluster
+            target_ip {str} -- Address of one of the nodes of the TARGET cluster
+
+        Keyword Arguments:
+            ca_certificate {str} -- CA certificiate used to perform TLS certificate validation (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+
+        Returns:
+            dict -- The full API response from `POST /internal/replication/target`.
+        """
+
+        config = {}
+
+        config['replicationSetup'] = 'Private Network'
+        config['targetClusterAddress'] = target_ip
+        config['username'] = username
+        config['password'] = password
+
+        if ca_certificate is not None:
+            config["caCerts"] = ca_certificate
+
+        self.log("configure_replication: Adding cluster '{}' as private network replication target.".format(target_ip))
+
+        return self.post("internal", "/replication/target", config, timeout)
+
+    def configure_replication_nat(self, username, password, source_gateway, target_gateway, ca_certificate=None, timeout=30):
+        """Configure replication partner as specified by user using NAT gateways.
+
+        Arguments:
+            username {str} -- Username for the TARGET cluster
+            password {str} -- Password for the TARGET cluster
+            source_gateway {list} -- Specification of source NAT gateway specified as [str IP, [list of portnumber(s)]]
+            target_gateway {list} -- Specification of source NAT gateway specified as [str IP, [list of portnumber(s)]]
+
+        Keyword Arguments:
+            ca_certificate {str} -- CA certificiate used to perform TLS certificate validation (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+
+        Returns:
+            dict -- The full API response from `POST /internal/replication/target`.
+        """
+
+        config = {}
+
+        # Source/Target gateway need to be specified as [str IP, [list of portnumber(s)]]
+        source_check = isinstance(source_gateway, list) and len(source_gateway) == 2 and isinstance(source_gateway[1], list) and len(source_gateway[1]) > 0
+        target_check = isinstance(target_gateway, list) and len(target_gateway) == 2 and isinstance(target_gateway[1], list) and len(target_gateway[1]) > 0
+
+        if not source_check or not target_check:
+            raise InvalidParameterException('The configure_replication() source and target gateways need to be defined as: ["IP STRING", [LIST OF PORT NUMBER(S)]].')
+
+        config['targetGateway'] = {}
+        config['sourceGateway'] = {}
+
+        config['replicationSetup'] = 'NAT'
+        config['sourceGateway']['address'] = source_gateway[0]
+        config['sourceGateway']['ports'] = source_gateway[1]
+        config['targetGateway']['address'] = target_gateway[0]
+        config['targetGateway']['ports'] = target_gateway[1]
+        config['username'] = username
+        config['password'] = password
+
+        if ca_certificate is not None:
+            config["caCerts"] = ca_certificate
+
+        self.log("configure_replication: Adding cluster behind '{}' as NAT replication target.".format(tgt_gateway))
+
+        return self.post("internal", "/replication/target", config, timeout)
 
     def cluster_version(self, timeout=15):
         """Retrieves the software version of the Rubrik cluster.
@@ -61,7 +167,7 @@ class Cluster(Api):
         return True
 
     def cluster_node_ip(self, timeout=15):
-        """Retrive the IP Address for each node in the Rubrik cluster.
+        """Retrieve the IP Address for each node in the Rubrik cluster.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
@@ -81,7 +187,7 @@ class Cluster(Api):
         return node_ip_list
 
     def cluster_node_name(self, timeout=15):
-        """Retrive the name of each node in the Rubrik cluster.
+        """Retrieve the name of each node in the Rubrik cluster.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
@@ -257,7 +363,7 @@ class Cluster(Api):
         cluster_summary = self.get("v1", "/cluster/me", timeout=timeout)
 
         if cluster_summary["timezone"]["timezone"] == timezone:
-            return "No change required. The Rubrik cluster is already configured with '{}' as it's timezone.".format(
+            return "No change required. The Rubrik cluster is already configured with '{}' as its timezone.".format(
                 timezone)
 
         config = {}
