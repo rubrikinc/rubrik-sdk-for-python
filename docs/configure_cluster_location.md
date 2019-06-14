@@ -1,8 +1,8 @@
-# set_cluster_location
+# configure_cluster_location
 
 Configure the Rubrik cluster timezone.
 ```py
-def set_cluster_location(timezone, timeout=15)
+def configure_cluster_location(timezone, timeout=15)
 ```
 
 ## Arguments
@@ -22,7 +22,7 @@ def set_cluster_location(timezone, timeout=15)
 ```py
 import rubrik_cdm
 
-RubrikConn = rubrik_cdm.Connect()
+rubrik = rubrik_cdm.Connect()
 
-RubrikConn.set_cluster_location("Example Location")
+rubrik.configure_cluster_location("Example Location")
 ```

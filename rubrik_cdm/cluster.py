@@ -30,7 +30,7 @@ class Cluster(Api):
     """This class contains methods related to the management of the Rubrik cluster itself.
     """
 
-    def set_cluster_location(self, location, timeout=15):
+    def configure_cluster_location(self, location, timeout=15):
         """Configure cluster geolocation. Overwrites previously set value if different.
 
         Arguments:
@@ -45,20 +45,22 @@ class Cluster(Api):
         """
 
         if not isinstance(location, str):
-            raise InvalidParameterException('The set_cluster_location() function requires the location to be specified as string.')
+            raise InvalidParameterException(
+                'The configure_cluster_location() function requires the location to be specified as string.')
 
-        self.log("set_cluster_location: Determing the current cluster location.")
+        self.log("configure_cluster_location: Determing the current cluster location.")
 
         cluster_summary = self.get("v1", "/cluster/me", timeout=timeout)
 
         if cluster_summary["geolocation"]["address"] == location:
-            return "No change required. The Rubrik cluster is already configured with '{}' as its location.".format(location)
+            return "No change required. The Rubrik cluster is already configured with '{}' as its location.".format(
+                location)
 
         config = {}
         config["geolocation"] = {}
         config["geolocation"]["address"] = location
 
-        self.log("set_cluster_location: Configuring the Rubrik cluster location.")
+        self.log("configure_cluster_location: Configuring the Rubrik cluster location.")
 
         return self.patch("v1", "/cluster/me", config, timeout)
 
@@ -92,7 +94,8 @@ class Cluster(Api):
 
         return self.post("internal", "/replication/target", config, timeout)
 
-    def configure_replication_nat(self, username, password, source_gateway, target_gateway, ca_certificate=None, timeout=30):
+    def configure_replication_nat(self, username, password, source_gateway,
+                                  target_gateway, ca_certificate=None, timeout=30):
         """Configure replication partner as specified by user using NAT gateways.
 
         Arguments:
@@ -112,11 +115,22 @@ class Cluster(Api):
         config = {}
 
         # Source/Target gateway need to be specified as [str IP, [list of portnumber(s)]]
-        source_check = isinstance(source_gateway, list) and len(source_gateway) == 2 and isinstance(source_gateway[1], list) and len(source_gateway[1]) > 0
-        target_check = isinstance(target_gateway, list) and len(target_gateway) == 2 and isinstance(target_gateway[1], list) and len(target_gateway[1]) > 0
+        source_check = isinstance(
+            source_gateway,
+            list) and len(source_gateway) == 2 and isinstance(
+            source_gateway[1],
+            list) and len(
+            source_gateway[1]) > 0
+        target_check = isinstance(
+            target_gateway,
+            list) and len(target_gateway) == 2 and isinstance(
+            target_gateway[1],
+            list) and len(
+            target_gateway[1]) > 0
 
         if not source_check or not target_check:
-            raise InvalidParameterException('The configure_replication() source and target gateways need to be defined as: ["IP STRING", [LIST OF PORT NUMBER(S)]].')
+            raise InvalidParameterException(
+                'The configure_replication() source and target gateways need to be defined as: ["IP STRING", [LIST OF PORT NUMBER(S)]].')
 
         config['targetGateway'] = {}
         config['sourceGateway'] = {}
