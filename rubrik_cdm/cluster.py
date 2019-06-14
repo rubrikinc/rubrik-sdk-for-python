@@ -583,3 +583,70 @@ class Cluster(_API):
 
         self.log("proxy: Deleted proxy configuration.")
         return self.delete("internal", "/node_management/proxy_config", timeout)
+
+    def add_guest_credential(self, username, password, domain=None, timeout=15):
+        """Add a new guest credential to the Rubrik cluster.
+
+        Arguments:
+            username {str} -- The account username used for authentication.
+            password {str} -- The account password used for authentication.
+
+        Keyword Arguments:
+            domain {int} -- The domain name of account password used for authentication. (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full API response for `POST /vmware/guest_credential`
+        """
+
+        config = {}
+        config["username"] = username
+        config["password"] = password
+        config["domain"] = domain
+        current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
+
+        for guest_credential in current_guest_credentials["data"]:
+            if guest_credential.get("domain"):
+                if guest_credential["username"] == username and guest_credential["domain"] == domain:
+                    return "No change required. The account '{}@{}' has already been added to the Rubrik cluster.".format(username, domain)
+            elif domain == None :
+                if guest_credential["username"] == username:
+                    return "No change required. The account '{}' has already been added to the Rubrik cluster.".format(username)
+
+        self.log(
+            "guest_credentials: Added new guest OS credential '{}@{}' to the Rubrik cluster.".format(username, domain))
+        return self.post("internal", "/vmware/guest_credential", config, timeout)
+
+    def delete_guest_credential(self, username, domain=None, timeout=15):
+        """Delete a guest credential from the Rubrik cluster.
+
+        Arguments:
+            username {str} -- The account username to be deleted.
+
+        Keyword Arguments:
+            domain {int} -- The domain name of the account to be deleted. (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full API response for `POST /vmware/guest_credential`
+        """
+
+        current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
+        delete_guest_credential = ""
+
+        for guest_credential in current_guest_credentials["data"]:
+            if domain == None:
+                if guest_credential["username"] == username:
+                    delete_guest_credential = guest_credential["id"]
+                    self.log("guest_credentials: Deleting guest OS credentials '{}' to the Rubrik cluster.".format(username))
+                    return self.delete("internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
+            elif guest_credential.get("domain"):
+                if guest_credential["username"] == username and guest_credential["domain"] == domain:
+                    delete_guest_credential = guest_credential["id"]
+                    self.log("guest_credentials: Deleting guest OS credentials '{}@{}' to the Rubrik cluster.".format(username, domain))
+                    return self.delete("internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
+
+        if domain == None:
+            return "No change required. The guest credential '{}' does not exist.".format(username)
+        else:
+            return "No change required. The guest credential '{}@{}' does not exist.".format(username, domain)
