@@ -2,7 +2,7 @@
 
 Add a new AWS account to EC2 native protection on the Rubrik cluster.
 ```py
-def add_aws_native_account(aws_account_name, aws_access_key=None, aws_secret_key=None,
+def add_aws_native_account(aws_account_name, aws_access_key=None, aws_secret_key=None, aws_regions=None, regional_bolt_network_configs=None, timeout=30)
 ```
 
 ## Arguments
@@ -50,9 +50,15 @@ name = 'pythonsdkdemo'
 accessKey = 'AWS_ACCESS_KEY'
 secretKey = 'AWS_SECRET_KEY'
 regions = ['us-east-1']
-regional_bolt_network_configs = [{"region": "us-east-1", "vNetId": "vpc-a46e72c2",
-                                  "subnetId": "subnet-f0cc9695", "securityGroupId": "sg-66091b19"}]
 
-nativeaccount = rubrik.add_aws_native_account(
-    name, accessKey, secretKey, regions, regional_bolt_network_configs)
+regional_bolt_network_configs = [
+    {
+        "region": "us-east-1",
+        "vNetId": "vpc-a46e72c2",
+        "subnetId": "subnet-f0cc9695",
+        "securityGroupId": "sg-66091b19"
+    }
+]
+
+nativeaccount = rubrik.add_aws_native_account(name, accessKey, secretKey, regions, regional_bolt_network_configs)
 ```
