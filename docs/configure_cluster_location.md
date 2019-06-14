@@ -2,7 +2,7 @@
 
 Configure the Rubrik cluster timezone.
 ```py
-def configure_cluster_location(timezone, timeout=15)
+def configure_cluster_location(location, timeout=15)
 ```
 
 ## Arguments
@@ -16,7 +16,7 @@ def configure_cluster_location(timezone, timeout=15)
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| str  | No change required. The Rubrik cluster is already configured with '{}' as its location. |
+| str  | No change required. The Rubrik cluster is already configured with 'location' as its location. |
 | dict | The full API response for `PATCH /v1/cluster/me'` |
 ## Example
 ```py
@@ -24,5 +24,5 @@ import rubrik_cdm
 
 rubrik = rubrik_cdm.Connect()
 
-rubrik.configure_cluster_location("Example Location")
+rubrik.configure_cluster_location("St. Louis, Missouri")
 ```
