@@ -530,61 +530,56 @@ class Cluster(_API):
 
         return self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
 
-    def support_tunnel(self, isTunnelEnabled=True, inactivityTimeout=0, timeout=15):
-        """Enable/disable the support tunnel on the connected node.
+    def update_proxy(self, host, protocol, port, username=None, password=None, timeout=15):
+        """Update the proxy configuration on the Rubrik cluster.
 
         Arguments:
-            isTunnelEnabled {bool} -- Pass true to open the support tunnel, and false to close.. (default: {True})
+            host {str} -- The IP address or FQDN of the proxy you wish to add.
+            protocol {str} -- The protocol of the proxy you wish to add.
+            port {int} -- The port of the proxy you wish to add.
 
         Keyword Arguments:
-            inactivityTimeout {int} -- Tunnel inactivity timeout in seconds. (default: {0})
+            username {str} -- The proxy username used for authentication. (default: {None})
+            password {str} -- The proxy password used for authentication. (default: {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full API response for `PATCH /node/{id}/support_tunnel`
+            dict -- The full API response for `PATCH /node_management/proxy_config`
         """
 
-        node_id = "me"
-        config = {}
-        config["isTunnelEnabled"] = isTunnelEnabled
-        config["inactivityTimeout"] = inactivityTimeout
+        valid_protocols = [
+            'HTTP',
+            'HTTPS',
+            'SOCKS5']
 
-        support_tunnel_status = self.get(
-            "internal", "/node/{}/support_tunnel".format(node_id), timeout=timeout)
-
-        if isTunnelEnabled == True:
-            if support_tunnel_status["isTunnelEnabled"] == True:
-                self.log("support_tunnel: Support tunnel already enabled: {}.".format(support_tunnel_status["port"]))
-                return "Support tunnel already enabled: {}.".format(support_tunnel_status["port"])
-            self.log("support_tunnel: Support tunnel enabled.")
-        elif isTunnelEnabled == False:
-            if support_tunnel_status["isTunnelEnabled"] == False:
-                self.log("support_tunnel: Support tunnel is already disabled.")
-                return "Support tunnel already disabled."
-            self.log("support_tunnel: Support tunnel disabled.")
-
-        return self.patch("internal", "/node/{}/support_tunnel".format(node_id), config, timeout)
-
-    def guest_credential(self, username, password, domain=None, timeout=15):
-        """Create new guest OS credential.
-
-        Arguments:
-            username {str} -- Username for the account used to login to the VM guest OS.
-            password {str} -- Password for the account used to login to the VM guest OS.
-
-        Keyword Arguments:
-            domain {int} -- Domain name for the account used to login to the VM guest OS. (default: {None})
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
-        Returns:
-            dict -- The ful API response for `POST /vmware/guest_credential`
-        """
+        if protocol not in valid_protocols:
+            sys.exit("Error: The protocol argument must be one of the following: {}.".format(
+                valid_protocols))
 
         config = {}
+        config["host"] = host
+        config["protocol"] = protocol
+        config["port"] = port
         config["username"] = username
         config["password"] = password
-        config["domain"] = domain
 
-        self.log(
-            "guest_credential: Adding new guest OS credentials '{}{}' to the Rubrik cluster.".format(config["domain"],config["username"]))
-        return self.post("internal", "/vmware/guest_credential", config, timeout)
+        self.log("proxy: Updated proxy configuration.")
+        return self.patch("internal", "/node_management/proxy_config", config, timeout)
+
+    def delete_proxy(self, timeout=15):
+        """Delete the proxy configuration from the Rubrik cluster.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full API response for `DELETE /node_management/proxy_config`
+        """
+
+        current_proxy_settings = self.get("internal", "/node_management/proxy_config", timeout=timeout)
+
+        if current_proxy_settings["host"] == "":
+            return "No change required. The proxy configuration is already cleared out."
+
+        self.log("proxy: Deleted proxy configuration.")
+        return self.delete("internal", "/node_management/proxy_config", timeout)
