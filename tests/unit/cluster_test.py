@@ -434,7 +434,7 @@ def test_configure_timezone_idempotence(rubrik, mocker):
     mock_get.return_value = mock_get_v1_cluster_me()
 
     assert rubrik.configure_timezone("America/Chicago") \
-        == "No change required. The Rubrik cluster is already configured with 'America/Chicago' as it's timezone."
+        == "No change required. The Rubrik cluster is already configured with 'America/Chicago' as its timezone."
 
 
 def test_configure_timezone(rubrik, mocker):
