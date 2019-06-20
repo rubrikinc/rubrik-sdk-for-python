@@ -13,7 +13,7 @@ def delete_guest_credential(username, domain=None, timeout=15):
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| domain  | int  | The domain name of the account to be deleted. |         |
+| domain  | int  | The domain name of the account to be deleted. |         |    None     |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
@@ -21,7 +21,7 @@ def delete_guest_credential(username, domain=None, timeout=15):
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The guest credential 'username' does not exist. |
 | str  | No change required. The guest credential 'username@domain' does not exist. |
-| dict  | The full API response for `/vmware/guest_credential`. |
+| dict  | The full API response for `DELETE /v1/vmware/guest_credential`. |
 
 ## Example
 ```py

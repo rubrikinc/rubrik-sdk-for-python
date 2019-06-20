@@ -14,7 +14,7 @@ def delete_proxy(self, timeout=15)
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
 | str  | No change required. The proxy configuration is already cleared out. |
-| dict  | The full API response for `DELETE /node_management/proxy_config`. |
+| dict  | The full API response for `DELETE /internal/node_management/proxy_config`. |
 
 ## Example
 ```py
@@ -24,5 +24,3 @@ rubrik = rubrik_cdm.Connect()
 
 delete_proxy = rubrik.delete_proxy()
 ```
-    Returns:
-        dict -- The full API response for `DELETE /node_management/proxy_config`

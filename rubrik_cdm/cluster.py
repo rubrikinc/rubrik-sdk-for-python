@@ -539,12 +539,12 @@ class Cluster(_API):
             port {int} -- The port of the proxy you wish to add.
 
         Keyword Arguments:
-            username {str} -- The proxy username used for authentication. (default: {None})
-            password {str} -- The proxy password used for authentication. (default: {None})
+            username {str} -- The username used for authentication. (default: {None})
+            password {str} -- The password used for authentication. (default: {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full API response for `PATCH /node_management/proxy_config`
+            dict -- The full API response for `PATCH /internal/node_management/proxy_config`
         """
 
         valid_protocols = [
@@ -563,7 +563,13 @@ class Cluster(_API):
         config["username"] = username
         config["password"] = password
 
-        self.log("proxy: Updated proxy configuration.")
+        current_proxy_settings = self.get("internal", "/node_management/proxy_config", timeout=timeout)
+        self.log("update_proxy: Current proxy configuration {}".format(current_proxy_settings))
+
+        if current_proxy_settings["host"] == host and current_proxy_settings["port"] == port and current_proxy_settings["username"] == username:
+            return "No change required. The proxy '{}' has already been added to the Rubrik cluster.".format(host)
+
+        self.log("update_proxy: Updating proxy configuration.")
         return self.patch("internal", "/node_management/proxy_config", config, timeout)
 
     def delete_proxy(self, timeout=15):
@@ -573,15 +579,16 @@ class Cluster(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full API response for `DELETE /node_management/proxy_config`
+            dict -- The full API response for `DELETE /internal/node_management/proxy_config`
         """
 
         current_proxy_settings = self.get("internal", "/node_management/proxy_config", timeout=timeout)
+        self.log("delete_proxy: Current proxy configuration {}".format(current_proxy_settings))
 
         if current_proxy_settings["host"] == "":
             return "No change required. The proxy configuration is already cleared out."
 
-        self.log("proxy: Deleted proxy configuration.")
+        self.log("delete_proxy: Deleting proxy configuration.")
         return self.delete("internal", "/node_management/proxy_config", timeout)
 
     def add_guest_credential(self, username, password, domain=None, timeout=15):
@@ -596,14 +603,16 @@ class Cluster(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full API response for `POST /vmware/guest_credential`
+            dict -- The full API response for `POST /v1/vmware/guest_credential`
         """
 
         config = {}
         config["username"] = username
         config["password"] = password
         config["domain"] = domain
+
         current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
+        self.log("add_guest_credential: Current guest credentials {}".format(current_guest_credentials))
 
         for guest_credential in current_guest_credentials["data"]:
             if guest_credential.get("domain"):
@@ -614,7 +623,7 @@ class Cluster(_API):
                     return "No change required. The account '{}' has already been added to the Rubrik cluster.".format(username)
 
         self.log(
-            "guest_credentials: Added new guest OS credential '{}@{}' to the Rubrik cluster.".format(username, domain))
+            "guest_credentials: Adding new guest OS credential '{}@{}' to the Rubrik cluster.".format(username, domain))
         return self.post("internal", "/vmware/guest_credential", config, timeout)
 
     def delete_guest_credential(self, username, domain=None, timeout=15):
@@ -628,10 +637,12 @@ class Cluster(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full API response for `POST /vmware/guest_credential`
+            dict -- The full API response for `POST /v1/vmware/guest_credential`
         """
 
         current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
+        self.log("delete_guest_credential: Current guest credentials {}".format(current_guest_credentials))
+
         delete_guest_credential = ""
 
         for guest_credential in current_guest_credentials["data"]:

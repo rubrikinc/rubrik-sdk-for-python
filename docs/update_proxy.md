@@ -15,14 +15,14 @@ def update_proxy(self, host, protocol, port, username=None, password=None, timeo
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| username | str  | The proxy username used for authentication.          |         |         |
-| password | str  | The proxy password used for authentication.          |         |         |
+| username | str  | The username used for authentication.          |         |    None     |
+| password | str  | The password used for authentication.          |         |    None     |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| dict  | The full API response for `PATCH /node_management/proxy_config`. |
+| dict  | The full API response for `PATCH /internal/node_management/proxy_config`. |
 
 ## Example
 ```py
