@@ -2,7 +2,7 @@
 
 Initiate an on-demand snapshot.
 ```py
-def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=None, host_os=None, timeout=15)
+def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15)
 ```
 
 ## Arguments
@@ -16,6 +16,10 @@ def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=Non
 | sla_name  | str  | The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used.  |         |    current     |
 | fileset  | str  | The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host.  |         |    None     |
 | host_os  | str  | The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host.  |    Linux, Windows     |    None      |
+| sql_host  | str  | The name of the SQL Host hosting the specified database. Only required when taking a on-demand snapshot of a MSSQL DB.  |    None     |    None      |
+| sql_instance  | str  | The name of the SQL Instance hosting the specified database. Only required when taking a on-demand snapshot of a MSSQL DB.  |    None     |    None      |
+| sql_db  | str  | TThe name of the SQL DB. Only required when taking a on-demand snapshot of a MSSQL DB.  |    None     |    None      |
+| hostname  | str  | The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db  |    None     |    None      |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
 
 ## Returns
@@ -29,17 +33,17 @@ import rubrik_cdm
 
 rubrik = rubrik_cdm.Connect()
 
-vm_name = "python-sdk-demo"
-
-#VMware Snapshot
+# VMware Snapshot
+vsphere_vm_name = "python-sdk-demo"
 object_type = "vmware"
-snapshot = rubrik.on_demand_snapshot(vm_name, object_type)
+snapshot = rubrik.on_demand_snapshot(vsphere_vm_name, object_type)
 
-#AHV Snapshot
+# AHV Snapshot
+ahv_vm_name = "python-sdk-demo"
 object_type = "ahv"
-snapshot = rubrik.on_demand_snapshot(vm_name, object_type)
+snapshot = rubrik.on_demand_snapshot(ahv_vm_name, object_type)
 
-# Physical Host Snapst
+# Physical Host Snapshot
 physical_host_name = "python-sdk-physical-demo"
 object_type = "physical_host"
 sla = "Gold"
@@ -47,4 +51,18 @@ fileset = "/etc"
 host_os = "Linux"
 
 snapshot = rubrik.on_demand_snapshot(physical_host_name, object_type, sla, fileset, host_os)
+
+# MSSQL DB Snapshot
+object_name = "AdventureWorks2014"
+object_type = "mssql_db"
+
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sql_host="hostname.rubrik.com", sql_instance="MSSQLSERVER", sql_db="AdventureWorks2014")
+
+# Oracle DB Snapshot
+object_name = "oratestdb"
+object_type = "oracle_db"
+host = "ora_host_01"
+sla = "OracleTest"
+
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sla_name=sla, hostname=host)
 ```
