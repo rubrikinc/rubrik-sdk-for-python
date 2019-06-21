@@ -79,7 +79,7 @@ class Cluster(_API):
 
         return node_ip_name
 
-    def end_user_authorization(self, object_name, end_user, object_type='vmware', timeout=15):
+    def end_user_authorization(self, object_name, end_user, object_type='VMware', timeout=15):
         """Grant an End User authorization to the provided object.
 
         Arguments:
@@ -87,7 +87,7 @@ class Cluster(_API):
             end_user {str} -- The name of the end user you wish to grant authorization to.
 
         Keyword Arguments:
-            object_type {str} -- The Rubrik object type you wish to backup. (default: {vmware}) (choices: {vmware})
+            object_type {str} -- The Rubrik object type you wish to backup. (default: {VMware}) (choices: {VMware})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -95,7 +95,7 @@ class Cluster(_API):
             dict -- The full API response from `POST /internal/authorization/role/end_user`.
         """
 
-        valid_object_type = ['vmware']
+        valid_object_type = ['VMware']
 
         if object_type not in valid_object_type:
             sys.exit("Error: The end_user_authorization() object_type argument must be one of the following: {}.".format(
@@ -152,13 +152,13 @@ class Cluster(_API):
 
         Returns:
             str -- No change required. The vCenter '`vcenter_ip`' has already been added to the Rubrik cluster.
-            tuple -- The full API response for `POST /v1/vmware/vcenter` and the job status URL which can be used to monitor progress of the adding the vCenter to the Rubrik cluster. (api_response, job_status_url)
+            tuple -- The full API response for `POST /v1/VMware/vcenter` and the job status URL which can be used to monitor progress of the adding the vCenter to the Rubrik cluster. (api_response, job_status_url)
         """
 
         self.log(
             "add_vcenter: Searching the Rubrik cluster for the vCenter '{}'.".format(vcenter_ip))
         current_vcenter = self.get(
-            "v1", "/vmware/vcenter?primary_cluster_id=local", timeout=timeout)
+            "v1", "/VMware/vcenter?primary_cluster_id=local", timeout=timeout)
 
         for vcenter in current_vcenter["data"]:
             if vcenter["hostname"] == vcenter_ip:
@@ -178,7 +178,7 @@ class Cluster(_API):
 
         self.log(
             "add_vcenter: Adding vCenter '{}' to the Rubrik cluster.".format(vcenter_ip))
-        add_vcenter = self.post("v1", "/vmware/vcenter", config, timeout)
+        add_vcenter = self.post("v1", "/VMware/vcenter", config, timeout)
 
         return add_vcenter, add_vcenter['links'][0]['href']
 
@@ -512,7 +512,7 @@ class Cluster(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- When wait_for_completion is False, the full API response for `POST /v1/vmware/vcenter/{id}/refresh`
+            dict -- When wait_for_completion is False, the full API response for `POST /v1/VMware/vcenter/{id}/refresh`
             dict -- When wait_for_completion is True, the full API response of the job status
         """
 
@@ -523,12 +523,12 @@ class Cluster(_API):
         self.log("refresh_vcenter: Refresh vCenter.")
 
         api_request = self.post(
-            "v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
+            "v1", "/VMware/vcenter/{}/refresh".format(vcenter_id), timeout)
 
         if wait_for_completion:
             return self.job_status(api_request["links"][0]["href"])
 
-        return self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
+        return self.post("v1", "/VMware/vcenter/{}/refresh".format(vcenter_id), timeout)
 
     def update_proxy(self, host, protocol, port, username=None, password=None, timeout=15):
         """Update the proxy configuration on the Rubrik cluster.
@@ -563,8 +563,8 @@ class Cluster(_API):
         config["username"] = username
         config["password"] = password
 
+        self.log("update_proxy: Getting the current proxy configuration")
         current_proxy_settings = self.get("internal", "/node_management/proxy_config", timeout=timeout)
-        self.log("update_proxy: Current proxy configuration {}".format(current_proxy_settings))
 
         if current_proxy_settings["host"] == host and current_proxy_settings["port"] == port and current_proxy_settings["username"] == username:
             return "No change required. The proxy '{}' has already been added to the Rubrik cluster.".format(host)
@@ -603,7 +603,7 @@ class Cluster(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full API response for `POST /v1/vmware/guest_credential`
+            dict -- The full API response for `POST /v1/VMware/guest_credential`
         """
 
         config = {}
@@ -611,7 +611,7 @@ class Cluster(_API):
         config["password"] = password
         config["domain"] = domain
 
-        current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
+        current_guest_credentials = self.get("internal", "/VMware/guest_credential", timeout=timeout)
         self.log("add_guest_credential: Current guest credentials {}".format(current_guest_credentials))
 
         for guest_credential in current_guest_credentials["data"]:
@@ -624,7 +624,7 @@ class Cluster(_API):
 
         self.log(
             "guest_credentials: Adding new guest OS credential '{}@{}' to the Rubrik cluster.".format(username, domain))
-        return self.post("internal", "/vmware/guest_credential", config, timeout)
+        return self.post("internal", "/VMware/guest_credential", config, timeout)
 
     def delete_guest_credential(self, username, domain=None, timeout=15):
         """Delete a guest credential from the Rubrik cluster.
@@ -637,10 +637,10 @@ class Cluster(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full API response for `POST /v1/vmware/guest_credential`
+            dict -- The full API response for `POST /v1/VMware/guest_credential`
         """
 
-        current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
+        current_guest_credentials = self.get("internal", "/VMware/guest_credential", timeout=timeout)
         self.log("delete_guest_credential: Current guest credentials {}".format(current_guest_credentials))
 
         delete_guest_credential = ""
@@ -650,12 +650,12 @@ class Cluster(_API):
                 if guest_credential["username"] == username:
                     delete_guest_credential = guest_credential["id"]
                     self.log("guest_credentials: Deleting guest OS credentials '{}' to the Rubrik cluster.".format(username))
-                    return self.delete("internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
+                    return self.delete("internal", "/VMware/guest_credential/{}".format(delete_guest_credential), timeout)
             elif guest_credential.get("domain"):
                 if guest_credential["username"] == username and guest_credential["domain"] == domain:
                     delete_guest_credential = guest_credential["id"]
                     self.log("guest_credentials: Deleting guest OS credentials '{}@{}' to the Rubrik cluster.".format(username, domain))
-                    return self.delete("internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
+                    return self.delete("internal", "/VMware/guest_credential/{}".format(delete_guest_credential), timeout)
 
         if domain == None:
             return "No change required. The guest credential '{}' does not exist.".format(username)
