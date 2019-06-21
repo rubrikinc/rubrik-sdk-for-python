@@ -611,8 +611,9 @@ class Cluster(_API):
         config["password"] = password
         config["domain"] = domain
 
+        self.log("add_guest_credential: Getting the current guest credentials.")
         current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
-        self.log("add_guest_credential: Current guest credentials {}".format(current_guest_credentials))
+        
 
         for guest_credential in current_guest_credentials["data"]:
             if guest_credential.get("domain"):
