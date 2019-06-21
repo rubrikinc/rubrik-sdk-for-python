@@ -691,10 +691,10 @@ class Cluster(Api):
 
     def delete_proxy(self, timeout=15):
         """Delete the proxy configuration from the Rubrik cluster.
-        
+
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-        
+
         Returns:
             dict -- The full API response for `DELETE /internal/node_management/proxy_config`
         """
@@ -707,7 +707,6 @@ class Cluster(Api):
 
         self.log("delete_proxy: Deleting proxy configuration.")
         return self.delete("internal", "/node_management/proxy_config", timeout)
-
 
     def create_user(self, username, password, first_name=None, last_name=None, email_address=None, contact_number=None, timeout=15):  # pylint: ignore
         """Create a new user on the Rubrik cluster
@@ -749,19 +748,19 @@ class Cluster(Api):
         return self.post("internal", "/user", config, timeout)
 
     def read_only_authorization(self, username, timeout=15):
-       """Grant read-only access to a specific user.
+        """Grant read-only access to a specific user.
 
-        Arguments:
-            username {str} -- The username you wish to grant read-only access to.
+         Arguments:
+             username {str} -- The username you wish to grant read-only access to.
 
-        Keyword Arguments:
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+         Keyword Arguments:
+             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
-        Returns:
-            str -- No change required. The user '`username`' already has read-only permissions.
-            dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
-        """
-        
+         Returns:
+             str -- No change required. The user '`username`' already has read-only permissions.
+             dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
+         """
+
         if self.minimum_installed_cdm_version(5.0) is False:
             raise CDMVersionException(5.0)
 
@@ -789,7 +788,6 @@ class Cluster(Api):
         self.log("read_only_authorization: Granting read-only privilages to user '{}'.".format(username))
         return self.post("internal", "/authorization/role/read_only_admin", config, timeout)
 
-
     def add_guest_credential(self, username, password, domain=None, timeout=15):
         """Add a new guest credential to the Rubrik cluster.
 
@@ -812,15 +810,16 @@ class Cluster(Api):
 
         self.log("add_guest_credential: Getting the current guest credentials.")
         current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
-        
 
         for guest_credential in current_guest_credentials["data"]:
             if guest_credential.get("domain"):
                 if guest_credential["username"] == username and guest_credential["domain"] == domain:
-                    return "No change required. The account '{}@{}' has already been added to the Rubrik cluster.".format(username, domain)
-            elif domain == None :
+                    return "No change required. The account '{}@{}' has already been added to the Rubrik cluster.".format(
+                        username, domain)
+            elif domain is None:
                 if guest_credential["username"] == username:
-                    return "No change required. The account '{}' has already been added to the Rubrik cluster.".format(username)
+                    return "No change required. The account '{}' has already been added to the Rubrik cluster.".format(
+                        username)
 
         self.log(
             "guest_credentials: Adding new guest OS credential '{}@{}' to the Rubrik cluster.".format(username, domain))
@@ -846,24 +845,25 @@ class Cluster(Api):
         delete_guest_credential = ""
 
         for guest_credential in current_guest_credentials["data"]:
-            if domain == None:
+            if domain is None:
                 if guest_credential["username"] == username:
                     delete_guest_credential = guest_credential["id"]
                     self.log("guest_credentials: Deleting guest OS credentials '{}' to the Rubrik cluster.".format(username))
-                    return self.delete("internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
+                    return self.delete(
+                        "internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
             elif guest_credential.get("domain"):
                 if guest_credential["username"] == username and guest_credential["domain"] == domain:
                     delete_guest_credential = guest_credential["id"]
-                    self.log("guest_credentials: Deleting guest OS credentials '{}@{}' to the Rubrik cluster.".format(username, domain))
-                    return self.delete("internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
+                    self.log(
+                        "guest_credentials: Deleting guest OS credentials '{}@{}' to the Rubrik cluster.".format(
+                            username, domain))
+                    return self.delete(
+                        "internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
 
-        if domain == None:
+        if domain is None:
             return "No change required. The guest credential '{}' does not exist.".format(username)
         else:
             return "No change required. The guest credential '{}@{}' does not exist.".format(username, domain)
-
-
-        
 
     def cluster_node_id(self, timeout=15):
         """Returns a list of node ids from all the nodes in the cluster.
@@ -930,4 +930,3 @@ class Cluster(Api):
                 self.log("cluster_support_tunnel - Disable the Support Tunnel")
 
                 return self.patch('internal', '/node/me/support_tunnel', config, timeout)
-
