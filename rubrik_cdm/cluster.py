@@ -100,8 +100,6 @@ class Cluster(Api):
 
         return node_ip_name
 
-
-
     def end_user_authorization(self, object_name, end_user, object_type='vmware', timeout=15):
         """Grant an End User authorization to the provided object.
 
@@ -616,11 +614,17 @@ class Cluster(Api):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-             dict -- The full API response from `POST /internal/node`.
+             list -- A list that contains the ID for each node in the Rubrik cluster.
         """
         self.log("cluster_node_id - Getting all the node ids from the from the cluster.")
-        return self.get('internal', '/node', timeout)
+        node_id_list = []
 
+        api_request = self.get('internal', '/node', timeout)
+
+        for node in api_request['data']:
+            node_id_list.append(node["id"])
+
+        return node_id_list
 
     def cluster_support_tunnel(self, enabled=True, timeout=15):
         """Enable or Disable the support tunnel.
@@ -635,14 +639,13 @@ class Cluster(Api):
             dict -- The full API response from `POST /internal/node/me/support_tunnel`.
         """
 
-        if type(enabled) is not bool:
+        if not isinstance(enabled, bool):
             raise InvalidParameterException("The enabled parameter must be True or False.")
 
         self.log("cluster_support_tunnel - Determining status of Cluster Support Tunnel.")
         check_tunnel = self.get('internal', '/node/me/support_tunnel', timeout)
 
         if enabled is True:
-
 
             if check_tunnel['isTunnelEnabled'] is False:
 
@@ -651,7 +654,7 @@ class Cluster(Api):
                 config['inactivityTimeoutInSeconds'] = 0
 
                 self.log("cluster_support_tunnel - Enabling Cluster Support Tunnel.")
-                return self.patch('internal', '/node/me/support_tunnel', config,timeout)
+                return self.patch('internal', '/node/me/support_tunnel', config, timeout)
 
             else:
                 return("No change required. Support Tunnel is already enabled.")
@@ -668,6 +671,7 @@ class Cluster(Api):
 
                 self.log("cluster_support_tunnel - Disable the Support Tunnel")
 
+<<<<<<< HEAD
                 return self.patch('internal', '/node/me/support_tunnel', config,timeout)
 
     def add_guest_creds(self, username, password, domain=None, timeout=15):
@@ -745,3 +749,6 @@ class Cluster(Api):
 
 
 
+=======
+                return self.patch('internal', '/node/me/support_tunnel', config, timeout)
+>>>>>>> 3978c09f153be41aa6c0c7a16c89aa03f66db772
