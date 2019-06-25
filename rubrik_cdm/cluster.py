@@ -670,3 +670,78 @@ class Cluster(Api):
 
                 return self.patch('internal', '/node/me/support_tunnel', config,timeout)
 
+    def add_guest_creds(self, username, password, domain=None, timeout=15):
+        """Returns a list of node ids from all the nodes in the cluster.
+
+        Arguments:
+            username {str} -- Username for guest credentials.
+            password {str} -- Password for guest credentials.
+            domain {str} -- Domain for guest credentials.
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+             dict -- The full API response from `POST /internal/vmware/guest_credential`.
+        """
+        config = {}
+        config['username'] = username
+        config['password'] = password
+        config['domain'] = domain
+        print(config)
+        self.log("add_guest_creds - Checking to see if user already exists.")
+        current_guest_creds = self.get('internal', '/vmware/guest_credential', timeout)
+
+        for item in current_guest_creds['data']:
+
+            if domain is None and 'domain' not in item:
+                 if 'domain' not in item and item['username'] == username:
+                    print("No domain found - but user exists")
+                    return ("No change required. User already exists.")
+            else:
+                if domain is not None and 'domain' not in item:
+                    continue
+                else:
+                    if item['domain'] == domain and item['username'] == username:
+                        return("No change required. User already exists")
+
+        self.log("add_guest_creds - Adding guest os credentials to the cluster.")
+        return self.post('internal', '/vmware/guest_credential', config, timeout)
+
+
+
+
+
+    def del_guest_creds(self, username,  domain=None, timeout=15):
+        """Returns a list of node ids from all the nodes in the cluster.
+
+        Arguments:
+            username {str} -- Required - Username for guest credentials.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+            domain {str}
+        Returns:
+             dict -- The full API response from `POST /internal/vmware/guest_credential/{id}`.
+        """
+
+        self.log("del_guest_creds - Getting all the guest os credentials from the from the cluster.")
+        api_data = self.get('internal', '/vmware/guest_credential',timeout)
+
+        for item in api_data['data']:
+            if 'domain' in item:
+
+                if item['domain'] == domain and item['username'] == username:
+
+                    self.log("del_guest_creds - Deleteing the requested guest os credential.")
+                    return self.delete('internal', '/vmware/guest_credential/{}'.format( item['id']))
+
+            elif 'domain' not in item:
+                if item['username'] == username:
+                    self.log("del_guest_creds - Deleteing the requested guest os credential.")
+                    return self.delete('internal', '/vmware/guest_credential/{}'.format(item['id']))
+
+        return ("No change required. User is not found.")
+
+
+
+
