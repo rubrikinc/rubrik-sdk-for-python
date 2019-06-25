@@ -670,8 +670,6 @@ class Cluster(Api):
                 config['isTunnelEnabled'] = False
 
                 self.log("cluster_support_tunnel - Disable the Support Tunnel")
-
-<<<<<<< HEAD
                 return self.patch('internal', '/node/me/support_tunnel', config,timeout)
 
     def add_guest_creds(self, username, password, domain=None, timeout=15):
@@ -745,10 +743,3 @@ class Cluster(Api):
                     return self.delete('internal', '/vmware/guest_credential/{}'.format(item['id']))
 
         return ("No change required. User is not found.")
-
-
-
-
-=======
-                return self.patch('internal', '/node/me/support_tunnel', config, timeout)
->>>>>>> 3978c09f153be41aa6c0c7a16c89aa03f66db772
