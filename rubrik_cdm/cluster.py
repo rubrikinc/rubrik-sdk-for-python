@@ -673,17 +673,17 @@ class Cluster(Api):
                 return self.patch('internal', '/node/me/support_tunnel', config,timeout)
 
     def add_guest_creds(self, username, password, domain=None, timeout=15):
-        """Returns a list of node ids from all the nodes in the cluster.
+        """ Adds the guest credentials that are passed in if they don't already exist.
 
         Arguments:
-            username {str} -- Username for guest credentials.
-            password {str} -- Password for guest credentials.
-            domain {str} -- Domain for guest credentials.
+            username {str} -- Required - Username for guest credentials.
+            password {str} -- Required - Password for guest credentials.
+
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
+            domain {str} -- The active directory domain if one is needed. (default: {None})
         Returns:
-             dict -- The full API response from `POST /internal/vmware/guest_credential`.
+             dict -- The full API response from `POST /internal/vmware/guest_credential/{id}`.
         """
         config = {}
         config['username'] = username
@@ -704,24 +704,22 @@ class Cluster(Api):
                     continue
                 else:
                     if item['domain'] == domain and item['username'] == username:
-                        return("No change required. User already exists")
+                        return("No change required. User already exists.")
 
         self.log("add_guest_creds - Adding guest os credentials to the cluster.")
         return self.post('internal', '/vmware/guest_credential', config, timeout)
 
 
 
-
-
     def del_guest_creds(self, username,  domain=None, timeout=15):
-        """Returns a list of node ids from all the nodes in the cluster.
+        """ Deletes guest credentials that are passed in.
 
         Arguments:
             username {str} -- Required - Username for guest credentials.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-            domain {str}
+            domain {str} -- The active directory domain if one is needed. (default: {None})
         Returns:
              dict -- The full API response from `POST /internal/vmware/guest_credential/{id}`.
         """
