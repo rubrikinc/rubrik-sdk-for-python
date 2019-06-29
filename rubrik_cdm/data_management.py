@@ -466,7 +466,7 @@ class Data_Management(_API):
             raise InvalidTypeException("The 'power_on' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
             raise InvalidParameterException(
-                "The date and time arguments most both be 'latest' or a specific date and time.")
+                "The date and time arguments must both be 'latest' or a specific date and time.")
 
         self.log("vsphere_live_mount: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
@@ -573,7 +573,6 @@ class Data_Management(_API):
         
         is_recovery_point = self.time_in_range(start, end, recovery_date_time)
         recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
-        #recovery_timestamp = datetime.datetime(recovery_date_time).timestamp() * 1000
 
         try:
             if is_recovery_point == False:
