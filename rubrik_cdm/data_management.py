@@ -934,12 +934,12 @@ class Data_Management(_API):
         recovery_date_time = self._date_time_conversion(date, time)
         recovery_date_time = datetime.datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
 
-        startStr = range_summary['data'][0]['beginTime']
-        endStr = range_summary['data'][0]['endTime']
-        startSplit = startStr[:16]
-        endSplit = endStr[:16]
-        start = datetime.datetime.strptime(startSplit,'%Y-%m-%dT%H:%M')
-        end = datetime.datetime.strptime(endSplit,'%Y-%m-%dT%H:%M')
+        startstr = range_summary['data'][0]['beginTime']
+        endstr = range_summary['data'][0]['endTime']
+        startsplit = startstr[:16]
+        endsplit = endstr[:16]
+        start = datetime.datetime.strptime(startsplit,'%Y-%m-%dT%H:%M')
+        end = datetime.datetime.strptime(endsplit,'%Y-%m-%dT%H:%M')
 
         self.log("sql_live_mount: Searching for the provided recovery_point.")
         
