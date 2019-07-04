@@ -22,6 +22,7 @@
 This module contains the Rubrik SDK Data_Management class.
 """
 import re
+import datetime
 from .api import Api
 from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException
 
@@ -885,3 +886,81 @@ class Data_Management(_API):
                         sla, object_type))
 
             return vm_name_id
+
+    def time_in_range(self, start, end, x):
+        """Return true if x is in the range [start, end]"""
+        if start <= end:
+            return start <= x <= end
+        else:
+            return start <= x or x <= end
+
+    def sql_live_mount(self, sql_db, sql_instance, sql_host, clone_name, date, time, timeout=15):  # pylint: ignore
+        """Live Mount a database from a specified recovery point. 
+
+        Arguments:
+            sql_db {str} -- The name of the database to Live Mount.
+            sql_instance {str} -- The SQL instance name for the database to Live Mount.
+            sql_host {str} -- The SQL Host of the database/instance to Live Mount.
+            clone_name {str} -- The name given to the Live Mounted database i.e. clone name, AdventureWorks_Clone.
+            date {str} -- The date of the recovery_point you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). 
+            time {str} -- The time of the recovery_point you wish to Live Mount formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full response of `POST /v1/mssql/db/{id}/mount`.
+        """
+        
+        mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
+
+        mssql_instance = self.get(
+            'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host_id), timeout)
+
+        for instance in mssql_instance['data']:
+            if instance['name'] == sql_instance:
+                sql_instance_id = instance['id']
+
+        mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_instance_id), timeout)
+
+        for db in mssql_db['data']:
+            if db['name'] == sql_db:
+                mssql_id = db['id']
+        
+        self.log("sql_live_mount: Getting the recoverable range for mssql db '{}'.".format(sql_db))
+        range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
+
+        self.log("sql_live_mount: Converting the provided date/time into UTC.")
+        recovery_date_time = self._date_time_conversion(date, time)
+        recovery_date_time = datetime.datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
+
+        startStr = range_summary['data'][0]['beginTime']
+        endStr = range_summary['data'][0]['endTime']
+        startSplit = startStr[:16]
+        endSplit = endStr[:16]
+        start = datetime.datetime.strptime(startSplit,'%Y-%m-%dT%H:%M')
+        end = datetime.datetime.strptime(endSplit,'%Y-%m-%dT%H:%M')
+
+        self.log("sql_live_mount: Searching for the provided recovery_point.")
+        
+        is_recovery_point = self.time_in_range(start, end, recovery_date_time)
+        recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
+
+        try:
+            if is_recovery_point == False:
+                raise InvalidParameterException("The database '{}' does not have a recovery_point taken on {} at {}.".format(
+                sql_db, date, time))
+        except NameError:
+            pass
+        else:
+            config = {}
+            config['recoveryPoint'] = {'timestampMs': recovery_timestamp}
+            config['mountedDatabaseName'] = clone_name
+                
+            self.log(
+                "sql_live_mount: Live Mounting the database from recovery_point on {} at {} as database '{}'.".format(
+                    date,
+                    time,
+                    clone_name))
+
+            return self.post('v1', '/mssql/db/{}/mount'.format(mssql_id), config, timeout)    
