@@ -22,6 +22,7 @@
 This module contains the Rubrik SDK Data_Management class.
 """
 import re
+import datetime
 from .api import Api
 from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException
 
@@ -32,7 +33,7 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, timeout=15):  # pylint: ignore
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15):  # pylint: ignore
         """Initiate an on-demand snapshot.
 
         Arguments:
@@ -43,7 +44,6 @@ class Data_Management(_API):
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
             host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
-            hostname {str} -- The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -52,7 +52,7 @@ class Data_Management(_API):
 
         """
 
-        valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db']
+        valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db']
         valid_host_os_type = ['Linux', 'Windows']
 
         if object_type not in valid_object_type:
@@ -191,46 +191,14 @@ class Data_Management(_API):
 
             snapshot_status_url = api_request['links'][0]['href']
 
-        elif object_type == 'oracle_db':
-            if hostname is None:
-                raise InvalidParameterException(
-                    "You must provide the host or one of the hosts in a RAC cluster for the Oracle DB object.")
-
-            self.log(
-                "on_demand_snapshot: Searching the Rubrik cluster for the Oracle database '{}' on the host '{}'.".format(
-                    object_name,
-                    hostname))
-            db_id = self.object_id(object_name, object_type, hostname=hostname, timeout=timeout)
-
-            if sla_name == 'current':
-                self.log(
-                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Oracle database '{}'.".format(
-                        object_name))
-
-                oracle_db_summary = self.get('internal', '/oracle/db/{}'.format(db_id), timeout)
-                sla_id = oracle_db_summary['effectiveSlaDomainId']
-
-            elif sla_name != 'current':
-                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
-
-            config = {}
-            config['slaId'] = sla_id
-
-            self.log("on_demand_snapshot: Initiating snapshot for the Oracle database '{}'.".format(object_name))
-            api_request = self.post('internal', '/oracle/db/{}/snapshot'.format(db_id), config, timeout)
-
-            snapshot_status_url = api_request['links'][0]['href']
-
         return (api_request, snapshot_status_url)
 
-    def object_id(self, object_name, object_type, host_os=None, hostname=None, timeout=15):
+    def object_id(self, object_name, object_type, host_os=None, timeout=15):
         """Get the ID of a Rubrik object by providing its name.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
             object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, aws_native, vcenter})
-            hostname {str} -- The hostname, or one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -248,8 +216,7 @@ class Data_Management(_API):
             'mssql_instance',
             'vcenter',
             'ahv',
-            'aws_native',
-            'oracle_db']
+            'aws_native']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -264,11 +231,6 @@ class Data_Management(_API):
         if object_type == 'sla':
             if object_name.upper() == "FOREVER" or object_name.upper() == "UNPROTECTED":
                 return "UNPROTECTED"
-
-        if object_type == 'oracle_db':
-            if hostname is None:
-                raise InvalidParameterException(
-                    "You must provide the host or one of the hosts in a RAC cluster for the Oracle DB object.")
 
         api_call = {
             "vmware": {
@@ -310,10 +272,6 @@ class Data_Management(_API):
             "vcenter": {
                 "api_version": "v1",
                 "api_endpoint": "/vmware/vcenter"
-            },
-            "oracle_db": {
-                "api_version": "internal",
-                "api_endpoint": "/oracle/db"
             }
         }
 
@@ -345,20 +303,11 @@ class Data_Management(_API):
             else:
                 name_value = 'name'
 
-            host_match = False
             for item in api_request['data']:
-                if object_type == 'oracle_db' and item[name_value] == object_name:
-                    for instance in item['instances']:
-                        if hostname in instance['hostName']:
-                            object_ids.append(item['id'])
-                            host_match = True
-                elif item[name_value] == object_name:
+                if item[name_value] == object_name:
                     object_ids.append(item['id'])
 
-            if object_type == 'oracle_db' and not host_match:
-                raise InvalidParameterException(
-                    "The {} object '{}' on the host '{}' was not found on the Rubrik cluster.".format(object_type, object_name, hostname))
-            elif len(object_ids) > 1:
+            if len(object_ids) > 1:
                 raise InvalidParameterException(
                     "Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(object_type, object_name))
             elif len(object_ids) == 0:
@@ -517,7 +466,7 @@ class Data_Management(_API):
             raise InvalidTypeException("The 'power_on' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
             raise InvalidParameterException(
-                "The date and time arguments most both be 'latest' or a specific date and time.")
+                "The date and time arguments must both be 'latest' or a specific date and time.")
 
         self.log("vsphere_live_mount: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
@@ -565,6 +514,84 @@ class Data_Management(_API):
                     vm_name))
 
             return self.post('v1', '/vmware/vm/snapshot/{}/mount'.format(snapshot_id), config, timeout)
+    
+    def time_in_range(self, start, end, x):
+        """Return true if x is in the range [start, end]"""
+        if start <= end:
+            return start <= x <= end
+        else:
+            return start <= x or x <= end
+
+    def sql_live_mount(self, sql_db, sql_instance, sql_host, clone_name, date, time, timeout=15):  # pylint: ignore
+        """Live Mount a database from a specified recovery point. 
+
+        Arguments:
+            sql_db {str} -- The name of the database to Live Mount.
+            sql_instance {str} -- The SQL instance name for the database to Live Mount.
+            sql_host {str} -- The SQL Host of the database/instance to Live Mount.
+            clone_name {str} -- The name given to the Live Mounted database i.e. clone name, AdventureWorks_Clone.
+            date {str} -- The date of the recovery_point you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). 
+            time {str} -- The time of the recovery_point you wish to Live Mount formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full response of `POST /v1/mssql/db/{id}/mount`.
+        """
+        
+        mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
+
+        mssql_instance = self.get(
+            'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host_id), timeout)
+
+        for instance in mssql_instance['data']:
+            if instance['name'] == sql_instance:
+                sql_instance_id = instance['id']
+
+        mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_instance_id), timeout)
+
+        for db in mssql_db['data']:
+            if db['name'] == sql_db:
+                mssql_id = db['id']
+        
+        self.log("sql_live_mount: Getting the recoverable range for mssql db '{}'.".format(sql_db))
+        range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
+
+        self.log("sql_live_mount: Converting the provided date/time into UTC.")
+        recovery_date_time = self._date_time_conversion(date, time)
+        recovery_date_time = datetime.datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
+
+        startStr = range_summary['data'][0]['beginTime']
+        endStr = range_summary['data'][0]['endTime']
+        startSplit = startStr[:16]
+        endSplit = endStr[:16]
+        start = datetime.datetime.strptime(startSplit,'%Y-%m-%dT%H:%M')
+        end = datetime.datetime.strptime(endSplit,'%Y-%m-%dT%H:%M')
+
+        self.log("sql_live_mount: Searching for the provided recovery_point.")
+        
+        is_recovery_point = self.time_in_range(start, end, recovery_date_time)
+        recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
+
+        try:
+            if is_recovery_point == False:
+                raise InvalidParameterException("The database '{}' does not have a recovery_point taken on {} at {}.".format(
+                sql_db, date, time))
+        except NameError:
+            pass
+        else:
+            config = {}
+            config['recoveryPoint'] = {'timestampMs': recovery_timestamp}
+            config['mountedDatabaseName'] = clone_name
+                
+            self.log(
+                "sql_live_mount: Live Mounting the database from recovery_point on {} at {} as database '{}'.".format(
+                    date,
+                    time,
+                    clone_name))
+
+            return self.post('v1', '/mssql/db/{}/mount'.format(mssql_id), config, timeout)
 
     def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):  # pylint: ignore
         """Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
