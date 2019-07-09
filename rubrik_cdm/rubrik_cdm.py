@@ -293,9 +293,7 @@ class Bootstrap(_API):
             else:
                 self.log('Resolved IPv6 address')
                 if interface != None:
-                    # Use user provided interface to determine scope
-                    # self.ipv6_scope = socket.if_nametoindex(interface)
-                    # self.log("IPv6 scope: {}".format(self.ipv6_scope))
+                    # Use user provided interface as scope
                     self.ipv6_scope = interface
                 else:
                     # Extract scope from socket.getaddrinfo
@@ -307,8 +305,8 @@ class Bootstrap(_API):
                         interfaces = socket.if_nameindex()
                         for sock_interface, name in interfaces:
                             if 'lo' not in name:
-                                self.ipv6_scope = sock_interface
-                                self.log("Using scope {}, interface {}".format(sock_interface, name))
+                                self.log("Using scope {} (interface index {})".format(name, sock_interface))
+                                self.ipv6_scope = name
                                 break
                         if self.ipv6_scope == 0:
                             sys.exit("Error: Unable to find a usable IPv6 link local scope")
