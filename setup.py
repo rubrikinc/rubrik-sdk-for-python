@@ -74,7 +74,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.6"
     ],
     install_requires=[
-        'requests >= 2.18.4',
+        'requests >= 2.18.4, != 2.22.0',
         'python-dateutil',
         'pytz'
     ],
