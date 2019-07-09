@@ -263,7 +263,7 @@ class Bootstrap(_API):
         _API {class} - This class contains the base API methods that can be called independently or internally in standalone functions.
     """
 
-    def __init__(self, node_ip, enable_logging=False):
+    def __init__(self, node_ip, interface=None, enable_logging=False):
         """Constructor for the Bootstrap class which is used to initialize the class variables.
         """
         if enable_logging:
@@ -271,6 +271,13 @@ class Bootstrap(_API):
 
         self.node_ip = node_ip
         self.log("User Provided Node IP: {}".format(self.node_ip))
+        if interface != None:
+            self.log("User Provided Interface: {}".format(interface))
+            try:
+                socket.if_nameindex(interface)
+            except OSError:
+                sys.exit("Error: Invalid interface supplied ")
+
         node_resolution = False
         self.ipv6_addr = ""
 
@@ -281,14 +288,29 @@ class Bootstrap(_API):
             self.ipv6_addr = ip_info[0][4][0]
             if '::ffff' in self.ipv6_addr:
                 self.ipv6_addr = ""
-                self.log('Resolved IPv4 address')
-                # ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
-                self.log("Resolved Node IP: {}".format(self.node_ip))
+                self.log("Resolved Node IPv4 address: {}".format(self.node_ip))
                 node_resolution = True
             else:
                 self.log('Resolved IPv6 address')
-                # Extract scope from response
-                self.ipv6_scope = str(ip_info[0][4][3])
+                if interface != None:
+                    # Use user provided interface to determine scope
+                    self.ipv6_scope = socket.if_nameindex(interface)
+                    self.log("IPv6 scope: {}".format(self.ipv6_scope))
+                else:
+                    # Extract scope from socket.getaddrinfo
+                    self.ipv6_scope = str(ip_info[0][4][3])
+                    self.log("IPv6 scope: {}".format(self.ipv6_scope))
+                    if self.ipv6_scope == "0":
+                        # Scope 0 is invalid, so find the first non-loopback interface and use that as the scope
+                        self.log('IPv6 link local scope not resolved, searching for a usable scope')
+                        interfaces = socket.if_nameindex()
+                        for sock_interface, name in interfaces:
+                            if 'lo' not in name:
+                                self.ipv6_scope = sock_interface
+                                self.log("Using scope {}, interface {}".format(sock_interface, name))
+                                break
+                        if self.ipv6_scope == 0:
+                            sys.exit("Error: Unable to find a usable IPv6 link local scope")
                 # Properly format link-local IPv6 address with scope
                 self.node_ip = ('[{}%{}]').format(self.ipv6_addr, self.ipv6_scope)
                 self.log("Resolved Node IP: {}".format(self.node_ip))
@@ -305,10 +327,11 @@ class Bootstrap(_API):
             except socket.gaierror:
                 self.log('Could not resolve IPv4 address for cluster.')
 
+
         if node_resolution == False:
-            sys.exit(
-                "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
-            )
+                sys.exit(
+                    "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
+                )
 
     def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster
