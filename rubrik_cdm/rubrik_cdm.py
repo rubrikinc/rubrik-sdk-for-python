@@ -303,6 +303,7 @@ class Bootstrap(_API):
                     if self.ipv6_scope == "0":
                         # Scope 0 is invalid, so find the first non-loopback interface and use that as the scope
                         self.log('IPv6 link local scope not resolved, searching for a usable scope')
+                        interfaces = socket.if_nameindex()
                         for sock_interface, name in interfaces:
                             if 'lo' not in name:
                                 self.log("Using scope {}, interface {}".format(sock_interface, name))                                
