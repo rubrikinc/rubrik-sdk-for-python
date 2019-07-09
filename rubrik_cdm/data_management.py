@@ -229,7 +229,7 @@ class Data_Management(_API):
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, aws_native, vcenter})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, windows_host})
             hostname {str} -- The hostname, or one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
@@ -249,7 +249,8 @@ class Data_Management(_API):
             'vcenter',
             'ahv',
             'aws_native',
-            'oracle_db']
+            'oracle_db',
+            'windows_host']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -314,6 +315,10 @@ class Data_Management(_API):
             "oracle_db": {
                 "api_version": "internal",
                 "api_endpoint": "/oracle/db"
+            },
+            "windows_host": {
+                "api_version": "internal",
+                "api_endpoint": "/volume_group?is_relic=false"
             }
         }
 
@@ -342,6 +347,8 @@ class Data_Management(_API):
             # Define the "object name" to search for
             if object_type == 'physical_host':
                 name_value = filter_field_name
+            elif object_type == "windows_host":
+                name_value = "hostname"
             else:
                 name_value = 'name'
 
