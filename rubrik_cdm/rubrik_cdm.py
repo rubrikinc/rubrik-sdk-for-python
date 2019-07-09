@@ -274,7 +274,7 @@ class Bootstrap(_API):
         if interface != None:
             self.log("User Provided Interface: {}".format(interface))
             try:
-                socket.if_nameindex(interface)
+                socket.if_nametoindex(interface)
             except OSError:
                 sys.exit("Error: Invalid interface supplied ")
 
@@ -294,7 +294,7 @@ class Bootstrap(_API):
                 self.log('Resolved IPv6 address')
                 if interface != None:
                     # Use user provided interface to determine scope
-                    self.ipv6_scope = socket.if_nameindex(interface)
+                    self.ipv6_scope = socket.if_nametoindex(interface)
                     self.log("IPv6 scope: {}".format(self.ipv6_scope))
                 else:
                     # Extract scope from socket.getaddrinfo
