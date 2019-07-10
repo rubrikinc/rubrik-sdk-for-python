@@ -29,6 +29,10 @@ By default, the Rubrik SDK will attempt to read the the Rubrik Cluster credentia
 * `rubrik_cdm_node_ip`
 * `rubrik_cdm_username`
 * `rubrik_cdm_password`
+* `rubrik_cdm_token`
+
+| Note: The `rubrik_cdm_username` and `rubrik_cdm_password` must be supplied together and may not be provided if the `rubrik_cdm_token` variable is present|
+| --- |
 
 ```py
 import rubrik_cdm
