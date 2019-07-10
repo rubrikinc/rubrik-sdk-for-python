@@ -7,7 +7,9 @@
 		"njpwerner.autodocstring",
 		"github.vscode-pull-request-github",
 		"bierner.markdown-preview-github-styles",
-		"josa.markdown-table-formatter"
+		"josa.markdown-table-formatter",
+		"mrmlnc.vscode-duplicate",
+		"codezombiech.gitignore"
 	],
 	"postCreateCommand": "chmod +x .devcontainer/start.sh && . .devcontainer/start.sh",
 	"settings": {
