@@ -29,6 +29,7 @@ import logging
 from random import choice
 import time
 import socket
+import sys
 
 from .api import Api
 from .cluster import Cluster
@@ -329,9 +330,9 @@ class Bootstrap(_API):
 
 
         if node_resolution == False:
-                sys.exit(
-                    "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
-                )
+            sys.exit(
+                "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
+            )
 
     def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster
