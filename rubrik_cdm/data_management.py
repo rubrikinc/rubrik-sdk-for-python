@@ -229,7 +229,7 @@ class Data_Management(_API):
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, windows_host})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group})
             hostname {str} -- The hostname, or one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
@@ -250,7 +250,7 @@ class Data_Management(_API):
             'ahv',
             'aws_native',
             'oracle_db',
-            'windows_host']
+            'volume_group']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -316,7 +316,7 @@ class Data_Management(_API):
                 "api_version": "internal",
                 "api_endpoint": "/oracle/db"
             },
-            "windows_host": {
+            "volume_group": {
                 "api_version": "internal",
                 "api_endpoint": "/volume_group?is_relic=false"
             }
@@ -347,7 +347,7 @@ class Data_Management(_API):
             # Define the "object name" to search for
             if object_type == 'physical_host':
                 name_value = filter_field_name
-            elif object_type == "windows_host":
+            elif object_type == "volume_group":
                 name_value = "hostname"
             else:
                 name_value = 'name'
@@ -377,26 +377,30 @@ class Data_Management(_API):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, timeout=30):  # pytest: ignore
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
-            object_name {str} -- The name of the Rubrik object you wish to assign to an SLA Domain.
+            object_name {str or list} -- The name of the Rubrik object you wish to assign to an SLA Domain. When the 'object_type' is 'volume_group', the object_name can be a list of volumes.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
-            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host})
+            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host, volume_group})
 
         Keyword Arguments:
             log_backup_frequency_in_seconds {str} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
             log_retention_hours {int} -- The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
             copy_only {int} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
+            windows_host {str} -- The name of the Windows host that contains the relevant volume group. Required when the `object_type` is `volume_group`. (default {None})
             timeout {bool} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
-            dict -- The full API reponse for `POST /internal/sla_domain/{sla_id}/assign`.
+            str -- No change required. The MSSQL Instance '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`, log_retention_hours: `log_retention_hours` and copy_only: `copy_only`
+            str -- No change required. The '`object_name`' volume_group is already assigned to the '`sla_name`' SLA Domain.
+            dict -- The full API response for `POST /internal/sla_domain/{sla_id}/assign`.
+            dict -- The full API response for `PATCH /internal/volume_group/{id}`.
         """
 
-        valid_object_type = ['vmware', 'mssql_host']
+        valid_object_type = ['vmware', 'mssql_host', 'volume_group']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -406,6 +410,19 @@ class Data_Management(_API):
             if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
                 raise InvalidParameterException(
                     "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
+
+        if object_type == "volume_group":
+
+            if not isinstance(object_name, (str, list)):
+                raise InvalidParameterException(
+                    "When the object_type is 'volume_group', the 'object_name' must be a string or a list.")
+
+            if windows_host is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'volumge_group' the 'windows_host' paramater must be populated.")
+        else:
+            raise InvalidParameterException("The object_name must be a string.")
+
         # Determine if 'do not protect' or 'clear' are the SLA Domain Name
         do_not_protect_regex = re.findall('\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
         clear_regex = re.findall('\\bclear\\b', sla_name, flags=re.IGNORECASE)
@@ -499,6 +516,63 @@ class Data_Management(_API):
                     "Host ID not found for instance '{}'").format(object_name)
 
             return db_sla_lst
+
+        elif object_type == "volume_group":
+
+            volume_group_id = self.object_id(windows_host, "volume_group", timeout=timeout)
+            physical_host_id = self.object_id(windows_host, "physical_host", host_os="windows", timeout=timeout)
+
+            self.log("assign_sla: Getting a list of all volumes on the '{}' Windows host.".format(windows_host))
+            host_volumes = self.get("internal", "/host/{}/volume".format(physical_host_id), timeout=timeout)
+
+            # If the object_name (volumes to assign to the SLA) is a string, create a list for processing
+            if not isinstance(object_name, list):
+                volumes_to_assign = [object_name]
+            else:
+                volumes_to_assign = object_name
+
+            # Create a mapping of the volumes on the windows host and their ids
+            currnt_volumes = {}
+            for volume in host_volumes["data"]:
+                for v in volume["mountPoints"]:
+                    if v in volumes_to_assign:
+                        currnt_volumes[v] = volume["id"]
+
+            # Validate that the provided volume(s) are on the windows host
+            for v in volumes_to_assign:
+                try:
+                    currnt_volumes[v]
+                except KeyError:
+                    raise InvalidParameterException(
+                        "The Windows Host '{}' does not have a '{}' volume.".format(windows_host, v))
+
+            self.log("assign_sla: Getting details of the current volume group on the Windows host.")
+            volume_group_details = self.get("internal", "/volume_group/{}".format(volume_group_id), timeout=timeout)
+
+            # Create a config of the current volume sla settings
+            current_volumes_included_in_snapshot = []
+            for volume in volume_group_details["volumes"]:
+                current_volumes_included_in_snapshot.append(volume["id"])
+
+            current_config = {}
+            current_config["configuredSlaDomainId"] = volume_group_details["configuredSlaDomainId"]
+            current_config["volumeIdsIncludedInSnapshots"] = current_volumes_included_in_snapshot
+
+            # Create the user desired config
+            volumes_included_in_snapshot = []
+            for volume, volume_id in currnt_volumes.items():
+                volumes_included_in_snapshot.append(volume_id)
+
+            config = {}
+            config["configuredSlaDomainId"] = sla_id
+            config["volumeIdsIncludedInSnapshots"] = volumes_included_in_snapshot
+
+            if current_config == config:
+                return "No change required. The {} volume_group is already assigned to the {} SLA.".format(
+                    object_name, sla_name)
+            else:
+                self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+                return self.patch("internal", "/volume_group/{}".format(volume_group_id), config, timeout=timeout)
 
     def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):  # pylint: ignore
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
