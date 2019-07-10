@@ -421,7 +421,8 @@ class Data_Management(_API):
                 raise InvalidParameterException(
                     "When the object_type is 'volumge_group' the 'windows_host' paramater must be populated.")
         else:
-            raise InvalidParameterException("The object_name must be a string.")
+            if not isinstance(object_name, (str)):
+                raise InvalidParameterException("The object_name must be a string.")
 
         # Determine if 'do not protect' or 'clear' are the SLA Domain Name
         do_not_protect_regex = re.findall('\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
