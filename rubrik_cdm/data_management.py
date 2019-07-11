@@ -967,3 +967,126 @@ class Data_Management(_API):
                         sla, object_type))
 
             return vm_name_id
+
+    def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, timeout=15):  
+        """[summary]
+        
+        Raises:
+            InvalidParameterException: [description]
+            InvalidParameterException: [description]
+            InvalidParameterException: [description]
+            InvalidParameterException: [description]
+            InvalidParameterException: [description]
+            InvalidParameterException: [description]
+            InvalidParameterException: [description]
+        
+        Returns:
+            [type] -- [description]
+        """
+
+        all_params = [
+            hourly_frequency,
+            hourly_retention,
+            daily_frequency,
+            daily_retention,
+            monthly_frequency,
+            monthly_retention,
+            yearly_frequency,
+            yearly_retention]
+
+        # Validate all values besides name are ints
+        for param in all_params:
+            if not isinstance(param, int):
+                raise InvalidParameterException("All 'frequency' and 'retention' parameters must be integers.")
+
+        # Make sure at least one frequency and retention is populated
+        if all(value is None for value in all_params):
+            raise InvalidParameterException("You must populate at least one frequency and retention.")
+
+        # Make sure the "time unit" frequency and retention are used together
+        if hourly_frequency is not None and hourly_retention is None or hourly_frequency is None and hourly_retention is not None:
+            raise InvalidParameterException("The 'hourly_frequency' and 'hourly_retention' must be populated together.")
+
+        if daily_frequency is not None and daily_retention is None or daily_frequency is None and daily_retention is not None:
+            raise InvalidParameterException("The 'daily_frequency' and 'daily_retention' must be populated together.")
+
+        if monthly_frequency is not None and monthly_retention is None or monthly_frequency is None and monthly_retention is not None:
+            raise InvalidParameterException(
+                "The 'monthly_frequency' and 'monthly_retention' must be populated together.")
+
+        if yearly_frequency is not None and yearly_retention is None or yearly_frequency is None and yearly_retention is not None:
+            raise InvalidParameterException("The 'yearly_frequency' and 'yearly_retention' must be populated together.")
+
+        try:
+            # object_id() will set sla_already_present to something besides False if the SLA is already on the cluter
+            sla_id = self.object_id(name, "sla", timeout=timeout)
+        except BaseException:
+            sla_id = False
+
+        config = {}
+        config["name"] = name
+        frequencies = []
+
+        if hourly_frequency is not None:
+            frequencies.append({
+                "timeUnit": "Hourly",
+                "frequency": hourly_frequency,
+                "retention": hourly_retention
+            })
+        if daily_frequency is not None:
+            frequencies.append({
+                "timeUnit": "Daily",
+                "frequency": daily_frequency,
+                "retention": daily_retention
+            })
+        if monthly_frequency is not None:
+            frequencies.append({
+                "timeUnit": "Monthly",
+                "frequency": monthly_frequency,
+                "retention": monthly_retention
+            })
+        if yearly_frequency is not None:
+            frequencies.append({
+                "timeUnit": "Yearly",
+                "frequency": yearly_frequency,
+                "retention": yearly_retention
+            })
+        config["frequencies"] = frequencies
+
+        if sla_id is not False:
+            self.log("create_sla: Getting the configuration details for the SLA Domain {} already on the Rubrik cluster.".format(name))
+            current_sla_details = self.get("v1", "/sla_domain/{}".format(sla_id))
+
+            del current_sla_details["id"]
+            del current_sla_details["primaryClusterId"]
+            del current_sla_details["allowedBackupWindows"]
+            del current_sla_details["firstFullAllowedBackupWindows"]
+            del current_sla_details["archivalSpecs"]
+            del current_sla_details["replicationSpecs"]
+            del current_sla_details["numDbs"]
+            del current_sla_details["numOracleDbs"]
+            del current_sla_details["numFilesets"]
+            del current_sla_details["numHypervVms"]
+            del current_sla_details["numNutanixVms"]
+            del current_sla_details["numManagedVolumes"]
+            del current_sla_details["numStorageArrayVolumeGroups"]
+            del current_sla_details["numWindowsVolumeGroups"]
+            del current_sla_details["numLinuxHosts"]
+            del current_sla_details["numShares"]
+            del current_sla_details["numWindowsHosts"]
+            del current_sla_details["numVms"]
+            del current_sla_details["numEc2Instances"]
+            del current_sla_details["numVcdVapps"]
+            del current_sla_details["numProtectedObjects"]
+            del current_sla_details["isDefault"]
+            del current_sla_details["uiColor"]
+            del current_sla_details["maxLocalRetentionLimit"]
+
+            if config == current_sla_details:
+                return "No change required. The {} SLA Domain is already configured with the provided configuration".format(
+                    name)
+            else:
+                raise InvalidParameterException("The Rubrik cluster already has an SLA Domain named '{}'.".format(name))
+
+        self.log("create_sla: Creating the new SLA")
+        return self.post("v1", "/sla_domain", config, timeout=timeout)
