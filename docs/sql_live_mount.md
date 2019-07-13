@@ -2,36 +2,40 @@
 
 Live Mount a mssql database from a specified recovery point i.e. data and time.
 ```py
-def sql_live_mount(sql_db=, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15)
+def sql_live_mount(self, sql_db, date, time, sql_instance=None, sql_host=None, mount_name=None, timeout=30):
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| vm_name  | str  | The name of the vSphere VM to Live Mount. |         |
+| db_name  | str  | The name of the database to Live Mount. |         |
+| date  | str  | The recovery_point date you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014).   |         |
+| time  | str  | The recovery_point time you wish to Live Mount formated as `Hour:Minute AM/PM` (ex: 1:30 AM).  |         |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| date  | str  | The date of the snapshot you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). If `latest` is specified, the last snapshot taken will be used.  |         |    latest     |
-| time  | str  | The time of the snapshot you wish to Live Mount formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM). If `latest` is specified, the last snapshot taken will be used.  |         |    latest     |
-| host  | str  | The hostname or IP address of the ESXi host to Live Mount the VM on. By default, the current host will be used.  |         |    current     |
-| remove_network_devices  | bool  | Flag that determines whether to remove the network interfaces from the Live Mounted VM. Set to `True` to remove all network interfaces.  |         |    False     |
-| power_on  | bool  | Flag that determines whether the VM should be powered on after the Live Mount. Set to `True` to power on the VM. Set to `False` to mount the VM but not power it on.  |         |    True     |
-| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
+| sql_instance  | str  | The SQL instance name with the database you wish to Live Mount.  |         |         |
+| sql_host  | str  | The SQL Host of the database/instance to Live Mount.  |         |         |
+| mount_name  | str  | The name given to the Live Mounted database i.e. AdventureWorks_Clone.  |         |         |
+| timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    30     |
 
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| dict  | The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount`. |
+| dict  | The full response of `POST /v1/mssql/db/{id}/mount`. |
 ## Example
 ```py
 import rubrik_cdm
 
 rubrik = rubrik_cdm.Connect()
 
-vm_name = "python-sdk-demo"
+db_name = "python-sdk-demo"
 date = "08-26-2018"
 time = "12:11 AM"
+db_name = "AdventureWorks2016"
+sql_instance = 'MSSQLSERVER'
+sql_host = 'sql.rubrikdemo.com'
+mount_name = 'AdventureWorksClone'
 
-live_mount = rubrik.vsphere_live_mount(vm_name, date, time)
+live_mount = rubrik.sql_live_mount(db_name, date, time, sql_instance, sql_host, mount_name)
 ```
