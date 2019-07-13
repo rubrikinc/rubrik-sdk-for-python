@@ -186,8 +186,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         """
 
         if self.api_token is None:
-            self.log("Creating the authorization header using the provided username and password.")
-
             credentials = '{}:{}'.format(self.username, self.password)
 
             # Encode the Username:Password as base64
@@ -204,7 +202,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         else:
 
-            self.log("Creating the authorization header using the provided API Token.")
             authorization_header = {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -272,7 +269,7 @@ class Bootstrap(_API):
 
         self.node_ip = node_ip
         self.log("User Provided Node IP: {}".format(self.node_ip))
-        if interface != None:
+        if interface is not None:
             self.log("User Provided Interface: {}".format(interface))
             try:
                 socket.if_nametoindex(interface)
@@ -293,7 +290,7 @@ class Bootstrap(_API):
                 node_resolution = True
             else:
                 self.log('Resolved IPv6 address')
-                if interface != None:
+                if interface is not None:
                     # Use user provided interface as scope
                     self.ipv6_scope = socket.if_nametoindex(interface)
                     self.log("IPv6 scope: {}".format(self.ipv6_scope))
@@ -307,7 +304,7 @@ class Bootstrap(_API):
                         interfaces = socket.if_nameindex()
                         for sock_interface, name in interfaces:
                             if 'lo' not in name:
-                                self.log("Using scope {}, interface {}".format(sock_interface, name))                                
+                                self.log("Using scope {}, interface {}".format(sock_interface, name))
                                 self.ipv6_scope = sock_interface
                                 break
                         if self.ipv6_scope == 0:
@@ -327,7 +324,6 @@ class Bootstrap(_API):
                 node_resolution = True
             except socket.gaierror:
                 self.log('Could not resolve IPv4 address for cluster.')
-
 
         if node_resolution == False:
             sys.exit(
