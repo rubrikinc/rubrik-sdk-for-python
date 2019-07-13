@@ -22,7 +22,6 @@
 This module contains the Rubrik SDK Data_Management class.
 """
 import re
-import datetime
 from .api import Api
 from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException
 
@@ -887,64 +886,92 @@ class Data_Management(_API):
 
             return vm_name_id
 
-    def time_in_range(self, start, end, x):
-        """Return true if x is in the range [start, end]"""
-        if start <= end:
-            return start <= x <= end
-        else:
-            return start <= x or x <= end
+    def _time_in_range(self, start, end, recovery_point):
+        """Checks if a specific datetime exists in a start and end time. For example:
+        checks if a recovery point exists in the available snapshots
+        
+        Arguments:
+            start {datetime} -- The start time of the recoverable range the database can be mounted from.
+            end {datetime} -- The end time of the recoverable range the database can be mounted from. 
+            recovery_point {datetime} -- The recovery_point you wish to Live Mount.
 
-    def sql_live_mount(self, sql_db, sql_instance, sql_host, clone_name, date, time, timeout=15):  # pylint: ignore
+        Returns:
+            bool -- True if recovery_point is in the range [start, end]."""
+        
+        if start <= end:
+            return start <= recovery_point <= end
+        else:
+            return start <= recovery_point or recovery_point <= end
+
+    def sql_live_mount(self, sql_db, date, time, sql_instance=None, sql_host=None, clone_name=None, timeout=30):  # pylint: ignore
         """Live Mount a database from a specified recovery point. 
 
         Arguments:
             sql_db {str} -- The name of the database to Live Mount.
-            sql_instance {str} -- The SQL instance name for the database to Live Mount.
-            sql_host {str} -- The SQL Host of the database/instance to Live Mount.
-            clone_name {str} -- The name given to the Live Mounted database i.e. clone name, AdventureWorks_Clone.
             date {str} -- The date of the recovery_point you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). 
             time {str} -- The time of the recovery_point you wish to Live Mount formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
 
         Keyword Arguments:
+            sql_instance {str} -- The SQL instance name for the database to Live Mount.
+            sql_host {str} -- The SQL Host of the database/instance to Live Mount.
+            clone_name {str} -- The name given to the Live Mounted database i.e. clone name, AdventureWorks_Clone.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
             dict -- The full response of `POST /v1/mssql/db/{id}/mount`.
         """
         
-        mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
+        from datetime import datetime
 
+        if sql_instance is None or sql_host is None or clone_name is None:
+                raise InvalidParameterException(
+                    "To live mount a mssql database the 'sql_instance', 'sql_host', 'clone_name' paramaters must be populated.")
+
+        mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
+        
+        self.log("sql_live_mount: Getting the list of instances on host {}.".format(sql_host))
         mssql_instance = self.get(
             'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host_id), timeout)
 
         for instance in mssql_instance['data']:
             if instance['name'] == sql_instance:
                 sql_instance_id = instance['id']
+                break
+        else:
+            raise InvalidParameterException("The SQL instance {} does not exist, please provide a valid instance".format(sql_instance))
 
+        self.log("sql_live_mount: Getting the list of databases on the instance {}, on host {}.".format(sql_instance, sql_host))
         mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_instance_id), timeout)
 
         for db in mssql_db['data']:
             if db['name'] == sql_db:
                 mssql_id = db['id']
+                break
+        else:
+            raise InvalidParameterException("The database {} does not exist, please provide a valid database".format(sql_db))
         
         self.log("sql_live_mount: Getting the recoverable range for mssql db '{}'.".format(sql_db))
         range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
 
         self.log("sql_live_mount: Converting the provided date/time into UTC.")
         recovery_date_time = self._date_time_conversion(date, time)
-        recovery_date_time = datetime.datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
-
-        startstr = range_summary['data'][0]['beginTime']
-        endstr = range_summary['data'][0]['endTime']
-        startsplit = startstr[:16]
-        endsplit = endstr[:16]
-        start = datetime.datetime.strptime(startsplit,'%Y-%m-%dT%H:%M')
-        end = datetime.datetime.strptime(endsplit,'%Y-%m-%dT%H:%M')
-
-        self.log("sql_live_mount: Searching for the provided recovery_point.")
-        
-        is_recovery_point = self.time_in_range(start, end, recovery_date_time)
+        recovery_date_time = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
         recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
+
+        for range in range_summary['data']:
+            startstr = range['beginTime']
+            endstr = range['endTime']
+            startsplit = startstr[:16]
+            endsplit = endstr[:16]
+            start = datetime.strptime(startsplit,'%Y-%m-%dT%H:%M')
+            end = datetime.strptime(endsplit,'%Y-%m-%dT%H:%M')
+
+            self.log("sql_live_mount: Searching for the provided recovery_point.")
+            is_recovery_point = self._time_in_range(start, end, recovery_date_time)
+            if is_recovery_point == False:
+                continue
+            else:
+                break
 
         try:
             if is_recovery_point == False:
