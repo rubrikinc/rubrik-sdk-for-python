@@ -2,7 +2,7 @@
 
 Live Mount a mssql database from a specified recovery point i.e. data and time.
 ```py
-def sql_live_mount(self, sql_db, date, time, sql_instance=None, sql_host=None, mount_name=None, timeout=30):
+def sql_live_mount(self, db_name, date, time, sql_instance=None, sql_host=None, mount_name=None, timeout=30):
 ```
 
 ## Arguments
