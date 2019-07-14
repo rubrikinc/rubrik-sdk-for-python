@@ -998,7 +998,7 @@ class Data_Management(_API):
             dict -- The full API response for `POST /v2/sla_domain`.
         """
 
-        v2_sla = self.minimum_installed_cdm_version("5.0")
+        v2_sla = self.minimum_installed_cdm_version("5.0", timeout=timeout)
 
         all_params = [
             hourly_frequency,
@@ -1052,7 +1052,7 @@ class Data_Management(_API):
         config = {}
 
         if archive_name is not None:
-            archival_location_id = self.object_id(archive_name, "archival_location")
+            archival_location_id = self.object_id(archive_name, "archival_location", timeout=timeout)
 
             # convert retention in days to seconds
             retention_on_brik_in_seconds = retention_on_brik_in_days * 86400
@@ -1125,9 +1125,9 @@ class Data_Management(_API):
         if sla_id is not False:
             self.log("create_sla: Getting the configuration details for the SLA Domain {} already on the Rubrik cluster.".format(name))
             if v2_sla is True:
-                current_sla_details = self.get("v2", "/sla_domain/{}".format(sla_id))
+                current_sla_details = self.get("v2", "/sla_domain/{}".format(sla_id), timeout=timeout)
             else:
-                current_sla_details = self.get("v1", "/sla_domain/{}".format(sla_id))
+                current_sla_details = self.get("v1", "/sla_domain/{}".format(sla_id), timeout=timeout)
 
             keys_to_delete = [
                 "id",
