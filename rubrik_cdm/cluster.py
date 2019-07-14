@@ -584,8 +584,8 @@ class Cluster(Api):
 
         Returns:
             str -- No change required. The Rubrik cluster is already configured with the provided SMTP settings.
-            dict -- The full API response for `POST /internal/smtp_instance'`
-            dict -- The full API response for `PATCH /internal/smtp_instance/{id}'`
+            dict -- The full API response for `POST /internal/smtp_instance`
+            dict -- The full API response for `PATCH /internal/smtp_instance/{id}`
         """
 
         valid_encryption = ['SSL', 'STARTTLS', 'NONE']
