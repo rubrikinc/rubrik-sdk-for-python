@@ -1051,23 +1051,6 @@ class Data_Management(_API):
 
         config = {}
 
-        if archive_name is not None:
-            archival_location_id = self.object_id(archive_name, "archival_location", timeout=timeout)
-
-            # convert retention in days to seconds
-            retention_on_brik_in_seconds = retention_on_brik_in_days * 86400
-            if instant_archive is False:
-                archival_threshold = retention_on_brik_in_seconds
-            else:
-                archival_threshold = 1
-
-            config["localRetentionLimit"] = retention_on_brik_in_seconds
-
-            config["archivalSpecs"] = [{
-                "locationId": archival_location_id,
-                "archivalThreshold": archival_threshold
-            }]
-
         config["name"] = name
 
         if v2_sla is True:
@@ -1121,6 +1104,23 @@ class Data_Management(_API):
                     "retention": yearly_retention
                 })
             config["frequencies"] = frequencies
+
+        if archive_name is not None:
+            archival_location_id = self.object_id(archive_name, "archival_location", timeout=timeout)
+
+            # convert retention in days to seconds
+            retention_on_brik_in_seconds = retention_on_brik_in_days * 86400
+            if instant_archive is False:
+                archival_threshold = retention_on_brik_in_seconds
+            else:
+                archival_threshold = 1
+
+            config["localRetentionLimit"] = archival_threshold
+
+            config["archivalSpecs"] = [{
+                "locationId": archival_location_id,
+                "archivalThreshold": archival_threshold
+            }]
 
         if sla_id is not False:
             self.log("create_sla: Getting the configuration details for the SLA Domain {} already on the Rubrik cluster.".format(name))
