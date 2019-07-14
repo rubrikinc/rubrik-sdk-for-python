@@ -974,19 +974,28 @@ class Data_Management(_API):
             return vm_name_id
 
     def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, timeout=15):  # pylint: ignore
-        """[summary]
+        """Create a new SLA Domain.
 
-        Raises:
-            InvalidParameterException: [description]
-            InvalidParameterException: [description]
-            InvalidParameterException: [description]
-            InvalidParameterException: [description]
-            InvalidParameterException: [description]
-            InvalidParameterException: [description]
-            InvalidParameterException: [description]
+        Arguments:
+            name {str} -- The name of the new SLA Domain.
+
+        Keyword Arguments:
+            hourly_frequency {int} -- Hourly frequency to take backups. (default: {None})
+            hourly_retention {int} -- Number of hours to retain the hourly backups. (default: {None})
+            daily_frequency {int} -- Daily frequency to take backups. (default: {None})
+            daily_retention {int} -- Number of hours to retain the daily backups. (default: {None})
+            monthly_frequency {int} -- Monthly frequency to take backups. (default: {None})
+            monthly_retention {int} -- Number of hours to retain the monthly backups. (default: {None})
+            yearly_frequency {int} -- Yearly frequency to take backups. (default: {None})
+            yearly_retention {int} -- Number of hours to retain the yearly backups. (default: {None})
+            archive_name {str} -- The optional archive location you wish to configure on the SLA Domain. (default: {None})
+            retention_on_brik_in_days {int} -- The number of days you wish to keep the backups on the Rubrik cluster. (default: {None})
+            instant_archive= {bool} -- Flag that determines whether or not to enable instant archive. Set to true to enable. (default: {False})
 
         Returns:
-            [type] -- [description]
+            str -- No change required. The 'name' SLA Domain is already configured with the provided configuration."
+            dict -- The full API response for `POST /v1/sla_domain`.
+            dict -- The full API response for `POST /v2/sla_domain`.
         """
 
         v2_sla = self.minimum_installed_cdm_version("5.0")
@@ -1062,7 +1071,7 @@ class Data_Management(_API):
         config["name"] = name
 
         if v2_sla is True:
-              # create the config for the v2 API
+            # create the config for the v2 API
             config["frequencies"] = {}
 
             config["frequencies"]["hourly"] = {}
@@ -1159,11 +1168,6 @@ class Data_Management(_API):
                 except KeyError:
                     pass
 
-            import json
-            print(json.dumps(config))
-            print()
-            print(json.dumps(current_sla_details))
-            print()
             if config == current_sla_details:
                 return "No change required. The {} SLA Domain is already configured with the provided configuration.".format(
                     name)
@@ -1172,10 +1176,8 @@ class Data_Management(_API):
 
         self.log("create_sla: Creating the new SLA")
         if v2_sla is True:
-            self.log("v2 create -- delete log")
             return self.post("v2", "/sla_domain", config, timeout=timeout)
         else:
-            self.log("v1 create -- delete log")
             return self.post("v1", "/sla_domain", config, timeout=timeout)
 
     def delete_sla(self, name, timeout=15):
@@ -1202,7 +1204,10 @@ class Data_Management(_API):
             delete_sla = self.delete("v1", "/sla_domain/{}".format(sla_id))
         except APICallException as api_response:
             if "SLA Domains created/updated using v2 rest api version cannot be deleted from v1" in str(api_response):
-                self.log("delete_sla: Attempting to delete the SLA using the v2 API")
+                self.log(
+                    "delete_sla: SLA Domains created with the v2 endpoint can not be deleted by the v1 endpoint. Attempting to delete the SLA using the v2 API")
                 delete_sla = self.delete("v2", "/sla_domain/{}".format(sla_id))
+            else:
+                raise APICallException(api_response)
 
         return delete_sla
