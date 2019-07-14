@@ -407,13 +407,31 @@ class Cluster(Api):
         self.log("cluster_ntp: Determing the current cluster NTP settings")
         cluster_ntp = self.get("internal", "/cluster/me/ntp_server", timeout=timeout)
 
-        if sorted(cluster_ntp["data"]) == sorted(ntp_server):
+        cdm_v5_check = self.minimum_installed_cdm_version("5.0")
+
+        if cdm_v5_check is True:
+            current_ntp_servers = []
+            for ntp in cluster_ntp["data"]:
+                current_ntp_servers.append(ntp["server"])
+        else:
+            current_ntp_servers = cluster_ntp["data"]
+
+        if sorted(current_ntp_servers) == sorted(ntp_server):
             return "No change required. The NTP server(s) {} has already been added to the Rubrik cluster.".format(
                 ntp_server)
 
-        self.log(
-            "cluster_ntp: Adding the NTP server(s) '{}' to the Rubrik cluster.".format(ntp_server))
-        return self.post("internal", "/cluster/me/ntp_server", ntp_server, timeout)
+        self.log("cluster_ntp: Adding the NTP server(s) '{}' to the Rubrik cluster.".format(ntp_server))
+
+        if cdm_v5_check is True:
+            config = []
+            for ntp in ntp_server:
+                config.append({
+                    "server": ntp
+                })
+        else:
+            config = ntp_server
+
+        return self.post("internal", "/cluster/me/ntp_server", config, timeout)
 
     def configure_syslog(self, syslog_ip, protocol, port=514, timeout=15):
         """Configure the Rubrik cluster syslog settings.
