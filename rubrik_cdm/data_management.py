@@ -988,12 +988,12 @@ class Data_Management(_API):
             monthly_retention {int} -- Number of hours to retain the monthly backups. (default: {None})
             yearly_frequency {int} -- Yearly frequency to take backups. (default: {None})
             yearly_retention {int} -- Number of hours to retain the yearly backups. (default: {None})
-            archive_name {str} -- The optional archive location you wish to configure on the SLA Domain. (default: {None})
-            retention_on_brik_in_days {int} -- The number of days you wish to keep the backups on the Rubrik cluster. (default: {None})
+            archive_name {str} -- The optional archive location you wish to configure on the SLA Domain. When populated, you must also provide a `retention_on_brik_in_days`. (default: {None})
+            retention_on_brik_in_days {int} -- The number of days you wish to keep the backups on the Rubrik cluster. When populated, you must also provide a `archive_name`. (default: {None})
             instant_archive= {bool} -- Flag that determines whether or not to enable instant archive. Set to true to enable. (default: {False})
 
         Returns:
-            str -- No change required. The 'name' SLA Domain is already configured with the provided configuration."
+            str -- No change required. The 'name' SLA Domain is already configured with the provided configuration.
             dict -- The full API response for `POST /v1/sla_domain`.
             dict -- The full API response for `POST /v2/sla_domain`.
         """
