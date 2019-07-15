@@ -23,6 +23,7 @@ This module contains the Rubrik SDK Data_Management class.
 """
 import re
 from .api import Api
+from datetime import datetime
 from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException
 
 
@@ -967,3 +968,107 @@ class Data_Management(_API):
                         sla, object_type))
 
             return vm_name_id
+
+    def _time_in_range(self, start, end, point_in_time):
+        """Checks if a specific datetime exists in a start and end time. For example:
+        checks if a recovery point exists in the available snapshots
+        
+        Arguments:
+            start {datetime} -- The start time of the recoverable range the database can be mounted from.
+            end {datetime} -- The end time of the recoverable range the database can be mounted from. 
+            point_in_time {datetime} -- The point_in_time you wish to Live Mount.
+
+        Returns:
+            bool -- True if point_in_time is in the range [start, end]."""
+        
+        if start <= end:
+            return start <= point_in_time <= end
+        else:
+            return start <= point_in_time or point_in_time <= end
+
+    def sql_live_mount(self, db_name, date, time, sql_instance=None, sql_host=None, mount_name=None, timeout=30):  # pylint: ignore
+        """Live Mount a database from a specified recovery point. 
+
+        Arguments:
+            db_name {str} -- The name of the database to Live Mount.
+            date {str} -- The recovery_point date you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). 
+            time {str} -- The recovery_point time you wish to Live Mount formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+
+        Keyword Arguments:
+            sql_instance {str} -- The SQL instance name with the database you wish to Live Mount.
+            sql_host {str} -- The SQL Host of the database/instance to Live Mount.
+            mount_name {str} -- The name given to the Live Mounted database i.e. AdventureWorks_Clone.
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+
+        Returns:
+            dict -- The full response of `POST /v1/mssql/db/{id}/mount`.
+        """
+        
+        
+        if sql_instance is None or sql_host is None or mount_name is None:
+                raise InvalidParameterException(
+                    "To live mount a mssql database the 'sql_instance', 'sql_host', 'mount_name' paramaters must be populated.")
+
+        mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
+        
+        self.log("sql_live_mount: Getting the list of instances on host {}.".format(sql_host))
+        mssql_instance = self.get(
+            'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host_id), timeout)
+
+        for instance in mssql_instance['data']:
+            if instance['name'] == sql_instance:
+                sql_instance_id = instance['id']
+                break
+        else:
+            raise InvalidParameterException("The SQL instance {} does not exist, please provide a valid instance".format(sql_instance))
+
+        self.log("sql_live_mount: Getting the list of databases on the instance {}, on host {}.".format(sql_instance, sql_host))
+        mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_instance_id), timeout)
+
+        for db in mssql_db['data']:
+            if db['name'] == db_name:
+                mssql_id = db['id']
+                break
+        else:
+            raise InvalidParameterException("The database {} does not exist, please provide a valid database".format(db_name))
+        
+        self.log("sql_live_mount: Getting the recoverable range for mssql db '{}'.".format(db_name))
+        range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
+
+        self.log("sql_live_mount: Converting the provided date/time into UTC.")
+        recovery_date_time = self._date_time_conversion(date, time)
+        recovery_date_time = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
+        recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
+
+        for range in range_summary['data']:
+            startstr = range['beginTime']
+            endstr = range['endTime']
+            startsplit = startstr[:16]
+            endsplit = endstr[:16]
+            start = datetime.strptime(startsplit,'%Y-%m-%dT%H:%M')
+            end = datetime.strptime(endsplit,'%Y-%m-%dT%H:%M')
+
+            self.log("sql_live_mount: Searching for the provided recovery_point.")
+            is_recovery_point = self._time_in_range(start, end, recovery_date_time)
+            if is_recovery_point == False:
+                continue
+            else:
+                break
+
+        try:
+            if is_recovery_point == False:
+                raise InvalidParameterException("The database '{}' does not have a recovery_point taken on {} at {}.".format(db_name, date, time))
+        except NameError:
+            pass
+        else:
+            config = {}
+            config['recoveryPoint'] = {'timestampMs': recovery_timestamp}
+            config['mountedDatabaseName'] = mount_name
+                
+            self.log(
+                "sql_live_mount: Live Mounting the database from recovery_point on {} at {} as database '{}'.".format(
+                    date,
+                    time,
+                    mount_name))
+
+            return self.post('v1', '/mssql/db/{}/mount'.format(mssql_id), config, timeout)    
