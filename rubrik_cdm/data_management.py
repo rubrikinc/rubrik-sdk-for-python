@@ -23,6 +23,7 @@ This module contains the Rubrik SDK Data_Management class.
 """
 import re
 from .api import Api
+from datetime import datetime
 from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException
 
 
@@ -921,8 +922,7 @@ class Data_Management(_API):
             dict -- The full response of `POST /v1/mssql/db/{id}/mount`.
         """
         
-        from datetime import datetime
-
+        
         if sql_instance is None or sql_host is None or mount_name is None:
                 raise InvalidParameterException(
                     "To live mount a mssql database the 'sql_instance', 'sql_host', 'mount_name' paramaters must be populated.")
