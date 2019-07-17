@@ -990,3 +990,109 @@ class Data_Management(_API):
                     mount_name))
 
             return self.post('v1', '/mssql/db/{}/mount'.format(mssql_id), config, timeout)    
+
+    def vsphere_live_unmount(self, mounted_vm_name, force=False, timeout=30):  # pylint: ignore
+        """Delete a vSphere Live Mount for a mounted VM. 
+
+        Arguments:
+            mounted_vm_name {str} -- The name of the Live Mounted vSphere VM to be unmounted. 
+
+        Keyword Arguments:
+            force {bool} -- Force unmount to remove metadata when the datastore of the Live Mount virtual machine was moved off of the Rubrik cluster. (default: {False})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full response of `DELETE '/vmware/vm/snapshot/mount/{}?force={}'.
+        """
+
+
+        self.log("vsphere_live_unmount: Searching the Rubrik cluster for the Live Mount vSphere VM '{}'.".format(mounted_vm_name))
+        mounted_vm_id = self.object_id(mounted_vm_name, 'vmware', timeout=timeout)
+
+        self.log("vsphere_live_unmount: Getting the vSphere VM mount information from the Rubrik cluster.")
+        mount_summary = self.get('v1', '/vmware/vm/snapshot/mount', timeout=timeout)
+
+        self.log("vsphere_live_unmount: Getting the mount ID of the vSPhere VM '{}'.".format(mounted_vm_name))
+        for mountedvm in mount_summary['data']:
+            if mountedvm['mountedVmId'] == mounted_vm_id:
+                mount_id = mountedvm['id']
+                break
+        else:
+            raise InvalidParameterException("The mounted VM '{}' does not exist, please provide a valid instance".format(mounted_vm_name))
+
+        try:
+            mount_id
+        except NameError:
+            raise InvalidParameterException("The mounted vSphere VM '{}' does exist, please check the name you provided.".format(
+                mounted_vm_name))
+        else:
+            #config = {}
+            #config['force'] = force
+
+            self.log(
+                "vsphere_live_mount: Unmounting the vSphere VM '{}'.".format(mounted_vm_name))
+
+            return self.delete('v1', '/vmware/vm/snapshot/mount/{}?force={}'.format(mount_id, force), timeout)
+
+    def sql_live_unmount(self, mounted_db_name, sql_instance=None, sql_host=None, force=False, timeout=30):  # pylint: ignore
+        """Delete a Microsoft SQL Live Mount of a database. 
+
+        Arguments:
+            mounted_db_name {str} -- The name of the Live Mounted database to be unmounted. 
+
+        Keyword Arguments:
+            sql_instance {str} -- The name of the MSSQL instance managing the Live Mounted database to be unmounted. 
+            sql_host {str} -- The name of the MSSQL host running the Live Mounted database to be unmounted. 
+            force {bool} -- Remove all data within the Rubrik cluster related to the Live Mount, even if the SQL Server database cannot be contacted. (default: {False})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full response of `DELETE /mssql/db/mount/{}?force={}`.
+        """
+
+
+        if sql_instance is None or sql_host is None:
+                raise InvalidParameterException(
+                    "To live mount a mssql database the 'sql_instance' and 'sql_host' paramaters must be provided.")
+
+        mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
+        
+        self.log("sql_live_mount: Getting the list of instances on host {}.".format(sql_host))
+        mssql_instance = self.get(
+            'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host_id), timeout)
+
+        for instance in mssql_instance['data']:
+            if instance['name'] == sql_instance:
+                sql_instance_id = instance['id']
+                break
+        else:
+            raise InvalidParameterException("The SQL instance {} does not exist, please provide a valid instance".format(sql_instance))
+
+        self.log("sql_live_mount: Getting the list of databases on the instance {}, on host {}.".format(sql_instance, sql_host))
+        mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_instance_id), timeout)
+
+        for db in mssql_db['data']:
+            if db['name'] == mounted_db_name:
+                mounted_db_id = db['id']
+                break
+        else:
+            raise InvalidParameterException("The database {} does not exist, please provide a valid database".format(db_name))
+
+        self.log("sql_live_unmount: Getting the MSSQL mount information from the Rubrik cluster.")
+        mount_summary = self.get('v1', '/mssql/db/mount', timeout=timeout)
+
+        self.log("sql_live_unmount: Getting the mount ID of the mounted database '{}'.".format(mounted_db_name))
+        for mounteddb in mount_summary['data']:
+            if mounteddb['mountedDatabaseId'] == mounted_db_id:
+                mount_id = mounteddb['id']
+
+        try:
+            mount_id
+        except NameError:
+            raise InvalidParameterException("The mounted database '{}' does exist, please check the name you provided.".format(
+                mounted_db_name))
+        else:
+            self.log(
+                "sql_live_mount: Unmounting the database '{}'.".format(mounted_db_name))
+
+            return self.delete('v1', '/mssql/db/mount/{}?force={}'.format(mount_id, force), timeout)
