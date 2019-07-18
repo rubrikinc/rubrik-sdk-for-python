@@ -272,7 +272,7 @@ class Physical(Api):
 
         Returns:
             str -- No change required. The share with the given hostname and export point has already been added.
-            dict -- The full API response for `POST /internal/host/share with the given share arguments.
+            dict -- The full API response for `POST /internal/host/share` with the given share arguments.
         """
         valid_share_type = ['NFS', 'SMB']
 
