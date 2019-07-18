@@ -992,7 +992,7 @@ class Data_Management(_API):
             return self.post('v1', '/mssql/db/{}/mount'.format(mssql_id), config, timeout)    
 
     def vsphere_live_unmount(self, mounted_vm_name, force=False, timeout=30):  # pylint: ignore
-        """Delete a vSphere Live Mount for a mounted VM. 
+        """Delete a vSphere Live Mount from the Rubrik cluster. 
 
         Arguments:
             mounted_vm_name {str} -- The name of the Live Mounted vSphere VM to be unmounted. 
@@ -1002,7 +1002,7 @@ class Data_Management(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full response of `DELETE '/vmware/vm/snapshot/mount/{}?force={}'.
+            dict -- The full response of `DELETE '/vmware/vm/snapshot/mount/{id}?force={bool}'.
         """
 
 
