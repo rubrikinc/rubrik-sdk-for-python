@@ -1076,7 +1076,7 @@ class Data_Management(_API):
                 mounted_db_id = db['id']
                 break
         else:
-            raise InvalidParameterException("The database {} does not exist, please provide a valid database".format(db_name))
+            raise InvalidParameterException("The database {} does not exist, please provide a valid database".format(mounted_db_name))
 
         self.log("sql_live_unmount: Getting the MSSQL mount information from the Rubrik cluster.")
         mount_summary = self.get('v1', '/mssql/db/mount', timeout=timeout)
@@ -1089,7 +1089,7 @@ class Data_Management(_API):
         try:
             mount_id
         except NameError:
-            raise InvalidParameterException("The mounted database '{}' does exist, please check the name you provided.".format(
+            raise InvalidParameterException("A mount ID for '{}' does exist, please provide a valid Live Mounted database.".format(
                 mounted_db_name))
         else:
             self.log(
