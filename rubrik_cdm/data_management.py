@@ -1035,7 +1035,7 @@ class Data_Management(_API):
             return self.delete('v1', '/vmware/vm/snapshot/mount/{}?force={}'.format(mount_id, force), timeout)
 
     def sql_live_unmount(self, mounted_db_name, sql_instance=None, sql_host=None, force=False, timeout=30):  # pylint: ignore
-        """Delete a Microsoft SQL Live Mount of a database. 
+        """Delete a Microsoft SQL Live Mount from the Rubrik cluster. 
 
         Arguments:
             mounted_db_name {str} -- The name of the Live Mounted database to be unmounted. 
@@ -1047,7 +1047,7 @@ class Data_Management(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full response of `DELETE /mssql/db/mount/{}?force={}`.
+            dict -- The full response of `DELETE /mssql/db/mount/{id}?force={bool}`.
         """
 
 
