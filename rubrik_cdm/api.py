@@ -146,6 +146,14 @@ class Api():
         except requests.exceptions.ReadTimeout:
             raise APICallException(
                 "The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
+        except requests.exceptions.HTTPError as error:
+            try:
+                error_message = json.loads(error.response.text)["message"]
+            except BaseException:
+                error_message = error.response.text
+
+            raise APICallException(error_message)
+
         except requests.exceptions.RequestException as error:
             # If "error_message" has be defined raise that message else raise the request exception error
             try:

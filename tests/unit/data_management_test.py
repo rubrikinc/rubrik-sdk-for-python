@@ -1722,7 +1722,7 @@ def test_object_id_invalid_object_type(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The object_id() object_type argument must be one of the following: ['vmware', 'sla', 'vmware_host', 'physical_host', 'fileset_template', 'managed_volume', 'mssql_db', 'mssql_instance', 'vcenter', 'ahv', 'aws_native', 'oracle_db']."
+    assert error_message == "The object_id() object_type argument must be one of the following: ['vmware', 'sla', 'vmware_host', 'physical_host', 'fileset_template', 'managed_volume', 'mssql_db', 'mssql_instance', 'vcenter', 'ahv', 'aws_native', 'oracle_db', 'volume_group', 'archival_location']."
 
 
 def test_object_id_invalid_fileset_template(rubrik):
@@ -2625,7 +2625,7 @@ def test_assign_sla_invalid_object_type(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The assign_sla() object_type argument must be one of the following: ['vmware', 'mssql_host']."
+    assert error_message == "The assign_sla() object_type argument must be one of the following: ['vmware', 'mssql_host', 'volume_group']."
 
 
 def test_assign_sla_idempotence_specific_sla(rubrik, mocker):

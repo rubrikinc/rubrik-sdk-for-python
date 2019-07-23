@@ -22,9 +22,11 @@
 This module contains the Rubrik SDK Data_Management class.
 """
 import re
-from .api import Api
 from datetime import datetime
-from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException
+from .api import Api
+from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException, APICallException
+
+
 
 
 _API = Api
@@ -230,7 +232,7 @@ class Data_Management(_API):
 
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, aws_native, vcenter})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location})
             hostname {str} -- The hostname, or one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
@@ -250,7 +252,9 @@ class Data_Management(_API):
             'vcenter',
             'ahv',
             'aws_native',
-            'oracle_db']
+            'oracle_db',
+            'volume_group',
+            'archival_location']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -315,6 +319,14 @@ class Data_Management(_API):
             "oracle_db": {
                 "api_version": "internal",
                 "api_endpoint": "/oracle/db"
+            },
+            "volume_group": {
+                "api_version": "internal",
+                "api_endpoint": "/volume_group?is_relic=false"
+            },
+            "archival_location": {
+                "api_version": "internal",
+                "api_endpoint": "/archive/location?name={}".format(object_name)
             }
         }
 
@@ -343,6 +355,8 @@ class Data_Management(_API):
             # Define the "object name" to search for
             if object_type == 'physical_host':
                 name_value = filter_field_name
+            elif object_type == "volume_group":
+                name_value = "hostname"
             else:
                 name_value = 'name'
 
@@ -371,26 +385,30 @@ class Data_Management(_API):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, timeout=30):  # pytest: ignore
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
-            object_name {str} -- The name of the Rubrik object you wish to assign to an SLA Domain.
+            object_name {str or list} -- The name of the Rubrik object you wish to assign to an SLA Domain. When the 'object_type' is 'volume_group', the object_name can be a list of volumes.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
-            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host})
+            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host, volume_group})
 
         Keyword Arguments:
             log_backup_frequency_in_seconds {str} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
             log_retention_hours {int} -- The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
             copy_only {int} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
+            windows_host {str} -- The name of the Windows host that contains the relevant volume group. Required when the `object_type` is `volume_group`. (default {None})
             timeout {bool} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
-            dict -- The full API reponse for `POST /internal/sla_domain/{sla_id}/assign`.
+            str -- No change required. The MSSQL Instance '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`, log_retention_hours: `log_retention_hours` and copy_only: `copy_only`
+            str -- No change required. The '`object_name`' volume_group is already assigned to the '`sla_name`' SLA Domain.
+            dict -- The full API response for `POST /internal/sla_domain/{sla_id}/assign`.
+            dict -- The full API response for `PATCH /internal/volume_group/{id}`.
         """
 
-        valid_object_type = ['vmware', 'mssql_host']
+        valid_object_type = ['vmware', 'mssql_host', 'volume_group']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -400,6 +418,20 @@ class Data_Management(_API):
             if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
                 raise InvalidParameterException(
                     "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
+
+        if object_type == "volume_group":
+
+            if not isinstance(object_name, (str, list)):
+                raise InvalidParameterException(
+                    "When the object_type is 'volume_group', the 'object_name' must be a string or a list.")
+
+            if windows_host is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'volumge_group' the 'windows_host' paramater must be populated.")
+        else:
+            if not isinstance(object_name, (str)):
+                raise InvalidParameterException("The object_name must be a string.")
+
         # Determine if 'do not protect' or 'clear' are the SLA Domain Name
         do_not_protect_regex = re.findall('\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
         clear_regex = re.findall('\\bclear\\b', sla_name, flags=re.IGNORECASE)
@@ -493,6 +525,63 @@ class Data_Management(_API):
                     "Host ID not found for instance '{}'").format(object_name)
 
             return db_sla_lst
+
+        elif object_type == "volume_group":
+
+            volume_group_id = self.object_id(windows_host, "volume_group", timeout=timeout)
+            physical_host_id = self.object_id(windows_host, "physical_host", host_os="windows", timeout=timeout)
+
+            self.log("assign_sla: Getting a list of all volumes on the '{}' Windows host.".format(windows_host))
+            host_volumes = self.get("internal", "/host/{}/volume".format(physical_host_id), timeout=timeout)
+
+            # If the object_name (volumes to assign to the SLA) is a string, create a list for processing
+            if not isinstance(object_name, list):
+                volumes_to_assign = [object_name]
+            else:
+                volumes_to_assign = object_name
+
+            # Create a mapping of the volumes on the windows host and their ids
+            currnt_volumes = {}
+            for volume in host_volumes["data"]:
+                for v in volume["mountPoints"]:
+                    if v in volumes_to_assign:
+                        currnt_volumes[v] = volume["id"]
+
+            # Validate that the provided volume(s) are on the windows host
+            for v in volumes_to_assign:
+                try:
+                    currnt_volumes[v]
+                except KeyError:
+                    raise InvalidParameterException(
+                        "The Windows Host '{}' does not have a '{}' volume.".format(windows_host, v))
+
+            self.log("assign_sla: Getting details of the current volume group on the Windows host.")
+            volume_group_details = self.get("internal", "/volume_group/{}".format(volume_group_id), timeout=timeout)
+
+            # Create a config of the current volume sla settings
+            current_volumes_included_in_snapshot = []
+            for volume in volume_group_details["volumes"]:
+                current_volumes_included_in_snapshot.append(volume["id"])
+
+            current_config = {}
+            current_config["configuredSlaDomainId"] = volume_group_details["configuredSlaDomainId"]
+            current_config["volumeIdsIncludedInSnapshots"] = current_volumes_included_in_snapshot
+
+            # Create the user desired config
+            volumes_included_in_snapshot = []
+            for volume, volume_id in currnt_volumes.items():
+                volumes_included_in_snapshot.append(volume_id)
+
+            config = {}
+            config["configuredSlaDomainId"] = sla_id
+            config["volumeIdsIncludedInSnapshots"] = volumes_included_in_snapshot
+
+            if current_config == config:
+                return "No change required. The {} volume_group is already assigned to the {} SLA.".format(
+                    object_name, sla_name)
+            else:
+                self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+                return self.patch("internal", "/volume_group/{}".format(volume_group_id), config, timeout=timeout)
 
     def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):  # pylint: ignore
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
@@ -887,6 +976,246 @@ class Data_Management(_API):
 
             return vm_name_id
 
+
+    def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, timeout=15):  # pylint: ignore
+        """Create a new SLA Domain.
+
+        Arguments:
+            name {str} -- The name of the new SLA Domain.
+
+        Keyword Arguments:
+            hourly_frequency {int} -- Hourly frequency to take backups. (default: {None})
+            hourly_retention {int} -- Number of hours to retain the hourly backups. (default: {None})
+            daily_frequency {int} -- Daily frequency to take backups. (default: {None})
+            daily_retention {int} -- Number of hours to retain the daily backups. (default: {None})
+            monthly_frequency {int} -- Monthly frequency to take backups. (default: {None})
+            monthly_retention {int} -- Number of hours to retain the monthly backups. (default: {None})
+            yearly_frequency {int} -- Yearly frequency to take backups. (default: {None})
+            yearly_retention {int} -- Number of hours to retain the yearly backups. (default: {None})
+            archive_name {str} -- The optional archive location you wish to configure on the SLA Domain. When populated, you must also provide a `retention_on_brik_in_days`. (default: {None})
+            retention_on_brik_in_days {int} -- The number of days you wish to keep the backups on the Rubrik cluster. When populated, you must also provide a `archive_name`. (default: {None})
+            instant_archive= {bool} -- Flag that determines whether or not to enable instant archive. Set to true to enable. (default: {False})
+
+        Returns:
+            str -- No change required. The 'name' SLA Domain is already configured with the provided configuration.
+            dict -- The full API response for `POST /v1/sla_domain`.
+            dict -- The full API response for `POST /v2/sla_domain`.
+        """
+
+        v2_sla = self.minimum_installed_cdm_version("5.0", timeout=timeout)
+
+        all_params = [
+            hourly_frequency,
+            hourly_retention,
+            daily_frequency,
+            daily_retention,
+            monthly_frequency,
+            monthly_retention,
+            yearly_frequency,
+            yearly_retention]
+
+        # Validate all values besides name are ints
+        for param in all_params:
+            if not isinstance(param, int):
+                raise InvalidParameterException("All 'frequency' and 'retention' parameters must be integers.")
+
+        if not isinstance(retention_on_brik_in_days, int) and retention_on_brik_in_days is not None:
+            raise InvalidParameterException("The 'retention_on_brik_in_days' parameter must be integer.")
+
+        # Make sure at least one frequency and retention is populated
+        if all(value is None for value in all_params):
+            raise InvalidParameterException("You must populate at least one frequency and retention.")
+
+        # Make sure the "time unit" frequency and retention are used together
+        if hourly_frequency is not None and hourly_retention is None or hourly_frequency is None and hourly_retention is not None:
+            raise InvalidParameterException(
+                "The 'hourly_frequency' and 'hourly_retention' parameters must be populated together.")
+
+        if daily_frequency is not None and daily_retention is None or daily_frequency is None and daily_retention is not None:
+            raise InvalidParameterException(
+                "The 'daily_frequency' and 'daily_retention' parameters must be populated together.")
+
+        if monthly_frequency is not None and monthly_retention is None or monthly_frequency is None and monthly_retention is not None:
+            raise InvalidParameterException(
+                "The 'monthly_frequency' and 'monthly_retention' parameters must be populated together.")
+
+        if yearly_frequency is not None and yearly_retention is None or yearly_frequency is None and yearly_retention is not None:
+            raise InvalidParameterException(
+                "The 'yearly_frequency' and 'yearly_retention' parameters must be populated together.")
+
+        if archive_name is not None and retention_on_brik_in_days is None or archive_name is None and retention_on_brik_in_days is not None:
+            raise InvalidParameterException(
+                "The 'archive_name' and 'retention_on_brik_in_days' parameters must be populated together.")
+
+        try:
+            # object_id() will set sla_already_present to something besides False if the SLA is already on the cluter
+            sla_id = self.object_id(name, "sla", timeout=timeout)
+        except InvalidParameterException:
+            sla_id = False
+
+        config = {}
+
+        config["name"] = name
+
+        if v2_sla is True:
+            # create the config for the v2 API
+            config["frequencies"] = {}
+
+            config["frequencies"]["hourly"] = {}
+            config["frequencies"]["hourly"]["frequency"] = hourly_frequency
+            config["frequencies"]["hourly"]["retention"] = hourly_retention
+
+            config["frequencies"]["daily"] = {}
+            config["frequencies"]["daily"]["frequency"] = daily_frequency
+            config["frequencies"]["daily"]["retention"] = daily_retention
+
+            config["frequencies"]["monthly"] = {}
+            config["frequencies"]["monthly"]["dayOfMonth"] = "LastDay"
+            config["frequencies"]["monthly"]["frequency"] = monthly_frequency
+            config["frequencies"]["monthly"]["retention"] = monthly_retention
+
+            config["frequencies"]["yearly"] = {}
+            config["frequencies"]["yearly"]["yearStartMonth"] = "January"
+            config["frequencies"]["yearly"]["dayOfYear"] = "LastDay"
+            config["frequencies"]["yearly"]["frequency"] = yearly_frequency
+            config["frequencies"]["yearly"]["retention"] = yearly_retention
+
+        else:
+            # Create the config for v1 endpoint
+            frequencies = []
+            if hourly_frequency is not None:
+                frequencies.append({
+                    "timeUnit": "Hourly",
+                    "frequency": hourly_frequency,
+                    "retention": hourly_retention
+                })
+            if daily_frequency is not None:
+                frequencies.append({
+                    "timeUnit": "Daily",
+                    "frequency": daily_frequency,
+                    "retention": daily_retention
+                })
+            if monthly_frequency is not None:
+                frequencies.append({
+                    "timeUnit": "Monthly",
+                    "frequency": monthly_frequency,
+                    "retention": monthly_retention
+                })
+            if yearly_frequency is not None:
+                frequencies.append({
+                    "timeUnit": "Yearly",
+                    "frequency": yearly_frequency,
+                    "retention": yearly_retention
+                })
+            config["frequencies"] = frequencies
+
+        if archive_name is not None:
+            archival_location_id = self.object_id(archive_name, "archival_location", timeout=timeout)
+
+            # convert retention in days to seconds
+            retention_on_brik_in_seconds = retention_on_brik_in_days * 86400
+            if instant_archive is False:
+                archival_threshold = retention_on_brik_in_seconds
+            else:
+                archival_threshold = 1
+
+            config["localRetentionLimit"] = archival_threshold
+
+            config["archivalSpecs"] = [{
+                "locationId": archival_location_id,
+                "archivalThreshold": archival_threshold
+            }]
+
+        if sla_id is not False:
+            self.log("create_sla: Getting the configuration details for the SLA Domain {} already on the Rubrik cluster.".format(name))
+            if v2_sla is True:
+                current_sla_details = self.get("v2", "/sla_domain/{}".format(sla_id), timeout=timeout)
+            else:
+                current_sla_details = self.get("v1", "/sla_domain/{}".format(sla_id), timeout=timeout)
+
+            keys_to_delete = [
+                "id",
+                "primaryClusterId",
+                "allowedBackupWindows",
+                "firstFullAllowedBackupWindows",
+                "archivalSpecs",
+                "replicationSpecs",
+                "numDbs",
+                "numOracleDbs",
+                "numFilesets",
+                "numHypervVms",
+                "numNutanixVms",
+                "numManagedVolumes",
+                "numStorageArrayVolumeGroups",
+                "numWindowsVolumeGroups",
+                "numLinuxHosts",
+                "numShares",
+                "numWindowsHosts",
+                "numVms",
+                "numEc2Instances",
+                "numVcdVapps",
+                "numProtectedObjects",
+                "isDefault",
+                "uiColor",
+                "maxLocalRetentionLimit",
+                "showAdvancedUi",
+                "advancedUiConfig"]
+
+            if archive_name is not None:
+                keys_to_delete.remove("archivalSpecs")
+                current_sla_details["localRetentionLimit"] = archival_threshold
+
+            for key in keys_to_delete:
+
+                try:
+                    del current_sla_details[key]
+                except KeyError:
+                    pass
+
+            if config == current_sla_details:
+                return "No change required. The {} SLA Domain is already configured with the provided configuration.".format(
+                    name)
+            else:
+                raise InvalidParameterException("The Rubrik cluster already has an SLA Domain named '{}'.".format(name))
+
+        self.log("create_sla: Creating the new SLA")
+        if v2_sla is True:
+            return self.post("v2", "/sla_domain", config, timeout=timeout)
+        else:
+            return self.post("v1", "/sla_domain", config, timeout=timeout)
+
+    def delete_sla(self, name, timeout=15):
+        """[summary]
+
+        Arguments:
+            name {[type]} -- [description]
+
+        Keyword Arguments:
+            timeout {int} -- [description] (default: {15})
+
+        Returns:
+            [type] -- [description]
+        """
+
+        try:
+            # object_id() will set sla_already_present to something besides False if the SLA is already on the cluter
+            sla_id = self.object_id(name, "sla", timeout=timeout)
+        except InvalidParameterException:
+            return "No change required. The SLA Domain '{}' is not on the Rubrik cluster.".format(name)
+
+        try:
+            self.log("delete_sla: Attempting to delete the SLA using the v1 API")
+            delete_sla = self.delete("v1", "/sla_domain/{}".format(sla_id))
+        except APICallException as api_response:
+            if "SLA Domains created/updated using v2 rest api version cannot be deleted from v1" in str(api_response):
+                self.log(
+                    "delete_sla: SLA Domains created with the v2 endpoint can not be deleted by the v1 endpoint. Attempting to delete the SLA using the v2 API")
+                delete_sla = self.delete("v2", "/sla_domain/{}".format(sla_id))
+            else:
+                raise APICallException(api_response)
+
+        return delete_sla
+
     def _time_in_range(self, start, end, point_in_time):
         """Checks if a specific datetime exists in a start and end time. For example:
         checks if a recovery point exists in the available snapshots
@@ -991,6 +1320,7 @@ class Data_Management(_API):
 
             return self.post('v1', '/mssql/db/{}/mount'.format(mssql_id), config, timeout)    
 
+
     def vsphere_live_unmount(self, mounted_vm_name, force=False, timeout=30):  # pylint: ignore
         """Delete a vSphere Live Mount from the Rubrik cluster. 
 
@@ -1093,3 +1423,4 @@ class Data_Management(_API):
                 "sql_live_unmount: Unmounting the database '{}'.".format(mounted_db_name))
 
             return self.delete('v1', '/mssql/db/mount/{}?force={}'.format(mount_id, force), timeout)
+
