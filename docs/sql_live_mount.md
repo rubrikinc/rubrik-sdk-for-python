@@ -14,9 +14,9 @@ def sql_live_mount(self, db_name, date, time, sql_instance=None, sql_host=None, 
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
-| sql_instance  | str  | The SQL instance name with the database you wish to Live Mount.  |         |         |
-| sql_host  | str  | The SQL Host of the database/instance to Live Mount.  |         |         |
-| mount_name  | str  | The name given to the Live Mounted database i.e. AdventureWorks_Clone.  |         |         |
+| sql_instance  | str  | The SQL instance name with the database you wish to Live Mount.  |         |    None     |
+| sql_host  | str  | The SQL Host of the database/instance to Live Mount.  |         |     None    |
+| mount_name  | str  | The name given to the Live Mounted database i.e. AdventureWorks_Clone.  |         |    None     |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    30     |
 
 ## Returns
