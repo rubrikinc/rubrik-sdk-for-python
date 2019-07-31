@@ -2,14 +2,14 @@
 
 Issues a bootstrap request to a specified Rubrik cluster
 ```py
-def setup_cluster(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30)
+def setup_cluster(cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, pre_cdm5=False, wait_for_completion=True, timeout=30)
 ```
 
 ## Useage
 
 ### Physical Cluster or Virtual Appliance
 
-By default, an un-bootstrapped Rubrik Cluster will respond to [multicast DNS](https://en.wikipedia.org/wiki/Multicast_DNS) (mDNS) queries directed to `[node_serial_number].local`. It is important that mDNS resolution is working properly on system the SDK is called from if you wish to supply `[node_serial_number].local` to the `bootstrap()` function as the `node_ip` value. 
+By default, an un-bootstrapped Rubrik Cluster will respond to [multicast DNS](https://en.wikipedia.org/wiki/Multicast_DNS) (mDNS) queries directed to `[node_serial_number].local`. It is important that mDNS resolution is working properly on system the SDK is called from if you wish to supply `[node_serial_number].local` to the `bootstrap()` function as the `node_ip` value.
 
 | Note: When bootstrapping a cluster, `Bootstrap()` is used instead of `Connect()` to establish the connection to the cluster. |
 | --- |
@@ -50,6 +50,7 @@ mDNS name resolution can be verified on systemd-based Linux systems using the co
 | dns_search_domains  | str  | The search domain that the DNS Service will use to resolve hostnames that are not fully qualified.  |         |    None     |
 | dns_nameservers  | list  | IPv4 addresses of DNS servers.  |         |    [8.8.8.8]     |
 | ntp_servers  | list  | FQDN or IPv4 address of a network time protocol (NTP) server.  |         |    [pool.ntp.org]     |
+| pre_cdm5  | bool  | Flag to determine if bootstrap will be on a pre-cdm 5.0 version. |         |    False     |
 | wait_for_completion  | bool  | Flag to determine if the function should wait for the bootstrap process to complete.  |         |    True     |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    30     |
 

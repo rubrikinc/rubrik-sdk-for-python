@@ -310,7 +310,7 @@ class Bootstrap(_API):
                 "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
             )
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):  # pylint: ignore
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, pre_cdm5=False, wait_for_completion=True, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
@@ -326,6 +326,7 @@ class Bootstrap(_API):
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
             dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {['8.8.8.8']})
             ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {['pool.ntp.org']})
+            pre_cdm5 {bool} -- Flag to determine if bootstrap will be on a pre-cdm 5.0 version. (default: {False})
             wait_for_completion {bool} -- Flag to determine if the function should wait for the bootstrap process to complete. (default: {True})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
@@ -358,7 +359,15 @@ class Bootstrap(_API):
         bootstrap_config["name"] = cluster_name
         bootstrap_config["dnsNameservers"] = dns_nameservers
         bootstrap_config["dnsSearchDomains"] = dns_search_domains
-        bootstrap_config["ntpServers"] = ntp_servers
+
+        if pre_cdm5 == True:
+            bootstrap_config["ntpServers"] = ntp_servers
+        else:
+            bootstrap_config["ntpServerConfigs"] = []
+            for ntp in ntp_servers:
+                tempNtp = {}
+                tempNtp["server"] = ntp
+                bootstrap_config["ntpServerConfigs"].append(tempNtp)
 
         bootstrap_config["adminUserInfo"] = {}
         bootstrap_config["adminUserInfo"]['password'] = admin_password
