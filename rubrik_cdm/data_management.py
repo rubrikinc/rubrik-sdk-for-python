@@ -976,7 +976,6 @@ class Data_Management(_API):
 
             return vm_name_id
 
-
     def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, timeout=15):  # pylint: ignore
         """Create a new SLA Domain.
 
@@ -1320,7 +1319,6 @@ class Data_Management(_API):
 
             return self.post('v1', '/mssql/db/{}/mount'.format(mssql_id), config, timeout)    
 
-
     def vsphere_live_unmount(self, mounted_vm_name, force=False, timeout=30):  # pylint: ignore
         """Delete a vSphere Live Mount from the Rubrik cluster. 
 
@@ -1424,3 +1422,58 @@ class Data_Management(_API):
 
             return self.delete('v1', '/mssql/db/mount/{}?force={}'.format(mount_id, force), timeout)
 
+    def get_vsphere_live_mount(self, vm_name, timeout=15):  # pylint: ignore
+        """Get existing Live Mounts for a vSphere VM.
+
+        Arguments:
+            vm_name {str} -- The name of the mounted vSphere VM.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full response of `GET /v1/vmware/vm/snapshot/mount?vm_id={vm_id}`.
+        """
+
+        self.log("get_vsphere_live_mount: Searching the Rubrik cluster for the mounted vSphere VM '{}'.".format(vm_name))
+        vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
+
+        #try:
+        #    vm_id
+        #except NameError:
+        #    raise InvalidParameterException("The vSphere VM '{}' does not exit.".format(vm_name))
+        #else:
+        self.log("get_vsphere_live_mount: Getting Live Mounts of vSphere VM {}.".format(vm_name))
+        return self.get('v1', '/vmware/vm/snapshot/mount?vm_id={}'.format(vm_id), timeout)
+    
+    def get_vsphere_live_mount_names(self, vm_name, timeout=15):  # pylint: ignore
+        """Get existing Live Mount VM name(s) for a vSphere VM.
+
+        Arguments:
+            vm_name {str} -- The name of the mounted vSphere VM (source).
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            list -- A list of the Live Mounted VM names.
+        """
+
+        self.log("get_vsphere_live_mount_names: Searching the Rubrik cluster for the mounted vSphere VM '{}'.".format(vm_name))
+        vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
+
+        self.log("get_vsphere_live_mount_names: Getting Live Mounts of vSphere VM {}.".format(vm_name))
+        mounted_vm = self.get('v1', '/vmware/vm/snapshot/mount?vm_id={}'.format(vm_id), timeout)
+        mounted_vm_name = []
+        for vm in mounted_vm['data']:
+            try:
+                vm_moid = vm['mountedVmId']
+                split_moid = vm_moid.split('-')
+                moid = split_moid[-2]+'-'+split_moid[-1]
+                self.log("get_vsphere_live_mount_names: Getting summary of VM with moid '{}'.".format(moid))
+                vm_data = self.get('v1', '/vmware/vm?moid={}'.format(moid), timeout)
+                mounted_vm_name.append(vm_data['data'][0]['name'])
+            except KeyError:
+                self.log("get_vsphere_live_mount_names: A Live Mount of vSphere VM '{}' is in progress.".format(vm_name))
+                continue
+        return mounted_vm_name
