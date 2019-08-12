@@ -1438,11 +1438,6 @@ class Data_Management(_API):
         self.log("get_vsphere_live_mount: Searching the Rubrik cluster for the mounted vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
-        #try:
-        #    vm_id
-        #except NameError:
-        #    raise InvalidParameterException("The vSphere VM '{}' does not exit.".format(vm_name))
-        #else:
         self.log("get_vsphere_live_mount: Getting Live Mounts of vSphere VM {}.".format(vm_name))
         return self.get('v1', '/vmware/vm/snapshot/mount?vm_id={}'.format(vm_id), timeout)
     
