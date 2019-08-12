@@ -1450,7 +1450,7 @@ class Data_Management(_API):
         """Get existing Live Mount VM name(s) for a vSphere VM.
 
         Arguments:
-            vm_name {str} -- The name of the mounted vSphere VM (source).
+            vm_name {str} -- The name of the mounted vSphere VM.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
