@@ -1250,33 +1250,7 @@ class Data_Management(_API):
             dict -- The full response of `POST /v1/mssql/db/{id}/mount`.
         """
         
-        
-        if sql_instance is None or sql_host is None or mount_name is None:
-                raise InvalidParameterException(
-                    "To live mount a mssql database the 'sql_instance', 'sql_host', 'mount_name' paramaters must be populated.")
-
-        mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
-        
-        self.log("sql_live_mount: Getting the list of instances on host {}.".format(sql_host))
-        mssql_instance = self.get(
-            'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host_id), timeout=timeout)
-
-        for instance in mssql_instance['data']:
-            if instance['name'] == sql_instance:
-                sql_instance_id = instance['id']
-                break
-        else:
-            raise InvalidParameterException("The SQL instance {} does not exist, please provide a valid instance".format(sql_instance))
-
-        self.log("sql_live_mount: Getting the list of databases on the instance {}, on host {}.".format(sql_instance, sql_host))
-        mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_instance_id), timeout=timeout)
-
-        for db in mssql_db['data']:
-            if db['name'] == db_name:
-                mssql_id = db['id']
-                break
-        else:
-            raise InvalidParameterException("The database {} does not exist, please provide a valid database".format(db_name))
+        mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
         
         self.log("sql_live_mount: Getting the recoverable range for mssql db '{}'.".format(db_name))
         range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
@@ -1375,33 +1349,7 @@ class Data_Management(_API):
             dict -- The full response of `DELETE /mssql/db/mount/{id}?force={bool}`.
         """
 
-
-        if sql_instance is None or sql_host is None:
-                raise InvalidParameterException(
-                    "To unmount a mssql database the 'sql_instance' and 'sql_host' paramaters must be provided.")
-
-        mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
-        
-        self.log("sql_live_unmount: Getting the list of instances on host {}.".format(sql_host))
-        mssql_instance = self.get(
-            'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host_id), timeout=timeout)
-
-        for instance in mssql_instance['data']:
-            if instance['name'] == sql_instance:
-                sql_instance_id = instance['id']
-                break
-        else:
-            raise InvalidParameterException("The mssql instance {} does not exist, please provide a valid instance".format(sql_instance))
-
-        self.log("sql_live_unmount: Getting the list of databases on the instance {}, on host {}.".format(sql_instance, sql_host))
-        mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_instance_id), timeout=timeout)
-
-        for db in mssql_db['data']:
-            if db['name'] == mounted_db_name:
-                mounted_db_id = db['id']
-                break
-        else:
-            raise InvalidParameterException("The database {} does not exist, please provide a valid database".format(mounted_db_name))
+        mounted_db_id = self._validate_sql_db(mounted_db_name, sql_instance, sql_host)
 
         self.log("sql_live_unmount: Getting the MSSQL mount information from the Rubrik cluster.")
         mount_summary = self.get('v1', '/mssql/db/mount', timeout=timeout)
@@ -1472,3 +1420,65 @@ class Data_Management(_API):
                 self.log("get_vsphere_live_mount_names: A Live Mount of vSphere VM '{}' is in progress.".format(vm_name))
                 continue
         return mounted_vm_name
+
+    def _validate_sql_db(self, db_name, sql_instance=None, sql_host=None, timeout=30): # pylint: ignore
+        """Validate the db is with db_name, sql_instance, sql_host
+
+        Arguments:
+            db_name {str} -- The name of the source database with Live Mounts.
+            
+        Keyword Arguments:
+            sql_instance {str} -- The SQL instance name of the source database.
+            sql_host {str} -- The SQL Host name of the source database/instance.
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+
+        Returns:
+            str -- The ID of the MSSQL database.
+        """
+        if sql_instance is None or sql_host is None:
+            raise InvalidParameterException(
+                "To retrieve live mounts of an mssql database the 'sql_instance' and 'sql_host' paramaters must be populated.")
+
+        mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
+        
+        self.log("_validate_sql_db: Getting the list of instances on host {}.".format(sql_host))
+        mssql_instance = self.get(
+            'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host_id), timeout=timeout)
+
+        for instance in mssql_instance['data']:
+            if instance['name'] == sql_instance:
+                sql_instance_id = instance['id']
+                break
+        else:
+            raise InvalidParameterException("The SQL instance {} does not exist, please provide a valid instance".format(sql_instance))
+
+        self.log("_validate_sql_db: Getting the list of databases on the instance {}, on host {}.".format(sql_instance, sql_host))
+        mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_instance_id), timeout=timeout)
+
+        for db in mssql_db['data']:
+            if db['name'] == db_name:
+                mssql_id = db['id']
+                break
+        else:
+            raise InvalidParameterException("The database {} does not exist, please provide a valid database".format(db_name))
+        return mssql_id
+
+    def get_sql_live_mount(self, db_name, sql_instance=None, sql_host=None, timeout=30):  # pylint: ignore
+        """Retrieve the Live Mounts for a MSSQL source database.
+
+        Arguments:
+            db_name {str} -- The name of the source database with Live Mounts.
+            
+        Keyword Arguments:
+            sql_instance {str} -- The SQL instance name of the source database.
+            sql_host {str} -- The SQL host name of the source database/instance.
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+
+        Returns:
+            dict -- The full response of `GET /v1/mssql/db/mount?source_database_id={id}`.
+        """
+        
+        mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
+
+        self.log("get_sql_live_mount: Getting the live mounts for mssql db id'{}'.".format(mssql_id))
+        return self.get('v1', '/mssql/db/mount?source_database_id={}'.format(mssql_id), timeout)  
