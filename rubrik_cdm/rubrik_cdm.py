@@ -393,11 +393,12 @@ class Bootstrap(_API):
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
 
+        number_of_attempts = 1
+
         while True:
 
             try:
                 self.log('bootstrap: Starting the bootstrap process.')
-                number_of_attempts = 1
                 api_request = self.post(
                     'internal',
                     '/cluster/me/bootstrap',
