@@ -27,7 +27,7 @@ from .exceptions import InvalidParameterException, InvalidTypeException
 
 
 class Physical(Api):
-    """This class contains methods related to the managment of the Physical objects in the Rubrik cluster."""
+    """This class contains methods related to the management of the Physical objects in the Rubrik cluster."""
 
     def add_physical_host(self, hostname, timeout=60):
         """Add a physical host to the Rubrik cluster.
@@ -255,6 +255,59 @@ class Physical(Api):
 
         self.log("create_fileset: Creating the '{}' Fileset.".format(name))
         return self.post('internal', '/fileset_template/bulk', model, timeout=timeout)
+
+    def add_nas_share_to_host(self, hostname, share_type, export_point, username=None, password=None, domain=None, timeout=60):  # pylint: ignore
+        """Add a network share to a host.
+
+        Arguments:
+            hostname {str} -- The hostname or IP Address of the host serving the NAS share.
+            share_type {str} -- The type of NAS Share you wish to backup. (choices: {NFS, SMB})
+            export_point {str} -- Name of the share exported by the NAS host.
+
+        Keyword Arguments:
+            username {str} -- Username if the network share requires authentication.
+            password {str} -- Password if the network share requires authentication.
+            domain {str} -- Domain name of account credentials used for authentication.
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default {60})
+
+        Returns:
+            str -- No change required. The share with the given hostname and export point has already been added.
+            dict -- The full API response for `POST /internal/host/share` with the given share arguments.
+        """
+        valid_share_type = ['NFS', 'SMB']
+
+        share_address = "{}:{}".format(hostname, export_point)
+
+        if share_type not in valid_share_type:
+            raise InvalidParameterException(
+                "The add_nas_share_to_host() share_type argument must be one of the following: {}.".format(valid_share_type))
+
+        host_id = self.object_id(hostname, 'physical_host')
+
+        self.log("add_nas_share_to_host: Getting the properties of the {} share {}.".format(share_type, share_address))
+        current_host_shares = self.get(
+            'internal', '/host/share?share_type={}&hostid={}'.format(share_type, host_id),
+            timeout=timeout)
+
+        matching_current_host_share = [share_properties for share_properties in current_host_shares['data']
+                                       if share_properties['exportPoint'] == export_point]
+
+        if len(matching_current_host_share) >= 1:
+            return "No change required. The {} share {} is already in Rubrik.".format(share_type, share_address)
+        else:
+            config = {}
+            config['hostId'] = host_id
+            config['shareType'] = share_type
+            config['exportPoint'] = export_point
+            if username:
+                config['username'] = username
+            if password:
+                config['password'] = password
+            if domain:
+                config['domain'] = domain
+
+            self.log("Adding the {} share {} to Rubrik.".format(share_type, share_address))
+            return self.post('internal', '/host/share', config, timeout)
 
     def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None, exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):  # pylint: ignore
         """Assign a Fileset to a Linux or Windows machine. If you have multiple Filesets with identical names, you will need to populate the Filesets properties (i.e this functions keyword arguments)

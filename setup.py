@@ -58,7 +58,7 @@ print(cluster_version)
 
 setuptools.setup(
     name="rubrik_cdm",
-    version="2.0.1",
+    version="2.0.2",
     author="Rubrik Build",
     description="A Python package for interacting with the Rubrik CDM API.",
     long_description=long_description,
@@ -74,7 +74,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.6"
     ],
     install_requires=[
-        'requests >= 2.18.4',
+        'requests >= 2.18.4, != 2.22.0',
         'python-dateutil',
         'pytz'
     ],

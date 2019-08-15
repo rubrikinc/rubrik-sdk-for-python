@@ -680,6 +680,81 @@ def test_create_nas_fileset(rubrik, mocker, share):
         mock_post_v1_fileset_template_bulk()
 
 
+@pytest.mark.parametrize('share_type', ["NFS", "SMB"])
+def test_add_nas_share_to_host_adds_new_share(rubrik, mocker, share_type):
+
+    def mock_object_id_for_host():
+        return "Host:::aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+
+    def mock_get_internal_host_share():
+        return {
+            "hasMore": False,
+            "data": [],
+            "total": 1
+        }
+
+    def mock_post_internal_host_share():
+        return {
+            'hostId' : "Host:::aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            'shareType' : share_type,
+            'exportPoint' : "/my_share"
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_host_share()
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True, spec_set=True)
+    mock_get.return_value = mock_object_id_for_host()
+
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post.return_value = mock_post_internal_host_share()
+
+    assert rubrik.add_nas_share_to_host("my_nas_host", share_type, "/my_share") == \
+        mock_post_internal_host_share()
+
+
+@pytest.mark.parametrize('share_type', ["NFS", "SMB"])
+def test_add_nas_share_to_host_idempotence_with_existing_share(rubrik, mocker, share_type):
+
+    def mock_get_internal_host_share():
+        return {
+            'hasMore': False,
+            'data': [
+                {
+                    'id': 'HostShare:::00000000-1111-2222-3333-444444444444',
+                    'hostId': 'Host:::aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+                    'hostname': 'my_nas_host',
+                    'shareType': share_type,
+                    'exportPoint': '/my_share',
+                    'status': 'Connected',
+                    'primaryClusterId': '00000000-aaaa-1111-bbbb-222222222222'
+                }
+            ],
+            'total': 1}
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_host_share()
+
+    mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.object_id', autospec=True, spec_set=True)
+    mock_get.return_value = "Host:::aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+
+    assert rubrik.add_nas_share_to_host("my_nas_host", share_type, "/my_share") == \
+        "No change required. The {} share my_nas_host:/my_share is already in Rubrik.".format(share_type)
+    assert not rubrik.post.called
+
+
+def test_add_nas_share_to_host_errors_when_invalid_share_type_is_passed(rubrik):
+
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.add_nas_share_to_host("hostname", "share_name", "not_a_valid_share_type")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "The add_nas_share_to_host() share_type argument must be one of the following: ['NFS', 'SMB']."
+
+
 def test_assign_physical_host_fileset_invalid_operating_system(rubrik):
 
     with pytest.raises(InvalidParameterException) as error:

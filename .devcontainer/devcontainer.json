@@ -5,8 +5,13 @@
 	"extensions": [
 		"ms-python.python",
 		"njpwerner.autodocstring",
-		"github.vscode-pull-request-github"
+		"github.vscode-pull-request-github",
+		"bierner.markdown-preview-github-styles",
+		"josa.markdown-table-formatter",
+		"mrmlnc.vscode-duplicate",
+		"codezombiech.gitignore"
 	],
+	"postCreateCommand": "chmod +x .devcontainer/start.sh && . .devcontainer/start.sh",
 	"settings": {
 		"python.pythonPath": "/usr/local/bin/python"
 	}
