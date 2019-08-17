@@ -112,6 +112,13 @@ class Api():
                 self.log('PATCH {}'.format(request_url))
                 self.log('Config: {}'.format(config))
                 api_request = requests.patch(request_url, verify=False, headers=header, data=config, timeout=timeout)
+            elif call_type == 'PUT':
+                config = json.dumps(config)
+                request_url = "https://{}/api/{}{}".format(
+                    self.node_ip, api_version, api_endpoint)
+                self.log('PUT {}'.format(request_url))
+                self.log('Config: {}'.format(config))
+                api_request = requests.put(request_url, verify=False, headers=header, data=config, timeout=timeout)
             elif call_type == 'DELETE':
                 config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(
@@ -237,6 +244,31 @@ class Api():
 
         return self._common_api(
             'PATCH',
+            api_version,
+            api_endpoint,
+            config=config,
+            job_status_url=None,
+            timeout=timeout,
+            authentication=authentication)
+
+    def put(self, api_version, api_endpoint, config, timeout=15, authentication=True):
+        """Send a PUT request to the provided Rubrik API endpoint.
+
+        Arguments:
+            api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
+            api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
+            config {dict} -- The specified data to send with the API call.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+            authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
+
+        Returns:
+            dict -- The response body of the API call.
+        """
+
+        return self._common_api(
+            'PUT',
             api_version,
             api_endpoint,
             config=config,
