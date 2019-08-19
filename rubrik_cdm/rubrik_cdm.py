@@ -29,7 +29,6 @@ from .physical import Physical
 from .cloud import Cloud
 from .exceptions import InvalidParameterException, RubrikException, APICallException
 
-
 _CLUSTER = Cluster
 _DATA_MANAGEMENT = Data_Management
 _PHYSICAL = Physical
@@ -200,7 +199,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                     "Error: The API Endpoint should not end with '/' unless proceeded by '='. (ex. /cluster/me or /fileset/snapshot/<id>/browse?path=/)")
 
 
-
 class Bootstrap(_API):
     """This class contains all functions related to the Bootstrapping of a Rubrik Cluster.
 
@@ -220,19 +218,29 @@ class Bootstrap(_API):
 
         node_ip = [self.node_ip]
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None,
-                      enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
+    def setup_cluster(self, cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask, mgmt_vlan=None, node_mgmt_ips=None,
+                      ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None, data_gateway=None, data_subnet_mask=None, data_vlan=None,
+                      node_data_ips=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
             cluster_name {str} -- Unique name to assign to the Rubrik cluster.
             admin_email {str} -- The Rubrik cluster sends messages for the admin account to this email address.
             admin_password {str} --  Password for the admin account.
-            management_gateway {str} --  IP address assigned to the management network gateway
-            management_subnet_mask {str} -- Subnet mask assigned to the management network.
+            mgmt_gateway {str} --  IP address assigned to the management network gateway.
+            mgmt_subnet_mask {str} -- Subnet mask assigned to the management network.
 
         Keyword Arguments:
-            node_config {dict} -- The Node Name and IP formatted as a dictionary. (default: {None})
+            mgmt_vlan {int} -- VLAN assigned to the management network. (default: {None})
+            ipmi_gateway {str} --  IP address assigned to the ipmi network gateway. (default: {None})
+            ipmi_subnet_mask {str} -- Subnet mask assigned to the ipmi network. (default: {None})
+            ipmi_vlan {int} -- VLAN assigned to the ipmi network. (default: {None})
+            data_gateway {str} --  IP address assigned to the ipmi network gateway. (default: {None})
+            data_subnet_mask {str} -- Subnet mask assigned to the ipmi network. (default: {None})
+            data_vlan {int} -- VLAN assigned to the data network. (default: {None})
+            node_mgmt_ips {dict} -- The Node Name and IP formatted as a dictionary for Management addresses. Mandatory. (default: {None})
+            node_ipmi_ips {dict} -- The Node Name and IP formatted as a dictionary for IPMI addresses. Optional. (default: {None})
+            node_data_ips {dict} -- The Node Name and IP formatted as a dictionary for Data addresses. Optional. (default: {None})
             enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
             dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {['8.8.8.8']})
@@ -244,9 +252,9 @@ class Bootstrap(_API):
             dict -- The response returned by `POST /internal/cluster/me/bootstrap`.
         """
 
-        if node_config is None or isinstance(node_config, dict) is not True:
+        if node_mgmt_ips is None or isinstance(node_mgmt_ips, dict) is not True:
             raise InvalidParameterException(
-                'You must provide a valid dictionary for "node_config".')
+                'You must provide a valid dictionary for "node_mgmt_ips" holding node names and corresponding management IPs.')
 
         if dns_search_domains is None:
             dns_search_domains = []
@@ -264,6 +272,14 @@ class Bootstrap(_API):
         elif isinstance(ntp_servers, list) is not True:
             raise InvalidParameterException('You must provide a valid list for "ntp_servers".')
 
+        using_ipmi_config = False;
+        using_data_config = False;
+
+        if ipmi_gateway is not None and ipmi_subnet_mask is not None and isinstance(node_ipmi_ips, dict):
+            using_ipmi_config = True
+        if data_gateway is not None and data_subnet_mask is not None and isinstance(node_data_ips,dict):
+            using_data_config = True
+
         bootstrap_config = {}
         bootstrap_config["enableSoftwareEncryptionAtRest"] = enable_encryption
         bootstrap_config["name"] = cluster_name
@@ -277,13 +293,43 @@ class Bootstrap(_API):
         bootstrap_config["adminUserInfo"]['id'] = "admin"
 
         bootstrap_config["nodeConfigs"] = {}
-        for node_name, node_ip in node_config.items():
+
+        for node_name, node_ip in node_mgmt_ips.items():
             bootstrap_config["nodeConfigs"][node_name] = {}
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig'] = {}
-            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['netmask'] = management_subnet_mask
-            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
+            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['netmask'] = mgmt_subnet_mask
+            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = mgmt_gateway
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
+            if mgmt_vlan is not None:
+                bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['vlan'] = mgmt_vlan
 
+        if (using_ipmi_config):
+            for node_name, ipmi_ip in node_ipmi_ips.items():
+                if node_name not in bootstrap_config["nodeConfigs"]:
+                    raise InvalidParameterException('Non-existent node name specified in IPMI addresses.')
+                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig'] = {}
+                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['netmask'] = ipmi_subnet_mask
+                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['gateway'] = ipmi_gateway
+                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['address'] = ipmi_ip
+                if ipmi_vlan is not None:
+                    bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['vlan'] = ipmi_vlan
+
+        if (using_data_config):
+            for node_name, data_ip in node_data_ips.items():
+                if node_name not in bootstrap_config["nodeConfigs"]:
+                    raise InvalidParameterException('Non-existent node name specified in DATA addresses.')
+                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig'] = {}
+                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['netmask'] = data_subnet_mask
+                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['gateway'] = data_gateway
+                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['address'] = data_ip
+                if data_vlan is not None:
+                    bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['vlan'] = data_vlan
+
+        print ("Constructed the following JSON:", bootstrap_config)
+
+        return True
+
+        """
         while True:
 
             try:
@@ -331,6 +377,7 @@ class Bootstrap(_API):
                     return status
 
         return api_request
+        """
 
     def status(self, request_id="1", timeout=15):
         """Retrieves status of in progress bootstrap requests
