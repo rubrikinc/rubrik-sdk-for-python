@@ -72,7 +72,7 @@ class Physical(Api):
                 self.log("Adding the following physical host(s): '{}'".format(hostname))
                 return self.post('internal', '/host/bulk', config, timeout)
             else:
-                return "No Change Required. All Hosts Already added or supplied list was empty"
+                return "No change required. All Hosts have already been added or supplied list was empty."
         else:
             for host in current_hosts['data']:
                 if host['hostname'] == hostname:
