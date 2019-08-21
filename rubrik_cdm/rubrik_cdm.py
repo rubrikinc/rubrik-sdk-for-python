@@ -326,9 +326,7 @@ class Bootstrap(_API):
                 self.log('Could not resolve IPv4 address for cluster.')
 
         if node_resolution == False:
-            sys.exit(
-                "Error: Could not resolve addrsss for cluster, or invalid IP/address supplied "
-            )
+            raise RubrikException("Error: Could not resolve addrsss for cluster, or invalid IP/address supplied")
 
     def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster
@@ -393,11 +391,12 @@ class Bootstrap(_API):
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
 
+        number_of_attempts = 1
+
         while True:
 
             try:
                 self.log('bootstrap: Starting the bootstrap process.')
-                number_of_attempts = 1
                 api_request = self.post(
                     'internal',
                     '/cluster/me/bootstrap',

@@ -10,7 +10,7 @@ Install from pip:
 
 Install from source:
 ```
-$ git clone https://github.com/rubrik-devops/rubrik-sdk-for-python
+$ git clone https://github.com/rubrikinc/rubrik-sdk-for-python
 $ cd rubrik-sdk-for-python
 $ python setup.py install
 ``` 
