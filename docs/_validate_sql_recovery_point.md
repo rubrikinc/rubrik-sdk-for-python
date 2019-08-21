@@ -1,6 +1,6 @@
 # _validate_sql_recovery_point
 
-Checks whether a database exist on an SQL Instance and Host.
+Check whether the data and time provided is a valid recovery point for an MSSQL database
 ```py
 def _validate_sql_recovery_point(db_name, date, time, timeout=30)
 ```
