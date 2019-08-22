@@ -1237,8 +1237,8 @@ class Data_Management(_API):
 
         Arguments:
             db_name {str} -- The name of the database to Live Mount.
-            date {str} -- The recovery_point date you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). 
-            time {str} -- The recovery_point time you wish to Live Mount formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+            date {str} -- The recovery_point date to recovery to formated as `Month-Day-Year` (ex: 1-15-2014). 
+            time {str} -- The recovery_point time to recovery to formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
 
         Keyword Arguments:
             sql_instance {str} -- The SQL instance name with the database you wish to Live Mount.
@@ -1252,37 +1252,16 @@ class Data_Management(_API):
         
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
         
-        self.log("sql_live_mount: Getting the recoverable range for mssql db '{}'.".format(db_name))
-        range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
-
-        self.log("sql_live_mount: Converting the provided date/time into UTC.")
-        recovery_date_time = self._date_time_conversion(date, time)
-        recovery_date_time = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
-        recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
-
-        for range in range_summary['data']:
-            startstr = range['beginTime']
-            endstr = range['endTime']
-            startsplit = startstr[:16]
-            endsplit = endstr[:16]
-            start = datetime.strptime(startsplit,'%Y-%m-%dT%H:%M')
-            end = datetime.strptime(endsplit,'%Y-%m-%dT%H:%M')
-
-            self.log("sql_live_mount: Searching for the provided recovery_point.")
-            is_recovery_point = self._time_in_range(start, end, recovery_date_time)
-            if is_recovery_point == False:
-                continue
-            else:
-                break
+        recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
 
         try:
-            if is_recovery_point == False:
+            if recovery_point['is_recovery_point'] == False:
                 raise InvalidParameterException("The database '{}' does not have a recovery_point taken on {} at {}.".format(db_name, date, time))
         except NameError:
             pass
         else:
             config = {}
-            config['recoveryPoint'] = {'timestampMs': recovery_timestamp}
+            config['recoveryPoint'] = {'timestampMs': recovery_point['recovery_timestamp']}
             config['mountedDatabaseName'] = mount_name
                 
             self.log(
@@ -1422,14 +1401,14 @@ class Data_Management(_API):
         return mounted_vm_name
 
     def _validate_sql_db(self, db_name, sql_instance=None, sql_host=None, timeout=30): # pylint: ignore
-        """Validate the db is with db_name, sql_instance, sql_host
+        """Checks whether a database exist on an SQL Instance and Host.
 
         Arguments:
-            db_name {str} -- The name of the source database with Live Mounts.
+            db_name {str} -- The name of the database.
             
         Keyword Arguments:
-            sql_instance {str} -- The SQL instance name of the source database.
-            sql_host {str} -- The SQL Host name of the source database/instance.
+            sql_instance {str} -- The SQL instance.
+            sql_host {str} -- The SQL server hostname.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
@@ -1482,3 +1461,84 @@ class Data_Management(_API):
 
         self.log("get_sql_live_mount: Getting the live mounts for mssql db id'{}'.".format(mssql_id))
         return self.get('v1', '/mssql/db/mount?source_database_id={}'.format(mssql_id), timeout)  
+
+    def _validate_sql_recovery_point(self, mssql_id, date, time, timeout=30):  # pylint: ignore
+        """Check whether the data and time provided is a valid recovery point for an MSSQL database
+
+        Arguments:
+            mssql_id {str} -- The ID of the database.
+            date {str} -- The recovery_point date formated as `Month-Day-Year` (ex: 1-15-2014). 
+            time {str} -- The recovery_point time  formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+            
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+
+        Returns:
+            dict -- A dictionary with values {'is_recovery_point': bool, 'recovery_timestamp': datetime}.
+        """
+
+        self.log("_validate_sql_recovery_point: Getting the recoverable range for mssql db ID:'{}'.".format(mssql_id))
+        range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
+
+        self.log("_validate_sql_recovery_point: Converting the provided date/time into UTC.")
+        recovery_date_time = self._date_time_conversion(date, time)
+        recovery_date_time = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
+        recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
+
+        for range in range_summary['data']:
+            startstr = range['beginTime']
+            endstr = range['endTime']
+            startsplit = startstr[:16]
+            endsplit = endstr[:16]
+            start = datetime.strptime(startsplit,'%Y-%m-%dT%H:%M')
+            end = datetime.strptime(endsplit,'%Y-%m-%dT%H:%M')
+
+            self.log("_validate_sql_recovery_point: Searching for the provided recovery_point.")
+            is_recovery_point = self._time_in_range(start, end, recovery_date_time)
+            if is_recovery_point == False:
+                continue
+            else:
+                break
+        recovery_point = {}
+        recovery_point['is_recovery_point'] = is_recovery_point
+        recovery_point['recovery_timestamp'] = recovery_timestamp
+        
+        return recovery_point
+
+    def sql_instant_recovery(self, db_name, date, time, sql_instance=None, sql_host=None, finish_recovery=True, max_data_streams=0, timeout=30):  # pylint: ignore
+        """Perform an instant recovery for MSSQL database from a specified recovery point.
+
+        Arguments:
+            db_name {str} -- The name of the database to instantly recover.
+            date {str} -- The recovery_point date to recover to formated as `Month-Day-Year` (ex: 1-15-2014). 
+            time {str} -- The recovery_point time to recover to formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+
+        Keyword Arguments:
+            sql_instance {str} -- The SQL instance name with the database to instantly recover.
+            sql_host {str} -- The SQL Host of the database/instance to instantly recover.
+            finish_recovery {bool} -- A Boolean value that determines the recovery option to use during database restore. When this value is 'true', the database is restored using the RECOVERY option and is fully functional at the end of the restore operation. When this value is 'false', the database is restored using the NORECOVERY option and remains in recovering mode at the end of the restore operation.
+            max_data_streams {int} -- Maximum number of parallel data streams that can be used to copy data to the target system.
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+
+        Returns:
+            dict -- The full response of `POST /mssql/db/{id}/restore`.
+        """
+        
+        mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
+        
+        recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
+
+        try:
+            if recovery_point['is_recovery_point'] == False:
+                raise InvalidParameterException("The database '{}' does not have a recovery_point taken on {} at {}.".format(db_name, date, time))
+        except NameError:
+            pass
+        else:
+            config = {}
+            config['recoveryPoint'] = {'timestampMs': recovery_point['recovery_timestamp']}
+            config['finish_recovery'] = finish_recovery
+            config['max_data_streams'] = max_data_streams
+                
+            self.log("sql_instant_recovery: Performing instant recovery of {} to recovery_point {} at {}.".format(db_name, date, time))
+
+            return self.post('v1', '/mssql/db/{}/restore'.format(mssql_id), config, timeout)
