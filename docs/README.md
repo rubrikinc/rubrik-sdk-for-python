@@ -56,10 +56,9 @@ rubrik = rubrik_cdm.Connect(node_ip, username, password)
 import rubrik_cdm
 
 node_ip = "172.21.8.90"
-username = "sdk@rangers.lab"
 api_token "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUVkN2FhYzlfZWU0MzA5ODQtMGE1Zi00NGZjLTliNTYtN"
 
-rubrik = rubrik_cdm.Connect(node_ip, username, api_token=api_token)
+rubrik = rubrik_cdm.Connect(node_ip, api_token=api_token)
 ```
 
 
