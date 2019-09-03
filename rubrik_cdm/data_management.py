@@ -1118,7 +1118,7 @@ class Data_Management(_API):
             else:
                 archival_threshold = 1
 
-            config["localRetentionLimit"] = archival_threshold
+            config["localRetentionLimit"] = retention_on_brik_in_seconds
 
             config["archivalSpecs"] = [{
                 "locationId": archival_location_id,
