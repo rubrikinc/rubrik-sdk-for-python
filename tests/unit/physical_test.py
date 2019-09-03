@@ -107,7 +107,7 @@ def test_add_physical_host_list_idempotence(rubrik, mocker):
     mock_get.return_value = mock_get_v1_host()
 
     assert rubrik.add_physical_host(["hostname1", "hostname2"]) == \
-        "No Change Required. All Hosts Already added or supplied list was empty"
+        "No change required. All Hosts have already been added or supplied list was empty."
 
 
 def test_add_physical_host(rubrik, mocker):
@@ -695,9 +695,9 @@ def test_add_nas_share_to_host_adds_new_share(rubrik, mocker, share_type):
 
     def mock_post_internal_host_share():
         return {
-            'hostId' : "Host:::aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-            'shareType' : share_type,
-            'exportPoint' : "/my_share"
+            'hostId': "Host:::aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            'shareType': share_type,
+            'exportPoint': "/my_share"
         }
 
     mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
