@@ -1542,3 +1542,31 @@ class Data_Management(_API):
             self.log("sql_instant_recovery: Performing instant recovery of {} to recovery_point {} at {}.".format(db_name, date, time))
 
             return self.post('v1', '/mssql/db/{}/restore'.format(mssql_id), config, timeout)
+
+    def vcenter_refresh_vm(self, vm_name, timeout=15):  # pylint: ignore
+        """Refresh a single vSphere VM metadata.
+
+        Arguments:
+            vm_name {str} -- The name of the vSphere VM.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            no content.
+        """
+
+        self.log("vcenter_refresh_vm: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        data = self.get('v1', '/vmware/vm?name={}'.format(vm_name), timeout)
+        if data['data'] == []:
+            raise InvalidParameterException("The vSphere VM '{}' does not exist.".format(vm_name))
+        else:
+            vcenter_id = data['data'][0]['infraPath'][0]['id']
+            vm_id = data['data'][0]['id']
+        
+        self.log("vcenter_refresh_vm: Getting the MOID for vSphere VM {}.".format(vm_name))
+        split_moid = vm_id.split('-')
+        moid = split_moid[-2]+'-'+split_moid[-1]
+        config = {'vmMoid':moid}
+        self.log("vcenter_refresh_vm: Refreshing vSphere VM {} metadata.".format(vm_name))
+        self.post('internal', '/vmware/vcenter/{}/refresh_vm'.format(vcenter_id), config, timeout)
