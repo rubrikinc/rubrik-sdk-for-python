@@ -963,11 +963,14 @@ class Cluster(Api):
             raise InvalidParameterException("The 'floating_ips' argument must be a list")
 
         config = self.get('internal', '/node_management/cluster_ip')
-        for i in floating_ips:
-            config.append(i)
+        if set(config).intersection(floating_ips):
+            return("No change required. IP(s) {} is already in list".format(set(config).intersection(floating_ips)))
+        else:
+            if i in config:
+                config.append(i)
 
-        return config
-        # return self.post('internal', '/node_management/cluster_ip', config)
+        # return config
+        return self.post('internal', '/node_management/cluster_ip', config)
         
     def remove_floating_ips(self, floating_ips, wait_for_completion=True, timeout=15):
         """Remove floating IPs from CDM.
@@ -984,8 +987,12 @@ class Cluster(Api):
             raise InvalidParameterException("The 'floating_ips' argument must be a list")
             
         config = self.get('internal', '/node_management/cluster_ip')
-        for i in floating_ips:
-            if i in config:
-                config.remove(i)
+        if set(config).intersection(floating_ips):
+            for i in floating_ips:
+                if i in config:
+                    config.remove(i)
+        else:
+            return("No change required. IP(s) {} is not in list".format(set(config).intersection(floating_ips)))
+
 
         return self.post('internal', '/node_management/cluster_ip', config)
