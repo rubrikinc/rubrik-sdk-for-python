@@ -982,7 +982,7 @@ class Cluster(Api):
             dict -- When wait_for_completion is False, the full API response for `POST /internal/node_management/cluster_ip`
             dict -- When wait_for_completion is True, the full API response of the job status
         """
-        self.log("Removinglist of floating IPs with {}".format(floating_ips))
+        self.log("Removing list of floating IPs with {}".format(floating_ips))
         if isinstance(floating_ips, list) is False:
             raise InvalidParameterException("The 'floating_ips' argument must be a list")
             
@@ -996,3 +996,15 @@ class Cluster(Api):
 
 
         return self.post('internal', '/node_management/cluster_ip', config)
+    def get_floating_ips(self, wait_for_completion=True, timeout=15):
+        """Returns list of floating IPs
+
+        Returns:
+            dict -- When wait_for_completion is False, the full API response for `GET /internal/node_management/cluster_ip`
+            dict -- When wait_for_completion is True, the full API response of the job status
+        """
+        self.log("Returning list of floating IPs with")
+            
+        config = self.get('internal', '/node_management/cluster_ip')
+
+        return config
