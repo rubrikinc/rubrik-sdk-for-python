@@ -966,7 +966,7 @@ class Cluster(Api):
         if set(config).intersection(floating_ips):
             return("No change required. IP(s) {} is already in list".format(set(config).intersection(floating_ips)))
         else:
-            for i in config:
+            for i in floating_ips:
                 config.append(i)
 
         # return config
