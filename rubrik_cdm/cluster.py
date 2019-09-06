@@ -1003,7 +1003,7 @@ class Cluster(Api):
             dict -- When wait_for_completion is False, the full API response for `GET /internal/node_management/cluster_ip`
             dict -- When wait_for_completion is True, the full API response of the job status
         """
-        self.log("Returning list of floating IPs with")
+        self.log("Returning list of floating IPs.")
             
         config = self.get('internal', '/node_management/cluster_ip')
 
