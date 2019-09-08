@@ -365,11 +365,13 @@ class Data_Management(_API):
             host_match = False
             for item in api_request['data']:
                 if object_type == 'oracle_db':
-                    # Find the oracle_db object with the correct hostName or infraPath.
+                    # Find the oracle_db object with the correct hostName or RAC cluster name. Checks the instances for a match, set the host_match flag if matched.
+                    # Instance names can be stored/entered with and without the domain name so we will compare the hostname with the domain.
                     for instance in item['instances']:
                         if hostname.split('.')[0] in instance['hostName'] and not host_match:
                             object_ids.append(item['id'])
                             host_match = True
+                    # The instance or RAC cluster name can also be in the infraPath
                     if hostname.split('.')[0] in item['infraPath'] and not host_match:
                         object_ids.append(item['id'])
                         host_match = True
