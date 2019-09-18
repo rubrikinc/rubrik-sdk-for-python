@@ -1,15 +1,22 @@
 # Copyright 2018 Rubrik, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License prop
-#  http://www.apache.org/licenses/LICENSE-2.0
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
 
 """
 This module contains the Rubrik SDK Connect class.
@@ -21,13 +28,16 @@ import os
 import logging
 from random import choice
 import time
+import socket
+import sys
 
 from .api import Api
 from .cluster import Cluster
 from .data_management import Data_Management
 from .physical import Physical
 from .cloud import Cloud
-from .exceptions import InvalidParameterException, RubrikException, APICallException
+from .exceptions import InvalidParameterException, RubrikException, APICallException, InvalidTypeException
+
 
 _CLUSTER = Cluster
 _DATA_MANAGEMENT = Data_Management
@@ -71,44 +81,92 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         self.log("Node IP: {}".format(self.node_ip))
 
-        # If the api_token has not been provided check for the env variable and then
-        # check for the username and password fields
-        if api_token is None:
-            api_token = os.environ.get('rubrik_cdm_token')
-            if api_token is None:
+        # List to store how the credentials have been provided
+        credentials_manually_provided = []
+        credentials_env_var_provided = []
+        # Combined list of manually provided and env var provided
+        all_credentials_provided = []
 
+        # Flag used to determine if we have enough information to authenticate against the Rubrik cluster
+        credentials_needed_for_authentication = False
+
+        if username:
+            credentials_manually_provided.append("username")
+        else:
+            username = os.environ.get('rubrik_cdm_username')
+            if username is not None:
+                credentials_env_var_provided.append("username")
+
+        if password:
+            credentials_manually_provided.append("password")
+        else:
+            password = os.environ.get('rubrik_cdm_password')
+            if password is not None:
+                credentials_env_var_provided.append("password")
+
+        if api_token:
+            credentials_manually_provided.append("api_token")
+        else:
+            api_token = os.environ.get('rubrik_cdm_token')
+            if api_token is not None:
+                credentials_env_var_provided.append("api_token")
+
+        all_credentials_provided = credentials_manually_provided + credentials_env_var_provided
+
+        if len(credentials_manually_provided) == 3:
+            raise InvalidParameterException(
+                "You have provided both an API token and a username and password for authentication. You may only use one or the other.")
+
+        if "username" in all_credentials_provided and "password" not in all_credentials_provided:
+            raise InvalidParameterException(
+                "When providing the username argument, either manually or through the environment variables, you must also provide a password. Alternatively, starting with CDM 5.0, you may also use API Token instead of username and password.")
+
+        if "password" in all_credentials_provided and "username" not in all_credentials_provided:
+            raise InvalidParameterException(
+                "When providing the password argument, either manually or through the environment variables, you must also provide a username. Alternatively, starting with CDM 5.0, you may also use API Token instead of username and password.")
+
+        if "username" in credentials_manually_provided and "password" in credentials_manually_provided:
+
+            self.username = username
+            self.password = password
+            self.api_token = None
+
+            self.log("Username: {}".format(self.username))
+            self.log("Password: ******")
+
+            credentials_needed_for_authentication = True
+
+        if "api_token" in credentials_manually_provided:
+            self.api_token = api_token
+
+            self.log("API Token: ******")
+
+            credentials_needed_for_authentication = True
+
+        if credentials_needed_for_authentication is False:
+            if len(credentials_env_var_provided) == 3:
+                raise InvalidParameterException(
+                    "You have provided both an API token and a username and password, in your environment variables, for authentication. You may only use one or the other.")
+
+            if "username" in all_credentials_provided and "password" in all_credentials_provided:
+
+                self.username = username
+                self.password = password
                 self.api_token = None
 
-                if username is None:
-                    username = os.environ.get('rubrik_cdm_username')
-                    if username is None:
-                        raise InvalidParameterException(
-                            "The Rubrik CDM Username or an API Token has not been provided.")
-                    else:
-                        self.username = username
-                        self.log("Username: {}".format(self.username))
-                else:
-                    self.username = username
-                    self.log("Username: {}".format(self.username))
+                self.log("Username: {}".format(self.username))
+                self.log("Password: ******")
 
-                if password is None:
-                    password = os.environ.get('rubrik_cdm_password')
-                    if password is None:
-                        raise InvalidParameterException(
-                            "The Rubrik CDM Password or an API Token has not been provided.")
-                    else:
-                        self.password = password
-                        self.log("Password: *******\n")
-                else:
-                    self.password = password
-                    self.log("Password: *******\n")
+                credentials_needed_for_authentication = True
 
-            else:
+            if "api_token" in credentials_env_var_provided and credentials_needed_for_authentication is False:
                 self.api_token = api_token
-                self.log("API Token: *******\n")
-        else:
-            self.api_token = api_token
-            self.log("API Token: *******\n")
+                self.log("API Token: ******")
+                credentials_needed_for_authentication = True
+
+        if credentials_needed_for_authentication is False:
+            raise InvalidParameterException(
+                "You must provide either a username and password or API Token for authentication.")
 
     @staticmethod
     def log(log_message):
@@ -128,8 +186,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         """
 
         if self.api_token is None:
-            self.log("Creating the authorization header using the provided username and password.")
-
             credentials = '{}:{}'.format(self.username, self.password)
 
             # Encode the Username:Password as base64
@@ -141,17 +197,16 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Authorization': 'Basic ' + authorization,
-                'User-Agent': 'Rubrik Python SDK v1.0.13'
+                'User-Agent': 'Rubrik Python SDK v2.0.3'
             }
 
         else:
 
-            self.log("Creating the authorization header using the provided API Token.")
             authorization_header = {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Authorization': 'Bearer ' + self.api_token,
-                'User-Agent': 'Rubrik Python SDK v1.0.13'
+                'User-Agent': 'Rubrik Python SDK v2.0.3'
             }
 
         return authorization_header
@@ -189,7 +244,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         # Validate the API Endpoint Syntax
         if not isinstance(api_endpoint, str):
-            raise InvalidParameterException("The API Endpoint must be a string.")
+            raise InvalidTypeException("The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
             raise InvalidParameterException(
                 "The API Endpoint should begin with '/'. (ex: /cluster/me)")
@@ -206,41 +261,85 @@ class Bootstrap(_API):
         _API {class} - This class contains the base API methods that can be called independently or internally in standalone functions.
     """
 
-    def __init__(self, node_ip, enable_logging=False):
+    def __init__(self, node_ip, interface=None, enable_logging=False):
         """Constructor for the Bootstrap class which is used to initialize the class variables.
         """
-
         if enable_logging:
             logging.getLogger().setLevel(logging.DEBUG)
 
         self.node_ip = node_ip
         self.log("User Provided Node IP: {}".format(self.node_ip))
+        if interface is not None:
+            self.log("User Provided Interface: {}".format(interface))
+            try:
+                socket.if_nametoindex(interface)
+            except OSError:
+                sys.exit("Error: Invalid interface supplied")
 
-        node_ip = [self.node_ip]
+        node_resolution = False
+        self.ipv6_addr = ""
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask, mgmt_vlan=None, node_mgmt_ips=None,
-                      ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None, data_gateway=None, data_subnet_mask=None, data_vlan=None,
-                      node_data_ips=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):
+        try:
+            # Attempt to resolve and/or obtain scope for supplied address
+            ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET6)
+            # Extract address from response
+            self.ipv6_addr = ip_info[0][4][0]
+            if '::ffff' in self.ipv6_addr:
+                self.ipv6_addr = ""
+                self.log("Resolved Node IPv4 address: {}".format(self.node_ip))
+                node_resolution = True
+            else:
+                self.log('Resolved IPv6 address')
+                if interface is not None:
+                    # Use user provided interface as scope
+                    self.ipv6_scope = socket.if_nametoindex(interface)
+                    self.log("IPv6 scope: {}".format(self.ipv6_scope))
+                else:
+                    # Extract scope from socket.getaddrinfo
+                    self.ipv6_scope = str(ip_info[0][4][3])
+                    self.log("IPv6 scope: {}".format(self.ipv6_scope))
+                    if self.ipv6_scope == "0":
+                        # Scope 0 is invalid, so find the first non-loopback interface and use that as the scope
+                        self.log('IPv6 link local scope not resolved, searching for a usable scope')
+                        interfaces = socket.if_nameindex()
+                        for sock_interface, name in interfaces:
+                            if 'lo' not in name:
+                                self.log("Using scope {}, interface {}".format(sock_interface, name))
+                                self.ipv6_scope = sock_interface
+                                break
+                        if self.ipv6_scope == 0:
+                            sys.exit("Error: Unable to find a usable IPv6 link local scope")
+                # Properly format link-local IPv6 address with scope
+                self.node_ip = ('[{}%{}]').format(self.ipv6_addr, self.ipv6_scope)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
+        except socket.gaierror:
+            self.log('Could not resolve link-local IPv6 address for cluster.')
+
+        # IPv6 resolution failed, verify IPv4
+        if node_resolution == False:
+            try:
+                ip_info = socket.getaddrinfo(self.node_ip, 443, socket.AF_INET)
+                self.log("Resolved Node IP: {}".format(self.node_ip))
+                node_resolution = True
+            except socket.gaierror:
+                self.log('Could not resolve IPv4 address for cluster.')
+
+        if node_resolution == False:
+            raise RubrikException("Error: Could not resolve addrsss for cluster, or invalid IP/address supplied")
+
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster
 
         Arguments:
             cluster_name {str} -- Unique name to assign to the Rubrik cluster.
             admin_email {str} -- The Rubrik cluster sends messages for the admin account to this email address.
             admin_password {str} --  Password for the admin account.
-            mgmt_gateway {str} --  IP address assigned to the management network gateway.
-            mgmt_subnet_mask {str} -- Subnet mask assigned to the management network.
+            management_gateway {str} --  IP address assigned to the management network gateway
+            management_subnet_mask {str} -- Subnet mask assigned to the management network.
 
         Keyword Arguments:
-            mgmt_vlan {int} -- VLAN assigned to the management network. (default: {None})
-            ipmi_gateway {str} --  IP address assigned to the ipmi network gateway. (default: {None})
-            ipmi_subnet_mask {str} -- Subnet mask assigned to the ipmi network. (default: {None})
-            ipmi_vlan {int} -- VLAN assigned to the ipmi network. (default: {None})
-            data_gateway {str} --  IP address assigned to the ipmi network gateway. (default: {None})
-            data_subnet_mask {str} -- Subnet mask assigned to the ipmi network. (default: {None})
-            data_vlan {int} -- VLAN assigned to the data network. (default: {None})
-            node_mgmt_ips {dict} -- The Node Name and IP formatted as a dictionary for Management addresses. Mandatory. (default: {None})
-            node_ipmi_ips {dict} -- The Node Name and IP formatted as a dictionary for IPMI addresses. Optional. (default: {None})
-            node_data_ips {dict} -- The Node Name and IP formatted as a dictionary for Data addresses. Optional. (default: {None})
+            node_config {dict} -- The Node Name and IP formatted as a dictionary. (default: {None})
             enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
             dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {['8.8.8.8']})
@@ -252,33 +351,25 @@ class Bootstrap(_API):
             dict -- The response returned by `POST /internal/cluster/me/bootstrap`.
         """
 
-        if node_mgmt_ips is None or isinstance(node_mgmt_ips, dict) is not True:
-            raise InvalidParameterException(
-                'You must provide a valid dictionary for "node_mgmt_ips" holding node names and corresponding management IPs.')
+        if node_config is None or isinstance(node_config, dict) is not True:
+            raise InvalidTypeException(
+                'You must provide a valid dictionary for "node_config".')
 
         if dns_search_domains is None:
             dns_search_domains = []
         elif isinstance(dns_search_domains, list) is not True:
-            raise InvalidParameterException(
+            raise InvalidTypeException(
                 'You must provide a valid list for "dns_search_domains".')
 
         if dns_nameservers is None:
             dns_nameservers = ['8.8.8.8']
         elif isinstance(dns_nameservers, list) is not True:
-            raise InvalidParameterException('You must provide a valid list for "dns_nameservers".')
+            raise InvalidTypeException('You must provide a valid list for "dns_nameservers".')
 
         if ntp_servers is None:
             ntp_servers = ['pool.ntp.org']
         elif isinstance(ntp_servers, list) is not True:
-            raise InvalidParameterException('You must provide a valid list for "ntp_servers".')
-
-        using_ipmi_config = False;
-        using_data_config = False;
-
-        if ipmi_gateway is not None and ipmi_subnet_mask is not None and isinstance(node_ipmi_ips, dict):
-            using_ipmi_config = True
-        if data_gateway is not None and data_subnet_mask is not None and isinstance(node_data_ips,dict):
-            using_data_config = True
+            raise InvalidTypeException('You must provide a valid list for "ntp_servers".')
 
         bootstrap_config = {}
         bootstrap_config["enableSoftwareEncryptionAtRest"] = enable_encryption
@@ -293,48 +384,19 @@ class Bootstrap(_API):
         bootstrap_config["adminUserInfo"]['id'] = "admin"
 
         bootstrap_config["nodeConfigs"] = {}
-
-        for node_name, node_ip in node_mgmt_ips.items():
+        for node_name, node_ip in node_config.items():
             bootstrap_config["nodeConfigs"][node_name] = {}
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig'] = {}
-            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['netmask'] = mgmt_subnet_mask
-            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = mgmt_gateway
+            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['netmask'] = management_subnet_mask
+            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
-            if mgmt_vlan is not None:
-                bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['vlan'] = mgmt_vlan
 
-        if (using_ipmi_config):
-            for node_name, ipmi_ip in node_ipmi_ips.items():
-                if node_name not in bootstrap_config["nodeConfigs"]:
-                    raise InvalidParameterException('Non-existent node name specified in IPMI addresses.')
-                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig'] = {}
-                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['netmask'] = ipmi_subnet_mask
-                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['gateway'] = ipmi_gateway
-                bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['address'] = ipmi_ip
-                if ipmi_vlan is not None:
-                    bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['vlan'] = ipmi_vlan
+        number_of_attempts = 1
 
-        if (using_data_config):
-            for node_name, data_ip in node_data_ips.items():
-                if node_name not in bootstrap_config["nodeConfigs"]:
-                    raise InvalidParameterException('Non-existent node name specified in DATA addresses.')
-                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig'] = {}
-                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['netmask'] = data_subnet_mask
-                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['gateway'] = data_gateway
-                bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['address'] = data_ip
-                if data_vlan is not None:
-                    bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['vlan'] = data_vlan
-
-        print ("Constructed the following JSON:", bootstrap_config)
-
-        return True
-
-        """
         while True:
 
             try:
                 self.log('bootstrap: Starting the bootstrap process.')
-                number_of_attempts = 1
                 api_request = self.post(
                     'internal',
                     '/cluster/me/bootstrap',
@@ -377,7 +439,6 @@ class Bootstrap(_API):
                     return status
 
         return api_request
-        """
 
     def status(self, request_id="1", timeout=15):
         """Retrieves status of in progress bootstrap requests
@@ -393,6 +454,7 @@ class Bootstrap(_API):
         self.log('status: Getting the status of the Rubrik Cluster bootstrap.')
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(
             request_id)
+        self.log(bootstrap_status_api_endpoint)
         api_request = self.get(
             'internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
 
@@ -441,7 +503,7 @@ class Bootstrap(_API):
 
         # Validate the API Endpoint Syntax
         if not isinstance(api_endpoint, str):
-            raise InvalidParameterException("The API Endpoint must be a string.")
+            raise InvalidTypeException("The API Endpoint must be a string.")
         elif api_endpoint[0] != "/":
             raise InvalidParameterException(
                 "The API Endpoint should begin with '/'. (ex: /cluster/me)")

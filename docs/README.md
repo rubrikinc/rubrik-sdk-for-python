@@ -10,7 +10,7 @@ Install from pip:
 
 Install from source:
 ```
-$ git clone https://github.com/rubrik-devops/rubrik-sdk-for-python
+$ git clone https://github.com/rubrikinc/rubrik-sdk-for-python
 $ cd rubrik-sdk-for-python
 $ python setup.py install
 ``` 
@@ -22,6 +22,10 @@ Before you begin to use the Rubrik Python SDK, you should first setup your authe
 * `rubrik_cdm_node_ip`
 * `rubrik_cdm_username`
 * `rubrik_cdm_password`
+* `rubrik_cdm_token`
+
+| Note: The `rubrik_cdm_username` and `rubrik_cdm_password` must be supplied together and may not be provided if the `rubrik_cdm_token` variable is present|
+| --- |
 
 ## Usage
 
@@ -46,6 +50,15 @@ username = "sdk@rangers.lab"
 password = "RubrikPythonSDK"
 
 rubrik = rubrik_cdm.Connect(node_ip, username, password)
+```
+
+```py
+import rubrik_cdm
+
+node_ip = "172.21.8.90"
+api_token "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUVkN2FhYzlfZWU0MzA5ODQtMGE1Zi00NGZjLTliNTYtN"
+
+rubrik = rubrik_cdm.Connect(node_ip, api_token=api_token)
 ```
 
 

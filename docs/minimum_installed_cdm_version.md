@@ -6,14 +6,19 @@ def minimum_installed_cdm_version(cluster_version, timeout=15)
 ```
 
 ## Arguments
+
 | Name            | Type  | Description                                                            | Choices |
 |-----------------|-------|------------------------------------------------------------------------|---------|
 | cluster_version | float | The minimum required version of Rubrik CDM you wish ensure is running. |         |
+
 ## Keyword Arguments
+
 | Name    | Type | Description                                                                                                  | Choices | Default |
 |---------|------|--------------------------------------------------------------------------------------------------------------|---------|---------|
 | timeout | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. |         | 15      |
+
 ## Example
+
 ```py
 import rubrik_cdm
 

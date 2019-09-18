@@ -1,6 +1,7 @@
 .DS_Store
 
 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -112,3 +113,5 @@ venv.bak/
 dev.py
 .vscode/launch.json
 .vscode/settings.json
+rubrik_cdm/.vscode/settings.json
+tests/unit/assets/style.css

@@ -1,28 +1,35 @@
-# set_cluster_location
+# delete_guest_credential
 
-Configure the Rubrik cluster timezone.
+Delete a guest credential from the Rubrik cluster.
 ```py
-def set_cluster_location(timezone, timeout=15)
+def delete_guest_credential(username, domain=None, timeout=15):
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| location  | str  | Geolocation of the cluster.                                                   |         |
+| username | str  | The account username to be deleted.          |         |         |
+
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
+| domain  | int  | The domain name of the account to be deleted. |         |    None     |
 | timeout  | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |         |    15     |
+
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| str  | No change required. The Rubrik cluster is already configured with '{}' as its location. |
-| dict | The full API response for `PATCH /v1/cluster/me'` |
+| str  | No change required. The guest credential 'username' does not exist. |
+| str  | No change required. The guest credential 'username@domain' does not exist. |
+| dict  | The full API response for `DELETE /v1/vmware/guest_credential`. |
+
 ## Example
 ```py
 import rubrik_cdm
 
-RubrikConn = rubrik_cdm.Connect()
+rubrik = rubrik_cdm.Connect()
 
-RubrikConn.set_cluster_location("Example Location")
+username = "pythonuser"
+
+update_proxy = rubrik.delete_guest_credential(username):
 ```

@@ -1,55 +1,90 @@
 # Copyright 2018 Rubrik, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License prop
-#  http://www.apache.org/licenses/LICENSE-2.0
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
 
 """
 This module contains the Rubrik SDK Physical class.
 """
 
 from .api import Api
-from .exceptions import InvalidParameterException
+from .exceptions import InvalidParameterException, InvalidTypeException
 
 
 class Physical(Api):
-    """This class contains methods related to the managment of the Physical objects in the Rubrik cluster."""
+    """This class contains methods related to the management of the Physical objects in the Rubrik cluster."""
 
     def add_physical_host(self, hostname, timeout=60):
         """Add a physical host to the Rubrik cluster.
 
         Arguments:
-            hostname {str} -- The hostname or IP Address of the physical host you want to add to the Rubrik cluster.
+            hostname {str} or [list] -- The hostname(s) or IP Address(es) of the physical host you want to add to the Rubrik cluster.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {60})
 
         Returns:
-            str -- No change requird. The host '`hostname`' is already connected to the Rubrik cluster.
+            str -- No change required. The host '`hostname`' is already connected to the Rubrik cluster.
             dict -- The full API response for `POST /v1/host`.
         """
+
+        if(len(hostname) == 0):
+            raise InvalidParameterException("The provided hostname list is empty.")
 
         self.log('Searching the Rubrik cluster for the current hosts.')
         current_hosts = self.get('v1', '/host', timeout=timeout)
 
-        for host in current_hosts['data']:
-            if host['hostname'] == hostname:
-                return "No change requird. The host '{}' is already connected to the Rubrik cluster.".format(
-                    hostname)
+        if isinstance(hostname, list):
 
-        config = {}
-        config['hostname'] = hostname
-        config['hasAgent'] = True
+            for host in current_hosts['data']:
+                for single_host in hostname:
+                    if host['hostname'] == single_host:
+                        hostname.remove(single_host)
+                        self.log("The host '{}' is already connected to the Rubrik cluster. '{}' skipped.".format(
+                            single_host, single_host))
 
-        self.log("Adding the host '{}' to the Rubrik cluster.".format(hostname))
-        return self.post('v1', '/host', config, timeout)
+            config = []
+
+            self.log("Adding '{}' Physical Host(s)".format(len(hostname)))
+
+            if len(hostname) != 0:
+                for hosts in hostname:
+                    config += [{
+                        'hostname': hosts,
+                        'hasAgent': True
+                    }]
+
+                self.log("Adding the following physical host(s): '{}'".format(hostname))
+                return self.post('internal', '/host/bulk', config, timeout)
+            else:
+                return "No change required. All Hosts have already been added or supplied list was empty."
+        else:
+            for host in current_hosts['data']:
+                if host['hostname'] == hostname:
+                    return "No change required. The host '{}' is already connected to the Rubrik cluster.".format(
+                        hostname)
+
+            config = {}
+            config['hostname'] = hostname
+            config['hasAgent'] = True
+
+            self.log("Adding the host '{}' to the Rubrik cluster.".format(hostname))
+            return self.post('v1', '/host', config, timeout)
 
     def delete_physical_host(self, hostname, timeout=120):
         """Delete a physical host from the Rubrik cluster.
@@ -80,12 +115,10 @@ class Physical(Api):
             return "No change required. The host '{}' is not connected to the Rubrik cluster.".format(
                 hostname)
 
-        self.log(
-            "Deleting the host '{}' from the Rubrik cluster.".format(hostname))
+        self.log("Deleting the host '{}' from the Rubrik cluster.".format(hostname))
         return self.delete('v1', '/host/{}'.format(host_id), timeout=timeout)
 
-    def create_physical_fileset(self, name, operating_system, include, exclude, exclude_exception,
-                                follow_network_shares=False, backup_hidden_folders=False, timeout=15):
+    def create_physical_fileset(self, name, operating_system, include, exclude, exclude_exception, follow_network_shares=False, backup_hidden_folders=False, timeout=15):  # pylint: ignore
         """Create a Fileset for a Linux or Windows machine.
 
         Arguments:
@@ -112,18 +145,15 @@ class Physical(Api):
                 valid_operating_system))
 
         if isinstance(follow_network_shares, bool) is False:
-            raise InvalidParameterException(
-                "The 'follow_network_shares' argument must be True or False.")
+            raise InvalidTypeException("The 'follow_network_shares' argument must be True or False.")
         elif isinstance(backup_hidden_folders, bool) is False:
-            raise InvalidParameterException(
-                "The 'backup_hidden_folders' argument must be True or False.")
+            raise InvalidTypeException("The 'backup_hidden_folders' argument must be True or False.")
         elif isinstance(include, list) is False:
-            raise InvalidParameterException("The 'include' argument must be a list object.")
+            raise InvalidTypeException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
-            raise InvalidParameterException("The 'exclude' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            raise InvalidParameterException(
-                "The 'exclude_exception' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude_exception' argument must be a list object.")
 
         config = {}
         config['name'] = name
@@ -134,20 +164,17 @@ class Physical(Api):
         config['allowBackupNetworkMounts'] = follow_network_shares
         config['operatingSystemType'] = operating_system
 
-        self.log("create_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(
-            operating_system))
+        self.log("create_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(operating_system))
         current_filesets = self.get(
-            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(operating_system, name), timeout=timeout)
+            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
+                operating_system, name), timeout=timeout)
 
         current_config = {}
         if current_filesets['data']:
             current_config['name'] = current_filesets['data'][0]['name']
-            current_config['includes'] = sorted(
-                current_filesets['data'][0]['includes'])
-            current_config['excludes'] = sorted(
-                current_filesets['data'][0]['excludes'])
-            current_config['exceptions'] = sorted(
-                current_filesets['data'][0]['exceptions'])
+            current_config['includes'] = sorted(current_filesets['data'][0]['includes'])
+            current_config['excludes'] = sorted(current_filesets['data'][0]['excludes'])
+            current_config['exceptions'] = sorted(current_filesets['data'][0]['exceptions'])
             current_config['allowBackupHiddenFoldersInNetworkMounts'] = current_filesets['data'][0]['allowBackupHiddenFoldersInNetworkMounts']
             current_config['operatingSystemType'] = current_filesets['data'][0]['operatingSystemType']
             current_config['allowBackupNetworkMounts'] = current_filesets['data'][0]['allowBackupNetworkMounts']
@@ -161,14 +188,9 @@ class Physical(Api):
         model.append(config)
 
         self.log("create_fileset: Creating the '{}' Fileset.".format(name))
-        return self.post(
-            'internal',
-            '/fileset_template/bulk',
-            model,
-            timeout=timeout)
+        return self.post('internal', '/fileset_template/bulk', model, timeout=timeout)
 
-    def create_nas_fileset(self, name, share_type, include, exclude,
-                           exclude_exception, follow_network_shares=False, timeout=15):
+    def create_nas_fileset(self, name, share_type, include, exclude, exclude_exception, follow_network_shares=False, timeout=15):  # pylint: ignore
         """Create a NAS Fileset.
 
         Arguments:
@@ -190,19 +212,17 @@ class Physical(Api):
         valid_share_type = ['NFS', 'SMB']
 
         if share_type not in valid_share_type:
-            raise InvalidParameterException("The create_fileset() share_type argument must be one of the following: {}.".format(
-                valid_share_type))
+            raise InvalidParameterException(
+                "The create_fileset() share_type argument must be one of the following: {}.".format(valid_share_type))
 
         if isinstance(follow_network_shares, bool) is False:
-            raise InvalidParameterException(
-                "The 'follow_network_shares' argument must be True or False.")
+            raise InvalidTypeException("The 'follow_network_shares' argument must be True or False.")
         elif isinstance(include, list) is False:
-            raise InvalidParameterException("The 'include' argument must be a list object.")
+            raise InvalidTypeException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
-            raise InvalidParameterException("The 'exclude' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            raise InvalidParameterException(
-                "The 'exclude_exception' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude_exception' argument must be a list object.")
 
         config = {}
         config['name'] = name
@@ -212,20 +232,16 @@ class Physical(Api):
         config['allowBackupHiddenFoldersInNetworkMounts'] = follow_network_shares
         config['shareType'] = share_type
 
-        self.log(
-            "create_fileset: Searching the Rubrik cluster for all current NAS Filesets.")
+        self.log("create_fileset: Searching the Rubrik cluster for all current NAS Filesets.")
         current_filesets = self.get(
             'v1', '/fileset_template?primary_cluster_id=local&operating_system_type=NONE&name={}'.format(name), timeout=timeout)
 
         current_config = {}
         if current_filesets['data']:
             current_config['name'] = current_filesets['data'][0]['name']
-            current_config['includes'] = sorted(
-                current_filesets['data'][0]['includes'])
-            current_config['excludes'] = sorted(
-                current_filesets['data'][0]['excludes'])
-            current_config['exceptions'] = sorted(
-                current_filesets['data'][0]['exceptions'])
+            current_config['includes'] = sorted(current_filesets['data'][0]['includes'])
+            current_config['excludes'] = sorted(current_filesets['data'][0]['excludes'])
+            current_config['exceptions'] = sorted(current_filesets['data'][0]['exceptions'])
             current_config['allowBackupHiddenFoldersInNetworkMounts'] = current_filesets['data'][0]['allowBackupHiddenFoldersInNetworkMounts']
             current_config['shareType'] = current_filesets['data'][0]['shareType']
 
@@ -238,14 +254,62 @@ class Physical(Api):
         model.append(config)
 
         self.log("create_fileset: Creating the '{}' Fileset.".format(name))
-        return self.post(
-            'internal',
-            '/fileset_template/bulk',
-            model,
+        return self.post('internal', '/fileset_template/bulk', model, timeout=timeout)
+
+    def add_nas_share_to_host(self, hostname, share_type, export_point, username=None, password=None, domain=None, timeout=60):  # pylint: ignore
+        """Add a network share to a host.
+
+        Arguments:
+            hostname {str} -- The hostname or IP Address of the host serving the NAS share.
+            share_type {str} -- The type of NAS Share you wish to backup. (choices: {NFS, SMB})
+            export_point {str} -- Name of the share exported by the NAS host.
+
+        Keyword Arguments:
+            username {str} -- Username if the network share requires authentication.
+            password {str} -- Password if the network share requires authentication.
+            domain {str} -- Domain name of account credentials used for authentication.
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default {60})
+
+        Returns:
+            str -- No change required. The share with the given hostname and export point has already been added.
+            dict -- The full API response for `POST /internal/host/share` with the given share arguments.
+        """
+        valid_share_type = ['NFS', 'SMB']
+
+        share_address = "{}:{}".format(hostname, export_point)
+
+        if share_type not in valid_share_type:
+            raise InvalidParameterException(
+                "The add_nas_share_to_host() share_type argument must be one of the following: {}.".format(valid_share_type))
+
+        host_id = self.object_id(hostname, 'physical_host')
+
+        self.log("add_nas_share_to_host: Getting the properties of the {} share {}.".format(share_type, share_address))
+        current_host_shares = self.get(
+            'internal', '/host/share?share_type={}&hostid={}'.format(share_type, host_id),
             timeout=timeout)
 
-    def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None,
-                                     exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):
+        matching_current_host_share = [share_properties for share_properties in current_host_shares['data']
+                                       if share_properties['exportPoint'] == export_point]
+
+        if len(matching_current_host_share) >= 1:
+            return "No change required. The {} share {} is already in Rubrik.".format(share_type, share_address)
+        else:
+            config = {}
+            config['hostId'] = host_id
+            config['shareType'] = share_type
+            config['exportPoint'] = export_point
+            if username:
+                config['username'] = username
+            if password:
+                config['password'] = password
+            if domain:
+                config['domain'] = domain
+
+            self.log("Adding the {} share {} to Rubrik.".format(share_type, share_address))
+            return self.post('internal', '/host/share', config, timeout)
+
+    def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None, exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):  # pylint: ignore
         """Assign a Fileset to a Linux or Windows machine. If you have multiple Filesets with identical names, you will need to populate the Filesets properties (i.e this functions keyword arguments)
         to find a specific match. Filesets with identical names and properties are not supported.
 
@@ -272,7 +336,7 @@ class Physical(Api):
         valid_operating_system = ['Linux', 'Windows']
 
         if operating_system not in valid_operating_system:
-            raise InvalidParameterException("The create_physical_fileset() operating_system argument must be one of the following: {}.".format(
+            raise InvalidParameterException("The assign_physical_host_fileset() operating_system argument must be one of the following: {}.".format(
                 valid_operating_system))
 
         if include is None:
@@ -285,25 +349,24 @@ class Physical(Api):
             exclude_exception = []
 
         if isinstance(follow_network_shares, bool) is False:
-            raise InvalidParameterException(
-                "The 'follow_network_shares' argument must be True or False.")
+            raise InvalidTypeException("The 'follow_network_shares' argument must be True or False.")
         elif isinstance(backup_hidden_folders, bool) is False:
-            raise InvalidParameterException(
-                "The 'backup_hidden_folders' argument must be True or False.")
+            raise InvalidTypeException("The 'backup_hidden_folders' argument must be True or False.")
         elif isinstance(include, list) is False:
-            raise InvalidParameterException("The 'include' argument must be a list object.")
+            raise InvalidTypeException("The 'include' argument must be a list object.")
         elif isinstance(exclude, list) is False:
-            raise InvalidParameterException("The 'exclude' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude' argument must be a list object.")
         elif isinstance(exclude_exception, list) is False:
-            raise InvalidParameterException(
-                "The 'exclude_exception' argument must be a list object.")
+            raise InvalidTypeException("The 'exclude_exception' argument must be a list object.")
 
         self.log(
             "assign_physical_host_fileset: Searching the Rubrik cluster for the {} physical host {}.".format(
                 operating_system,
                 hostname))
-        current_hosts = self.get(
-            'v1', '/host?operating_system_type={}&primary_cluster_id=local&hostname={}'.format(operating_system, hostname), timeout=timeout)
+        current_hosts = self.get('v1',
+                                 '/host?operating_system_type={}&primary_cluster_id=local&hostname={}'.format(operating_system,
+                                                                                                              hostname),
+                                 timeout=timeout)
 
         if current_hosts['total'] >= 1:
             for host in current_hosts['data']:
@@ -314,13 +377,12 @@ class Physical(Api):
             host_id
         except NameError:
             raise InvalidParameterException(
-                "The Rubrik cluster is not connected to a {} physical host named '{}'.".format(
-                    operating_system, hostname))
+                "The Rubrik cluster is not connected to a {} physical host named '{}'.".format(operating_system, hostname))
 
-        self.log("assign_physical_host_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(
-            operating_system))
+        self.log("assign_physical_host_fileset: Searching the Rubrik cluster for all current {} Filesets.".format(operating_system))
         current_filesets_templates = self.get(
-            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(operating_system, fileset_name), timeout=timeout)
+            'v1', '/fileset_template?primary_cluster_id=local&operating_system_type={}&name={}'.format(
+                operating_system, fileset_name), timeout=timeout)
 
         number_of_matches = 0
         if current_filesets_templates['total'] == 0:
@@ -336,7 +398,6 @@ class Physical(Api):
                 # If there are multiple Filesets with the same name us all of
                 # the possible config values to try and find the correct
                 # Fileset
-                number_of_matches = 0
                 for fileset_template in current_filesets_templates['data']:
                     if fileset_template['name'] == fileset_name \
                             and fileset_template['includes'] == include \
@@ -366,25 +427,20 @@ class Physical(Api):
                                 "The Rubrik cluster contains multiple {} Filesets named '{}' that match all of the populate function arguments. Please use a unique Fileset.".format(
                                     operating_system, fileset_name))
                         else:
+
                             raise InvalidParameterException(
                                 "The Rubrik cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(
                                     operating_system, fileset_name))
-                    raise InvalidParameterException(
-                        "The Rubrik cluster contains multiple {} Filesets named '{}'. Please populate all function arguments to find a more specific match.".format(
-                            operating_system,
-                            fileset_name))
 
         if current_filesets_templates['total'] == 1 or number_of_matches == 1:
             for fileset_temmplate in current_filesets_templates['data']:
                 if fileset_temmplate['name'] == fileset_name:
                     fileset_template_id = fileset_temmplate['id']
 
-        self.log(
-            "assign_physical_host_fileset: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+        self.log("assign_physical_host_fileset: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
         sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
-        self.log("assign_physical_host_fileset: Getting the properties of the {} Fileset.".format(
-            fileset_name))
+        self.log("assign_physical_host_fileset: Getting the properties of the {} Fileset.".format(fileset_name))
         current_fileset = self.get(
             'v1', '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(host_id, fileset_template_id), timeout=timeout)
 
@@ -404,8 +460,7 @@ class Physical(Api):
 
             config = {}
             config['configuredSlaDomainId'] = sla_id
-            assign_sla = self.patch(
-                'v1', '/fileset/{}'.format(fileset_id), config, timeout)
+            assign_sla = self.patch('v1', '/fileset/{}'.format(fileset_id), config, timeout)
 
             return (create_fileset, assign_sla)
         elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] != sla_id:
@@ -419,11 +474,7 @@ class Physical(Api):
             fileset_id = current_fileset['data'][0]['id']
             config = {}
             config['configuredSlaDomainId'] = sla_id
-            return self.patch(
-                'v1',
-                '/fileset/{}'.format(fileset_id),
-                config,
-                timeout)
+            return self.patch('v1', '/fileset/{}'.format(fileset_id), config, timeout)
 
         elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] == sla_id:
             return "No change required. The {} Fileset '{}' is already assigned to the SLA Domain '{}' on the physical host '{}'.".format(

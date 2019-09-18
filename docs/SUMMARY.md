@@ -10,6 +10,7 @@
 * [job_status](job_status.md)
 * [patch](patch.md)
 * [post](post.md)
+* [put](put.md)
 
 ### Bootstrap Functions
 * [setup_cluster](setup_cluster.md)
@@ -63,6 +64,7 @@
 
 ### SDK Helper Functions
 * [log](log.md)
+* [exceptions](exceptions.md)
 
 ### Internal Functions
 * [_api_validation](_api_validation.md)

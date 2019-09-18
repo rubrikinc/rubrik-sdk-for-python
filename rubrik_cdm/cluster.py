@@ -1,29 +1,36 @@
 # Copyright 2018 Rubrik, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License prop
-#  http://www.apache.org/licenses/LICENSE-2.0
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
 
 """
 This module contains the Rubrik SDK Cluster class.
 """
 
 from .api import Api
-from .exceptions import InvalidParameterException, CDMVersionException
+from .exceptions import InvalidParameterException, CDMVersionException, InvalidTypeException
 
 
 class Cluster(Api):
     """This class contains methods related to the management of the Rubrik cluster itself.
     """
 
-    def set_cluster_location(self, location, timeout=15):
+    def configure_cluster_location(self, location, timeout=15):
         """Configure cluster geolocation. Overwrites previously set value if different.
 
         Arguments:
@@ -38,20 +45,22 @@ class Cluster(Api):
         """
 
         if not isinstance(location, str):
-            raise InvalidParameterException('The set_cluster_location() function requires the location to be specified as string.')
+            raise InvalidParameterException(
+                'The configure_cluster_location() function requires the location to be specified as string.')
 
-        self.log("set_cluster_location: Determing the current cluster location.")
+        self.log("configure_cluster_location: Determing the current cluster location.")
 
         cluster_summary = self.get("v1", "/cluster/me", timeout=timeout)
 
         if cluster_summary["geolocation"]["address"] == location:
-            return "No change required. The Rubrik cluster is already configured with '{}' as its location.".format(location)
+            return "No change required. The Rubrik cluster is already configured with '{}' as its location.".format(
+                location)
 
         config = {}
         config["geolocation"] = {}
         config["geolocation"]["address"] = location
 
-        self.log("set_cluster_location: Configuring the Rubrik cluster location.")
+        self.log("configure_cluster_location: Configuring the Rubrik cluster location.")
 
         return self.patch("v1", "/cluster/me", config, timeout)
 
@@ -85,7 +94,8 @@ class Cluster(Api):
 
         return self.post("internal", "/replication/target", config, timeout)
 
-    def configure_replication_nat(self, username, password, source_gateway, target_gateway, ca_certificate=None, timeout=30):
+    def configure_replication_nat(self, username, password, source_gateway,
+                                  target_gateway, ca_certificate=None, timeout=30):
         """Configure replication partner as specified by user using NAT gateways.
 
         Arguments:
@@ -105,11 +115,22 @@ class Cluster(Api):
         config = {}
 
         # Source/Target gateway need to be specified as [str IP, [list of portnumber(s)]]
-        source_check = isinstance(source_gateway, list) and len(source_gateway) == 2 and isinstance(source_gateway[1], list) and len(source_gateway[1]) > 0
-        target_check = isinstance(target_gateway, list) and len(target_gateway) == 2 and isinstance(target_gateway[1], list) and len(target_gateway[1]) > 0
+        source_check = isinstance(
+            source_gateway,
+            list) and len(source_gateway) == 2 and isinstance(
+            source_gateway[1],
+            list) and len(
+            source_gateway[1]) > 0
+        target_check = isinstance(
+            target_gateway,
+            list) and len(target_gateway) == 2 and isinstance(
+            target_gateway[1],
+            list) and len(
+            target_gateway[1]) > 0
 
         if not source_check or not target_check:
-            raise InvalidParameterException('The configure_replication() source and target gateways need to be defined as: ["IP STRING", [LIST OF PORT NUMBER(S)]].')
+            raise InvalidParameterException(
+                'The configure_replication() source and target gateways need to be defined as: ["IP STRING", [LIST OF PORT NUMBER(S)]].')
 
         config['targetGateway'] = {}
         config['sourceGateway'] = {}
@@ -257,8 +278,7 @@ class Cluster(Api):
                 config,
                 timeout=timeout)
 
-    def add_vcenter(self, vcenter_ip, vcenter_username, vcenter_password,
-                    vm_linking=True, ca_certificate=None, timeout=30):
+    def add_vcenter(self, vcenter_ip, vcenter_username, vcenter_password, vm_linking=True, ca_certificate=None, timeout=30):  # pylint: ignore
         """Add a new vCenter to the Rubrik cluster.
 
         Arguments:
@@ -382,18 +402,36 @@ class Cluster(Api):
         """
 
         if isinstance(ntp_server, list) is False:
-            raise InvalidParameterException("The 'ntp_server' argument must be a list object.")
+            raise InvalidTypeException("The 'ntp_server' argument must be a list object.")
 
         self.log("cluster_ntp: Determing the current cluster NTP settings")
         cluster_ntp = self.get("internal", "/cluster/me/ntp_server", timeout=timeout)
 
-        if sorted(cluster_ntp["data"]) == sorted(ntp_server):
+        cdm_v5_check = self.minimum_installed_cdm_version("5.0")
+
+        if cdm_v5_check is True:
+            current_ntp_servers = []
+            for ntp in cluster_ntp["data"]:
+                current_ntp_servers.append(ntp["server"])
+        else:
+            current_ntp_servers = cluster_ntp["data"]
+
+        if sorted(current_ntp_servers) == sorted(ntp_server):
             return "No change required. The NTP server(s) {} has already been added to the Rubrik cluster.".format(
                 ntp_server)
 
-        self.log(
-            "cluster_ntp: Adding the NTP server(s) '{}' to the Rubrik cluster.".format(ntp_server))
-        return self.post("internal", "/cluster/me/ntp_server", ntp_server, timeout)
+        self.log("cluster_ntp: Adding the NTP server(s) '{}' to the Rubrik cluster.".format(ntp_server))
+
+        if cdm_v5_check is True:
+            config = []
+            for ntp in ntp_server:
+                config.append({
+                    "server": ntp
+                })
+        else:
+            config = ntp_server
+
+        return self.post("internal", "/cluster/me/ntp_server", config, timeout)
 
     def configure_syslog(self, syslog_ip, protocol, port=514, timeout=15):
         """Configure the Rubrik cluster syslog settings.
@@ -512,7 +550,7 @@ class Cluster(Api):
         """
 
         if isinstance(server_ip, list) is False:
-            raise InvalidParameterException("The 'server_ip' argument must be a list")
+            raise InvalidTypeException("The 'server_ip' argument must be a list")
 
         self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
         current_dns_servers = self.get("internal", "/cluster/me/dns_nameserver", timeout=timeout)
@@ -537,7 +575,7 @@ class Cluster(Api):
         """
 
         if isinstance(search_domain, list) is False:
-            raise InvalidParameterException("The 'server_ip' argument must be a list")
+            raise InvalidTypeException("The 'server_ip' argument must be a list")
 
         self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
         current_dns_search_domains = self.get("internal", "/cluster/me/dns_search_domain", timeout=timeout)
@@ -547,8 +585,7 @@ class Cluster(Api):
 
         return self.post("internal", "/cluster/me/dns_search_domain", search_domain, timeout)
 
-    def configure_smtp_settings(self, hostname, port, from_email, smtp_username,
-                                smtp_password, encryption="NONE", timeout=15):
+    def configure_smtp_settings(self, hostname, port, from_email, smtp_username, smtp_password, encryption="NONE", timeout=15):  # pylint: ignore
         """The Rubrik cluster uses email to send all notifications to local Rubrik cluster user accounts that have the Admin role. To do this the Rubrik cluster transfers the email messages to an SMTP server for delivery.
         This function will configure the Rubrik cluster with account information for the SMTP server to permit the Rubrik cluster to use the SMTP server for sending outgoing email.
 
@@ -565,8 +602,8 @@ class Cluster(Api):
 
         Returns:
             str -- No change required. The Rubrik cluster is already configured with the provided SMTP settings.
-            dict -- The full API response for `POST /internal/smtp_instance'`
-            dict -- The full API response for `PATCH /internal/smtp_instance/{id}'`
+            dict -- The full API response for `POST /internal/smtp_instance`
+            dict -- The full API response for `PATCH /internal/smtp_instance/{id}`
         """
 
         valid_encryption = ['SSL', 'STARTTLS', 'NONE']
@@ -628,8 +665,68 @@ class Cluster(Api):
 
         return api_request
 
-    def create_user(self, username, password, first_name=None, last_name=None,
-                    email_address=None, contact_number=None, timeout=15):
+    def update_proxy(self, host, protocol, port, username=None, password=None, timeout=15):
+        """Update the proxy configuration on the Rubrik cluster.
+
+        Arguments:
+            host {str} -- The IP address or FQDN of the proxy you wish to add.
+            protocol {str} -- The protocol of the proxy you wish to add.
+            port {int} -- The port of the proxy you wish to add.
+
+        Keyword Arguments:
+            username {str} -- The username used for authentication. (default: {None})
+            password {str} -- The password used for authentication. (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full API response for `PATCH /internal/node_management/proxy_config`
+        """
+
+        valid_protocols = [
+            'HTTP',
+            'HTTPS',
+            'SOCKS5']
+
+        if protocol not in valid_protocols:
+            sys.exit("Error: The protocol argument must be one of the following: {}.".format(
+                valid_protocols))
+
+        config = {}
+        config["host"] = host
+        config["protocol"] = protocol
+        config["port"] = port
+        config["username"] = username
+        config["password"] = password
+
+        self.log("update_proxy: Getting the current proxy configuration")
+        current_proxy_settings = self.get("internal", "/node_management/proxy_config", timeout=timeout)
+
+        if current_proxy_settings["host"] == host and current_proxy_settings["port"] == port and current_proxy_settings["username"] == username:
+            return "No change required. The proxy '{}' has already been added to the Rubrik cluster.".format(host)
+
+        self.log("update_proxy: Updating proxy configuration.")
+        return self.patch("internal", "/node_management/proxy_config", config, timeout)
+
+    def delete_proxy(self, timeout=15):
+        """Delete the proxy configuration from the Rubrik cluster.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full API response for `DELETE /internal/node_management/proxy_config`
+        """
+
+        current_proxy_settings = self.get("internal", "/node_management/proxy_config", timeout=timeout)
+        self.log("delete_proxy: Current proxy configuration {}".format(current_proxy_settings))
+
+        if current_proxy_settings["host"] == "":
+            return "No change required. The proxy configuration is already cleared out."
+
+        self.log("delete_proxy: Deleting proxy configuration.")
+        return self.delete("internal", "/node_management/proxy_config", timeout)
+
+    def create_user(self, username, password, first_name=None, last_name=None, email_address=None, contact_number=None, timeout=15):  # pylint: ignore
         """Create a new user on the Rubrik cluster
 
         Arguments:
@@ -671,16 +768,16 @@ class Cluster(Api):
     def read_only_authorization(self, username, timeout=15):
         """Grant read-only access to a specific user.
 
-        Arguments:
-            username {str} -- The username you wish to grant read-only access to.
+         Arguments:
+             username {str} -- The username you wish to grant read-only access to.
 
-        Keyword Arguments:
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+         Keyword Arguments:
+             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
-        Returns:
-            str -- No change required. The user '`username`' already has read-only permissions.
-            dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
-        """
+         Returns:
+             str -- No change required. The user '`username`' already has read-only permissions.
+             dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
+         """
 
         if self.minimum_installed_cdm_version(5.0) is False:
             raise CDMVersionException(5.0)
@@ -708,3 +805,146 @@ class Cluster(Api):
 
         self.log("read_only_authorization: Granting read-only privilages to user '{}'.".format(username))
         return self.post("internal", "/authorization/role/read_only_admin", config, timeout)
+
+    def add_guest_credential(self, username, password, domain=None, timeout=15):
+        """Add a new guest credential to the Rubrik cluster.
+
+        Arguments:
+            username {str} -- The account username used for authentication.
+            password {str} -- The account password used for authentication.
+
+        Keyword Arguments:
+            domain {int} -- The domain name of account password used for authentication. (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full API response for `POST /v1/vmware/guest_credential`
+        """
+
+        config = {}
+        config["username"] = username
+        config["password"] = password
+        config["domain"] = domain
+
+        self.log("add_guest_credential: Getting the current guest credentials.")
+        current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
+
+        for guest_credential in current_guest_credentials["data"]:
+            if guest_credential.get("domain"):
+                if guest_credential["username"] == username and guest_credential["domain"] == domain:
+                    return "No change required. The account '{}@{}' has already been added to the Rubrik cluster.".format(
+                        username, domain)
+            elif domain is None:
+                if guest_credential["username"] == username:
+                    return "No change required. The account '{}' has already been added to the Rubrik cluster.".format(
+                        username)
+
+        self.log(
+            "guest_credentials: Adding new guest OS credential '{}@{}' to the Rubrik cluster.".format(username, domain))
+        return self.post("internal", "/vmware/guest_credential", config, timeout)
+
+    def delete_guest_credential(self, username, domain=None, timeout=15):
+        """Delete a guest credential from the Rubrik cluster.
+
+        Arguments:
+            username {str} -- The account username to be deleted.
+
+        Keyword Arguments:
+            domain {int} -- The domain name of the account to be deleted. (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full API response for `POST /v1/vmware/guest_credential`
+        """
+
+        current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
+        self.log("delete_guest_credential: Current guest credentials {}".format(current_guest_credentials))
+
+        delete_guest_credential = ""
+
+        for guest_credential in current_guest_credentials["data"]:
+            if domain is None:
+                if guest_credential["username"] == username:
+                    delete_guest_credential = guest_credential["id"]
+                    self.log("guest_credentials: Deleting guest OS credentials '{}' to the Rubrik cluster.".format(username))
+                    return self.delete(
+                        "internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
+            elif guest_credential.get("domain"):
+                if guest_credential["username"] == username and guest_credential["domain"] == domain:
+                    delete_guest_credential = guest_credential["id"]
+                    self.log(
+                        "guest_credentials: Deleting guest OS credentials '{}@{}' to the Rubrik cluster.".format(
+                            username, domain))
+                    return self.delete(
+                        "internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
+
+        if domain is None:
+            return "No change required. The guest credential '{}' does not exist.".format(username)
+        else:
+            return "No change required. The guest credential '{}@{}' does not exist.".format(username, domain)
+
+    def cluster_node_id(self, timeout=15):
+        """Returns a list of node ids from all the nodes in the cluster.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+             list -- A list that contains the ID for each node in the Rubrik cluster.
+        """
+        self.log("cluster_node_id - Getting all the node ids from the from the cluster.")
+        node_id_list = []
+
+        api_request = self.get('internal', '/node', timeout)
+
+        for node in api_request['data']:
+            node_id_list.append(node["id"])
+
+        return node_id_list
+
+    def cluster_support_tunnel(self, enabled=True, timeout=15):
+        """Enable or Disable the support tunnel.
+
+        Keyword Arguments:
+
+            enabled (bool) -- The flag that enables or disables the support tunnel. (default: {True})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+
+        Returns:
+            dict -- The full API response from `POST /internal/node/me/support_tunnel`.
+        """
+
+        if not isinstance(enabled, bool):
+            raise InvalidParameterException("The enabled parameter must be True or False.")
+
+        self.log("cluster_support_tunnel - Determining status of Cluster Support Tunnel.")
+        check_tunnel = self.get('internal', '/node/me/support_tunnel', timeout)
+
+        if enabled is True:
+
+            if check_tunnel['isTunnelEnabled'] is False:
+
+                config = {}
+                config['isTunnelEnabled'] = True
+                config['inactivityTimeoutInSeconds'] = 0
+
+                self.log("cluster_support_tunnel - Enabling Cluster Support Tunnel.")
+                return self.patch('internal', '/node/me/support_tunnel', config, timeout)
+
+            else:
+                return("No change required. Support Tunnel is already enabled.")
+
+        elif enabled is False:
+
+            if check_tunnel['isTunnelEnabled'] is False:
+
+                return ("No change required. Support Tunnel is already disabled.")
+
+            else:
+                config = {}
+                config['isTunnelEnabled'] = False
+
+                self.log("cluster_support_tunnel - Disable the Support Tunnel")
+
+                return self.patch('internal', '/node/me/support_tunnel', config, timeout)
