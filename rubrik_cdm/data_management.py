@@ -35,18 +35,19 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, timeout=15):  # pylint: ignore
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, force_full=False,  timeout=15):  # pylint: ignore
         """Initiate an on-demand snapshot.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object to take a on-demand snapshot of.
-            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host, ahv, mssql})
+            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host, ahv, mssql_db, oarcle_db})
 
         Keyword Arguments:
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
             host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
             hostname {str} -- The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
+            force_full {bool} -- If True will force a new full image backup of an Oracle database. (default: {False})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -219,6 +220,7 @@ class Data_Management(_API):
 
             config = {}
             config['slaId'] = sla_id
+            config['forceFullSnapshot'] = force_full
 
             self.log("on_demand_snapshot: Initiating snapshot for the Oracle database '{}'.".format(object_name))
             api_request = self.post('internal', '/oracle/db/{}/snapshot'.format(db_id), config, timeout)
@@ -233,7 +235,7 @@ class Data_Management(_API):
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
             object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location})
-            hostname {str} -- The hostname, or one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
+            hostname {str} -- The hostname, or one of the hostnames in a RAC cluster, or the RAC cluster name. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -318,7 +320,7 @@ class Data_Management(_API):
             },
             "oracle_db": {
                 "api_version": "internal",
-                "api_endpoint": "/oracle/db"
+                "api_endpoint": "/oracle/db?name={}".format(object_name)
             },
             "volume_group": {
                 "api_version": "internal",
@@ -362,14 +364,19 @@ class Data_Management(_API):
 
             host_match = False
             for item in api_request['data']:
-                if object_type == 'oracle_db' and item[name_value] == object_name:
+                if object_type == 'oracle_db':
+                    # Find the oracle_db object with the correct hostName or RAC cluster name. Checks the instances for a match, set the host_match flag if matched.
+                    # Instance names can be stored/entered with and without the domain name so we will compare the hostname with the domain.
                     for instance in item['instances']:
-                        if hostname in instance['hostName']:
+                        if hostname.split('.')[0] in instance['hostName'] and not host_match:
                             object_ids.append(item['id'])
                             host_match = True
+                    # The instance or RAC cluster name can also be in the infraPath
+                    if hostname.split('.')[0] in item['infraPath'] and not host_match:
+                        object_ids.append(item['id'])
+                        host_match = True
                 elif item[name_value] == object_name:
                     object_ids.append(item['id'])
-
             if object_type == 'oracle_db' and not host_match:
                 raise InvalidParameterException(
                     "The {} object '{}' on the host '{}' was not found on the Rubrik cluster.".format(object_type, object_name, hostname))
