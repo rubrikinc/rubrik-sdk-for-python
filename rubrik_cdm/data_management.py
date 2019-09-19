@@ -385,7 +385,7 @@ class Data_Management(_API):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, timeout=30):  # pytest: ignore
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
@@ -408,7 +408,7 @@ class Data_Management(_API):
             dict -- The full API response for `PATCH /internal/volume_group/{id}`.
         """
 
-        valid_object_type = ['vmware', 'mssql_host', 'volume_group']
+        valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'fileset']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -418,6 +418,11 @@ class Data_Management(_API):
             if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
                 raise InvalidParameterException(
                     "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
+
+        if object_type == "fileset":
+            if nas_host is None or share is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'fileset' the 'nas_host' and 'share' paramaters must be populated.")
 
         if object_type == "volume_group":
 
@@ -461,6 +466,49 @@ class Data_Management(_API):
                 config['managedIds'] = [vm_id]
 
                 return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout)
+        
+        elif object_type == 'fileset':
+            self.log("assign_sla: Searching the Rubrik cluster for the NAS host '{}'.".format(nas_host))
+            host_id = self.object_id(nas_host, 'physical_host', timeout=timeout)
+
+            self.log("assign_sla: Searching the Rubrik cluster for the share '{}'.".format(share))
+            share_summary = self.get("internal", '/host/share', timeout=timeout)
+            share_id = None
+            for shares in share_summary['data']:
+                if shares['hostId'] == host_id and shares['exportPoint'] == share:
+                    share_id = shares['id']
+            if share_id is None:
+                raise InvalidParameterException("The share object'{}' does not exist for host '{}'.".format(share, nas_host))
+
+            self.log("assign_sla: Searching the Rubrik cluster for the fileset '{}' template.".format(object_name))
+            fileset_summary = self.get("v1", '/fileset?is_relic=false&name={}'.format(object_name), timeout=timeout)
+            template_id = None
+            for filesets in fileset_summary['data']:
+                if filesets['hostId'] == host_id and filesets['name'] == object_name:
+                    template_id = filesets['templateId']
+            if template_id is None:
+                raise InvalidParameterException("The fileset '{}' template does not exist".format(object_name))
+
+            self.log("assign_sla: Creating filesets for a network host. Each fileset is a fileset template applied to a host")
+            bulk = [{
+                'isPassthrough': False,
+                'shareId': share_id,
+                'templateId': template_id
+            }]
+            fileset_response = self.post("internal", "/fileset/bulk", bulk, timeout)
+            fileset_id = fileset_response['data'][0]['id']
+
+            if sla_id == fileset_summary['data'][0]['configuredSlaDomainId']:
+                return "No change required. The NAS fileset '{}' is already assigned to the '{}' SLA Domain.".format(
+                    object_name, sla_name)
+            
+            else:
+                self.log("assign_sla: Assigning the fileset '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+
+                config = {}
+                config['managedIds'] = [fileset_id]
+
+                return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout=180)
 
         elif object_type == 'mssql_host':
 
@@ -1511,7 +1559,7 @@ class Data_Management(_API):
         Arguments:
             db_name {str} -- The name of the database to instantly recover.
             date {str} -- The recovery_point date to recover to formated as `Month-Day-Year` (ex: 1-15-2014). 
-            time {str} -- The recovery_point time to recover to formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+            time {str} -- The recovery_point time to recover to formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
 
         Keyword Arguments:
             sql_instance {str} -- The SQL instance name with the database to instantly recover.
