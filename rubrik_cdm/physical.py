@@ -426,3 +426,33 @@ class Physical(Api):
         elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] == sla_id:
             return "No change required. The {} Fileset '{}' is already assigned to the SLA Domain '{}' on the physical host '{}'.".format(
                 operating_system, fileset_name, sla_name, hostname)
+
+    def add_host_share(self, hostname, share_type, export_point, username=None, password=None, domain=None, timeout=60):
+        """Add a network share object to a host.
+        Arguments:
+            hostname {str} -- The hostname or IP Address of the physical host you want to add to the Rubrik cluster.
+            share_type {str} -- The share object type to be added to the host. (choices: {NFS, SMB})
+            export_point {str} -- The NFS export path of the share. 
+        Keyword Arguments:
+            username {str} -- The username for the host. (default: {None})
+            password {str} -- The password for the host. (default: {None})
+            domain {str} -- The domain for the host (default: {None})
+            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {60})
+        Returns:
+            dict -- The full API response for `POST /internal/host/share`.
+        """
+        if(len(hostname) == 0 or len(share_type) == 0 or len(export_point) == 0):
+            raise InvalidParameterException("The provided hostname list, share_type, export_point is empty.")
+        self.log('Searching the Rubrik cluster for the host ID.')
+        host_id = self.object_id(hostname, 'physical_host', timeout=timeout)
+
+        config = {}
+        config['hostname'] = hostname
+        config['hostId'] = host_id
+        config['shareType'] = share_type
+        config['exportPoint'] = export_point
+        config['username'] = username
+        config['password'] = password
+        config['domain'] = domain
+        self.log("add_host_share: Adding share object '{}' to Physical Host ID {}".format(export_point, host_id))
+        return self.post('internal', '/host/share', config, timeout)

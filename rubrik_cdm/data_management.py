@@ -398,6 +398,8 @@ class Data_Management(_API):
             log_retention_hours {int} -- The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
             copy_only {int} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
             windows_host {str} -- The name of the Windows host that contains the relevant volume group. Required when the `object_type` is `volume_group`. (default {None})
+            nas_host {str} -- The name of the NAS host that contains the relevant share. Required when the `object_type` is `fileset`. (default {None})
+            share {str} -- The name of the network share a fileset will be created for. Required when the `object_type` is `fileset`. (default {None})
             timeout {bool} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
