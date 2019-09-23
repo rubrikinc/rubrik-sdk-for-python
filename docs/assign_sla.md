@@ -22,6 +22,8 @@ def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in
 | log_retention_hours             | int  | The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`.   |         | None    |
 | copy_only                       | bool | Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`.                                      |         | None    |
 | windows_host                    | str  | The name of the Windows host that contains the relevant volume group. Required when the `object_type` is `volume_group`. |         | None    |
+| nas_host                    | str  | The name of the NAS host that contains the relevant share. Required when the `object_type` is `fileset`. |         | None    |
+| share                    | str  | The name of the network share a fileset will be created for. Required when the `object_type` is `fileset`. |         | None    |
 | timeout                         | str  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.             |         | 30      |
 
 ## Returns
@@ -82,4 +84,21 @@ windows_host = "windows2016.rubrik.com"
 sla_name = "Gold"
 
 assign_sla = rubrik.assign_sla(object_name, sla_name, "volume_group", windows_host=windows_host)
+```
+
+## Fileset
+
+```py
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+object_name = 'nas_fileset'
+object_type = 'fileset'
+
+sla_name = 'Gold'
+nas_host = 'nas-server.rubrik.com'
+share = '/nas_share'
+
+assign_sla = rubrik.assign_sla(object_name, sla_name, object_type, nas_host=nas_host, share=share)
 ```
