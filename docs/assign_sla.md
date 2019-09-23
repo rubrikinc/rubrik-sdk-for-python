@@ -7,11 +7,11 @@ def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in
 
 ## Arguments
 
-| Name        | Type        | Description                                                                                                                                                                                                                                                | Choices                          |
-|-------------|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
-| object_name | str or list | The name of the Rubrik object you wish to assign to an SLA Domain. When the 'object_type' is 'volume_group', the object_name can be a list of volumes.                                                                                                     |                                  |
-| sla_name    | str         | The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`. |                                  |
-| object_type | str         | The Rubrik object type you want to assign to the SLA Domain.                                                                                                                                                                                               | vmware, mssql_host, volume_group |
+| Name        | Type        | Description                                                                                                                                                                                                                                                | Choices                               |
+|-------------|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------|
+| object_name | str or list | The name of the Rubrik object you wish to assign to an SLA Domain. When the 'object_type' is 'volume_group', the object_name can be a list of volumes.                                                                                                     |                                       |
+| sla_name    | str         | The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`. |                                       |
+| object_type | str         | The Rubrik object type you want to assign to the SLA Domain.                                                                                                                                                                                               | vmware, mssql_host, volume_group, ahv |
 
 
 ## Keyword Arguments
@@ -82,4 +82,18 @@ windows_host = "windows2016.rubrik.com"
 sla_name = "Gold"
 
 assign_sla = rubrik.assign_sla(object_name, sla_name, "volume_group", windows_host=windows_host)
+```
+
+## AHV
+
+```py
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+
+vm_name = "python-sdk-demo"
+sla_name = "Gold"
+
+assign_sla = rubrik.assign_sla(object_name, sla_name, "ahv")
 ```
