@@ -33,7 +33,7 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, force_full=False,  timeout=15):  # pylint: ignore
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, force_full=False, timeout=15):  # pylint: ignore
         """Initiate an on-demand snapshot.
 
         Arguments:
@@ -364,7 +364,8 @@ class Data_Management(_API):
             for item in api_request['data']:
                 if object_type == 'oracle_db':
                     # Find the oracle_db object with the correct hostName or RAC cluster name. Checks the instances for a match, set the host_match flag if matched.
-                    # Instance names can be stored/entered with and without the domain name so we will compare the hostname with the domain.
+                    # Instance names can be stored/entered with and without the domain name so
+                    # we will compare the hostname with the domain.
                     for instance in item['instances']:
                         if hostname.split('.')[0] in instance['hostName'] and not host_match:
                             object_ids.append(item['id'])
@@ -416,7 +417,6 @@ class Data_Management(_API):
         """
 
         valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'fileset', 'ahv']
-
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -474,7 +474,7 @@ class Data_Management(_API):
                 config['managedIds'] = [vm_id]
 
                 return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout)
-        
+
         elif object_type == 'fileset':
             self.log("assign_sla: Searching the Rubrik cluster for the NAS host '{}'.".format(nas_host))
             host_id = self.object_id(nas_host, 'physical_host', timeout=timeout)
@@ -486,7 +486,9 @@ class Data_Management(_API):
                 if shares['hostId'] == host_id and shares['exportPoint'] == share:
                     share_id = shares['id']
             if share_id is None:
-                raise InvalidParameterException("The share object'{}' does not exist for host '{}'.".format(share, nas_host))
+                raise InvalidParameterException(
+                    "The share object'{}' does not exist for host '{}'.".format(
+                        share, nas_host))
 
             self.log("assign_sla: Searching the Rubrik cluster for the fileset '{}' template.".format(object_name))
             fileset_summary = self.get("v1", '/fileset?is_relic=false&name={}'.format(object_name), timeout=timeout)
@@ -509,7 +511,7 @@ class Data_Management(_API):
             if sla_id == fileset_summary['data'][0]['configuredSlaDomainId']:
                 return "No change required. The NAS fileset '{}' is already assigned to the '{}' SLA Domain.".format(
                     object_name, sla_name)
-            
+
             else:
                 self.log("assign_sla: Assigning the fileset '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
 
@@ -526,7 +528,7 @@ class Data_Management(_API):
             vm_summary = self.get('internal', '/nutanix/vm/{}'.format(vm_id), timeout=timeout)
 
             if sla_id == vm_summary['configuredSlaDomainId']:
-                return "No change required. The vSphere VM '{}' is already assigned to the '{}' SLA Domain.".format(
+                return "No change required. The AHV VM '{}' is already assigned to the '{}' SLA Domain.".format(
                     object_name, sla_name)
             else:
                 self.log("assign_sla: Assigning the AHV VM '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
@@ -1653,10 +1655,10 @@ class Data_Management(_API):
         else:
             vcenter_id = data['data'][0]['infraPath'][0]['id']
             vm_id = data['data'][0]['id']
-        
+
         self.log("vcenter_refresh_vm: Getting the MOID for vSphere VM {}.".format(vm_name))
         split_moid = vm_id.split('-')
-        moid = split_moid[-2]+'-'+split_moid[-1]
-        config = {'vmMoid':moid}
+        moid = split_moid[-2] + '-' + split_moid[-1]
+        config = {'vmMoid': moid}
         self.log("vcenter_refresh_vm: Refreshing vSphere VM {} metadata.".format(vm_name))
         self.post('internal', '/vmware/vcenter/{}/refresh_vm'.format(vcenter_id), config, timeout)
