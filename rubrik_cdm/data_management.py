@@ -33,18 +33,19 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, timeout=15):  # pylint: ignore
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, force_full=False,  timeout=15):  # pylint: ignore
         """Initiate an on-demand snapshot.
 
         Arguments:
             object_name {str} -- The name of the Rubrik object to take a on-demand snapshot of.
-            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host, ahv, mssql})
+            object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host, ahv, mssql_db, oarcle_db})
 
         Keyword Arguments:
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
             host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
             hostname {str} -- The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
+            force_full {bool} -- If True will force a new full image backup of an Oracle database. (default: {False})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -217,6 +218,7 @@ class Data_Management(_API):
 
             config = {}
             config['slaId'] = sla_id
+            config['forceFullSnapshot'] = force_full
 
             self.log("on_demand_snapshot: Initiating snapshot for the Oracle database '{}'.".format(object_name))
             api_request = self.post('internal', '/oracle/db/{}/snapshot'.format(db_id), config, timeout)
@@ -231,7 +233,7 @@ class Data_Management(_API):
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
             object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location})
-            hostname {str} -- The hostname, or one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
+            hostname {str} -- The hostname, or one of the hostnames in a RAC cluster, or the RAC cluster name. Required when the object_type is oracle_db.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
@@ -316,7 +318,7 @@ class Data_Management(_API):
             },
             "oracle_db": {
                 "api_version": "internal",
-                "api_endpoint": "/oracle/db"
+                "api_endpoint": "/oracle/db?name={}".format(object_name)
             },
             "volume_group": {
                 "api_version": "internal",
@@ -360,14 +362,19 @@ class Data_Management(_API):
 
             host_match = False
             for item in api_request['data']:
-                if object_type == 'oracle_db' and item[name_value] == object_name:
+                if object_type == 'oracle_db':
+                    # Find the oracle_db object with the correct hostName or RAC cluster name. Checks the instances for a match, set the host_match flag if matched.
+                    # Instance names can be stored/entered with and without the domain name so we will compare the hostname with the domain.
                     for instance in item['instances']:
-                        if hostname in instance['hostName']:
+                        if hostname.split('.')[0] in instance['hostName'] and not host_match:
                             object_ids.append(item['id'])
                             host_match = True
+                    # The instance or RAC cluster name can also be in the infraPath
+                    if hostname.split('.')[0] in item['infraPath'] and not host_match:
+                        object_ids.append(item['id'])
+                        host_match = True
                 elif item[name_value] == object_name:
                     object_ids.append(item['id'])
-
             if object_type == 'oracle_db' and not host_match:
                 raise InvalidParameterException(
                     "The {} object '{}' on the host '{}' was not found on the Rubrik cluster.".format(object_type, object_name, hostname))
@@ -383,7 +390,7 @@ class Data_Management(_API):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, timeout=30):  # pytest: ignore
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
 
         Arguments:
@@ -396,6 +403,8 @@ class Data_Management(_API):
             log_retention_hours {int} -- The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
             copy_only {int} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
             windows_host {str} -- The name of the Windows host that contains the relevant volume group. Required when the `object_type` is `volume_group`. (default {None})
+            nas_host {str} -- The name of the NAS host that contains the relevant share. Required when the `object_type` is `fileset`. (default {None})
+            share {str} -- The name of the network share a fileset will be created for. Required when the `object_type` is `fileset`. (default {None})
             timeout {bool} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
@@ -406,7 +415,8 @@ class Data_Management(_API):
             dict -- The full API response for `PATCH /internal/volume_group/{id}`.
         """
 
-        valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'ahv']
+        valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'fileset', 'ahv']
+
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -416,6 +426,11 @@ class Data_Management(_API):
             if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
                 raise InvalidParameterException(
                     "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
+
+        if object_type == "fileset":
+            if nas_host is None or share is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'fileset' the 'nas_host' and 'share' paramaters must be populated.")
 
         if object_type == "volume_group":
 
@@ -459,6 +474,49 @@ class Data_Management(_API):
                 config['managedIds'] = [vm_id]
 
                 return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout)
+        
+        elif object_type == 'fileset':
+            self.log("assign_sla: Searching the Rubrik cluster for the NAS host '{}'.".format(nas_host))
+            host_id = self.object_id(nas_host, 'physical_host', timeout=timeout)
+
+            self.log("assign_sla: Searching the Rubrik cluster for the share '{}'.".format(share))
+            share_summary = self.get("internal", '/host/share', timeout=timeout)
+            share_id = None
+            for shares in share_summary['data']:
+                if shares['hostId'] == host_id and shares['exportPoint'] == share:
+                    share_id = shares['id']
+            if share_id is None:
+                raise InvalidParameterException("The share object'{}' does not exist for host '{}'.".format(share, nas_host))
+
+            self.log("assign_sla: Searching the Rubrik cluster for the fileset '{}' template.".format(object_name))
+            fileset_summary = self.get("v1", '/fileset?is_relic=false&name={}'.format(object_name), timeout=timeout)
+            template_id = None
+            for filesets in fileset_summary['data']:
+                if filesets['hostId'] == host_id and filesets['name'] == object_name:
+                    template_id = filesets['templateId']
+            if template_id is None:
+                raise InvalidParameterException("The fileset '{}' template does not exist".format(object_name))
+
+            self.log("assign_sla: Creating filesets for a network host. Each fileset is a fileset template applied to a host")
+            bulk = [{
+                'isPassthrough': False,
+                'shareId': share_id,
+                'templateId': template_id
+            }]
+            fileset_response = self.post("internal", "/fileset/bulk", bulk, timeout)
+            fileset_id = fileset_response['data'][0]['id']
+
+            if sla_id == fileset_summary['data'][0]['configuredSlaDomainId']:
+                return "No change required. The NAS fileset '{}' is already assigned to the '{}' SLA Domain.".format(
+                    object_name, sla_name)
+            
+            else:
+                self.log("assign_sla: Assigning the fileset '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+
+                config = {}
+                config['managedIds'] = [fileset_id]
+
+                return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout=180)
 
         elif object_type == 'ahv':
             self.log("assign_sla: Searching the Rubrik cluster for the AHV VM '{}'.".format(object_name))
@@ -1134,7 +1192,7 @@ class Data_Management(_API):
             else:
                 archival_threshold = 1
 
-            config["localRetentionLimit"] = archival_threshold
+            config["localRetentionLimit"] = retention_on_brik_in_seconds
 
             config["archivalSpecs"] = [{
                 "locationId": archival_location_id,
@@ -1574,3 +1632,31 @@ class Data_Management(_API):
                     time))
 
             return self.post('v1', '/mssql/db/{}/restore'.format(mssql_id), config, timeout)
+
+    def vcenter_refresh_vm(self, vm_name, timeout=15):  # pylint: ignore
+        """Refresh a single vSphere VM metadata.
+
+        Arguments:
+            vm_name {str} -- The name of the vSphere VM.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            no content.
+        """
+
+        self.log("vcenter_refresh_vm: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        data = self.get('v1', '/vmware/vm?name={}'.format(vm_name), timeout)
+        if data['data'] == []:
+            raise InvalidParameterException("The vSphere VM '{}' does not exist.".format(vm_name))
+        else:
+            vcenter_id = data['data'][0]['infraPath'][0]['id']
+            vm_id = data['data'][0]['id']
+        
+        self.log("vcenter_refresh_vm: Getting the MOID for vSphere VM {}.".format(vm_name))
+        split_moid = vm_id.split('-')
+        moid = split_moid[-2]+'-'+split_moid[-1]
+        config = {'vmMoid':moid}
+        self.log("vcenter_refresh_vm: Refreshing vSphere VM {} metadata.".format(vm_name))
+        self.post('internal', '/vmware/vcenter/{}/refresh_vm'.format(vcenter_id), config, timeout)
