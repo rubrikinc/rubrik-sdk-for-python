@@ -948,3 +948,63 @@ class Cluster(Api):
                 self.log("cluster_support_tunnel - Disable the Support Tunnel")
 
                 return self.patch('internal', '/node/me/support_tunnel', config, timeout)
+    def add_floating_ips(self, floating_ips, wait_for_completion=True, timeout=15):
+        """Add floating IPs to CDM.
+
+        Arguments:
+            floating_ips {list} -- The IP addresses you wish to add. 
+
+        Returns:
+            dict -- When wait_for_completion is False, the full API response for `POST /internal/node_management/cluster_ip`
+            dict -- When wait_for_completion is True, the full API response of the job status
+        """
+        self.log("Appending list of floating IPs with {}".format(floating_ips))
+        if isinstance(floating_ips, list) is False:
+            raise InvalidParameterException("The 'floating_ips' argument must be a list")
+
+        config = self.get('internal', '/node_management/cluster_ip')
+        if set(config).intersection(floating_ips):
+            return("No change required. IP(s) {} is already in list".format(set(config).intersection(floating_ips)))
+        else:
+            for i in floating_ips:
+                config.append(i)
+
+        # return config
+        return self.post('internal', '/node_management/cluster_ip', config)
+        
+    def remove_floating_ips(self, floating_ips, wait_for_completion=True, timeout=15):
+        """Remove floating IPs from CDM.
+
+        Arguments:
+            floating_ips {list} -- The IP addresses you wish to remove. 
+
+        Returns:
+            dict -- When wait_for_completion is False, the full API response for `POST /internal/node_management/cluster_ip`
+            dict -- When wait_for_completion is True, the full API response of the job status
+        """
+        self.log("Removing list of floating IPs with {}".format(floating_ips))
+        if isinstance(floating_ips, list) is False:
+            raise InvalidParameterException("The 'floating_ips' argument must be a list")
+            
+        config = self.get('internal', '/node_management/cluster_ip')
+        if set(config).intersection(floating_ips):
+            for i in floating_ips:
+                if i in config:
+                    config.remove(i)
+        else:
+            return("No change required. IP(s) {} is not in list".format(set(config).intersection(floating_ips)))
+
+
+        return self.post('internal', '/node_management/cluster_ip', config)
+    def get_floating_ips(self, wait_for_completion=True, timeout=15):
+        """Returns list of floating IPs
+
+        Returns:
+            dict -- When wait_for_completion is False, the full API response for `GET /internal/node_management/cluster_ip`
+            dict -- When wait_for_completion is True, the full API response of the job status
+        """
+        self.log("Returning list of floating IPs.")
+            
+        config = self.get('internal', '/node_management/cluster_ip')
+
+        return config
