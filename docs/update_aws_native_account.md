@@ -30,6 +30,5 @@ current_aws_account_name = "Python"
 config = {}
 config["name"] = "Python-AWS-Demo"
 
-update_native = rubrik.update_aws_native_account(
-    current_aws_account_name, config)
+update_native = rubrik.update_aws_native_account(current_aws_account_name, config)
 ```
