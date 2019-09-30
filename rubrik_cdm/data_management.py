@@ -667,7 +667,7 @@ class Data_Management(_API):
 
         Keyword Arguments:
             date {str} -- The date of the snapshot you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
-            time {str} -- The time of the snapshot you wish to Live Mount formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
+            time {str} -- The time of the snapshot you wish to Live Mount formated as `Hour:Minute AM/PM` (ex: 1:30 AM). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
             host {str} -- The hostname or IP address of the ESXi host to Live Mount the VM on. By default, the current host will be used. (default: {'current'})
             remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Live Mounted VM. Set to `True` to remove all network interfaces. (default: {False})
             power_on {bool} -- Flag that determines whether the VM should be powered on after the Live Mount. Set to `True` to power on the VM. Set to `False` to mount the VM but not power it on. (default: {True})
@@ -740,7 +740,7 @@ class Data_Management(_API):
 
         Keyword Arguments:
             date {str} -- The date of the snapshot you wish to Instantly Recover formated as `Month-Day-Year` (ex: 1-15-2014). If 'latest' is specified, the last snapshot taken will used. (default: {'latest'})
-            time {str} -- The time of the snapshot you wish to Instantly Recover formated formated as `Hour:Minute AM/PM`  (ex: 1:30 AM). If 'latest' is specified, the last snapshot taken will be used. (default: {'latest'})
+            time {str} -- The time of the snapshot you wish to Instantly Recover formated as `Hour:Minute AM/PM`  (ex: 1:30 AM). If 'latest' is specified, the last snapshot taken will be used. (default: {'latest'})
             host {str} -- The hostname or IP address of the ESXi host to Instantly Recover the VM on. By default, the current host will be used. (default: {'current'})
             remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Instantly Recovered VM. Set to `True` to remove all network interfaces. (default: {False})
             power_on {bool} -- Flag that determines whether the VM should be powered on after Instant Recovery. Set to `True` to power on the VM. Set to `False` to instantly recover the VM but not power it on. (default: {True})
@@ -1314,7 +1314,7 @@ class Data_Management(_API):
         Arguments:
             db_name {str} -- The name of the database to Live Mount.
             date {str} -- The recovery_point date to recovery to formated as `Month-Day-Year` (ex: 1-15-2014).
-            time {str} -- The recovery_point time to recovery to formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+            time {str} -- The recovery_point time to recovery to formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
 
         Keyword Arguments:
             sql_instance {str} -- The SQL instance name with the database you wish to Live Mount.
@@ -1597,7 +1597,7 @@ class Data_Management(_API):
         Arguments:
             db_name {str} -- The name of the database to instantly recover.
             date {str} -- The recovery_point date to recover to formated as `Month-Day-Year` (ex: 1-15-2014).
-            time {str} -- The recovery_point time to recover to formated formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+            time {str} -- The recovery_point time to recover to formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
 
         Keyword Arguments:
             sql_instance {str} -- The SQL instance name with the database to instantly recover.
