@@ -1639,7 +1639,7 @@ class Data_Management(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full response of `POST /v1/vmware/vm?{query}`
+            dict -- The full response of `GET /v1/vmware/vm?{query}`
         """
         
         parameters = {'effective_sla_domain_id':effective_sla_domain_id,
@@ -1687,27 +1687,27 @@ class Data_Management(_API):
         return self.get('v1', '/vmware/vm?{}'.format(query), timeout)
 
     def get_vsphere_vm_snapshot(self, id, timeout=15):  # pylint: ignore
-        """Retrieve summary information for the snapshots of a virtual machine.
+        """Retrieve summary information for the snapshots of a virtual machine.
 
         Arguments:
-            id {str} -- ID of the virtual machine.
+            id {str} -- ID of the virtual machine.
 
         Returns:
-            dict -- The full response of `POST /v1/vmware/vm/{id}/snapshot`
+            dict -- The full response of `GET /v1/vmware/vm/{id}/snapshot`
         """
 
-        self.log("get_vsphere_vm_snapshot: Getting summary information for the snapshots of virtual machine {}".format(id))
+        self.log("get_vsphere_vm_snapshot: Getting summary information for the snapshots of virtual machine {}".format(id))
         return self.get('v1', '/vmware/vm/{}/snapshot'.format(id), timeout)
 
     def get_vsphere_vm_details(self, id, timeout=15):  # pylint: ignore
         """Retrieve details for a virtual machine.
 
         Arguments:
-            id {str} -- ID of the virtual machine.
+            id {str} -- ID of the virtual machine.
         
         Returns:
-            dict -- The full response of `POST /v1/vmware/vm/{id}`
+            dict -- The full response of `GET /v1/vmware/vm/{id}`
         """ 
 
-        self.log("get_vsphere_vm_details: Getting details of virtual machine {}".format(id))
+        self.log("get_vsphere_vm_details: Getting details of virtual machine {}".format(id))
         return self.get('v1', '/vmware/vm/{}'.format(id), timeout)
