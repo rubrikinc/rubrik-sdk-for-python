@@ -1607,7 +1607,7 @@ class Data_Management(_API):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
-            dict -- The full response of `POST /mssql/db/{id}/restore`.
+            dict -- The full response of `POST /v1/mssql/db/{id}/restore`.
         """
 
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
@@ -1662,3 +1662,68 @@ class Data_Management(_API):
         config = {'vmMoid': moid}
         self.log("vcenter_refresh_vm: Refreshing vSphere VM {} metadata.".format(vm_name))
         self.post('internal', '/vmware/vcenter/{}/refresh_vm'.format(vcenter_id), config, timeout)
+
+    def get_vsphere_vm(self, name=None, is_relic=None, effective_sla_domain_id=None, primary_cluster_id=None, limit=None, offset=None, moid=None, sla_assignment=None, guest_os_name=None, sort_by=None, sort_order=None, timeout=15):  # pylint: ignore
+        """Get summary of all the VMs. Each keyword argument is a query parameter to filter the VM details returned i.e. you can query for a specific VM name, is_relic, effective_sla_domain etc.
+
+        Keyword Arguments:
+            name {str} -- Search by using a virtual machine name.
+            is_relic {bool} -- Filter by the isRelic field of the virtual machine. When this parameter is not set, return both relic and non-relic virtual machines.
+            effective_sla_domain_id {str} -- Filter by ID of effective SLA Domain.
+            primary_cluster_id {str} -- Filter by primary cluster ID, or local.
+            limit {int} -- Limit the number of matches returned.
+            offset {int} -- Ignore these many matches in the beginning.
+            moid {str} -- Search by using a virtual machine managed object ID.
+            sla_assignment {str} -- Filter by SLA Domain assignment type. (Direct, Derived, Unassigned)
+            guest_os_name {str} -- Filters by the name of operating system using infix search.
+            sort_by {str} -- Sort results based on the specified attribute. (effectiveSlaDomainName, name, moid, folderPath, infraPath)
+            sort_order {str} -- Sort order, either ascending or descending. (asc, desc)
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- The full response of `POST /v1/vmware/vm?{query}`
+        """
+        
+        parameters = {'effective_sla_domain_id':effective_sla_domain_id,
+                      'primary_cluster_id':primary_cluster_id,
+                      'limit':limit,
+                      'offset':offset,
+                      'is_relic':is_relic,
+                      'name':name,
+                      'moid':moid,
+                      'sla_assignment':sla_assignment,
+                      'guest_os_name':guest_os_name,
+                      'sort_by':sort_by,
+                      'sort_order':sort_order}
+        parameters = {key : value for key, value in parameters.items() if value != None}
+
+        self.log("get_vsphere_vm: checking the provided query parameters.") 
+        valid_sla_assignment = ['Derived', 'Direct', 'Unassigned']
+        for key, value in parameters.items():
+            if key == 'sla_assignment' and value not in valid_sla_assignment:
+                raise InvalidParameterException('The sla_assignment parameter must be one of the following: {}'.format(valid_sla_assignment))
+        
+        valid_sort_by = ['effectiveSlaDomainName', 'name', 'moid', 'folderPath', 'infraPath']
+        for key, value in parameters.items():
+            if key == 'sort_by' and value not in valid_sort_by:
+                raise InvalidParameterException('The sort_by parameter must be one of the following: {}'.format(valid_sort_by))
+        
+        valid_sort_order = ['asc', 'desc']
+        for key, value in parameters.items():
+            if key == 'sort_order' and value not in valid_sort_order:
+                raise InvalidParameterException('The sort_order parameter must be one of the following: {}'.format(valid_sort_order))
+
+        for key, value in parameters.items():
+            if key == 'is_relic' and type(value) != bool:
+                raise InvalidParameterException('The is_relic paremeter must be a boolean: True or False')
+        
+        for key, value in parameters.items():
+            if ((key == 'limit') or (key == 'offset')) and type(value) != int:
+                raise InvalidParameterException('The limit and offset paremeter must be an integer')
+
+        query = ''
+        for key, value in parameters.items():
+            query = query+("{}={}".format(key, value)+'&')
+        
+        self.log("get_vsphere_vm: Get summary of all the VMs.")
+        return self.get('v1', '/vmware/vm?{}'.format(query), timeout)

@@ -2,7 +2,7 @@
 
 Retrieve the Live Mounts for a MSSQL source database.
 ```py
-def sql_live_mount(self, db_name, sql_instance=None, sql_host=None, timeout=30):
+def get_sql_live_mount(self, db_name, sql_instance=None, sql_host=None, timeout=30):
 ```
 
 ## Arguments
