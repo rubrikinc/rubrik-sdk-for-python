@@ -1708,6 +1708,6 @@ class Data_Management(_API):
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/{id}`
         """ 
-        
+
         self.log("get_vsphere_vm_details: Getting details of virtual machine {}".format(id))
         return self.get('v1', '/vmware/vm/{}'.format(id), timeout)
