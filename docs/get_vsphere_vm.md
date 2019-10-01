@@ -2,7 +2,7 @@
 
 Get summary of vSphere VMs
 ```py
-def get_vsphere_vm(self, timeout=15, **query):
+def get_vsphere_vm(self, name=None, is_relic=None, effective_sla_domain_id=None, primary_cluster_id=None, limit=None, offset=None, moid=None, sla_assignment=None, guest_os_name=None, sort_by=None, sort_order=None, timeout=15):
 ```
 
 ## Keyword Arguments
@@ -24,7 +24,7 @@ def get_vsphere_vm(self, timeout=15, **query):
 ## Returns
 | Type | Return Value                                                                                   |
 |------|-----------------------------------------------------------------------------------------------|
-| dict  | The full response of `GET /v1/vmware/vm?{**query}`. |
+| dict  | The full response of `GET /v1/vmware/vm?{query}`. |
 ## Example
 ```py
 import rubrik_cdm
