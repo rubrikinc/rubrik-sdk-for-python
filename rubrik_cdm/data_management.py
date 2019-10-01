@@ -1622,7 +1622,7 @@ class Data_Management(_API):
         self.post('internal', '/vmware/vcenter/{}/refresh_vm'.format(vcenter_id), config, timeout)
 
     def get_vsphere_vm(self, name=None, is_relic=None, effective_sla_domain_id=None, primary_cluster_id=None, limit=None, offset=None, moid=None, sla_assignment=None, guest_os_name=None, sort_by=None, sort_order=None, timeout=15):  # pylint: ignore
-        """Get summary of all the VMs.
+        """Get summary of all the VMs. Each keyword argument is a query parameter to filter the VM details returned i.e. you can query for a specific VM name, is_relic, effective_sla_domain etc.
 
         Keyword Arguments:
             name {str} -- Search by using a virtual machine name.
