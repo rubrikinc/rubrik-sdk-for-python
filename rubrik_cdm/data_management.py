@@ -1685,3 +1685,29 @@ class Data_Management(_API):
         
         self.log("get_vsphere_vm: Get summary of all the VMs.")
         return self.get('v1', '/vmware/vm?{}'.format(query), timeout)
+
+    def get_vsphere_vm_snapshot(self, id, timeout=15):  # pylint: ignore
+        """Retrieve summary information for the snapshots of a virtual machine.
+
+        Arguments:
+            id {str} -- ID of the virtual machine.
+
+        Returns:
+            dict -- The full response of `POST /v1/vmware/vm/{id}/snapshot`
+        """
+
+        self.log("get_vsphere_vm_snapshot: Getting summary information for the snapshots of virtual machine {}".format(id))
+        return self.get('v1', '/vmware/vm/{}/snapshot'.format(id), timeout)
+
+    def get_vsphere_vm_details(self, id, timeout=15):  # pylint: ignore
+        """Retrieve details for a virtual machine.
+
+        Arguments:
+            id {str} -- ID of the virtual machine.
+        
+        Returns:
+            dict -- The full response of `POST /v1/vmware/vm/{id}`
+        """ 
+        
+        self.log("get_vsphere_vm_details: Getting details of virtual machine {}".format(id))
+        return self.get('v1', '/vmware/vm/{}'.format(id), timeout)
