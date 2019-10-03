@@ -328,7 +328,7 @@ class Data_Management(_API):
             },
             "oracle_db": {
                 "api_version": "internal",
-                "api_endpoint": "/oracle/db"
+                "api_endpoint": "/oracle/db?name={}".format(object_name)
             },
             "volume_group": {
                 "api_version": "internal",
@@ -378,17 +378,24 @@ class Data_Management(_API):
 
             host_match = False
             for item in api_request['data']:
-                if object_type == 'oracle_db' and item[name_value] == object_name:
+                if object_type == 'oracle_db':
+                    # Find the oracle_db object with the correct hostName or RAC cluster name. Checks the instances for a match, set the host_match flag if matched.
+                    # Instance names can be stored/entered with and without the domain name so
+                    # we will compare the hostname with the domain.
                     for instance in item['instances']:
-                        if hostname in instance['hostName']:
+                        if hostname.split('.')[0] in instance['hostName'] and not host_match:
                             object_ids.append(item['id'])
                             host_match = True
+                    # The instance or RAC cluster name can also be in the infraPath
+                    if hostname.split('.')[0] in item['infraPath'] and not host_match:
+                        object_ids.append(item['id'])
+                        host_match = True
                 elif object_type == 'share' and item[name_value] == object_name:
                     if item['hostId'] == host_id:
                         object_ids.append(item['id'])
+                        host_match = True
                 elif item[name_value] == object_name:
                     object_ids.append(item['id'])
-
             if object_type == 'oracle_db' and not host_match:
                 raise InvalidParameterException(
                     "The {} object '{}' on the host '{}' was not found on the Rubrik cluster.".format(object_type, object_name, hostname))
@@ -1628,7 +1635,7 @@ class Data_Management(_API):
             sort_order {str} -- Sort order, either ascending or descending. (asc, desc)
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
         Returns:
-            dict -- The full response of `POST /v1/vmware/vm?{query}`
+            dict -- The full response of `GET /v1/vmware/vm?{query}`
         """
         
         parameters = {'effective_sla_domain_id':effective_sla_domain_id,
@@ -1677,13 +1684,10 @@ class Data_Management(_API):
 
     def get_vsphere_vm_snapshot(self, vm_name, timeout=15):  # pylint: ignore
         """Retrieve summary information for the snapshots of a virtual machine.
-
         Arguments:
             vm_name {str} -- Name of the virtual machine.
-
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
-
         Returns:
             dict -- The full response of `GET /v1/vmware/vm/{vm_id}/snapshot`
         """
@@ -1696,13 +1700,10 @@ class Data_Management(_API):
 
     def get_vsphere_vm_details(self, vm_name, timeout=15):  # pylint: ignore
         """Retrieve details for a virtual machine.
-
         Arguments:
-            vm_name {str} -- Name of the virtual machine.
-        
+            vm_name {str} -- Name of the virtual machine.       
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
-
         Returns:
             dict -- The full response of `GET /v1/vmware/vm/{vm_id}`
         """ 
@@ -1715,14 +1716,11 @@ class Data_Management(_API):
 
     def get_vsphere_vm_file(self, vm_name, path=None, timeout=15):  # pylint: ignore
         """Search for a file in the snapshots of a virtual machine. Specify the file by full path prefix or filename prefix.
-
         Arguments:
             vm_name {str} -- Name of the virtual machine.
-
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
-            path {str} -- The path query. Use either a path prefix or a filename prefix.
-        
+            path {str} -- The path query. Use either a path prefix or a filename prefix.       
         Returns:
             dict -- The full response of `GET /v1/vmware/vm/{vm_id}/search?path={path}`
         """
