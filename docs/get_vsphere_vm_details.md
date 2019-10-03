@@ -2,13 +2,13 @@
 
 Retrieve details for a virtual machine.
 ```py
-def get_vsphere_vm_details(self, id, timeout=15):
+def get_vsphere_vm_details(self, vm_name, timeout=15):
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| id  | str  | ID of the virtual machine.    |         |
+| vm_name  | str  | Name of the virtual machine.    |         |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
@@ -24,7 +24,7 @@ import rubrik_cdm
 
 rubrik = rubrik_cdm.Connect()
 
-id = "VirtualMachine:::ID"
+vm_name = "python-sdk-demo"
 
-get_vm_details = rubrik.get_vsphere_vm_details(id=id)
+get_vm_details = rubrik.get_vsphere_vm_details(vm_name)
 ```

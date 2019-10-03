@@ -2,13 +2,13 @@
 
 Search for a file in the snapshots of a virtual machine. Specify the file by full path prefix or filename prefix.
 ```py
-def get_vsphere_vm_file(self, id, path=None, timeout=15):
+def get_vsphere_vm_file(self, vm_name, path=None, timeout=15):
 ```
 
 ## Arguments
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| id  | str  | ID of the virtual machine.    |         |
+| vm_name  | str  | Name of the virtual machine.    |         |
 ## Keyword Arguments
 | Name        | Type | Description                                                                 | Choices | Default |
 |-------------|------|-----------------------------------------------------------------------------|---------|---------|
@@ -25,8 +25,8 @@ import rubrik_cdm
 
 rubrik = rubrik_cdm.Connect()
 
-id = "VirtualMachine:::ID"
 path = '/etc/hosts'
+vm_name = "python-sdk-demo"
 
-get_vm_file = rubrik.get_vsphere_vm_file(id=id, path=path)
+get_vm_file = rubrik.get_vsphere_vm_file(vm_name, path=path)
 ```

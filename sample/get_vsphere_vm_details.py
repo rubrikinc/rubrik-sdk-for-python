@@ -1,7 +1,7 @@
 import rubrik_cdm
 
-id = 'VirtualMachine:::ID'
+vm_name = "python-sdk-demo"
 
 rubrik = rubrik_cdm.Connect()
 
-get_vm_details = rubrik.get_vsphere_vm_details(id=id)
+get_vm_details = rubrik.get_vsphere_vm_details(vm_name)
