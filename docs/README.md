@@ -10,7 +10,7 @@ Install from pip:
 
 Install from source:
 ```
-$ git clone https://github.com/rubrik-devops/rubrik-sdk-for-python
+$ git clone https://github.com/rubrikinc/rubrik-sdk-for-python
 $ cd rubrik-sdk-for-python
 $ python setup.py install
 ``` 
@@ -50,6 +50,15 @@ username = "sdk@rangers.lab"
 password = "RubrikPythonSDK"
 
 rubrik = rubrik_cdm.Connect(node_ip, username, password)
+```
+
+```py
+import rubrik_cdm
+
+node_ip = "172.21.8.90"
+api_token "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUVkN2FhYzlfZWU0MzA5ODQtMGE1Zi00NGZjLTliNTYtN"
+
+rubrik = rubrik_cdm.Connect(node_ip, api_token=api_token)
 ```
 
 
