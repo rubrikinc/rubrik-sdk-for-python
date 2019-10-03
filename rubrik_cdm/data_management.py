@@ -1711,23 +1711,20 @@ class Data_Management(_API):
         self.log("get_vsphere_vm_details: Getting details of virtual machine {}".format(vm_id))
         return self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout)
 
-    def get_vsphere_vm_file(self, vm_name, path=None, timeout=15):  # pylint: ignore
+    def get_vsphere_vm_file(self, vm_name, path, timeout=15):  # pylint: ignore
         """Search for a file in the snapshots of a virtual machine. Specify the file by full path prefix or filename prefix.
         Arguments:
             vm_name {str} -- Name of the virtual machine.
-        Keyword Arguments:
-            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
-            path {str} -- The path query. Use either a path prefix or a filename prefix.       
+            path {str} -- The path query. Use either a path prefix or a filename prefix.
+        Keyword Arguments:    
+            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})   
         Returns:
             dict -- The full response of `GET /v1/vmware/vm/{vm_id}/search?path={path}`
         """
 
         self.log("get_vsphere_vm_file: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
-
-        if path == None:
-            raise InvalidParameterException('The path parameter argument must be provided')
-        
+ 
         self.log("get_vsphere_vm_file: Search for file/path {} in the snapshots of a virtual machine {}".format(path, vm_id))
         return self.get('v1', '/vmware/vm/{}/search?path={}'.format(vm_id, path), timeout)
 
