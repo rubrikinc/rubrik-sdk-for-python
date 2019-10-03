@@ -226,17 +226,14 @@ class Data_Management(_API):
 
     def object_id(self, object_name, object_type, host_os=None, hostname=None, share_type=None, timeout=15):
         """Get the ID of a Rubrik object by providing its name.
-
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location, share})
-            
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location, share})        
         Keyword Arguments:
             host_os {str} -- The operating system for the host. (default: {'None'})
             hostname {str} -- The hostname, for Oracle one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db or share.
             share_type {str} -- The type of NAS share i.e. NFS or SMB
             timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
-
         Returns:
             str -- The ID of the provided Rubrik object.
         """
