@@ -1,3 +1,4 @@
+  
 # Copyright 2018 Rubrik, Inc.
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,11 +36,9 @@ class Data_Management(_API):
 
     def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, force_full=False, timeout=15):  # pylint: ignore
         """Initiate an on-demand snapshot.
-
         Arguments:
             object_name {str} -- The name of the Rubrik object to take a on-demand snapshot of.
             object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host, ahv, mssql_db, oarcle_db})
-
         Keyword Arguments:
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
@@ -47,11 +46,9 @@ class Data_Management(_API):
             hostname {str} -- The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
             force_full {bool} -- If True will force a new full image backup of an Oracle database. (default: {False})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
         Returns:
             tuple -- When object_type is vmware, the full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
             tuple -- When object_type is physical_host, the full API response for `POST /v1/fileset/{}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
-
         """
 
         valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db']
@@ -227,15 +224,16 @@ class Data_Management(_API):
 
         return (api_request, snapshot_status_url)
 
-    def object_id(self, object_name, object_type, host_os=None, hostname=None, timeout=15):
+    def object_id(self, object_name, object_type, host_os=None, hostname=None, share_type=None, timeout=15):
         """Get the ID of a Rubrik object by providing its name.
-
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location})
-            hostname {str} -- The hostname, or one of the hostnames in a RAC cluster, or the RAC cluster name. Required when the object_type is oracle_db.
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location, share})        
+        Keyword Arguments:
+            host_os {str} -- The operating system for the host. (default: {'None'})
+            hostname {str} -- The hostname, for Oracle one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db or share.
+            share_type {str} -- The type of NAS share i.e. NFS or SMB
+            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
         Returns:
             str -- The ID of the provided Rubrik object.
         """
@@ -254,7 +252,8 @@ class Data_Management(_API):
             'aws_native',
             'oracle_db',
             'volume_group',
-            'archival_location']
+            'archival_location',
+            'share']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -274,6 +273,14 @@ class Data_Management(_API):
             if hostname is None:
                 raise InvalidParameterException(
                     "You must provide the host or one of the hosts in a RAC cluster for the Oracle DB object.")
+        
+        if object_type == 'share':
+            if hostname is None:
+                raise InvalidParameterException(
+                    "You must provide the hostname with the NAS share object.")
+            else: 
+                self.log('Searching the Rubrik cluster for the host ID.')
+                host_id = self.object_id(hostname, 'physical_host', timeout=timeout)
 
         api_call = {
             "vmware": {
@@ -327,6 +334,10 @@ class Data_Management(_API):
             "archival_location": {
                 "api_version": "internal",
                 "api_endpoint": "/archive/location?name={}".format(object_name)
+            },
+            "share": {
+                "api_version": "internal",
+                "api_endpoint": "/host/share?share_type={}".format(share_type)
             }
         }
 
@@ -340,7 +351,7 @@ class Data_Management(_API):
                 "api_version": "v1",
                 "api_endpoint": "/host?primary_cluster_id=local&{}={}".format(filter_field_name, object_name)
             }
-
+        
         self.log("object_id: Getting the object id for the {} object '{}'.".format(object_type, object_name))
         api_request = self.get(
             api_call[object_type]["api_version"],
@@ -357,6 +368,8 @@ class Data_Management(_API):
                 name_value = filter_field_name
             elif object_type == "volume_group":
                 name_value = "hostname"
+            elif object_type == 'share':
+                name_value = "exportPoint"
             else:
                 name_value = 'name'
 
@@ -372,6 +385,10 @@ class Data_Management(_API):
                             host_match = True
                     # The instance or RAC cluster name can also be in the infraPath
                     if hostname.split('.')[0] in item['infraPath'] and not host_match:
+                        object_ids.append(item['id'])
+                        host_match = True
+                elif object_type == 'share' and item[name_value] == object_name:
+                    if item['hostId'] == host_id:
                         object_ids.append(item['id'])
                         host_match = True
                 elif item[name_value] == object_name:
@@ -393,12 +410,10 @@ class Data_Management(_API):
 
     def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
-
         Arguments:
             object_name {str or list} -- The name of the Rubrik object you wish to assign to an SLA Domain. When the 'object_type' is 'volume_group', the object_name can be a list of volumes.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
             object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host, volume_group})
-
         Keyword Arguments:
             log_backup_frequency_in_seconds {str} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
             log_retention_hours {int} -- The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
@@ -407,7 +422,6 @@ class Data_Management(_API):
             nas_host {str} -- The name of the NAS host that contains the relevant share. Required when the `object_type` is `fileset`. (default {None})
             share {str} -- The name of the network share a fileset will be created for. Required when the `object_type` is `fileset`. (default {None})
             timeout {bool} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
-
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
             str -- No change required. The MSSQL Instance '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`, log_retention_hours: `log_retention_hours` and copy_only: `copy_only`
@@ -661,10 +675,8 @@ class Data_Management(_API):
 
     def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):  # pylint: ignore
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
-
         Arguments:
             vm_name {str} -- The name of the vSphere VM to Live Mount.
-
         Keyword Arguments:
             date {str} -- The date of the snapshot you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
             time {str} -- The time of the snapshot you wish to Live Mount formated as `Hour:Minute AM/PM` (ex: 1:30 AM). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
@@ -672,7 +684,6 @@ class Data_Management(_API):
             remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Live Mounted VM. Set to `True` to remove all network interfaces. (default: {False})
             power_on {bool} -- Flag that determines whether the VM should be powered on after the Live Mount. Set to `True` to power on the VM. Set to `False` to mount the VM but not power it on. (default: {True})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount`.
         """
@@ -734,10 +745,8 @@ class Data_Management(_API):
 
     def vsphere_instant_recovery(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, disable_network=False, keep_mac_addresses=False, preserve_moid=False, timeout=15):  # pylint: ignore
         """Instantly recover a vSphere VM from a provided snapshot. If a specific date and time is not provided, the last snapshot taken will be used.
-
         Arguments:
             vm_name {str} -- The name of the VM to Instantly Recover.
-
         Keyword Arguments:
             date {str} -- The date of the snapshot you wish to Instantly Recover formated as `Month-Day-Year` (ex: 1-15-2014). If 'latest' is specified, the last snapshot taken will used. (default: {'latest'})
             time {str} -- The time of the snapshot you wish to Instantly Recover formated as `Hour:Minute AM/PM`  (ex: 1:30 AM). If 'latest' is specified, the last snapshot taken will be used. (default: {'latest'})
@@ -748,7 +757,6 @@ class Data_Management(_API):
             keep_mac_addresses {bool} -- Flag that determines whether the MAC addresses of the network interfaces on the source VM are assigned to the new VM. Set to `True` to assign the original MAC addresses to the new VM. Set to `False` to assign new MAC addresses. When 'remove_network_devices' is set to `True`, this property is ignored. (default: {False})
             preserve_moid {bool} -- Flag that determines whether to preserve the MOID of the source VM in a restore operation. Use `True` to keep the MOID of the source. Use `False` to assign a new moid. (default: {False})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/instant_recover`.
         """
@@ -821,11 +829,9 @@ class Data_Management(_API):
         and need to be converted to the timezone configured on the Rubrik cluster in order to match
         the values provided by the end user in various functions. This internal function will handle that
         conversion process.
-
         Arguments:
             date {str} -- A date value formated as `Month-Day-Year` (ex: 1/15/2014).
             time {str} -- A time value formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
-
         Returns:
             str -- A combined date/time value formated as `Year-Month-DayTHour:Minute` where Hour:Minute is on the 24-hour clock (ex : 2014-1-15T01:30).
         """
@@ -869,14 +875,11 @@ class Data_Management(_API):
 
     def pause_snapshots(self, object_name, object_type, timeout=180):
         """Pause all snapshot activity for the provided object.
-
         Arguments:
             object_name {str} -- The name of the Rubrik object to pause snapshots for.
             object_type {str} -- The Rubrik object type you wish to pause snaphots on. (choices: {vmware})
-
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {180})
-
         Returns:
             str -- No change required. The '`object_type`' '`object_name`' is already paused.
             dict -- The full API response for `PATCH /v1/vmware/vm/{vm_id}`.
@@ -907,14 +910,11 @@ class Data_Management(_API):
 
     def resume_snapshots(self, object_name, object_type, timeout=180):
         """Resume all snapshot activity for the provided object.
-
         Arguments:
             object_name {str} -- The name of the Rubrik object to resume snapshots for.
             object_type {str} -- The Rubrik object type you wish to resume snaphots on. (choices: {vmware})
-
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {180})
-
         Returns:
             str -- No change required. The 'object_type' object 'object_name' is currently not paused.
             dict -- The full response for `PATCH /v1/vmware/vm/{vm_id}`.
@@ -946,13 +946,10 @@ class Data_Management(_API):
 
     def begin_managed_volume_snapshot(self, name, timeout=30):
         """Open a managed volume for writes. All writes to the managed volume until the snapshot is ended will be part of its snapshot.
-
         Arguments:
             name {str} -- The name of the Managed Volume to begin the snapshot on.
-
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {30})
-
         Returns:
             str -- No change required. The Managed Volume '`name`' is already assigned in a writeable state.
             dict -- The full API response for `POST /managed_volume/{id}/begin_snapshot`.
@@ -973,14 +970,11 @@ class Data_Management(_API):
 
     def end_managed_volume_snapshot(self, name, sla_name='current', timeout=30):
         """Close a managed volume for writes. A snapshot will be created containing all writes since the last begin snapshot call.
-
         Arguments:
             name {str} -- The name of the Managed Volume to end snapshots on.
-
         Keyword Arguments:
             sla_name {str} -- The SLA Domain name you want to assign the snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {30})
-
         Returns:
             str -- No change required. The Managed Volume `name` is already assigned in a read only state.
             dict -- The full API response for `POST /managed_volume/{id}/end_snapshot`.
@@ -1014,14 +1008,11 @@ class Data_Management(_API):
 
     def get_sla_objects(self, sla, object_type, timeout=15):
         """Retrieve the name and ID of a specific object type.
-
         Arguments:
             sla {str} -- The name of the SLA Domain you wish to search.
             object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware})
-
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {15})
-
         Returns:
             dict -- The `name:id` of each object in the provided SLA Domain.
         """
@@ -1054,10 +1045,8 @@ class Data_Management(_API):
 
     def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, timeout=15):  # pylint: ignore
         """Create a new SLA Domain.
-
         Arguments:
             name {str} -- The name of the new SLA Domain.
-
         Keyword Arguments:
             hourly_frequency {int} -- Hourly frequency to take backups. (default: {None})
             hourly_retention {int} -- Number of hours to retain the hourly backups. (default: {None})
@@ -1070,7 +1059,6 @@ class Data_Management(_API):
             archive_name {str} -- The optional archive location you wish to configure on the SLA Domain. When populated, you must also provide a `retention_on_brik_in_days`. (default: {None})
             retention_on_brik_in_days {int} -- The number of days you wish to keep the backups on the Rubrik cluster. When populated, you must also provide a `archive_name`. (default: {None})
             instant_archive= {bool} -- Flag that determines whether or not to enable instant archive. Set to true to enable. (default: {False})
-
         Returns:
             str -- No change required. The 'name' SLA Domain is already configured with the provided configuration.
             dict -- The full API response for `POST /v1/sla_domain`.
@@ -1261,13 +1249,10 @@ class Data_Management(_API):
 
     def delete_sla(self, name, timeout=15):
         """[summary]
-
         Arguments:
             name {[type]} -- [description]
-
         Keyword Arguments:
             timeout {int} -- [description] (default: {15})
-
         Returns:
             [type] -- [description]
         """
@@ -1294,12 +1279,10 @@ class Data_Management(_API):
     def _time_in_range(self, start, end, point_in_time):
         """Checks if a specific datetime exists in a start and end time. For example:
         checks if a recovery point exists in the available snapshots
-
         Arguments:
             start {datetime} -- The start time of the recoverable range the database can be mounted from.
             end {datetime} -- The end time of the recoverable range the database can be mounted from.
             point_in_time {datetime} -- The point_in_time you wish to Live Mount.
-
         Returns:
             bool -- True if point_in_time is in the range [start, end]."""
 
@@ -1310,18 +1293,15 @@ class Data_Management(_API):
 
     def sql_live_mount(self, db_name, date, time, sql_instance=None, sql_host=None, mount_name=None, timeout=30):  # pylint: ignore
         """Live Mount a database from a specified recovery point.
-
         Arguments:
             db_name {str} -- The name of the database to Live Mount.
             date {str} -- The recovery_point date to recovery to formated as `Month-Day-Year` (ex: 1-15-2014).
             time {str} -- The recovery_point time to recovery to formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
-
         Keyword Arguments:
             sql_instance {str} -- The SQL instance name with the database you wish to Live Mount.
             sql_host {str} -- The SQL Host of the database/instance to Live Mount.
             mount_name {str} -- The name given to the Live Mounted database i.e. AdventureWorks_Clone.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
-
         Returns:
             dict -- The full response of `POST /v1/mssql/db/{id}/mount`.
         """
@@ -1352,14 +1332,11 @@ class Data_Management(_API):
 
     def vsphere_live_unmount(self, mounted_vm_name, force=False, timeout=30):  # pylint: ignore
         """Delete a vSphere Live Mount from the Rubrik cluster.
-
         Arguments:
             mounted_vm_name {str} -- The name of the Live Mounted vSphere VM to be unmounted.
-
         Keyword Arguments:
             force {bool} -- Force unmount to remove metadata when the datastore of the Live Mount virtual machine was moved off of the Rubrik cluster. (default: {False})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
-
         Returns:
             dict -- The full response of `DELETE '/vmware/vm/snapshot/mount/{id}?force={bool}'.
         """
@@ -1392,16 +1369,13 @@ class Data_Management(_API):
 
     def sql_live_unmount(self, mounted_db_name, sql_instance=None, sql_host=None, force=False, timeout=30):  # pylint: ignore
         """Delete a Microsoft SQL Live Mount from the Rubrik cluster.
-
         Arguments:
             mounted_db_name {str} -- The name of the Live Mounted database to be unmounted.
-
         Keyword Arguments:
             sql_instance {str} -- The name of the MSSQL instance managing the Live Mounted database to be unmounted.
             sql_host {str} -- The name of the MSSQL host running the Live Mounted database to be unmounted.
             force {bool} -- Remove all data within the Rubrik cluster related to the Live Mount, even if the SQL Server database cannot be contacted. (default: {False})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
-
         Returns:
             dict -- The full response of `DELETE /mssql/db/mount/{id}?force={bool}`.
         """
@@ -1429,13 +1403,10 @@ class Data_Management(_API):
 
     def get_vsphere_live_mount(self, vm_name, timeout=15):  # pylint: ignore
         """Get existing Live Mounts for a vSphere VM.
-
         Arguments:
             vm_name {str} -- The name of the mounted vSphere VM.
-
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
         Returns:
             dict -- The full response of `GET /v1/vmware/vm/snapshot/mount?vm_id={vm_id}`.
         """
@@ -1448,13 +1419,10 @@ class Data_Management(_API):
 
     def get_vsphere_live_mount_names(self, vm_name, timeout=15):  # pylint: ignore
         """Get existing Live Mount VM name(s) for a vSphere VM.
-
         Arguments:
             vm_name {str} -- The name of the mounted vSphere VM.
-
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
         Returns:
             list -- A list of the Live Mounted VM names.
         """
@@ -1480,15 +1448,12 @@ class Data_Management(_API):
 
     def _validate_sql_db(self, db_name, sql_instance=None, sql_host=None, timeout=30):  # pylint: ignore
         """Checks whether a database exist on an SQL Instance and Host.
-
         Arguments:
             db_name {str} -- The name of the database.
-
         Keyword Arguments:
             sql_instance {str} -- The SQL instance.
             sql_host {str} -- The SQL server hostname.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
-
         Returns:
             str -- The ID of the MSSQL database.
         """
@@ -1530,15 +1495,12 @@ class Data_Management(_API):
 
     def get_sql_live_mount(self, db_name, sql_instance=None, sql_host=None, timeout=30):  # pylint: ignore
         """Retrieve the Live Mounts for a MSSQL source database.
-
         Arguments:
             db_name {str} -- The name of the source database with Live Mounts.
-
         Keyword Arguments:
             sql_instance {str} -- The SQL instance name of the source database.
             sql_host {str} -- The SQL host name of the source database/instance.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
-
         Returns:
             dict -- The full response of `GET /v1/mssql/db/mount?source_database_id={id}`.
         """
@@ -1550,15 +1512,12 @@ class Data_Management(_API):
 
     def _validate_sql_recovery_point(self, mssql_id, date, time, timeout=30):  # pylint: ignore
         """Check whether the data and time provided is a valid recovery point for an MSSQL database
-
         Arguments:
             mssql_id {str} -- The ID of the database.
             date {str} -- The recovery_point date formated as `Month-Day-Year` (ex: 1-15-2014).
             time {str} -- The recovery_point time  formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
-
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
-
         Returns:
             dict -- A dictionary with values {'is_recovery_point': bool, 'recovery_timestamp': datetime}.
         """
@@ -1593,19 +1552,16 @@ class Data_Management(_API):
 
     def sql_instant_recovery(self, db_name, date, time, sql_instance=None, sql_host=None, finish_recovery=True, max_data_streams=0, timeout=30):  # pylint: ignore
         """Perform an instant recovery for MSSQL database from a specified recovery point.
-
         Arguments:
             db_name {str} -- The name of the database to instantly recover.
             date {str} -- The recovery_point date to recover to formated as `Month-Day-Year` (ex: 1-15-2014).
             time {str} -- The recovery_point time to recover to formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
-
         Keyword Arguments:
             sql_instance {str} -- The SQL instance name with the database to instantly recover.
             sql_host {str} -- The SQL Host of the database/instance to instantly recover.
             finish_recovery {bool} -- A Boolean value that determines the recovery option to use during database restore. When this value is 'true', the database is restored using the RECOVERY option and is fully functional at the end of the restore operation. When this value is 'false', the database is restored using the NORECOVERY option and remains in recovering mode at the end of the restore operation.
             max_data_streams {int} -- Maximum number of parallel data streams that can be used to copy data to the target system.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
-
         Returns:
             dict -- The full response of `POST /v1/mssql/db/{id}/restore`.
         """
@@ -1637,13 +1593,10 @@ class Data_Management(_API):
 
     def vcenter_refresh_vm(self, vm_name, timeout=15):  # pylint: ignore
         """Refresh a single vSphere VM metadata.
-
         Arguments:
             vm_name {str} -- The name of the vSphere VM.
-
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
         Returns:
             no content.
         """
@@ -1665,7 +1618,6 @@ class Data_Management(_API):
 
     def get_vsphere_vm(self, name=None, is_relic=None, effective_sla_domain_id=None, primary_cluster_id=None, limit=None, offset=None, moid=None, sla_assignment=None, guest_os_name=None, sort_by=None, sort_order=None, timeout=15):  # pylint: ignore
         """Get summary of all the VMs. Each keyword argument is a query parameter to filter the VM details returned i.e. you can query for a specific VM name, is_relic, effective_sla_domain etc.
-
         Keyword Arguments:
             name {str} -- Search by using a virtual machine name.
             is_relic {bool} -- Filter by the isRelic field of the virtual machine. When this parameter is not set, return both relic and non-relic virtual machines.
@@ -1679,9 +1631,8 @@ class Data_Management(_API):
             sort_by {str} -- Sort results based on the specified attribute. (effectiveSlaDomainName, name, moid, folderPath, infraPath)
             sort_order {str} -- Sort order, either ascending or descending. (asc, desc)
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
         Returns:
-            dict -- The full response of `POST /v1/vmware/vm?{query}`
+            dict -- The full response of `GET /v1/vmware/vm?{query}`
         """
         
         parameters = {'effective_sla_domain_id':effective_sla_domain_id,
@@ -1727,3 +1678,53 @@ class Data_Management(_API):
         
         self.log("get_vsphere_vm: Get summary of all the VMs.")
         return self.get('v1', '/vmware/vm?{}'.format(query), timeout)
+
+    def get_vsphere_vm_snapshot(self, vm_name, timeout=15):  # pylint: ignore
+        """Retrieve summary information for the snapshots of a virtual machine.
+        Arguments:
+            vm_name {str} -- Name of the virtual machine.
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
+        Returns:
+            dict -- The full response of `GET /v1/vmware/vm/{vm_id}/snapshot`
+        """
+
+        self.log("get_vsphere_vm_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
+
+        self.log("get_vsphere_vm_snapshot: Getting summary information for the snapshots of virtual machine {}".format(vm_id))
+        return self.get('v1', '/vmware/vm/{}/snapshot'.format(vm_id), timeout)
+
+    def get_vsphere_vm_details(self, vm_name, timeout=15):  # pylint: ignore
+        """Retrieve details for a virtual machine.
+        Arguments:
+            vm_name {str} -- Name of the virtual machine.       
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
+        Returns:
+            dict -- The full response of `GET /v1/vmware/vm/{vm_id}`
+        """ 
+
+        self.log("get_vsphere_vm_details: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
+
+        self.log("get_vsphere_vm_details: Getting details of virtual machine {}".format(vm_id))
+        return self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout)
+
+    def get_vsphere_vm_file(self, vm_name, path, timeout=15):  # pylint: ignore
+        """Search for a file in the snapshots of a virtual machine. Specify the file by full path prefix or filename prefix.
+        Arguments:
+            vm_name {str} -- Name of the virtual machine.
+            path {str} -- The path query. Use either a path prefix or a filename prefix.
+        Keyword Arguments:    
+            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})   
+        Returns:
+            dict -- The full response of `GET /v1/vmware/vm/{vm_id}/search?path={path}`
+        """
+
+        self.log("get_vsphere_vm_file: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
+ 
+        self.log("get_vsphere_vm_file: Search for file/path {} in the snapshots of a virtual machine {}".format(path, vm_id))
+        return self.get('v1', '/vmware/vm/{}/search?path={}'.format(vm_id, path), timeout)
+
