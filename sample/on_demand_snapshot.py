@@ -18,5 +18,13 @@ object_type = "physical_host"
 sla = "Gold"
 fileset = "/etc"
 host_os = "Linux"
-
 snapshot = rubrik.on_demand_snapshot(physical_host_name, object_type, sla, fileset, host_os)
+
+# Share
+object_name = "python-sdk-share-demo"
+object_type = "share"
+sla = "Gold"
+fileset = "/etc"
+hostname = "python-sdk-demo"
+share_type = "NFS"
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sla, fileset, hostname=hostname, share_type=share_type)

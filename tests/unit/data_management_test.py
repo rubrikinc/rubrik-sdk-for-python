@@ -9,7 +9,7 @@ def test_on_demand_snapshot_invalid_object_type(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The on_demand_snapshot() `object_type` argument must be one of the following: ['vmware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db']."
+    assert error_message == "The on_demand_snapshot() `object_type` argument must be one of the following: ['vmware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db', 'share']."
 
 
 def test_on_demand_snapshot_invalid_host_os_type(rubrik):

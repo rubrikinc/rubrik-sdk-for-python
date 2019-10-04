@@ -34,24 +34,25 @@ _API = Api
 class Data_Management(_API):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, force_full=False, timeout=15):  # pylint: ignore
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, force_full=False, share_type=None, timeout=15):  # pylint: ignore
         """Initiate an on-demand snapshot.
         Arguments:
             object_name {str} -- The name of the Rubrik object to take a on-demand snapshot of.
             object_type {str} -- The Rubrik object type you want to backup. (choices: {vmware, physical_host, ahv, mssql_db, oarcle_db})
         Keyword Arguments:
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
-            fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host. (default: {'None'})
+            fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host or share. (default: {'None'})
             host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
-            hostname {str} -- The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db.
+            hostname {str} -- The host name, or one of the host names in the cluster, that the Oracle database is running or the NAS server hostname. Required when the object_type is oracle_db or share.
             force_full {bool} -- If True will force a new full image backup of an Oracle database. (default: {False})
+            share_type {str} -- The type of NAS share i.e. NFS or SMB. Only required when taking a snapshot of a Share.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
         Returns:
             tuple -- When object_type is vmware, the full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
             tuple -- When object_type is physical_host, the full API response for `POST /v1/fileset/{}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
         """
 
-        valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db']
+        valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db', 'share']
         valid_host_os_type = ['Linux', 'Windows']
 
         if object_type not in valid_object_type:
@@ -219,6 +220,48 @@ class Data_Management(_API):
 
             self.log("on_demand_snapshot: Initiating snapshot for the Oracle database '{}'.".format(object_name))
             api_request = self.post('internal', '/oracle/db/{}/snapshot'.format(db_id), config, timeout)
+
+            snapshot_status_url = api_request['links'][0]['href']
+        
+        elif object_type == 'share':
+            if hostname is None:
+                raise InvalidParameterException(
+                    "The on_demand_snapshot() `hostname` argument must be populated when taking a NAS Share fileset snapshot.")
+            elif fileset is None:
+                raise InvalidParameterException(
+                    "The on_demand_snapshot() `fileset` argument must be populated when taking a NAS Share fileset snapshot.")
+            elif share_type is None:
+                raise InvalidParameterException(
+                    "The on_demand_snapshot() `share_type` argument must be populated when taking a NAS Share fileset snapshot.")
+
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the NAS Host '{}'.".format(hostname))
+            host_id = self.object_id(hostname, 'physical_host', timeout=timeout)
+
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the NAS share '{}'.".format(object_name))
+            share_id = self.object_id(object_name, 'share', hostname=hostname, share_type=share_type, timeout=timeout)
+
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
+            api_endpoint = '/fileset?share_id={}&host_id={}&is_relic=false&name={}'.format(share_id, host_id, fileset)
+            fileset_summary = self.get('v1', api_endpoint, timeout=timeout)
+
+            if fileset_summary['total'] == 0:
+                raise InvalidParameterException(
+                    "The NAS Share '{}' is not assigned to the '{}' Fileset.".format(
+                        object_name, fileset))
+
+            fileset_id = fileset_summary['data'][0]['id']
+
+            if sla_name == 'current':
+                sla_id = fileset_summary['data'][0]['effectiveSlaDomainId']
+            elif sla_name != 'current':
+                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+            config = {}
+            config['slaId'] = sla_id
+
+            self.log("on_demand_snapshot: Initiating snapshot for the NAS Share '{}' Fileset '{}'.".format(object_name, fileset))
+            api_request = self.post('v1', '/fileset/{}/snapshot'.format(fileset_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -1727,4 +1770,3 @@ class Data_Management(_API):
  
         self.log("get_vsphere_vm_file: Search for file/path {} in the snapshots of a virtual machine {}".format(path, vm_id))
         return self.get('v1', '/vmware/vm/{}/search?path={}'.format(vm_id, path), timeout)
-

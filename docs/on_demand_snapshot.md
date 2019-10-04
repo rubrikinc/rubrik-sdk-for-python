@@ -2,7 +2,7 @@
 
 Initiate an on-demand snapshot.
 ```py
-def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, timeout=15)
+def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, force_full=False, share_type=None, timeout=15)
 ```
 
 ## Arguments
@@ -14,13 +14,14 @@ def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=Non
 | Name         | Type | Description                                                                                                                             | Choices        | Default |
 |--------------|------|-----------------------------------------------------------------------------------------------------------------------------------------|----------------|---------|
 | sla_name     | str  | The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used.           |                | current |
-| fileset      | str  | The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host.                          |                | None    |
+| fileset      | str  | The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host or share.                 |                | None    |
 | host_os      | str  | The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host.                          | Linux, Windows | None    |
 | sql_host     | str  | The name of the SQL Host hosting the specified database. Only required when taking a on-demand snapshot of a MSSQL DB.                  | None           | None    |
 | sql_instance | str  | The name of the SQL Instance hosting the specified database. Only required when taking a on-demand snapshot of a MSSQL DB.              | None           | None    |
 | sql_db       | str  | TThe name of the SQL DB. Only required when taking a on-demand snapshot of a MSSQL DB.                                                  | None           | None    |
-| hostname     | str  | The host name, or one of the host names in the cluster, that the Oracle database is running. Required when the object_type is oracle_db | None           | None    |
+| hostname     | str  | The host name, or one of the host names in the cluster, that the Oracle database is running or the NAS server hostname. Required when the object_type is oracle_db or share. | None           | None    |
 | force_full   | bool | If True will force a new full image backup of an Oracle database. Used when the object_type is oracle_db                                | True, False    | False   |
+| share_type   | str  | The type of NAS share i.e. NFS or SMB. Only required when taking a snapshot of a Share.                                                 | True, False    | False   |
 | timeout      | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.                            |                | 15      |
 
 ## Returns
@@ -101,4 +102,21 @@ host = "ora_host_01"
 sla = "OracleTest"
 
 snapshot = rubrik.on_demand_snapshot(object_name, object_type, sla_name=sla, hostname=host, force_full=False )
+```
+
+### Share
+
+```py
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+object_name = "python-sdk-share-demo"
+object_type = "share"
+sla = "Gold"
+fileset = "/etc"
+hostname = "python-sdk-demo"
+share_type = "NFS"
+
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sla, fileset, hostname=hostname, share_type=share_type)
 ```
