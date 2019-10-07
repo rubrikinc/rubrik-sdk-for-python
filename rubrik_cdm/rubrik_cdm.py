@@ -328,33 +328,36 @@ class Bootstrap(_API):
         if node_resolution == False:
             raise RubrikException("Error: Could not resolve addrsss for cluster, or invalid IP/address supplied")
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask, mgmt_vlan=None,
-                      node_mgmt_ips=None,
-                      ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None, data_gateway=None,
-                      data_subnet_mask=None, data_vlan=None,
+    def setup_cluster(self, cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask, node_mgmt_ips,
+                      mgmt_vlan=None, ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None,
+                      data_gateway=None, data_subnet_mask=None, data_vlan=None,
                       node_data_ips=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None,
                       ntp_servers=None, wait_for_completion=True, timeout=30):
-        """Issues a bootstrap request to a specified Rubrik cluster
+        """ Issues a bootstrap request to a specified Rubrik cluster: Edge, Cloudcluster or Physical nodes
+            Edge: no IPMI, no DATA and no Encryption set. One node only.
+            CloudCluster: same as Edge but more nodes possible.
+            Physical: Management and IPMI networks mandatory.
+            Node names needed are in IPv6 mDNS broadcast traffic (SERIAL.local)
 
         Arguments:
-            cluster_name {str} -- Unique name to assign to the Rubrik cluster.
+            cluster_name {str} -- Unique name to assign to the Rubrik cluster. No FQDN allowed with dots.
             admin_email {str} -- The Rubrik cluster sends messages for the admin account to this email address.
-            admin_password {str} --  Password for the admin account.
+            admin_password {str} --  Password for the admin account. Store carefully.
             mgmt_gateway {str} --  IP address assigned to the management network gateway.
             mgmt_subnet_mask {str} -- Subnet mask assigned to the management network.
+            node_mgmt_ips {dict} -- The Node Name(s) and IP(s) formatted as a dictionary for Management addresses.
 
         Keyword Arguments:
             mgmt_vlan {int} -- VLAN assigned to the management network. (default: {None})
             ipmi_gateway {str} --  IP address assigned to the ipmi network gateway. (default: {None})
             ipmi_subnet_mask {str} -- Subnet mask assigned to the ipmi network. (default: {None})
             ipmi_vlan {int} -- VLAN assigned to the ipmi network. (default: {None})
+            node_ipmi_ips {dict} -- The Node Name and IP formatted as a dictionary for IPMI addresses. Optional. (default: {None})
             data_gateway {str} --  IP address assigned to the ipmi network gateway. (default: {None})
             data_subnet_mask {str} -- Subnet mask assigned to the ipmi network. (default: {None})
             data_vlan {int} -- VLAN assigned to the data network. (default: {None})
-            node_mgmt_ips {dict} -- The Node Name and IP formatted as a dictionary for Management addresses. Mandatory. (default: {None})
-            node_ipmi_ips {dict} -- The Node Name and IP formatted as a dictionary for IPMI addresses. Optional. (default: {None})
             node_data_ips {dict} -- The Node Name and IP formatted as a dictionary for Data addresses. Optional. (default: {None})
-            enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster this value needs to be False. (default: {True})
+            enable_encryption {bool} -- Enable software data encryption at rest. When bootstraping a Cloud Cluster or Edge this value needs to be False. (default: {True})
             dns_search_domains {str} -- The search domain that the DNS Service will use to resolve hostnames that are not fully qualified. (default: {None})
             dns_nameservers {list} -- IPv4 addresses of DNS servers. (default: {['8.8.8.8']})
             ntp_servers {list} -- FQDN or IPv4 address of a network time protocol (NTP) server. (default: {['pool.ntp.org']})
@@ -385,8 +388,8 @@ class Bootstrap(_API):
         elif isinstance(ntp_servers, list) is not True:
             raise InvalidParameterException('You must provide a valid list for "ntp_servers".')
 
-        using_ipmi_config = False;
-        using_data_config = False;
+        using_ipmi_config = False
+        using_data_config = False
 
         if ipmi_gateway is not None and ipmi_subnet_mask is not None and isinstance(node_ipmi_ips, dict):
             using_ipmi_config = True
@@ -440,9 +443,6 @@ class Bootstrap(_API):
 
         print ("Constructed the following JSON:", bootstrap_config)
 
-        return True
-
-        """
         number_of_attempts = 1
 
         while True:
@@ -491,7 +491,6 @@ class Bootstrap(_API):
                     return status
 
         return api_request
-        """
 
     def status(self, request_id="1", timeout=15):
         """Retrieves status of in progress bootstrap requests
