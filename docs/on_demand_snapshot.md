@@ -19,9 +19,9 @@ def on_demand_snapshot(object_name, object_type, sla_name='current', fileset=Non
 | sql_host     | str  | The name of the SQL Host hosting the specified database. Only required when taking a on-demand snapshot of a MSSQL DB.                  | None           | None    |
 | sql_instance | str  | The name of the SQL Instance hosting the specified database. Only required when taking a on-demand snapshot of a MSSQL DB.              | None           | None    |
 | sql_db       | str  | TThe name of the SQL DB. Only required when taking a on-demand snapshot of a MSSQL DB.                                                  | None           | None    |
-| hostname     | str  | The host name, or one of the host names in the cluster, that the Oracle database is running or the NAS server hostname. Required when the object_type is oracle_db or share. | None           | None    |
+| hostname     | str  | Required when the `object_type` is either `oracle_db` or `share`. When `oracle_db` is the `object_type`, this argument corresponds to the host name, or one of those host names in the cluster that the Oracle database is running. When `share` is the `object_type` this argument corresponds to the NAS server host name. | None           | None    |
 | force_full   | bool | If True will force a new full image backup of an Oracle database. Used when the object_type is oracle_db                                | True, False    | False   |
-| share_type   | str  | The type of NAS share i.e. NFS or SMB. Only required when taking a snapshot of a Share.                                                 | True, False    | False   |
+| share_type   | str  | The type of NAS share i.e. NFS or SMB. Only required when taking a snapshot of a Share.                                                 | NFS or SMB    | False   |
 | timeout      | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.                            |                | 15      |
 
 ## Returns
@@ -104,7 +104,7 @@ sla = "OracleTest"
 snapshot = rubrik.on_demand_snapshot(object_name, object_type, sla_name=sla, hostname=host, force_full=False )
 ```
 
-### Share
+### NAS Share
 
 ```py
 import rubrik_cdm

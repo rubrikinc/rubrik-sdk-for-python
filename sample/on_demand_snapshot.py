@@ -20,7 +20,7 @@ fileset = "/etc"
 host_os = "Linux"
 snapshot = rubrik.on_demand_snapshot(physical_host_name, object_type, sla, fileset, host_os)
 
-# Share
+# NAS Share
 object_name = "python-sdk-share-demo"
 object_type = "share"
 sla = "Gold"

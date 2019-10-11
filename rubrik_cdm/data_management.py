@@ -43,7 +43,7 @@ class Data_Management(_API):
             sla_name {str} -- The SLA Domain name you want to assign the on-demand snapshot to. By default, the currently assigned SLA Domain will be used. (default: {'current'})
             fileset {str} -- The name of the Fileset you wish to backup. Only required when taking a on-demand snapshot of a physical host or share. (default: {'None'})
             host_os {str} -- The operating system for the physical host. Only required when taking a on-demand snapshot of a physical host. (default: {'None'}) (choices: {Linux, Windows})
-            hostname {str} -- The host name, or one of the host names in the cluster, that the Oracle database is running or the NAS server hostname. Required when the object_type is oracle_db or share.
+            hostname {str} -- Required when the object_type is either oracle_db or share. When oracle_db is the object_type, this argument corresponds to the host name, or one of those host names in the cluster that the Oracle database is running. When share is the object_type this argument corresponds to the NAS server host name.
             force_full {bool} -- If True will force a new full image backup of an Oracle database. (default: {False})
             share_type {str} -- The type of NAS share i.e. NFS or SMB. Only required when taking a snapshot of a Share.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
