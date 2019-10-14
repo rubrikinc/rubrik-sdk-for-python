@@ -4,6 +4,10 @@ import rubrik_cdm
 node_ip = 'SERIAL1.local'
 bootstrap = rubrik_cdm.Bootstrap(node_ip)
 
+## Alternatively, specify local interface
+## interface = 'ens160'
+## bootstrap = rubrik_cdm.Bootstrap(node_ip, interface)
+
 node_config = {}
 ipmi_config = {}
 data_config = {}
@@ -25,12 +29,13 @@ mgmt_gateway = '10.10.10.1'
 mgmt_subnet_mask = '255.255.255.0'
 ipmi_gateway = '10.10.10.1'
 ipmi_subnet_mask = '255.255.255.0'
-data_gateway = '10.10.20.1'
-data_subnet_mask = '255.255.255.0'
+data_gateway = None
+data_subnet_mask = None
 dns = ['10.10.10.2']
+encryption = False
 
 setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, mgmt_gateway,mgmt_subnet_mask,node_config, None,
                                         ipmi_gateway, ipmi_subnet_mask,None,ipmi_config,
-                                        None,None,None,None,
-                                        False, None, dns)
+                                        data_gateway,data_subnet_mask,data_vlan,None,
+                                        encryption, None, dns)
 print(setup_cluster)

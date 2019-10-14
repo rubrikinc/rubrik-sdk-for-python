@@ -2,7 +2,7 @@ import rubrik_cdm
 
 ## Examples of specifying IPs (v4 or v6 possible)
 ## node_ip = '10.10.10.10'
-## node_ip = 'fe80::250:250:250:250%ens123'
+## node_ip = 'fe80::250:250:250:250'
 node_ip = 'SERIAL.local'
 
 bootstrap = rubrik_cdm.Bootstrap(node_ip)

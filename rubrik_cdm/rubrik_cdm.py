@@ -326,7 +326,7 @@ class Bootstrap(_API):
                 self.log('Could not resolve IPv4 address for cluster.')
 
         if node_resolution == False:
-            raise RubrikException("Error: Could not resolve addrsss for cluster, or invalid IP/address supplied")
+            raise RubrikException("Error: Could not resolve address for cluster, or invalid IP/address supplied")
 
     def setup_cluster(self, cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask, node_mgmt_ips,
                       mgmt_vlan=None, ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None,
