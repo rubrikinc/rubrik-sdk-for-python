@@ -1,36 +1,36 @@
 import rubrik_cdm
 
-node_ip = 'SERIAL.local'
+## IPv6 only. mDNS broadcast - avahi daemon
+node_ip = 'SERIAL1.local'
 bootstrap = rubrik_cdm.Bootstrap(node_ip)
 
 node_config = {}
 ipmi_config = {}
 data_config = {}
 
-node_config['SERIAL1'] = '10.10.10.1' 
-node_config['SERIAL2'] = '10.10.10.2'
-node_config['SERIAL3'] = '10.10.10.3'
+node_config['SERIAL1'] = '10.10.10.10'
+node_config['SERIAL2'] = '10.10.10.12'
+node_config['SERIAL3'] = '10.10.10.13'
+node_config['SERIAL4'] = '10.10.10.14'
 
-ipmi_config[''SERIAL1] = '10.10.60.11'
-ipmi_config[''SERIAL2] = '10.10.60.12'
-ipmi_config[''SERIAL3] = '10.10.60.13'
+ipmi_config['SERIAL1'] = '10.10.10.15'
+ipmi_config['SERIAL2'] = '10.10.10.16'
+ipmi_config['SERIAL3'] = '10.10.10.17'
+ipmi_config['SERIAL4'] = '10.10.10.18'
 
-data_config[''SERIAL1] = '10.10.60.21'
-data_config[''SERIAL2] = '10.10.60.22'
-data_config[''SERIAL3] = '10.10.60.23'
-
-cluster_name = 'cluster'
+cluster_name = 'CLUSTERNAME'
 admin_email = 'admin@company.com'
 admin_password = 'SafePassword!'
 mgmt_gateway = '10.10.10.1'
 mgmt_subnet_mask = '255.255.255.0'
 ipmi_gateway = '10.10.10.1'
 ipmi_subnet_mask = '255.255.255.0'
-data_gateway = '10.10.10.1'
+data_gateway = '10.10.20.1'
 data_subnet_mask = '255.255.255.0'
-enable_encryption = True
+dns = ['10.10.10.2']
 
-setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, mgmt_gateway,mgmt_subnet_mask,None,node_config,
-                                        ipmi_gateway, ipmi_subnet_mask,None,ipmi_config,data_gateway,data_subnet_mask,None,data_config,enable_encryption,None,None)
-
+setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, mgmt_gateway,mgmt_subnet_mask,node_config, None,
+                                        ipmi_gateway, ipmi_subnet_mask,None,ipmi_config,
+                                        None,None,None,None,
+                                        False, None, dns)
 print(setup_cluster)

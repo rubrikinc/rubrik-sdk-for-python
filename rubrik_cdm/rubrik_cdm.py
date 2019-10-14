@@ -334,10 +334,10 @@ class Bootstrap(_API):
                       node_data_ips=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None,
                       ntp_servers=None, wait_for_completion=True, timeout=30):
         """ Issues a bootstrap request to a specified Rubrik cluster: Edge, Cloudcluster or Physical nodes
-            Edge: no IPMI, no DATA and no Encryption set. One node only.
-            CloudCluster: same as Edge but more nodes possible.
-            Physical: Management and IPMI networks mandatory.
-            Node names needed are in IPv6 mDNS broadcast traffic (SERIAL.local)
+            Edge: no IPMI, no DATA and no Encryption set. One node only. IPv4 or IPv6 possible.
+            CloudCluster: same as Edge but more nodes possible. Only IPv4 bootstrap.
+            Physical: Management and IPMI networks mandatory. IPv6 only.
+            Node names needed are in IPv6 mDNS broadcast traffic (SERIAL.local) which can be used for automization.
 
         Arguments:
             cluster_name {str} -- Unique name to assign to the Rubrik cluster. No FQDN allowed with dots.
@@ -370,7 +370,7 @@ class Bootstrap(_API):
 
         if node_mgmt_ips is None or isinstance(node_mgmt_ips, dict) is not True:
             raise InvalidParameterException(
-                'You must provide a valid dictionary for "node_mgmt_ips" holding node names and corresponding management IPs.')
+                'You must provide a valid dictionary for "node_mgmt_ips" holding node names and management IPs.')
 
         if dns_search_domains is None:
             dns_search_domains = []
@@ -440,8 +440,6 @@ class Bootstrap(_API):
                 bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['address'] = data_ip
                 if data_vlan is not None:
                     bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['vlan'] = data_vlan
-
-        print ("Constructed the following JSON:", bootstrap_config)
 
         number_of_attempts = 1
 
