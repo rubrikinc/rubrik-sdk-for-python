@@ -337,12 +337,12 @@ class Bootstrap(_API):
             Edge: no IPMI, no DATA and no Encryption set. One node only. IPv4 or IPv6 possible.
             CloudCluster: same as Edge but more nodes possible. Only IPv4 bootstrap.
             Physical: Management and IPMI networks mandatory. IPv6 only.
-            Node names needed are in IPv6 mDNS broadcast traffic (SERIAL.local) which can be used for automization.
+            Node names needed are in IPv6 mDNS broadcast traffic (SERIAL.local) which can be used for automation.
 
         Arguments:
             cluster_name {str} -- Unique name to assign to the Rubrik cluster. No FQDN allowed with dots.
             admin_email {str} -- The Rubrik cluster sends messages for the admin account to this email address.
-            admin_password {str} --  Password for the admin account. Store carefully.
+            admin_password {str} --  Password for the admin account.
             mgmt_gateway {str} --  IP address assigned to the management network gateway.
             mgmt_subnet_mask {str} -- Subnet mask assigned to the management network.
             node_mgmt_ips {dict} -- The Node Name(s) and IP(s) formatted as a dictionary for Management addresses.
