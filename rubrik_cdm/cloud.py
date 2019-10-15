@@ -50,7 +50,7 @@ class Cloud(Api):
 
         Returns:
             str -- No change required. The '`name`' archival location is already configured on the Rubrik cluster.
-            dict -- The full API response for `POST /internal/archive/object_store'`.
+            dict -- The full API response for `POST /internal/archive/object_store`.
         """
 
         valid_aws_regions = [
