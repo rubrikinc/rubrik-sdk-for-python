@@ -376,7 +376,13 @@ class Bootstrap(_API):
         bootstrap_config["name"] = cluster_name
         bootstrap_config["dnsNameservers"] = dns_nameservers
         bootstrap_config["dnsSearchDomains"] = dns_search_domains
-        bootstrap_config["ntpServers"] = ntp_servers
+
+        if float(self.get('v1', '/cluster/me/version', timeout, authentication=False)['version'][:3]) < float(5.0):
+            bootstrap_config["ntpServers"] = ntp_servers
+        else:
+            bootstrap_config["ntpServerConfigs"] = []   
+            for server in ntp_servers:
+                bootstrap_config["ntpServerConfigs"].append({ "server" : server})
 
         bootstrap_config["adminUserInfo"] = {}
         bootstrap_config["adminUserInfo"]['password'] = admin_password
