@@ -1770,3 +1770,104 @@ class Data_Management(_API):
  
         self.log("get_vsphere_vm_file: Search for file/path {} in the snapshots of a virtual machine {}".format(path, vm_id))
         return self.get('v1', '/vmware/vm/{}/search?path={}'.format(vm_id, path), timeout)
+
+    def get_sql_db(self, name=None, instance=None, hostname=None, instance_id=None, availability_group_id=None, effective_sla_domain_id=None, primary_cluster_id=None, sla_assignment=None, limit=None, offset=None,  is_relic=None, is_live_mount=None, is_log_shipping_secondary=None, sort_by=None, sort_order=None, timeout=15):  # pylint: ignore
+        """ Retrieves summary information for Microsoft SQL databases. Each keyword argument is a query parameter to filter the database details returned i.e. you can query for a specific database name, hostname, instance, is_relic, effective_sla_domain etc.
+        Keyword Arguments:
+            name {str} -- Filter by a substring of the database name.
+            instance {str} -- The SQL instance name of the database.
+            hostname {str} -- The SQL host name of the database.
+            instance_id {str} -- Filter by Microsoft SQL instance.
+            availability_group_id {str} -- Filter by the id of an Always On Availability Group.
+            effective_sla_domain_id {str} -- Filter by ID of effective SLA Domain.
+            primary_cluster_id {str} -- Filter by primary cluster ID, or local.
+            sla_assignment {str} -- Filter by SLA Domain assignment type. (Direct, Derived, Unassigned)
+            limit {int} -- Limit the number of matches returned.
+            offset {int} -- Ignore these many matches in the beginning.
+            is_relic {bool} -- Filter database summary information by the value of the isRelic field.
+            is_live_mount {bool} -- Filter database summary information by the value of the isLiveMount field.
+            is_log_shipping_secondary {bool} -- Filter database summary information by the value of the isLogShippingSecondary field.
+            sort_by {str} -- Sort results based on the specified attribute. (effectiveSlaDomainName, name)
+            sort_order {str} -- Sort order, either ascending or descending. (asc, desc)
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+        Returns:
+            dict -- The full response of `GET /v1/mssql/db?{query}`
+        """
+        
+        parameters = {'instance_id':instance_id,
+                      'availability_group_id':availability_group_id,
+                      'effective_sla_domain_id':effective_sla_domain_id,
+                      'primary_cluster_id':primary_cluster_id,
+                      'name':name,
+                      'sla_assignment':sla_assignment,
+                      'limit':limit,
+                      'offset':offset,
+                      'is_relic':is_relic,
+                      'is_live_mount':is_live_mount,
+                      'is_log_shipping_secondary':is_log_shipping_secondary,
+                      'sort_by':sort_by,
+                      'sort_order':sort_order}
+        parameters = {key : value for key, value in parameters.items() if value != None}
+
+        self.log("get_sql_db: checking the provided query parameters.") 
+        valid_sla_assignment = ['Derived', 'Direct', 'Unassigned']
+        for key, value in parameters.items():
+            if key == 'sla_assignment' and value not in valid_sla_assignment:
+                raise InvalidParameterException('The sla_assignment parameter must be one of the following: {}'.format(valid_sla_assignment))
+        
+        valid_sort_by = ['effectiveSlaDomainName', 'name']
+        for key, value in parameters.items():
+            if key == 'sort_by' and value not in valid_sort_by:
+                raise InvalidParameterException('The sort_by parameter must be one of the following: {}'.format(valid_sort_by))
+        
+        valid_sort_order = ['asc', 'desc']
+        for key, value in parameters.items():
+            if key == 'sort_order' and value not in valid_sort_order:
+                raise InvalidParameterException('The sort_order parameter must be one of the following: {}'.format(valid_sort_order))
+
+        for key, value in parameters.items():
+            if ((key == 'is_relic') or (key == 'is_live_mount') or (key == 'is_log_shipping_secondary')) and type(value) != bool:
+                raise InvalidParameterException('The is_relic, is_live_mount, is_log_shipping_secondary paremeter must be a boolean: True or False')
+        
+        for key, value in parameters.items():
+            if ((key == 'limit') or (key == 'offset')) and type(value) != int:
+                raise InvalidParameterException('The limit and offset paremeter must be an integer')
+        
+        query = ''
+        for key, value in parameters.items():
+            query = query+("{}={}".format(key, value)+'&')
+        
+        self.log("get_sql_db: Get summary of all the databases returned by the query.")
+        databases = self.get('v1', '/mssql/db?{}'.format(query), timeout)
+        
+        result = []
+
+        if instance == None and hostname == None:
+            return databases['data']
+        elif instance == None and hostname != None:
+            for item in databases['data']:
+                if item['rootProperties']['rootName'] == hostname:
+                    result.append(item)
+        elif instance != None and hostname == None:
+            try:
+                for item in databases['data']:
+                    for replica in item['replicas']:
+                        if replica['instanceName'] == instance:
+                           result.append(item)
+                        break
+            except:
+                pass
+            else:
+                result = [item for item in databases['data'] if replica['instanceName'] == instance]
+        elif instance != None and hostname != None:
+            try:
+                for item in databases['data']:
+                    for replica in item['replicas']:
+                        if item['rootProperties']['rootName'] == hostname and replica['instanceName'] == instance:
+                           result.append(item)
+                        break
+            except:
+                pass
+            else:
+                result = [item for item in databases['data'] if (item['rootProperties']['rootName'] == hostname and replica['instanceName'] == instance)]
+        return result

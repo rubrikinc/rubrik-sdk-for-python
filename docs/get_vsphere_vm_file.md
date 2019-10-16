@@ -2,7 +2,7 @@
 
 Search for a file in the snapshots of a virtual machine. Specify the file by full path prefix or filename prefix.
 ```py
-def get_vsphere_vm_file(self, vm_name, path, timeout=15):
+def get_vsphere_vm_file(self, vm_name, path, timeout=15)
 ```
 
 ## Arguments

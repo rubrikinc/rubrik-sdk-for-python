@@ -2,7 +2,7 @@
 
 Retrieve summary information for the snapshots of a virtual machine.
 ```py
-def get_vsphere_vm_snapshot(self, vm_name, timeout=15):
+def get_vsphere_vm_snapshot(self, vm_name, timeout=15)
 ```
 
 ## Arguments
