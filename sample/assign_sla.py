@@ -32,6 +32,7 @@ assignsla = rubrik.assign_sla(
     logRetentionHours,
     copyOnly)
 
+
 # Volume Group
 
 
@@ -44,3 +45,18 @@ windows_host = "windows2016.rubrik.com"
 sla_name = "Gold"
 
 assign_sla = rubrik.assign_sla(object_name, sla_name, "volume_group", windows_host=windows_host)
+
+
+# Fileset
+
+
+rubrik = rubrik_cdm.Connect()
+
+object_name = 'nas_fileset'
+object_type = 'fileset'
+
+sla_name = 'Gold'
+nas_host = 'nas-server.rubrik.com'
+share = '/nas_share'
+
+assign_sla = rubrik.assign_sla(object_name, sla_name, object_type, nas_host=nas_host, share=share)
