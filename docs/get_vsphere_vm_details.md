@@ -2,7 +2,7 @@
 
 Retrieve details for a virtual machine.
 ```py
-def get_vsphere_vm_details(self, vm_name, timeout=15):
+def get_vsphere_vm_details(self, vm_name, timeout=15)
 ```
 
 ## Arguments
