@@ -1,8 +1,8 @@
 # get_sql_db
 
-""" Retrieves summary information for Microsoft SQL databases. Each keyword argument is a query parameter to filter the database details returned i.e. you can query for a specific database name, hostname, instance, is_relic, effective_sla_domain etc.
+Retrieves summary information for SQL databases. Each keyword argument is a query parameter to filter the database details returned i.e. you can query for a specific database name, hostname, instance, is_relic, effective_sla_domain etc.
 ```py
-def get_sql_db(instance_id=None, availability_group_id=None, effective_sla_domain_id=None, primary_cluster_id=None, name=None, instance=None, hostname=None, sla_assignment=None, limit=None, offset=None,  is_relic=None, is_live_mount=None, is_log_shipping_secondary=None, sort_by=None, sort_order=None, timeout=15)
+def get_sql_db(self, name=None, instance=None, hostname=None, availability_group=None, effective_sla_domain=None, primary_cluster_id='local', sla_assignment=None, limit=None, offset=None,  is_relic=None, is_live_mount=None, is_log_shipping_secondary=None, sort_by=None, sort_order=None, timeout=15)
 ```
 
 ## Keyword Arguments
@@ -11,10 +11,9 @@ def get_sql_db(instance_id=None, availability_group_id=None, effective_sla_domai
 | name                      | str  | Filter by a substring of the database name.                                 |         |         |
 | instance                  | str  | The SQL instance name of the database.                                      |         |         |
 | hostname                  | str  | The SQL host name of the database.                                          |         |         |
-| instance_id               | str  | Filter by Microsoft SQL instance.                                           |         |         |
-| availability_group_id     | str  | Filter by the id of an Always On Availability Group.                        |         |         |
-| effective_sla_domain_id   | str  | Filter by ID of effective SLA Domain.                                       |         |         |
-| primary_cluster_id        | str  | Filter by primary cluster ID, or local.                                     |         |         |
+| availability_group        | str  | Filter by the name of the Always On Availability Group.                     |         |         |
+| effective_sla_domain      | str  | Filter by the name of the effective SLA Domain.                             |         |         |
+| primary_cluster_id        | str  | Filter by primary cluster ID, or local.                                     |         |  local  |
 | sla_assignment            | str  | Filter by SLA Domain assignment type.                                       |Direct, Derived, Unassigned |         |
 | limit                     | int  | Limit the number of matches returned.                                       |         |         |
 | offset                    | int  | Ignore these many matches in the beginning.                                 |         |         |
