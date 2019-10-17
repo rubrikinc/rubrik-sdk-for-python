@@ -58,7 +58,7 @@ print(cluster_version)
 
 setuptools.setup(
     name="rubrik_cdm",
-    version="2.0.4",
+    version="2.0.5",
     author="Rubrik Build",
     description="A Python package for interacting with the Rubrik CDM API.",
     long_description=long_description,
