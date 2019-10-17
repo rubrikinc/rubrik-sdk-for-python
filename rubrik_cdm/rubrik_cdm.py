@@ -325,15 +325,12 @@ class Bootstrap(_API):
             except socket.gaierror:
                 self.log('Could not resolve IPv4 address for cluster.')
 
-        if node_resolution == False:
+        if node_resolution is False:
             raise RubrikException("Error: Could not resolve address for cluster, or invalid IP/address supplied")
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask, node_mgmt_ips,
-                      mgmt_vlan=None, ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None,
-                      data_gateway=None, data_subnet_mask=None, data_vlan=None,
-                      node_data_ips=None, enable_encryption=True, dns_search_domains=None, dns_nameservers=None,
-                      ntp_servers=None, wait_for_completion=True, timeout=30):
-        """ Issues a bootstrap request to a specified Rubrik cluster: Edge, Cloudcluster or Physical nodes
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None,
+                      wait_for_completion=True, management_vlan=None, ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None, data_gateway=None, data_subnet_mask=None, data_vlan=None, node_data_ips=None, timeout=30):
+        """Issues a bootstrap request to a specified Rubrik cluster: Edge, Cloud Cluster or Physical nodes
             Edge: no IPMI, no DATA and no Encryption set. One node only. IPv4 or IPv6 possible.
             CloudCluster: same as Edge but more nodes possible. Only IPv4 bootstrap.
             Physical: Management and IPMI networks mandatory. IPv6 only.
@@ -343,12 +340,12 @@ class Bootstrap(_API):
             cluster_name {str} -- Unique name to assign to the Rubrik cluster. No FQDN allowed with dots.
             admin_email {str} -- The Rubrik cluster sends messages for the admin account to this email address.
             admin_password {str} --  Password for the admin account.
-            mgmt_gateway {str} --  IP address assigned to the management network gateway.
-            mgmt_subnet_mask {str} -- Subnet mask assigned to the management network.
-            node_mgmt_ips {dict} -- The Node Name(s) and IP(s) formatted as a dictionary for Management addresses.
+            management_gateway {str} --  IP address assigned to the management network gateway.
+            management_subnet_mask {str} -- Subnet mask assigned to the management network.
+            node_config {dict} -- The Node Name(s) and IP(s) formatted as a dictionary for Management addresses.
 
         Keyword Arguments:
-            mgmt_vlan {int} -- VLAN assigned to the management network. (default: {None})
+            management_vlan {int} -- VLAN assigned to the management network. (default: {None})
             ipmi_gateway {str} --  IP address assigned to the ipmi network gateway. (default: {None})
             ipmi_subnet_mask {str} -- Subnet mask assigned to the ipmi network. (default: {None})
             ipmi_vlan {int} -- VLAN assigned to the ipmi network. (default: {None})
@@ -368,9 +365,9 @@ class Bootstrap(_API):
             dict -- The response returned by `POST /internal/cluster/me/bootstrap`.
         """
 
-        if node_mgmt_ips is None or isinstance(node_mgmt_ips, dict) is not True:
+        if node_config is None or isinstance(node_config, dict) is not True:
             raise InvalidParameterException(
-                'You must provide a valid dictionary for "node_mgmt_ips" holding node names and management IPs.')
+                'You must provide a valid dictionary for "node_config" holding node names and management IPs.')
 
         if dns_search_domains is None:
             dns_search_domains = []
@@ -405,9 +402,9 @@ class Bootstrap(_API):
         if float(self.get('v1', '/cluster/me/version', timeout, authentication=False)['version'][:3]) < float(5.0):
             bootstrap_config["ntpServers"] = ntp_servers
         else:
-            bootstrap_config["ntpServerConfigs"] = []   
+            bootstrap_config["ntpServerConfigs"] = []
             for server in ntp_servers:
-                bootstrap_config["ntpServerConfigs"].append({ "server" : server})
+                bootstrap_config["ntpServerConfigs"].append({"server": server})
 
         bootstrap_config["adminUserInfo"] = {}
         bootstrap_config["adminUserInfo"]['password'] = admin_password
@@ -416,14 +413,14 @@ class Bootstrap(_API):
 
         bootstrap_config["nodeConfigs"] = {}
 
-        for node_name, node_ip in node_mgmt_ips.items():
+        for node_name, node_ip in node_config.items():
             bootstrap_config["nodeConfigs"][node_name] = {}
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig'] = {}
-            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['netmask'] = mgmt_subnet_mask
-            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = mgmt_gateway
+            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['netmask'] = management_subnet_mask
+            bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['gateway'] = management_gateway
             bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['address'] = node_ip
-            if mgmt_vlan is not None:
-                bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['vlan'] = mgmt_vlan
+            if management_vlan is not None:
+                bootstrap_config["nodeConfigs"][node_name]['managementIpConfig']['vlan'] = management_vlan
 
         if (using_ipmi_config):
             for node_name, ipmi_ip in node_ipmi_ips.items():
