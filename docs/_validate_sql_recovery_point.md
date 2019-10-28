@@ -14,7 +14,8 @@ def _validate_sql_recovery_point(db_name, date, time, timeout=30)
 
 ## Keyword Arguments
 | Name           | Type | Description                                                         | Choices | Default |
-| timeout        | int  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. |         | 30      |
+|----------------|------|---------------------------------------------------------------------|---------|---------|
+| timeout        | int  | The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. |         | 30      |
 
 ## Returns
 | Type | Return Value                                                                                  |

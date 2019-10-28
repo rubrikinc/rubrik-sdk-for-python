@@ -1771,10 +1771,10 @@ class Data_Management(_API):
         self.log("get_vsphere_vm_file: Search for file/path {} in the snapshots of a virtual machine {}".format(path, vm_id))
         return self.get('v1', '/vmware/vm/{}/search?path={}'.format(vm_id, path), timeout)
 
-    def get_sql_db(self, name=None, instance=None, hostname=None, availability_group=None, effective_sla_domain=None, primary_cluster_id='local', sla_assignment=None, limit=None, offset=None,  is_relic=None, is_live_mount=None, is_log_shipping_secondary=None, sort_by=None, sort_order=None, timeout=15):  # pylint: ignore
+    def get_sql_db(self, db_name=None, instance=None, hostname=None, availability_group=None, effective_sla_domain=None, primary_cluster_id='local', sla_assignment=None, limit=None, offset=None,  is_relic=None, is_live_mount=None, is_log_shipping_secondary=None, sort_by=None, sort_order=None, timeout=15):  # pylint: ignore
         """Retrieves summary information for SQL databases. Each keyword argument is a query parameter to filter the database details returned i.e. you can query for a specific database name, hostname, instance, is_relic, effective_sla_domain etc.
         Keyword Arguments:
-            name {str} -- Filter by a substring of the database name.
+            db_name {str} -- Filter by a substring of the database name.
             instance {str} -- The SQL instance name of the database.
             hostname {str} -- The SQL host name of the database.
             availability_group {str} -- Filter by the name of the Always On Availability Group.
@@ -1811,7 +1811,7 @@ class Data_Management(_API):
         parameters = {'availability_group_id':availability_group_id,
                       'effective_sla_domain_id':effective_sla_domain_id,
                       'primary_cluster_id':primary_cluster_id,
-                      'name':name,
+                      'name':db_name,
                       'sla_assignment':sla_assignment,
                       'limit':limit,
                       'offset':offset,
@@ -1884,3 +1884,114 @@ class Data_Management(_API):
             else:
                 result = [item for item in databases['data'] if (item['rootProperties']['rootName'] == hostname and replica['instanceName'] == instance)]
         return result
+
+    def get_sql_db_files(self, db_name, date, time, sql_instance=None, sql_host=None, timeout=15):  # pylint: ignore
+        """Provides a list of database files to be restored for the specified restore or export operation. The Data, Log and Filestream files will be retrieved along with name and path information.
+        Arguments:
+            db_name {str} -- The name of the database.
+            date {str} -- The recovery_point date formated as 'Month-Date-Year' (ex: 8-9-2018).
+            time {str} -- The recovery_point time formated as `Hour:Minute` (ex: 3:30 AM).
+        Keyword Arguments:
+            sql_instance {str} -- The SQL instance name with the database.
+            sql_host {str} -- The SQL Host of the database/instance.
+            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {30})
+        Returns:
+            list -- The full response of `GET /internal/mssql/db/{id}/restore_files?time={recovery_point}`.
+        """
+
+        mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
+        
+        recovery_date_time = self._date_time_conversion(date, time)
+        recovery_point = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M').isoformat()
+        valid_recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
+
+        try:
+            if valid_recovery_point['is_recovery_point'] == False:
+                raise InvalidParameterException(
+                    "The database '{}' does not have a recovery_point taken on {} at {}.".format(
+                        db_name, date, time))
+        except NameError:
+            pass
+        else:
+            self.log(
+                "get_sql_db_files: Getting SQL database '{}' files for recovery_point {} {}.".format(
+                    db_name,
+                    date,
+                    time))
+            return self.get('internal', '/mssql/db/{}/restore_files?time={}'.format(mssql_id, recovery_point), timeout)
+
+    def sql_db_export(self, db_name, date, time, sql_instance=None, sql_host=None, target_instance_name=None, target_hostname=None, target_database_name=None, target_data_file_path=None, target_log_file_path=None, target_file_paths=None, finish_recovery=True, max_data_streams=2, allow_overwrite=False, timeout=15):  # pylint: ignore
+        """Export an SQL database from a specified recovery point to a target SQL Instance and Host. Requires database data and log file name directory paths.
+        Arguments:
+            db_name {str} -- The name of the database to be exported.
+            date {str} -- The recovery_point date formated as 'Month-Date-Year' (ex: 8-9-2018).
+            time {str} -- The recovery_point time formated as `Hour:Minute` (ex: 3:30 AM).
+        Keyword Arguments:
+            sql_instance {str} -- The SQL instance name with the database to be exported.
+            sql_host {str} -- The SQL Host of the database/instance to be exported.
+            target_instance_name {str} -- Name of the Microsoft SQL instance for the new database.
+            target_hostname {str} -- Name of the Microsoft SQL host for the new database.
+            target_database_name {str} -- Name of the new database.
+            target_data_file_path {str} -- The target path to store all data files.
+            target_log_file_path {str} -- The target path to store all log files.
+            target_file_paths {list} -- A list of dictionary objects each with key value pairs: {'logicalName': 'Logical name of the database file', 'exportPath': 'The target path for the database file', 'newLogicalName': 'New logical name for the database file', 'newFilename': 'New filename for the database file'}. One target path for each individual database file. Overrides targetDataFilePath and targetLogFilePath.
+            finish_recovery {str} -- A Boolean value that determines the recovery option to use during database restore. When this value is 'true', the database is restored using the RECOVERY option and is fully functional at the end of the restore operation. When this value is 'false', the database is restored using the NORECOVERY option and remains in recovering mode at the end of the restore operation.
+            max_data_streams {str} -- Maximum number of parallel data streams that can be used to copy data to the target system.
+            allow_overwrite {str} -- A Boolean value that determines whether an existing database can be overwritten by a database this is exported from a backup. Set to false to prevent overwrites. This is the default. Set to true to allow overwrites.
+            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {30})
+        Returns:
+            dict -- The full response of `POST /v1/mssql/db/{id}/export`.
+        """
+
+        if target_file_paths is None:
+            if target_data_file_path is None or target_log_file_path is None:
+                raise InvalidParameterException(
+                    "The 'target_data_file_path' and 'target_log_file_path' parameters must be provided if a 'target_file_paths' dictionary list is not provided.")
+
+        mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
+        recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
+
+        target_host_id = self.object_id(target_hostname, 'physical_host', timeout=timeout)
+
+        self.log("sql_db_export: Getting the instances on target host {}.".format(target_hostname))
+        mssql_instance = self.get(
+            'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(target_host_id), timeout=timeout)
+
+        for instance in mssql_instance['data']:
+            if instance['name'] == target_instance_name:
+                target_instance_id = instance['id']
+                break
+        else:
+            raise InvalidParameterException(
+                "The target SQL instance {} does not exist, please provide a valid target instance".format(target_instance_name))
+        
+        try:
+            if recovery_point['is_recovery_point'] == False:
+                raise InvalidParameterException(
+                    "The database '{}' does not have a recovery_point taken on {} at {}.".format(
+                        db_name, date, time))
+        except NameError:
+            pass
+        else:
+            config = {}
+            config['recoveryPoint'] = {'timestampMs': recovery_point['recovery_timestamp']}
+            config['targetInstanceId'] = target_instance_id
+            config['targetDatabaseName'] = target_database_name
+            if target_file_paths is not None:
+                config['targetFilePaths'] = target_file_paths
+            else:
+                config['targetDataFilePath'] = target_data_file_path
+                config['targetLogFilePath'] = target_log_file_path
+            config['finishRecovery'] = finish_recovery
+            config['maxDataStreams'] = max_data_streams
+            config['allowOverwrite'] = allow_overwrite
+
+
+            self.log(
+                "sql_db_export: Exporting the database '{}' from recovery_point on {} at {} with new name '{}'.".format(
+                    db_name,
+                    date,
+                    time,
+                    target_database_name))
+
+            return self.post('v1', '/mssql/db/{}/export'.format(mssql_id), config, timeout)

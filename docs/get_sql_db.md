@@ -2,13 +2,13 @@
 
 Retrieves summary information for SQL databases. Each keyword argument is a query parameter to filter the database details returned i.e. you can query for a specific database name, hostname, instance, is_relic, effective_sla_domain etc.
 ```py
-def get_sql_db(self, name=None, instance=None, hostname=None, availability_group=None, effective_sla_domain=None, primary_cluster_id='local', sla_assignment=None, limit=None, offset=None,  is_relic=None, is_live_mount=None, is_log_shipping_secondary=None, sort_by=None, sort_order=None, timeout=15)
+def get_sql_db(self, db_name=None, instance=None, hostname=None, availability_group=None, effective_sla_domain=None, primary_cluster_id='local', sla_assignment=None, limit=None, offset=None,  is_relic=None, is_live_mount=None, is_log_shipping_secondary=None, sort_by=None, sort_order=None, timeout=15)
 ```
 
 ## Keyword Arguments
 | Name                      | Type | Description                                                                 | Choices | Default |
 |---------------------------|------|-----------------------------------------------------------------------------|---------|---------|
-| name                      | str  | Filter by a substring of the database name.                                 |         |         |
+| db_name                      | str  | Filter by a substring of the database name.                              |         |         |
 | instance                  | str  | The SQL instance name of the database.                                      |         |         |
 | hostname                  | str  | The SQL host name of the database.                                          |         |         |
 | availability_group        | str  | Filter by the name of the Always On Availability Group.                     |         |         |
@@ -34,7 +34,7 @@ import rubrik_cdm
 
 rubrik = rubrik_cdm.Connect()
 
-name = "python-sdk-demo"
+db_name = "python-sdk-demo"
 instance = 'MSSQLSERVER'
 hostname = 'sql.rubrikdemo.com'
 availability_group = 'sql.rubrikdemo.com'
