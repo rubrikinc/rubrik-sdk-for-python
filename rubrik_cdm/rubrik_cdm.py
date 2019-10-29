@@ -513,7 +513,7 @@ class Bootstrap(_API):
 
         return api_request
 
-    def discover(self, timeout=30):
+    def node_discover(self, timeout=30):
         """Searches for nodes bootstrappable to the specified Rubrik cluster
 
         Keyword Arguments:
@@ -523,12 +523,10 @@ class Bootstrap(_API):
             dict -- The response returned by `GET /internal/cluster/me/discover`.
         """
 
-        self.log('status: Discovering bootstrappable nodes for the Rubrik Cluster.')
-        discover_api_endpoint = '/cluster/me/discover'
-        api_request = self.get(
-            'internal', discover_api_endpoint, timeout=timeout, authentication=False)
-
-        return api_request
+        self.log('node_discover: Discovering bootstrappable nodes for the Rubrik Cluster.')
+       
+        return self.get(
+            'internal', '/cluster/me/discover', timeout=timeout, authentication=False)
 
     @staticmethod
     def log(log_message):
