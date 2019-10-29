@@ -513,6 +513,23 @@ class Bootstrap(_API):
 
         return api_request
 
+    def discover(self, timeout=30):
+        """Searches for nodes bootstrappable to the specified Rubrik cluster
+
+        Keyword Arguments:
+            timeout {int} -- The response timeout value, in seconds, of the API call. (default: {30})
+
+        Returns:
+            dict -- The response returned by `GET /internal/cluster/me/discover`.
+        """
+
+        self.log('status: Discovering bootstrappable nodes for the Rubrik Cluster.')
+        discover_api_endpoint = '/cluster/me/discover'
+        api_request = self.get(
+            'internal', discover_api_endpoint, timeout=timeout, authentication=False)
+
+        return api_request
+
     @staticmethod
     def log(log_message):
         """Create properly formatted debug log messages.
