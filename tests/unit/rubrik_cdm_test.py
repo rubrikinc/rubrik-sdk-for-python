@@ -6,6 +6,8 @@ def test_unit_header(rubrik):
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'User-Agent': "RubrikPythonSDK--{}--{}".format(rubrik.sdk_version, rubrik.python_version),
+        'rk-integration': rubrik.function_name
+
     }
 
     assert rubrik._header() == header

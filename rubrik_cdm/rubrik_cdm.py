@@ -184,6 +184,8 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             dict -- The authorization header that utilizes Basic authentication.
         """
 
+        user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+
         authorization_header = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -220,6 +222,8 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'User-Agent': user_agent,
+            'rk-integration': self.function_name
+
         }
 
         return header
@@ -330,8 +334,12 @@ class Bootstrap(Api):
         if node_resolution is False:
             raise RubrikException("Error: Could not resolve address for cluster, or invalid IP/address supplied")
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None,
-                      wait_for_completion=True, management_vlan=None, ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None, data_gateway=None, data_subnet_mask=None, data_vlan=None, node_data_ips=None, timeout=30):
+        self.sdk_version = "2.0.6"
+        self.python_version = sys.version.split("(")[0].strip()
+        # function_name will be populated in each function
+        self.function_name = ""
+
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, management_vlan=None, ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None, data_gateway=None, data_subnet_mask=None, data_vlan=None, node_data_ips=None, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster: Edge, Cloud Cluster or Physical nodes
             Edge: no IPMI, no DATA and no Encryption set. One node only. IPv4 or IPv6 possible.
             CloudCluster: same as Edge but more nodes possible. Only IPv4 bootstrap.
@@ -366,6 +374,8 @@ class Bootstrap(Api):
         Returns:
             dict -- The response returned by `POST /internal/cluster/me/bootstrap`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if node_config is None or isinstance(node_config, dict) is not True:
             raise InvalidParameterException(
@@ -506,6 +516,8 @@ class Bootstrap(Api):
             dict -- The response returned by `GET /internal/cluster/me/bootstrap?request_id={request_id}`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log('status: Getting the status of the Rubrik Cluster bootstrap.')
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(
             request_id)
@@ -525,17 +537,21 @@ class Bootstrap(Api):
         log = logging.getLogger(__name__)
         log.debug(log_message)
 
-    @staticmethod
-    def _header():
+    def _header(self):
         """Internal method used to create the a header without authorization used in the API calls.
 
         Returns:
             dict - - The header that does not include any authorization.
         """
 
+        user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+
         header = {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'User-Agent': user_agent,
+            'rk-integration': self.function_name
+
         }
 
         return header
