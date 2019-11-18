@@ -283,7 +283,8 @@ class Data_Management(Api):
             str -- The ID of the provided Rubrik object.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         valid_object_type = [
             'vmware',
@@ -889,7 +890,8 @@ class Data_Management(Api):
             str -- A combined date/time value formated as `Year-Month-DayTHour:Minute` where Hour:Minute is on the 24-hour clock (ex : 2014-1-15T01:30).
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         from datetime import datetime
         import pytz
@@ -1080,7 +1082,8 @@ class Data_Management(Api):
             dict -- The `name:id` of each object in the provided SLA Domain.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         valid_object_type = ['vmware']
 
@@ -1315,11 +1318,11 @@ class Data_Management(Api):
             return self.post("v1", "/sla_domain", config, timeout=timeout)
 
     def delete_sla(self, name, timeout=15):
-        """[summary]
+        """Delete an SLA from the Rubrik Cluster
         Arguments:
-            name {[type]} -- [description]
+            name {[type]} -- The name of the SLA you wish to delete.
         Keyword Arguments:
-            timeout {int} -- [description] (default: {15})
+            timeout {int} -- The number of seconds to wait to establish a connection to the Rubrik cluster. (default: {15})
         Returns:
             dict -- The full API response for `DELETE /v1/sla_domain`.
             dict -- The full API response for `DELETE /v2/sla_domain`.
@@ -1356,7 +1359,8 @@ class Data_Management(Api):
         Returns:
             bool -- True if point_in_time is in the range [start, end]."""
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         if start <= end:
             return start <= point_in_time <= end
@@ -1378,8 +1382,8 @@ class Data_Management(Api):
             dict -- The full response of `POST /v1/mssql/db/{id}/mount`.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
-
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
 
@@ -1417,7 +1421,6 @@ class Data_Management(Api):
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
-
 
         self.log("vsphere_live_unmount: Searching the Rubrik cluster for the Live Mount vSphere VM '{}'.".format(mounted_vm_name))
         mounted_vm_id = self.object_id(mounted_vm_name, 'vmware', timeout=timeout)
@@ -1459,7 +1462,6 @@ class Data_Management(Api):
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
-
 
         mounted_db_id = self._validate_sql_db(mounted_db_name, sql_instance, sql_host)
 
@@ -1612,7 +1614,8 @@ class Data_Management(Api):
             dict -- A dictionary with values {'is_recovery_point': bool, 'recovery_timestamp': datetime}.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         self.log("_validate_sql_recovery_point: Getting the recoverable range for mssql db ID:'{}'.".format(mssql_id))
         range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
@@ -1731,7 +1734,8 @@ class Data_Management(Api):
             dict -- The full response of `GET /v1/vmware/vm?{query}`
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         parameters = {'effective_sla_domain_id': effective_sla_domain_id,
                       'primary_cluster_id': primary_cluster_id,
@@ -1790,7 +1794,8 @@ class Data_Management(Api):
             dict -- The full response of `GET /v1/vmware/vm/{vm_id}/snapshot`
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         self.log("get_vsphere_vm_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
@@ -1808,7 +1813,8 @@ class Data_Management(Api):
             dict -- The full response of `GET /v1/vmware/vm/{vm_id}`
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         self.log("get_vsphere_vm_details: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
@@ -1827,7 +1833,8 @@ class Data_Management(Api):
             dict -- The full response of `GET /v1/vmware/vm/{vm_id}/search?path={path}`
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         self.log("get_vsphere_vm_file: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
@@ -1857,7 +1864,8 @@ class Data_Management(Api):
             dict -- The full response of `GET /v1/mssql/db?{query}`
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         if availability_group is not None:
             self.log("get_sql_db: Searching the Rubrik cluster for the ID of the availability_group {}.".format(availability_group))
@@ -1973,7 +1981,8 @@ class Data_Management(Api):
             list -- The full response of `GET /internal/mssql/db/{id}/restore_files?time={recovery_point}`.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
 

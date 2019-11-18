@@ -166,7 +166,8 @@ class Cluster(Api):
             str -- The version of CDM installed on the Rubrik cluster.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         self.log('cluster_version: Getting the software version of the Rubrik cluster.')
 
@@ -182,7 +183,8 @@ class Cluster(Api):
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
         """
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         if float(self.cluster_version(timeout)[:3]) < float(cluster_version):
             return False

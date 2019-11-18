@@ -192,7 +192,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         return self._common_api(
             'GET',
@@ -220,7 +221,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         return self._common_api(
             'POST',
@@ -247,7 +249,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         return self._common_api(
             'PATCH',
@@ -274,7 +277,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         return self._common_api(
             'PUT',
@@ -302,7 +306,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         if config is not None and params is not None:
             raise InvalidParameterException(
@@ -335,7 +340,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
-        self.function_name = inspect.currentframe().f_code.co_name
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         if not isinstance(wait_for_completion, bool):
             raise InvalidTypeException(
