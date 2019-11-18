@@ -166,6 +166,8 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
+        # Optional value to define the Platform using the SDK (Ex. Ansible)
+        self.platform = ""
 
     @staticmethod
     def log(log_message):
@@ -185,6 +187,8 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         """
 
         user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+        if self.platform != "":
+            user_agent = user_agent + '--' + self.platform
 
         authorization_header = {
             'Content-Type': 'application/json',
@@ -207,6 +211,8 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
             authorization_header["Authorization"] = 'Bearer {}'.format(self.api_token)
 
+        print(authorization_header)
+
         return authorization_header
 
     def _header(self):
@@ -217,6 +223,8 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         """
 
         user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+        if self.platform != "":
+            user_agent = user_agent + '--' + self.platform
 
         header = {
             'Content-Type': 'application/json',
@@ -256,8 +264,23 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                     "Error: The API Endpoint should not end with '/' unless proceeded by '='. (ex. /cluster/me or /fileset/snapshot/<id>/browse?path=/)")
 
     def _platform_user_agent(self, platform_name, platform_version):
-        self.platform_name = platform_name
-        self.platform_version = platform_version
+        """Internal method to used to populated the user-agent string with an
+        optional string for the Platform consuming the SDK.
+
+        Arguments:
+            platform_name {str} -- The name of the Platform consuming the SDK (Ex. Ansible)
+            platform_version {str} -- The version of the Platform consuming the SDK.
+        """
+
+        platform_user_agent = ""
+
+        if platform_name is not "":
+            platform_user_agent = "platform_name--{}".format(platform_name)
+
+        if platform_version is not "":
+            platform_user_agent = platform_user_agent + "--platform_version--{}".format(platform_version)
+
+        self.platform = platform_user_agent
 
 
 class Bootstrap(Api):
@@ -338,6 +361,8 @@ class Bootstrap(Api):
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
+        # Optional value to define the Platform using the SDK (Ex. Ansible)
+        self.platform = ""
 
     def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, management_vlan=None, ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None, data_gateway=None, data_subnet_mask=None, data_vlan=None, node_data_ips=None, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster: Edge, Cloud Cluster or Physical nodes
@@ -545,6 +570,8 @@ class Bootstrap(Api):
         """
 
         user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+        if self.platform != "":
+            user_agent = user_agent + '--' + self.platform
 
         header = {
             'Content-Type': 'application/json',
