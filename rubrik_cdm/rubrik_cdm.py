@@ -211,8 +211,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
             authorization_header["Authorization"] = 'Bearer {}'.format(self.api_token)
 
-        print(authorization_header)
-
         return authorization_header
 
     def _header(self):
