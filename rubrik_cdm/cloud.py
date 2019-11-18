@@ -26,6 +26,7 @@ import os
 import re
 from .api import Api
 from .exceptions import InvalidParameterException, CDMVersionException, InvalidTypeException
+import inspect
 
 
 class Cloud(Api):
@@ -52,6 +53,8 @@ class Cloud(Api):
             str -- No change required. The '`name`' archival location is already configured on the Rubrik cluster.
             dict -- The full API response for `POST /internal/archive/object_store`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         valid_aws_regions = [
             'ap-south-1',
@@ -179,6 +182,8 @@ class Cloud(Api):
             dict -- The full API response for `PATCH /internal/archive/object_store/{id}'`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         valid_storage_classes = [
             'standard',
             'standard_ia',
@@ -243,6 +248,8 @@ class Cloud(Api):
             dict -- The full API response for `PATCH /internal/archive/object_store/{id}`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("aws_s3_cloudon: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get('internal', '/archive/object_store', timeout=timeout)
 
@@ -285,6 +292,8 @@ class Cloud(Api):
             str -- No change required. The '`name`' archival location is already configured on the Rubrik cluster.
             dict -- The full API response for `POST /internal/archive/object_store`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         container = container.lower()
 
@@ -376,6 +385,8 @@ class Cloud(Api):
             str -- No change required. The '`archive_name`' archival location is already configured for CloudOn.
             dict -- The full API response for `PATCH /internal/archive/object_store/{id}`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         valid_regions = [
             "westus",
@@ -502,6 +513,8 @@ class Cloud(Api):
             dict -- The full API response for `POST /internal/aws/account'`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         valid_aws_regions = [
             'ap-south-1',
             'ap-northeast-3',
@@ -619,6 +632,9 @@ class Cloud(Api):
         Returns:
             dict -- The full API response for `PATCH /aws/account/{id}`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
         # verify we are on cdm 4.2 or newer, required for cloud native
         # protection
         if self.minimum_installed_cdm_version(4.2) is False:

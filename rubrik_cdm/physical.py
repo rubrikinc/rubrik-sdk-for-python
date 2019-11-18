@@ -24,6 +24,7 @@ This module contains the Rubrik SDK Physical class.
 
 from .api import Api
 from .exceptions import InvalidParameterException, InvalidTypeException
+import inspect
 
 
 class Physical(Api):
@@ -42,6 +43,8 @@ class Physical(Api):
             str -- No change required. The host '`hostname`' is already connected to the Rubrik cluster.
             dict -- The full API response for `POST /v1/host`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if(len(hostname) == 0):
             raise InvalidParameterException("The provided hostname list is empty.")
@@ -100,6 +103,8 @@ class Physical(Api):
             dict -- The full API response for `DELETE /v1'/host/{host_id}`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log('Searching the Rubrik cluster for the current hosts.')
         current_hosts = self.get('v1', '/host', timeout=timeout)
 
@@ -137,6 +142,8 @@ class Physical(Api):
             str -- No change required. The Rubrik cluster already has a `operating_system` Fileset named '`name`' configured with the provided variables.
             dict -- The full response for the `POST /internal/fileset_template/bulk` API endpoint.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         valid_operating_system = ['Linux', 'Windows']
 
@@ -209,6 +216,8 @@ class Physical(Api):
             dict -- The full response for the `POST /internal/fileset_template/bulk` API endpoint.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         valid_share_type = ['NFS', 'SMB']
 
         if share_type not in valid_share_type:
@@ -274,6 +283,9 @@ class Physical(Api):
             str -- No change required. The share with the given hostname and export point has already been added.
             dict -- The full API response for `POST /internal/host/share` with the given share arguments.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
         valid_share_type = ['NFS', 'SMB']
 
         share_address = "{}:{}".format(hostname, export_point)
@@ -332,6 +344,8 @@ class Physical(Api):
             tuple -- When a new Fileset is created the following tuple will be returned: (Full API response from `POST /v1/fileset`, Full API response from `POST /v1/fileset/{id}`)
             dict -- When the Fileset already exsits but is assigned to the wrong the SLA the Full API response from `POST `v1/fileset/{id}` is returned.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         valid_operating_system = ['Linux', 'Windows']
 
@@ -485,7 +499,7 @@ class Physical(Api):
         Arguments:
             hostname {str} -- The hostname or IP Address of the physical host you want to add to the Rubrik cluster.
             share_type {str} -- The share object type to be added to the host. (choices: {NFS, SMB})
-            export_point {str} -- The NFS export path of the share. 
+            export_point {str} -- The NFS export path of the share.
         Keyword Arguments:
             username {str} -- The username for the host. (default: {None})
             password {str} -- The password for the host. (default: {None})
@@ -494,6 +508,9 @@ class Physical(Api):
         Returns:
             dict -- The full API response for `POST /internal/host/share`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
         if(len(hostname) == 0 or len(share_type) == 0 or len(export_point) == 0):
             raise InvalidParameterException("The provided hostname list, share_type, export_point is empty.")
         self.log('Searching the Rubrik cluster for the host ID.')

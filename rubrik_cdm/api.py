@@ -31,6 +31,7 @@ except ImportError:
     from urllib.parse import quote  # Python 3+
 from random import choice
 from .exceptions import APICallException, InvalidParameterException, RubrikException, InvalidTypeException
+import inspect
 
 
 class Api():
@@ -70,20 +71,20 @@ class Api():
         if call_type != 'JOB_STATUS':
             self._api_validation(api_version, api_endpoint)
 
-            if '/cluster/me/bootstrap' or '/cluster/me/version' in api_endpoint:
-                if self.ipv6_addr != "":
-                    header = {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'Host': '[' + self.ipv6_addr + ']'
-                    }
-                    self.log('Created boostrap header: ' + str(header))
-                else:
-                    header = {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    }
-                    self.log('Created boostrap header: ' + str(header))
+            # if '/cluster/me/bootstrap' or '/cluster/me/version' in api_endpoint:
+            #     if self.ipv6_addr != "":
+            #         header = {
+            #             'Content-Type': 'application/json',
+            #             'Accept': 'application/json',
+            #             'Host': '[' + self.ipv6_addr + ']'
+            #         }
+            #         self.log('Created boostrap header: ' + str(header))
+            #     else:
+            #         header = {
+            #             'Content-Type': 'application/json',
+            #             'Accept': 'application/json',
+            #         }
+            #         self.log('Created boostrap header: ' + str(header))
 
         try:
             # Determine which call type is being used and then set the relevant
@@ -191,6 +192,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         return self._common_api(
             'GET',
             api_version,
@@ -217,6 +220,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         return self._common_api(
             'POST',
             api_version,
@@ -241,6 +246,8 @@ class Api():
         Returns:
             dict -- The response body of the API call.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         return self._common_api(
             'PATCH',
@@ -267,6 +274,8 @@ class Api():
             dict -- The response body of the API call.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         return self._common_api(
             'PUT',
             api_version,
@@ -292,6 +301,9 @@ class Api():
         Returns:
             dict -- The response body of the API call.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
         if config is not None and params is not None:
             raise InvalidParameterException(
                 "DELETE cannot have both params and config set in the same call.")
@@ -322,6 +334,8 @@ class Api():
         Returns:
             dict -- The response body of the API call.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if not isinstance(wait_for_completion, bool):
             raise InvalidTypeException(
