@@ -30,6 +30,7 @@ from random import choice
 import time
 import socket
 import sys
+import inspect
 
 from .api import Api
 from .cluster import Cluster
@@ -571,12 +572,12 @@ class Bootstrap(Api):
         if self.platform != "":
             user_agent = user_agent + '--' + self.platform
 
-        if self.function_name == "setup_cluster" and self.ipv6_addr != "":
+        if self.ipv6_addr != "":
             header = {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'User-Agent': user_agent,
-                'Host': '[' + self.ipv6_addr + ']'
+                'Host': '[' + self.ipv6_addr + ']',
                 'rk-integration': self.function_name
 
             }
@@ -589,6 +590,7 @@ class Bootstrap(Api):
 
             }
 
+        self.log("Header: {}".format(header))
         return header
 
     @staticmethod
