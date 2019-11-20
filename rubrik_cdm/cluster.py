@@ -24,6 +24,7 @@ This module contains the Rubrik SDK Cluster class.
 
 from .api import Api
 from .exceptions import InvalidParameterException, CDMVersionException, InvalidTypeException
+import inspect
 
 
 class Cluster(Api):
@@ -43,6 +44,8 @@ class Cluster(Api):
             str -- If already configured with the same, the location is returned
             dict -- The full API response from `PATCH /cluster/me`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if not isinstance(location, str):
             raise InvalidParameterException(
@@ -80,6 +83,8 @@ class Cluster(Api):
             dict -- The full API response from `POST /internal/replication/target`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         config = {}
 
         config['replicationSetup'] = 'Private Network'
@@ -94,8 +99,7 @@ class Cluster(Api):
 
         return self.post("internal", "/replication/target", config, timeout)
 
-    def configure_replication_nat(self, username, password, source_gateway,
-                                  target_gateway, ca_certificate=None, timeout=30):
+    def configure_replication_nat(self, username, password, source_gateway, target_gateway, ca_certificate=None, timeout=30):  # pylint: ignore
         """Configure replication partner as specified by user using NAT gateways.
 
         Arguments:
@@ -111,6 +115,8 @@ class Cluster(Api):
         Returns:
             dict -- The full API response from `POST /internal/replication/target`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         config = {}
 
@@ -160,6 +166,9 @@ class Cluster(Api):
             str -- The version of CDM installed on the Rubrik cluster.
         """
 
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
+
         self.log('cluster_version: Getting the software version of the Rubrik cluster.')
 
         return self.get('v1', '/cluster/me/version', timeout=timeout)['version']
@@ -174,6 +183,8 @@ class Cluster(Api):
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
         """
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         if float(self.cluster_version(timeout)[:3]) < float(cluster_version):
             return False
@@ -189,6 +200,8 @@ class Cluster(Api):
         Returns:
             list -- A list that contains the IP Address for each node in the Rubrik cluster.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         self.log('cluster_node_ip: Generating a list of all Cluster Node IPs.')
         api_request = self.get('internal', '/cluster/me/node', timeout=timeout)
@@ -209,6 +222,8 @@ class Cluster(Api):
         Returns:
             list -- A list that contains the name of each node in the Rubrik cluster.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         self.log('cluster_node_ip: Generating a list of all Cluster')
         api_request = self.get('internal', '/cluster/me/node', timeout=timeout)
@@ -235,6 +250,8 @@ class Cluster(Api):
             str -- No change required. The End User "`end_user`" is already authorized to interact with the "`object_name`" VM.
             dict -- The full API response from `POST /internal/authorization/role/end_user`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         valid_object_type = ['vmware']
 
@@ -296,6 +313,8 @@ class Cluster(Api):
             tuple -- The full API response for `POST /v1/vmware/vcenter` and the job status URL which can be used to monitor progress of the adding the vCenter to the Rubrik cluster. (api_response, job_status_url)
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("add_vcenter: Searching the Rubrik cluster for the vCenter '{}'.".format(vcenter_ip))
         current_vcenter = self.get("v1", "/vmware/vcenter?primary_cluster_id=local", timeout=timeout)
 
@@ -333,6 +352,8 @@ class Cluster(Api):
             str -- No change required. The Rubrik cluster is already configured with '`timezone`' as it's timezone.
             dict -- The full API response for `PATCH /v1//cluster/me'`
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         valid_timezones = [
             'America/Anchorage',
@@ -401,6 +422,8 @@ class Cluster(Api):
             dict -- {'status_code': 204}
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         if isinstance(ntp_server, list) is False:
             raise InvalidTypeException("The 'ntp_server' argument must be a list object.")
 
@@ -449,6 +472,8 @@ class Cluster(Api):
             dict -- The full API response for `POST /internal/syslog'`
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         valid_protocols = ["TCP", "UDP"]
 
         if protocol not in valid_protocols:
@@ -495,6 +520,8 @@ class Cluster(Api):
             str -- No change required. The Rubrik cluster is already configured with the provided VLAN information.
             dict -- The full API response for `POST /internal/cluster/me/vlan'`
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if isinstance(ips, list):
             self.log("cluster_vlan: Generating a list of all Cluster Node IPs.")
@@ -549,6 +576,8 @@ class Cluster(Api):
             dict -- The full API response for `POST /internal/cluster/me/dns_nameserver'`
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         if isinstance(server_ip, list) is False:
             raise InvalidTypeException("The 'server_ip' argument must be a list")
 
@@ -573,6 +602,8 @@ class Cluster(Api):
             str -- No change required. The Rubrik cluster is already configured with the provided DNS search domains.
             dict -- The full API response for `POST /internal/cluster/me/dns_search_domain'`
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if isinstance(search_domain, list) is False:
             raise InvalidTypeException("The 'server_ip' argument must be a list")
@@ -605,6 +636,7 @@ class Cluster(Api):
             dict -- The full API response for `POST /internal/smtp_instance`
             dict -- The full API response for `PATCH /internal/smtp_instance/{id}`
         """
+        self.function_name = inspect.currentframe().f_code.co_name
 
         valid_encryption = ['SSL', 'STARTTLS', 'NONE']
 
@@ -654,6 +686,8 @@ class Cluster(Api):
             dict -- When wait_for_completion is True, the full API response of the job status
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("refresh_vcenter: Searching the Rubrik cluster for the provided vCenter Server.")
         vcenter_id = self.object_id(vcenter_ip, "vcenter", timeout=timeout)
 
@@ -681,6 +715,8 @@ class Cluster(Api):
         Returns:
             dict -- The full API response for `PATCH /internal/node_management/proxy_config`
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         valid_protocols = [
             'HTTP',
@@ -717,6 +753,8 @@ class Cluster(Api):
             dict -- The full API response for `DELETE /internal/node_management/proxy_config`
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         current_proxy_settings = self.get("internal", "/node_management/proxy_config", timeout=timeout)
         self.log("delete_proxy: Current proxy configuration {}".format(current_proxy_settings))
 
@@ -744,6 +782,8 @@ class Cluster(Api):
             str -- No change required. The user '`username`' already exists on the Rubrik cluster
             dict -- The full API response from `POST /internal/user`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         self.log("create_user: Searching for the current users on the Rubrik cluster")
         current_users = self.get("internal", "/user?username={}".format(username), timeout=timeout)
@@ -778,6 +818,8 @@ class Cluster(Api):
              str -- No change required. The user '`username`' already has read-only permissions.
              dict -- The full API response from `POST /internal/authorization/role/read_only_admin`.
          """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if self.minimum_installed_cdm_version(5.0) is False:
             raise CDMVersionException(5.0)
@@ -821,6 +863,8 @@ class Cluster(Api):
             dict -- The full API response for `POST /v1/vmware/guest_credential`
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         config = {}
         config["username"] = username
         config["password"] = password
@@ -857,6 +901,8 @@ class Cluster(Api):
             dict -- The full API response for `POST /v1/vmware/guest_credential`
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
         self.log("delete_guest_credential: Current guest credentials {}".format(current_guest_credentials))
 
@@ -892,6 +938,9 @@ class Cluster(Api):
         Returns:
              list -- A list that contains the ID for each node in the Rubrik cluster.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("cluster_node_id - Getting all the node ids from the from the cluster.")
         node_id_list = []
 
@@ -906,14 +955,14 @@ class Cluster(Api):
         """Enable or Disable the support tunnel.
 
         Keyword Arguments:
-
             enabled (bool) -- The flag that enables or disables the support tunnel. (default: {True})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-
 
         Returns:
             dict -- The full API response from `POST /internal/node/me/support_tunnel`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if not isinstance(enabled, bool):
             raise InvalidParameterException("The enabled parameter must be True or False.")
@@ -948,16 +997,20 @@ class Cluster(Api):
                 self.log("cluster_support_tunnel - Disable the Support Tunnel")
 
                 return self.patch('internal', '/node/me/support_tunnel', config, timeout)
+
     def add_floating_ips(self, floating_ips, wait_for_completion=True, timeout=15):
         """Add floating IPs to CDM.
 
         Arguments:
-            floating_ips {list} -- The IP addresses you wish to add. 
+            floating_ips {list} -- The IP addresses you wish to add.
 
         Returns:
             dict -- When wait_for_completion is False, the full API response for `POST /internal/node_management/cluster_ip`
             dict -- When wait_for_completion is True, the full API response of the job status
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("Appending list of floating IPs with {}".format(floating_ips))
         if isinstance(floating_ips, list) is False:
             raise InvalidParameterException("The 'floating_ips' argument must be a list")
@@ -971,21 +1024,24 @@ class Cluster(Api):
 
         # return config
         return self.post('internal', '/node_management/cluster_ip', config)
-        
+
     def remove_floating_ips(self, floating_ips, wait_for_completion=True, timeout=15):
         """Remove floating IPs from CDM.
 
         Arguments:
-            floating_ips {list} -- The IP addresses you wish to remove. 
+            floating_ips {list} -- The IP addresses you wish to remove.
 
         Returns:
             dict -- When wait_for_completion is False, the full API response for `POST /internal/node_management/cluster_ip`
             dict -- When wait_for_completion is True, the full API response of the job status
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("Removing list of floating IPs with {}".format(floating_ips))
         if isinstance(floating_ips, list) is False:
             raise InvalidParameterException("The 'floating_ips' argument must be a list")
-            
+
         config = self.get('internal', '/node_management/cluster_ip')
         if set(config).intersection(floating_ips):
             for i in floating_ips:
@@ -994,8 +1050,8 @@ class Cluster(Api):
         else:
             return("No change required. IP(s) {} is not in list".format(set(config).intersection(floating_ips)))
 
-
         return self.post('internal', '/node_management/cluster_ip', config)
+
     def get_floating_ips(self, wait_for_completion=True, timeout=15):
         """Returns list of floating IPs
 
@@ -1003,8 +1059,10 @@ class Cluster(Api):
             dict -- When wait_for_completion is False, the full API response for `GET /internal/node_management/cluster_ip`
             dict -- When wait_for_completion is True, the full API response of the job status
         """
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("Returning list of floating IPs.")
-            
+
         config = self.get('internal', '/node_management/cluster_ip')
 
         return config

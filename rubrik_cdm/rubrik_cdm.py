@@ -30,6 +30,7 @@ from random import choice
 import time
 import socket
 import sys
+import inspect
 
 from .api import Api
 from .cluster import Cluster
@@ -39,21 +40,15 @@ from .cloud import Cloud
 from .exceptions import InvalidParameterException, RubrikException, APICallException, InvalidTypeException
 
 
-_CLUSTER = Cluster
-_DATA_MANAGEMENT = Data_Management
-_PHYSICAL = Physical
-_API = Api
-_CLOUD = Cloud
-
-
 class Connect(Cluster, Data_Management, Physical, Cloud):
     """This class acts as the base class for the Rubrik SDK and serves as the main interaction point
     for its end users. It also contains various helper functions used throughout the SDK.
 
     Arguments:
-        _CLUSTER {class} -- This class contains methods related to the management of the Rubrik Cluster itself.
-        _DATA_MANAGEMENT {class} - This class contains methods related to backup and restore operations for the various objects managed by the Rubrik Cluster.
-        _PHYSICAL {class} - This class contains methods related to the management of the Physical objects in the Rubrik Cluster.
+        Cluster {class} -- This class contains methods related to the management of the Rubrik Cluster itself.
+        Data_Management {class} - This class contains methods related to backup and restore operations for the various objects managed by the Rubrik Cluster.
+        Physical {class} - This class contains methods related to the management of the Physical objects in the Rubrik Cluster.
+        Cloud {class} - This class contains methods for the managment of Cloud related functionality on the Rubrik cluster.
     """
 
     def __init__(self, node_ip=None, username=None, password=None, api_token=None, enable_logging=False):
@@ -168,6 +163,13 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             raise InvalidParameterException(
                 "You must provide either a username and password or API Token for authentication.")
 
+        self.sdk_version = "2.0.6"
+        self.python_version = sys.version.split("(")[0].strip()
+        # function_name will be populated in each function
+        self.function_name = ""
+        # Optional value to define the Platform using the SDK (Ex. Ansible)
+        self.platform = ""
+
     @staticmethod
     def log(log_message):
         """Create properly formatted debug log messages.
@@ -185,6 +187,19 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             dict -- The authorization header that utilizes Basic authentication.
         """
 
+        user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+        if self.platform != "":
+            user_agent = user_agent + '--' + self.platform
+
+        self.log("User Agent: {}".format(user_agent))
+
+        authorization_header = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'User-Agent': user_agent,
+            'rk-integration': self.function_name
+        }
+
         if self.api_token is None:
             credentials = '{}:{}'.format(self.username, self.password)
 
@@ -193,37 +208,34 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             # Convert to String for API Call
             authorization = authorization.decode()
 
-            authorization_header = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Basic ' + authorization,
-                'User-Agent': 'Rubrik Python SDK v2.0.5'
-            }
+            authorization_header["Authorization"] = 'Basic {}'.format(authorization)
 
         else:
 
-            authorization_header = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + self.api_token,
-                'User-Agent': 'Rubrik Python SDK v2.0.5'
-            }
+            authorization_header["Authorization"] = 'Bearer {}'.format(self.api_token)
 
         return authorization_header
 
-    @staticmethod
-    def _header():
+    def _header(self):
         """Internal method used to create the a header without authorization used in the API calls.
 
         Returns:
             dict -- The header that does not include any authorization.
         """
 
+        user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+        if self.platform != "":
+            user_agent = user_agent + '--' + self.platform
+
         header = {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'User-Agent': user_agent,
+            'rk-integration': self.function_name
+
         }
 
+        self.log("Header: {}".format(header))
         return header
 
     @staticmethod
@@ -253,12 +265,31 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
                 raise InvalidParameterException(
                     "Error: The API Endpoint should not end with '/' unless proceeded by '='. (ex. /cluster/me or /fileset/snapshot/<id>/browse?path=/)")
 
+    def _platform_user_agent(self, platform_name, platform_version):
+        """Internal method to used to populated the user-agent string with an
+        optional string for the Platform consuming the SDK.
 
-class Bootstrap(_API):
+        Arguments:
+            platform_name {str} -- The name of the Platform consuming the SDK (Ex. Ansible)
+            platform_version {str} -- The version of the Platform consuming the SDK.
+        """
+
+        platform_user_agent = ""
+
+        if platform_name is not "":
+            platform_user_agent = "platform_name--{}".format(platform_name)
+
+        if platform_version is not "":
+            platform_user_agent = platform_user_agent + "--platform_version--{}".format(platform_version)
+
+        self.platform = platform_user_agent
+
+
+class Bootstrap(Api):
     """This class contains all functions related to the Bootstrapping of a Rubrik Cluster.
 
     Arguments:
-        _API {class} - This class contains the base API methods that can be called independently or internally in standalone functions.
+        Api {class} - This class contains the base API methods that can be called independently or internally in standalone functions.
     """
 
     def __init__(self, node_ip, interface=None, enable_logging=False):
@@ -328,8 +359,14 @@ class Bootstrap(_API):
         if node_resolution is False:
             raise RubrikException("Error: Could not resolve address for cluster, or invalid IP/address supplied")
 
-    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None,
-                      wait_for_completion=True, management_vlan=None, ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None, data_gateway=None, data_subnet_mask=None, data_vlan=None, node_data_ips=None, timeout=30):
+        self.sdk_version = "2.0.6"
+        self.python_version = sys.version.split("(")[0].strip()
+        # function_name will be populated in each function
+        self.function_name = ""
+        # Optional value to define the Platform using the SDK (Ex. Ansible)
+        self.platform = ""
+
+    def setup_cluster(self, cluster_name, admin_email, admin_password, management_gateway, management_subnet_mask, node_config, enable_encryption=True, dns_search_domains=None, dns_nameservers=None, ntp_servers=None, wait_for_completion=True, management_vlan=None, ipmi_gateway=None, ipmi_subnet_mask=None, ipmi_vlan=None, node_ipmi_ips=None, data_gateway=None, data_subnet_mask=None, data_vlan=None, node_data_ips=None, timeout=30):  # pylint: ignore
         """Issues a bootstrap request to a specified Rubrik cluster: Edge, Cloud Cluster or Physical nodes
             Edge: no IPMI, no DATA and no Encryption set. One node only. IPv4 or IPv6 possible.
             CloudCluster: same as Edge but more nodes possible. Only IPv4 bootstrap.
@@ -364,6 +401,8 @@ class Bootstrap(_API):
         Returns:
             dict -- The response returned by `POST /internal/cluster/me/bootstrap`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if node_config is None or isinstance(node_config, dict) is not True:
             raise InvalidParameterException(
@@ -504,6 +543,8 @@ class Bootstrap(_API):
             dict -- The response returned by `GET /internal/cluster/me/bootstrap?request_id={request_id}`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log('status: Getting the status of the Rubrik Cluster bootstrap.')
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(
             request_id)
@@ -523,19 +564,36 @@ class Bootstrap(_API):
         log = logging.getLogger(__name__)
         log.debug(log_message)
 
-    @staticmethod
-    def _header():
+    def _header(self):
         """Internal method used to create the a header without authorization used in the API calls.
 
         Returns:
             dict - - The header that does not include any authorization.
         """
 
-        header = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
+        user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+        if self.platform != "":
+            user_agent = user_agent + '--' + self.platform
 
+        if self.ipv6_addr != "":
+            header = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'User-Agent': user_agent,
+                'Host': '[' + self.ipv6_addr + ']',
+                'rk-integration': self.function_name
+
+            }
+        else:
+            header = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'User-Agent': user_agent,
+                'rk-integration': self.function_name
+
+            }
+
+        self.log("Header: {}".format(header))
         return header
 
     @staticmethod
