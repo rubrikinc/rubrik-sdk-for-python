@@ -191,6 +191,8 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         if self.platform != "":
             user_agent = user_agent + '--' + self.platform
 
+        self.log("User Agent: {}".format(user_agent))
+
         authorization_header = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -233,6 +235,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         }
 
+        self.log("Header: {}".format(header))
         return header
 
     @staticmethod
