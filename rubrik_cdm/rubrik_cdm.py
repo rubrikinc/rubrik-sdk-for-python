@@ -571,13 +571,23 @@ class Bootstrap(Api):
         if self.platform != "":
             user_agent = user_agent + '--' + self.platform
 
-        header = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'User-Agent': user_agent,
-            'rk-integration': self.function_name
+        if self.function_name == "setup_cluster" and self.ipv6_addr != "":
+            header = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'User-Agent': user_agent,
+                'Host': '[' + self.ipv6_addr + ']'
+                'rk-integration': self.function_name
 
-        }
+            }
+        else:
+            header = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'User-Agent': user_agent,
+                'rk-integration': self.function_name
+
+            }
 
         return header
 
