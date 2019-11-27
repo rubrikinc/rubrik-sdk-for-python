@@ -322,13 +322,13 @@ class Physical(Api):
             return self.post('internal', '/host/share', config, timeout)
 
     def assign_physical_host_fileset(self, hostname, fileset_name, operating_system, sla_name, include=None, exclude=None, exclude_exception=None, follow_network_shares=False, backup_hidden_folders=False, timeout=30):  # pylint: ignore
-        """Assign a Fileset to a Linux or Windows machine. If you have multiple Filesets with identical names, you will need to populate the Filesets properties (i.e this functions keyword arguments)
+        """Assign a Fileset to a Linux, Unix or Windows machine. If you have multiple Filesets with identical names, you will need to populate the Filesets properties (i.e this functions keyword arguments)
         to find a specific match. Filesets with identical names and properties are not supported.
 
         Arguments:
             hostname {str} -- The hostname or IP Address of the physical host you wish to associate to the Fileset.
-            fileset_name {str} -- The name of the Fileset you wish to assign to the Linux or Windows host.
-            operating_system {str} -- The operating system of the physical host you are assigning a Fileset to. (choices: {Linux, Windows})
+            fileset_name {str} -- The name of the Fileset you wish to assign to the Linux, Unix or Windows host.
+            operating_system {str} -- The operating system of the physical host you are assigning a Fileset to. (choices: {Linux, Windows, UnixLike})
             sla_name {str} -- The name of the SLA Domain to associate with the Fileset.
 
         Keyword Arguments:
@@ -347,7 +347,7 @@ class Physical(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        valid_operating_system = ['Linux', 'Windows']
+        valid_operating_system = ['Linux', 'Windows', 'UnixLike']
 
         if operating_system not in valid_operating_system:
             raise InvalidParameterException("The assign_physical_host_fileset() operating_system argument must be one of the following: {}.".format(
