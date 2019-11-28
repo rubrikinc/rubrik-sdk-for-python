@@ -762,7 +762,7 @@ def test_assign_physical_host_fileset_invalid_operating_system(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The assign_physical_host_fileset() operating_system argument must be one of the following: ['Linux', 'Windows']."
+    assert error_message == "The assign_physical_host_fileset() operating_system argument must be one of the following: ['Linux', 'Windows', 'UnixLike']."
 
 
 def test_assign_physical_host_fileset_invalid_follow_network_shares(rubrik):
