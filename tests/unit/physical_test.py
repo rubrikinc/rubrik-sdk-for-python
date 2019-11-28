@@ -381,7 +381,7 @@ def test_create_physical_fileset_invalid_operating_system(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The create_physical_fileset() operating_system argument must be one of the following: ['Linux', 'Windows', 'UnixLike']."
+    assert error_message == "The create_physical_fileset() operating_system argument must be one of the following: ['Linux', 'Windows']."
 
 
 def test_create_physical_fileset_invalid_follow_network_shares(rubrik):
