@@ -1,0 +1,24 @@
+# get_esx_subnets
+
+Retrieve the preferred subnets used to reach the ESXi hosts.
+```py
+def get_esx_subnets(timeout=15)
+```
+
+## Keyword Arguments
+| Name        | Type | Description                                                                 | Choices | Default |
+|-------------|------|-----------------------------------------------------------------------------|---------|---------|
+| timeout     | int  | The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error.  |         |    15     |
+
+## Returns
+| Type | Return Value                                                                                  |
+|------|-----------------------------------------------------------------------------------------------|
+| dict | The full response of `GET /internal/vmware/config/esx_subnets`.                               |
+## Example
+```py
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+subnets = rubrik.get_esx_subnets()
+```
