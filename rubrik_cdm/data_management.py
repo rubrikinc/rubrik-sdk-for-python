@@ -2005,9 +2005,7 @@ class Data_Management(_API):
             dict -- The full response of `PATCH /internal/vmware/config/set_esx_subnets`.
         """
         self.log("set_esx_subnets: Getting the existing subnets used to reach the ESXi hosts")
-        subnets_data = self.get_esxi_subnets()
-        subnets = subnets_data['esxSubnets'].split(',')
-
+        subnets = (self.get_esxi_subnets())['esxSubnets'].split(',')
         config = {}
         if esx_subnets is None:
             raise InvalidParameterException(
