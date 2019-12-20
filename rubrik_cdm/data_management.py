@@ -1996,28 +1996,34 @@ class Data_Management(_API):
 
             return self.post('v1', '/mssql/db/{}/export'.format(mssql_id), config, timeout)
 
-    def set_esx_subnets(self, esx_subnets=None, timeout=15):  # pylint: ignore
+    def set_esxi_subnets(self, esx_subnets=None, timeout=15):  # pylint: ignore
         """Sets the subnets that should be used to reach the ESXi hosts.
         Keyword Arguments:
-            esx_subnets {str} -- Preferred subnets used to reach the ESX hosts. The format should be the comma separated list without any spaces, for example, 192.168.2.10/24,10.255.0.2/16.
+            esx_subnets {list} -- Preferred subnets used to reach the ESX hosts. The format should be a list, for example ['192.168.2.10/24','10.255.0.2/16'].
             timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
         Returns:
             dict -- The full response of `PATCH /internal/vmware/config/set_esx_subnets`.
         """
+        self.log("set_esx_subnets: Getting the existing subnets used to reach the ESXi hosts")
+        subnets_data = self.get_esxi_subnets()
+        subnets = subnets_data['esxSubnets'].split(',')
 
         config = {}
         if esx_subnets is None:
-            config['esxSubnets'] = ""
+            raise InvalidParameterException(
+                    "The 'esx_subnets' parameter must be provided.")
+        elif subnets == esx_subnets:
+            return "No change required. The subnet list provided is the same as the existing values: {}.".format(
+                    subnets)
         else:
-            config['esxSubnets'] = esx_subnets
-        
-        self.log(
-            "set_esx_subnets: Setting the subnets that should be used to reach the ESXi hosts: '{}'.".format(
-                esx_subnets))
+            subnet_str = ','.join(esx_subnets)
+            config['esxSubnets'] = subnet_str
+            self.log(
+                "set_esx_subnets: Setting the subnets that should be used to reach the ESXi hosts: '{}'.".format(
+                    esx_subnets))
+            return self.patch('internal', '/vmware/config/set_esx_subnets', config, timeout)
 
-        return self.patch('internal', '/vmware/config/set_esx_subnets', config, timeout)
-
-    def get_esx_subnets(self, timeout=15):  # pylint: ignore
+    def get_esxi_subnets(self, timeout=15):  # pylint: ignore
         """Retrieve the preferred subnets used to reach the ESXi hosts.
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
