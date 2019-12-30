@@ -514,6 +514,23 @@ def test_configure_syslog_invalid_idempotence(rubrik, mocker):
     assert rubrik.configure_syslog("syslog_ip", "TCP") == \
         "No change required. The Rubrik cluster is already configured to use the syslog server 'syslog_ip' on port '514' using the 'TCP' protocol."
 
+def test_configure_login_banner(rubrik, mocker):
+
+    def mock_get_internal_login_banner():
+        return {
+            "loginBanner" : "old_banner"
+        }
+    def mock_put_internal_login_banner():
+        return {
+            "loginBanner" : "new_banner"
+        }
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_login_banner()
+
+    mock_put = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_put.return_value = mock_put_internal_login_banner()
+
+    assert rubrik.configure_login_banner("new_banner") == mock_put_internal_login_banner()
 
 def test_configure_syslog(rubrik, mocker):
 
