@@ -1,4 +1,4 @@
-# configure_syslog
+# configure_login_banner
 
 Configure the Login Banner Text on the Rubrik cluster.
 ```py
