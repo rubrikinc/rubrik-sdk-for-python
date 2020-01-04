@@ -589,6 +589,34 @@ class Cluster(Api):
 
         return self.post("internal", "/cluster/me/dns_nameserver", server_ip, timeout)
 
+    def configure_login_banner(self, banner, timeout=15):
+        """Configure the Login Banner Text on the Rubrik cluster.
+
+        Arguments:
+            banner {str} -- The Login Banner Text you wish to see when the Rubrik cluster login page loads.
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            str -- No change required. The Rubrik cluster is already configured with the login banner text '`banner`'.
+            dict -- The full API response for `PUT /internal/cluster/me/login_banner'`
+        """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
+        self.log("configure_login_banner: Retrieving the current login banner of the Rubrik cluster.")
+        current_login_banner = self.get("internal", "/cluster/me/login_banner", timeout=timeout)
+        
+        config = {}
+        config["loginBanner"] = banner
+
+        if config == current_login_banner:
+            return "No change required. The Rubrik cluster is already configured with the login banner text '`banner`'."
+
+        self.log("configure_login_banner: Setting the login banner of the Rubrik cluster.")
+        return self.put("internal", "/cluster/me/login_banner", config, timeout)
+
     def configure_search_domain(self, search_domain, timeout=15):
         """Configure the DNS search domains on the Rubrik cluster.
 
