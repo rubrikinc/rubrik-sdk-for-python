@@ -76,6 +76,9 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         self.log("Node IP: {}".format(self.node_ip))
 
+        # Initialize empty variable as a placeholder until full IPv6 support is added to Connect()
+        self.ipv6_addr = ""
+
         # List to store how the credentials have been provided
         credentials_manually_provided = []
         credentials_env_var_provided = []
