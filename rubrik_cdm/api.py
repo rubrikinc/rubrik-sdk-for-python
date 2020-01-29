@@ -116,9 +116,11 @@ class Api():
                 config = json.dumps(config)
                 request_url = "https://{}/api/internal/graphql".format(self.node_ip)
                 self.log('POST {}'.format(request_url))
-                self.log('Operation Name: {}'.format(gql_operation_name))
+                if gql_operation_name is not None:
+                    self.log('Operation Name: {}'.format(gql_operation_name))
                 self.log('Query: {}'.format(gql_query))
-                self.log('Variables: {}'.format(gql_variables))
+                if gql_variables is not None:
+                    self.log('Variables: {}'.format(gql_variables))
                 api_request = requests.post(
                     request_url,
                     verify=False,
@@ -182,7 +184,10 @@ class Api():
                         error_message
                         raise BaseException
                     except NameError:
-                        pass
+                        try:
+                            return api_request.json()["data"]
+                        except BaseException:
+                            pass
 
                 return api_request.json()
             except BaseException:
