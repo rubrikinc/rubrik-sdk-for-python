@@ -461,7 +461,7 @@ class Data_Management(Api):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, log_backup_frequency_in_minutes=None, num_channels=4, timeout=30):  # pytest: ignore
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, log_backup_frequency_in_minutes=None, num_channels=4, hostname=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
         Arguments:
             object_name {str or list} -- The name of the Rubrik object you wish to assign to an SLA Domain. When the 'object_type' is 'volume_group', the object_name can be a list of volumes.
@@ -476,6 +476,7 @@ class Data_Management(Api):
             share {str} -- The name of the network share a fileset will be created for. Required when the `object_type` is `fileset`. (default {None})
             log_backup_frequency_in_minutes {int} - The Oracle Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `oracle_db` or `oracle_host`. (default {None})
             num_channels {int} - Number of RMAN channels used to backup the Oracle database. Required when the `object_type` is `oracle_host`. (default {"4""})
+            hostname {str} -- The hostname, or one of the hostnames in a RAC cluster, or the RAC cluster name. Required when the object_type is oracle_db. (default {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
@@ -501,10 +502,15 @@ class Data_Management(Api):
                 raise InvalidParameterException(
                     "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
 
-        if object_type == "oracle_db" or object_type == "oracle_host":
+        if object_type == "oracle_host":
             if log_backup_frequency_in_minutes is None or log_retention_hours is None or num_channels is None:
                 raise InvalidParameterException(
                     "When the object_type is 'oracle_host' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' paramaters must be populated.")                    
+
+        if object_type == "oracle_db":
+            if log_backup_frequency_in_minutes is None or log_retention_hours is None or num_channels is None or hostname is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'oracle_db' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' and 'hostname' paramaters must be populated.")    
 
         if object_type == "fileset":
             if nas_host is None or share is None:
@@ -687,14 +693,7 @@ class Data_Management(Api):
             db_sla_lst = []
 
             self.log('Searching the Rubrik cluster for the current Oracle databases.')
-            current_dbs = self.get(
-                'internal',
-                '/oracle/db',
-                timeout=timeout)
-
-            for oracle_db in current_dbs['data']:
-                if oracle_db['name'] == object_name:
-                    oracle_db_id = oracle_db['id']
+            oracle_db_id = self.object_id(object_name, object_type, hostname=hostname)
 
             if(oracle_db_id):
                 self.log(
@@ -731,6 +730,8 @@ class Data_Management(Api):
             else:
                 raise InvalidParameterException(
                     "Database ID not found for instance '{}'").format(object_name)
+            
+            return db_sla_lst
 
         elif object_type == 'oracle_host':
 
@@ -738,14 +739,7 @@ class Data_Management(Api):
             db_sla_lst = []
 
             self.log('Searching the Rubrik cluster for the current Oracle hosts.')
-            current_hosts = self.get(
-                'internal',
-                '/oracle/hierarchy/root/children',
-                timeout=timeout)
-
-            for rubrik_host in current_hosts['data']:
-                if rubrik_host['name'] == object_name:
-                    host_id = rubrik_host['id']
+            host_id = self.object_id(object_name, object_type)
 
             if(host_id):
                 self.log(
