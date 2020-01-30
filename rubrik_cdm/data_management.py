@@ -273,7 +273,7 @@ class Data_Management(Api):
         """Get the ID of a Rubrik object by providing its name.
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location, share})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share})
         Keyword Arguments:
             host_os {str} -- The operating system for the host. (default: {'None'})
             hostname {str} -- The hostname, for Oracle one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db or share.
@@ -299,6 +299,7 @@ class Data_Management(Api):
             'ahv',
             'aws_native',
             'oracle_db',
+            'oracle_host',
             'volume_group',
             'archival_location',
             'share']
@@ -375,6 +376,10 @@ class Data_Management(Api):
                 "api_version": "internal",
                 "api_endpoint": "/oracle/db?name={}".format(object_name)
             },
+            "oracle_host": {
+                "api_version": "internal",
+                "api_endpoint": "/oracle/hierarchy/root/children?name={}".format(object_name)
+            },            
             "volume_group": {
                 "api_version": "internal",
                 "api_endpoint": "/volume_group?is_relic=false"
@@ -678,7 +683,6 @@ class Data_Management(Api):
         elif object_type == 'oracle_host':
 
             host_id = ''
-            #oracle_id = ''
             db_sla_lst = []
 
             self.log('Searching the Rubrik cluster for the current hosts.')
@@ -686,14 +690,6 @@ class Data_Management(Api):
                 'internal',
                 '/oracle/hierarchy/root/children?primary_cluster_id=local',
                 timeout=timeout)
-
-            # After 5.0, "hostname" is a deprecated field in the results that are returned in "current_hosts"
-            """
-            if self.minimum_installed_cdm_version(5.0):
-                current_hosts_name = "name"
-            else:
-                current_hosts_name = "hostname"
-            """
 
             for rubrik_host in current_hosts['data']:
                 if rubrik_host['name'] == object_name:
@@ -703,8 +699,6 @@ class Data_Management(Api):
             if(host_id):
                 self.log(
                     "assign_sla: Determing the SLA Domain currently assigned to the Oracle Host '{}'.".format(object_name))
-
-                #oracle_summary = self.get('v1', '/mssql/instance/{}'.format(mssql_id), timeout=timeout)
 
                 if (sla_id == oracle_summary['configuredSlaDomainId'] and log_backup_frequency_in_minutes == oracle_summary['logBackupFrequencyInMinutes'] and
                         log_retention_hours == oracle_summary['logRetentionHours'] and num_channels == mssql_summary['numChannels']):
