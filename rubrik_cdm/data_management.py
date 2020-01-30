@@ -456,31 +456,35 @@ class Data_Management(Api):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, timeout=30):  # pytest: ignore
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, log_backup_frequency_in_minutes=None, num_channels=4, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
         Arguments:
             object_name {str or list} -- The name of the Rubrik object you wish to assign to an SLA Domain. When the 'object_type' is 'volume_group', the object_name can be a list of volumes.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
-            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host, volume_group})
+            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {ahv, mssql_host, oracle_host, vmware, volume_group})
         Keyword Arguments:
-            log_backup_frequency_in_seconds {str} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
-            log_retention_hours {int} -- The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
+            log_backup_frequency_in_seconds {int} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
+            log_retention_hours {int} -- The MSSQL or Oracle Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host` or 'oracle_host'. (default {None})
             copy_only {int} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
             windows_host {str} -- The name of the Windows host that contains the relevant volume group. Required when the `object_type` is `volume_group`. (default {None})
             nas_host {str} -- The name of the NAS host that contains the relevant share. Required when the `object_type` is `fileset`. (default {None})
             share {str} -- The name of the network share a fileset will be created for. Required when the `object_type` is `fileset`. (default {None})
-            timeout {bool} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+            log_backup_frequency_in_minutes {int} - The Oracle Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `oracle_host`. (default {None})
+            num_channels {int} - Number of RMAN channels used to backup the Oracle database. Required when the `object_type` is `oracle_host`. (default {"4""})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
             str -- No change required. The MSSQL Instance '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`, log_retention_hours: `log_retention_hours` and copy_only: `copy_only`
+            str -- No change required. The Oracle Host '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`. log_retention_hours: `log_retention_hours`, and num_channels: `num_channels`
             str -- No change required. The '`object_name`' volume_group is already assigned to the '`sla_name`' SLA Domain.
             dict -- The full API response for `POST /internal/sla_domain/{sla_id}/assign`.
             dict -- The full API response for `PATCH /internal/volume_group/{id}`.
+            dict -- The full API response for `PATCH /internal/oracle/host/{id}`.
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'fileset', 'ahv']
+        valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'fileset', 'ahv', 'oracle_host']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -490,6 +494,11 @@ class Data_Management(Api):
             if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
                 raise InvalidParameterException(
                     "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
+
+        if object_type == "oracle_host":
+            if log_backup_frequency_in_minutes is None or log_retention_hours is None or num_channels is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'oracle_host' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' paramaters must be populated.")                    
 
         if object_type == "fileset":
             if nas_host is None or share is None:
@@ -665,6 +674,66 @@ class Data_Management(Api):
                     "Host ID not found for instance '{}'").format(object_name)
 
             return db_sla_lst
+
+        elif object_type == 'oracle_host':
+
+            host_id = ''
+            #oracle_id = ''
+            db_sla_lst = []
+
+            self.log('Searching the Rubrik cluster for the current hosts.')
+            current_hosts = self.get(
+                'internal',
+                '/oracle/hierarchy/root/children?primary_cluster_id=local',
+                timeout=timeout)
+
+            # After 5.0, "hostname" is a deprecated field in the results that are returned in "current_hosts"
+            """
+            if self.minimum_installed_cdm_version(5.0):
+                current_hosts_name = "name"
+            else:
+                current_hosts_name = "hostname"
+            """
+
+            for rubrik_host in current_hosts['data']:
+                if rubrik_host['name'] == object_name:
+                    host_id = rubrik_host['id']
+                    oracle_summary = rubrik_host
+
+            if(host_id):
+                self.log(
+                    "assign_sla: Determing the SLA Domain currently assigned to the Oracle Host '{}'.".format(object_name))
+
+                #oracle_summary = self.get('v1', '/mssql/instance/{}'.format(mssql_id), timeout=timeout)
+
+                if (sla_id == oracle_summary['configuredSlaDomainId'] and log_backup_frequency_in_minutes == oracle_summary['logBackupFrequencyInMinutes'] and
+                        log_retention_hours == oracle_summary['logRetentionHours'] and num_channels == mssql_summary['numChannels']):
+                    return "No change required. The Oracle Host '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
+                            " log_backup_frequency_in_minutes: {}, log_retention_hours: {} and num_channels: {}.".format(
+                                object_name, sla_name, log_backup_frequency_in_minutes, log_retention_hours, copy_only)
+
+                else:
+                    self.log(
+                        "assign_sla: Assigning the Oracle Host '{}' to the '{}' SLA Domain.".format(
+                            object_name, sla_name))
+
+                    config = {}
+                    if log_backup_frequency_in_minutes is not None:
+                        config['logBackupFrequencyInMinutes'] = log_backup_frequency_in_minutes
+                    if log_retention_hours is not None:
+                        config['logRetentionHours'] = log_retention_hours
+                    if num_channels is not None:
+                        config['numChannels'] = num_channels
+
+                    config['configuredSlaDomainId'] = sla_id
+
+                    patch_resp = self.patch("internal", "/oracle/host/{}".format(host_id), config, timeout)
+                    db_sla_lst.append(patch_resp)
+            else:
+                raise InvalidParameterException(
+                    "Host ID not found for instance '{}'").format(object_name)
+
+            return db_sla_lst            
 
         elif object_type == "volume_group":
 
