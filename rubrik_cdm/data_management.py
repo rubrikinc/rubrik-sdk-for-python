@@ -470,22 +470,23 @@ class Data_Management(Api):
         Keyword Arguments:
             log_backup_frequency_in_seconds {int} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
             log_retention_hours {int} -- The MSSQL or Oracle Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`, `oracle_db` or 'oracle_host'. (default {None})
-            copy_only {int} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
+            copy_only {bool} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
             windows_host {str} -- The name of the Windows host that contains the relevant volume group. Required when the `object_type` is `volume_group`. (default {None})
             nas_host {str} -- The name of the NAS host that contains the relevant share. Required when the `object_type` is `fileset`. (default {None})
             share {str} -- The name of the network share a fileset will be created for. Required when the `object_type` is `fileset`. (default {None})
             log_backup_frequency_in_minutes {int} - The Oracle Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `oracle_db` or `oracle_host`. (default {None})
             num_channels {int} - Number of RMAN channels used to backup the Oracle database. Required when the `object_type` is `oracle_host`. (default {"4""})
-            hostname {str} -- The hostname, or one of the hostnames in a RAC cluster, or the RAC cluster name. Required when the object_type is oracle_db. (default {None})
+            hostname {str} -- The hostname, or one of the hostnames in a RAC cluster, or the RAC cluster name. Required when the object_type is `oracle_db`. (default {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
             str -- No change required. The MSSQL Instance '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`, log_retention_hours: `log_retention_hours` and copy_only: `copy_only`
+            str -- No change required. The Oracle Database '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_minutes: `log_backup_frequency_in_seconds`, log_retention_hours: `log_retention_hours` and num_channels: `num_channels`.
             str -- No change required. The Oracle Host '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`. log_retention_hours: `log_retention_hours`, and num_channels: `num_channels`
             str -- No change required. The '`object_name`' volume_group is already assigned to the '`sla_name`' SLA Domain.
             dict -- The full API response for `POST /internal/sla_domain/{sla_id}/assign`.
             dict -- The full API response for `PATCH /internal/volume_group/{id}`.
-            dict -- The full API response for `PATCH /internal/oracle/db/{id}
+            dict -- The full API response for `PATCH /internal/oracle/db/{id}.`
             dict -- The full API response for `PATCH /internal/oracle/host/{id}`.
         """
 
