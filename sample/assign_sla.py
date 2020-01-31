@@ -33,6 +33,56 @@ assignsla = rubrik.assign_sla(
     copyOnly)
 
 
+# Oracle Database
+
+
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+object_name = 'HRDB50'
+object_type = 'oracle_db'
+hostname = 'python-sdk.demo.com'
+
+sla_name = 'Gold'
+log_backup_frequency_in_minutes = 30
+log_retention_hours = 720
+num_channels = 4
+
+assignsla = rubrik.assign_sla(
+    object_name, 
+    sla_name, 
+    object_type, 
+    log_backup_frequency_in_minutes=log_backup_frequency_in_minutes, 
+    log_retention_hours=log_retention_hours, 
+    num_channels=num_channels,
+    hostname=hostname)
+
+
+# Oracle Host
+
+
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+object_name = 'python-sdk.demo.com'
+object_type = 'oracle_host'
+
+sla_name = 'Gold'
+log_backup_frequency_in_minutes = 30
+log_retention_hours = 720
+num_channels = 4
+
+assignsla = rubrik.assign_sla(
+    object_name, 
+    sla_name, 
+    object_type, 
+    log_backup_frequency_in_minutes=log_backup_frequency_in_minutes, 
+    log_retention_hours=log_retention_hours, 
+    num_channels=num_channels)
+
+
 # Volume Group
 
 
