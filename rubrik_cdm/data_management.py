@@ -628,7 +628,6 @@ class Data_Management(Api):
 
             host_id = ''
             mssql_id = ''
-            db_sla_lst = []
 
             self.log('Searching the Rubrik cluster for the current hosts.')
             current_hosts = self.get(
@@ -681,17 +680,15 @@ class Data_Management(Api):
                         config['configuredSlaDomainId'] = sla_id
 
                         patch_resp = self.patch("v1", "/mssql/instance/{}".format(mssql_id), config, timeout)
-                        db_sla_lst.append(patch_resp)
             else:
                 raise InvalidParameterException(
                     "Host ID not found for instance '{}'").format(object_name)
 
-            return db_sla_lst
+            return patch_resp
 
         elif object_type == 'oracle_db':
 
             oracle_db_id = ''
-            db_sla_lst = []
 
             self.log('Searching the Rubrik cluster for the current Oracle databases.')
             oracle_db_id = self.object_id(object_name, object_type, hostname=hostname)
@@ -727,12 +724,11 @@ class Data_Management(Api):
                     config['configuredSlaDomainId'] = sla_id
 
                     patch_resp = self.patch("internal", "/oracle/db/{}".format(oracle_db_id), config, timeout)
-                    db_sla_lst.append(patch_resp)
             else:
                 raise InvalidParameterException(
                     "Database ID not found for instance '{}'").format(object_name)
             
-            return db_sla_lst
+            return patch_resp
 
         elif object_type == 'oracle_host':
 
