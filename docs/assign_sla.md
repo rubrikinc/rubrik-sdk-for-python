@@ -24,7 +24,7 @@ def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in
 | windows_host                    | str  | The name of the Windows host that contains the relevant volume group. Required when the `object_type` is `volume_group`. |         | None    |
 | nas_host                        | str  | The name of the NAS host that contains the relevant share. Required when the `object_type` is `fileset`.                 |         | None    |
 | share                           | str  | The name of the network share a fileset will be created for. Required when the `object_type` is `fileset`.               |         | None    |
-| log_backup_frequency_in_minutes | int  | The Oracle Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `oracle_db` or `oracle_host`. | None    |
+| log_backup_frequency_in_minutes | int  | The Oracle Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `oracle_db` or `oracle_host`. |         | None    |
 | num_channels                    | int  | Number of RMAN channels used to backup the Oracle database. Required when the `object_type` is `oracle_host`.            |         | 4       |
 | hostname                        | str  | The hostname, or one of the hostnames in a RAC cluster, or the RAC cluster name. Required when the object_type is `oracle_db.` |         | None    |
 | timeout                         | str  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.             |         | 30      |
