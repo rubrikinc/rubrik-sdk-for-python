@@ -1571,7 +1571,7 @@ class Data_Management(_API):
                 latest_date_time = latest_data['data'][0]['date']
             except:
                 raise InvalidParameterException(
-                    f"The database with ID {mssql_id} does not have any existing snapshots.")
+                    "The database with ID {} does not have any existing snapshots.".format(mssql_id))
 
             data_str = datetime.strptime(latest_date_time[:16], '%Y-%m-%dT%H:%M')
             date_str, time_str = [data_str.strftime('%m-%d-%Y'), data_str.strftime('%I:%M %p')]
