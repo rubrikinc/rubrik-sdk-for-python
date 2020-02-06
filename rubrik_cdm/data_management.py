@@ -1564,17 +1564,18 @@ class Data_Management(_API):
         Returns:
             dict -- A dictionary with values {'is_recovery_point': bool, 'recovery_timestamp': datetime}.
         """
+        is_recovery_point = False
         if date and time == 'latest':
             latest_data = self.get('v1', '/mssql/db/{}/snapshot'.format(mssql_id), timeout=timeout)
-            latest_date_time = latest_data['data'][0]['date']
-
-            if latest_date_time is None:
+            try:
+                latest_date_time = latest_data['data'][0]['date']
+            except:
                 raise InvalidParameterException(
                     f"The database with ID {mssql_id} does not have any existing snapshots.")
 
-            datastr = datetime.strptime(latest_date_time[:16], '%Y-%m-%dT%H:%M')
-            datestr, timestr = [datastr.strftime('%m-%d-%Y'), datastr.strftime('%I:%M %p')]
-            recovery_date_time = self._date_time_conversion(datestr, timestr)
+            data_str = datetime.strptime(latest_date_time[:16], '%Y-%m-%dT%H:%M')
+            date_str, time_str = [data_str.strftime('%m-%d-%Y'), data_str.strftime('%I:%M %p')]
+            recovery_date_time = self._date_time_conversion(date_str, time_str)
             recovery_date_time = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
             recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
             is_recovery_point = True
