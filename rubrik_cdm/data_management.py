@@ -1,4 +1,4 @@
-  
+
 # Copyright 2018 Rubrik, Inc.
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,12 +26,10 @@ import re
 from datetime import datetime
 from .api import Api
 from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException, APICallException
+import inspect
 
 
-_API = Api
-
-
-class Data_Management(_API):
+class Data_Management(Api):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
     def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, force_full=False, share_type=None, timeout=15):  # pylint: ignore
@@ -51,6 +49,8 @@ class Data_Management(_API):
             tuple -- When object_type is vmware, the full API response for `POST /v1/vmware/vm/{ID}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
             tuple -- When object_type is physical_host, the full API response for `POST /v1/fileset/{}/snapshot` and the job status URL which can be used to monitor progress of the snapshot. (api_response, job_status_url)
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db', 'share']
         valid_host_os_type = ['Linux', 'Windows']
@@ -222,7 +222,7 @@ class Data_Management(_API):
             api_request = self.post('internal', '/oracle/db/{}/snapshot'.format(db_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
-        
+
         elif object_type == 'share':
             if hostname is None:
                 raise InvalidParameterException(
@@ -260,7 +260,9 @@ class Data_Management(_API):
             config = {}
             config['slaId'] = sla_id
 
-            self.log("on_demand_snapshot: Initiating snapshot for the NAS Share '{}' Fileset '{}'.".format(object_name, fileset))
+            self.log(
+                "on_demand_snapshot: Initiating snapshot for the NAS Share '{}' Fileset '{}'.".format(
+                    object_name, fileset))
             api_request = self.post('v1', '/fileset/{}/snapshot'.format(fileset_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
@@ -271,7 +273,7 @@ class Data_Management(_API):
         """Get the ID of a Rubrik object by providing its name.
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location, share})        
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share})
         Keyword Arguments:
             host_os {str} -- The operating system for the host. (default: {'None'})
             hostname {str} -- The hostname, for Oracle one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db or share.
@@ -280,6 +282,9 @@ class Data_Management(_API):
         Returns:
             str -- The ID of the provided Rubrik object.
         """
+
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         valid_object_type = [
             'vmware',
@@ -294,6 +299,7 @@ class Data_Management(_API):
             'ahv',
             'aws_native',
             'oracle_db',
+            'oracle_host',
             'volume_group',
             'archival_location',
             'share']
@@ -316,12 +322,12 @@ class Data_Management(_API):
             if hostname is None:
                 raise InvalidParameterException(
                     "You must provide the host or one of the hosts in a RAC cluster for the Oracle DB object.")
-        
+
         if object_type == 'share':
             if hostname is None:
                 raise InvalidParameterException(
                     "You must provide the hostname with the NAS share object.")
-            else: 
+            else:
                 self.log('Searching the Rubrik cluster for the host ID.')
                 host_id = self.object_id(hostname, 'physical_host', timeout=timeout)
 
@@ -370,6 +376,10 @@ class Data_Management(_API):
                 "api_version": "internal",
                 "api_endpoint": "/oracle/db?name={}".format(object_name)
             },
+            "oracle_host": {
+                "api_version": "internal",
+                "api_endpoint": "/oracle/hierarchy/root/children?name={}".format(object_name)
+            },            
             "volume_group": {
                 "api_version": "internal",
                 "api_endpoint": "/volume_group?is_relic=false"
@@ -394,7 +404,7 @@ class Data_Management(_API):
                 "api_version": "v1",
                 "api_endpoint": "/host?primary_cluster_id=local&{}={}".format(filter_field_name, object_name)
             }
-        
+
         self.log("object_id: Getting the object id for the {} object '{}'.".format(object_type, object_name))
         api_request = self.get(
             api_call[object_type]["api_version"],
@@ -451,29 +461,38 @@ class Data_Management(_API):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, timeout=30):  # pytest: ignore
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, log_backup_frequency_in_minutes=None, num_channels=4, hostname=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
         Arguments:
             object_name {str or list} -- The name of the Rubrik object you wish to assign to an SLA Domain. When the 'object_type' is 'volume_group', the object_name can be a list of volumes.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
-            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host, volume_group})
+            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {ahv, mssql_host, oracle_host, vmware, volume_group})
         Keyword Arguments:
-            log_backup_frequency_in_seconds {str} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
-            log_retention_hours {int} -- The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
-            copy_only {int} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
+            log_backup_frequency_in_seconds {int} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
+            log_retention_hours {int} -- The MSSQL or Oracle Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`, `oracle_db` or 'oracle_host'. (default {None})
+            copy_only {bool} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
             windows_host {str} -- The name of the Windows host that contains the relevant volume group. Required when the `object_type` is `volume_group`. (default {None})
             nas_host {str} -- The name of the NAS host that contains the relevant share. Required when the `object_type` is `fileset`. (default {None})
             share {str} -- The name of the network share a fileset will be created for. Required when the `object_type` is `fileset`. (default {None})
-            timeout {bool} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+            log_backup_frequency_in_minutes {int} - The Oracle Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `oracle_db` or `oracle_host`. (default {None})
+            num_channels {int} - Number of RMAN channels used to backup the Oracle database. Required when the `object_type` is `oracle_host`. (default {"4""})
+            hostname {str} -- The hostname, or one of the hostnames in a RAC cluster, or the RAC cluster name. Required when the object_type is `oracle_db`. (default {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
             str -- No change required. The MSSQL Instance '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`, log_retention_hours: `log_retention_hours` and copy_only: `copy_only`
+            str -- No change required. The Oracle Database '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_minutes: `log_backup_frequency_in_seconds`, log_retention_hours: `log_retention_hours` and num_channels: `num_channels`.
+            str -- No change required. The Oracle Host '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`. log_retention_hours: `log_retention_hours`, and num_channels: `num_channels`
             str -- No change required. The '`object_name`' volume_group is already assigned to the '`sla_name`' SLA Domain.
             dict -- The full API response for `POST /internal/sla_domain/{sla_id}/assign`.
             dict -- The full API response for `PATCH /internal/volume_group/{id}`.
+            dict -- The full API response for `PATCH /internal/oracle/db/{id}.`
+            dict -- The full API response for `PATCH /internal/oracle/host/{id}`.
         """
 
-        valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'fileset', 'ahv']
+        self.function_name = inspect.currentframe().f_code.co_name
+
+        valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'fileset', 'ahv', 'oracle_db', 'oracle_host']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -483,6 +502,16 @@ class Data_Management(_API):
             if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
                 raise InvalidParameterException(
                     "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
+
+        if object_type == "oracle_host":
+            if log_backup_frequency_in_minutes is None or log_retention_hours is None or num_channels is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'oracle_host' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' paramaters must be populated.")                    
+
+        if object_type == "oracle_db":
+            if log_backup_frequency_in_minutes is None or log_retention_hours is None or num_channels is None or hostname is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'oracle_db' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' and 'hostname' paramaters must be populated.")    
 
         if object_type == "fileset":
             if nas_host is None or share is None:
@@ -659,6 +688,94 @@ class Data_Management(_API):
 
             return db_sla_lst
 
+        elif object_type == 'oracle_db':
+
+            oracle_db_id = ''
+
+            self.log('Searching the Rubrik cluster for the current Oracle databases.')
+            oracle_db_id = self.object_id(object_name, object_type, hostname=hostname)
+
+            if(oracle_db_id):
+                self.log(
+                    "assign_sla: Determing the SLA Domain currently assigned to the Oracle Database '{}'.".format(object_name))
+
+                oracle_summary = self.get(
+                    'internal',
+                    '/oracle/db/{}'.format(oracle_db_id),
+                    timeout=timeout)
+
+                if (sla_id == oracle_summary['configuredSlaDomainId'] and log_backup_frequency_in_minutes == oracle_summary['logBackupFrequencyInMinutes'] and
+                        log_retention_hours == oracle_summary['logRetentionHours'] and num_channels == oracle_summary['numChannels']):
+                    return "No change required. The Oracle Database '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
+                            " log_backup_frequency_in_minutes: {}, log_retention_hours: {} and num_channels: {}.".format(
+                                object_name, sla_name, log_backup_frequency_in_minutes, log_retention_hours, num_channels)
+
+                else:
+                    self.log(
+                        "assign_sla: Assigning the Oracle Database '{}' to the '{}' SLA Domain.".format(
+                            object_name, sla_name))
+
+                    config = {}
+                    if log_backup_frequency_in_minutes is not None:
+                        config['logBackupFrequencyInMinutes'] = log_backup_frequency_in_minutes
+                    if log_retention_hours is not None:
+                        config['logRetentionHours'] = log_retention_hours
+                    if num_channels is not None:
+                        config['numChannels'] = num_channels
+
+                    config['configuredSlaDomainId'] = sla_id
+
+                    patch_resp = self.patch("internal", "/oracle/db/{}".format(oracle_db_id), config, timeout)
+            else:
+                raise InvalidParameterException(
+                    "Database ID not found for instance '{}'").format(object_name)
+            
+            return patch_resp
+
+        elif object_type == 'oracle_host':
+
+            host_id = ''
+
+            self.log('Searching the Rubrik cluster for the current Oracle hosts.')
+            host_id = self.object_id(object_name, object_type)
+
+            if(host_id):
+                self.log(
+                    "assign_sla: Determing the SLA Domain currently assigned to the Oracle Host '{}'.".format(object_name))
+
+                oracle_summary = self.get(
+                    'internal',
+                    '/oracle/host/{}'.format(host_id),
+                    timeout=timeout)
+
+                if (sla_id == oracle_summary['configuredSlaDomainId'] and log_backup_frequency_in_minutes == oracle_summary['logBackupFrequencyInMinutes'] and
+                        log_retention_hours == oracle_summary['logRetentionHours'] and num_channels == oracle_summary['numChannels']):
+                    return "No change required. The Oracle Host '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
+                            " log_backup_frequency_in_minutes: {}, log_retention_hours: {} and num_channels: {}.".format(
+                                object_name, sla_name, log_backup_frequency_in_minutes, log_retention_hours, num_channels)
+
+                else:
+                    self.log(
+                        "assign_sla: Assigning the Oracle Host '{}' to the '{}' SLA Domain.".format(
+                            object_name, sla_name))
+
+                    config = {}
+                    if log_backup_frequency_in_minutes is not None:
+                        config['logBackupFrequencyInMinutes'] = log_backup_frequency_in_minutes
+                    if log_retention_hours is not None:
+                        config['logRetentionHours'] = log_retention_hours
+                    if num_channels is not None:
+                        config['numChannels'] = num_channels
+
+                    config['configuredSlaDomainId'] = sla_id
+
+                    patch_resp = self.patch("internal", "/oracle/host/{}".format(host_id), config, timeout)
+            else:
+                raise InvalidParameterException(
+                    "Host ID not found for instance '{}'").format(object_name)
+
+            return patch_resp           
+
         elif object_type == "volume_group":
 
             volume_group_id = self.object_id(windows_host, "volume_group", timeout=timeout)
@@ -730,6 +847,8 @@ class Data_Management(_API):
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/mount`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if isinstance(remove_network_devices, bool) is False:
             raise InvalidTypeException("The 'remove_network_devices' argument must be True or False.")
@@ -803,6 +922,8 @@ class Data_Management(_API):
         Returns:
             dict -- The full response of `POST /v1/vmware/vm/snapshot/{snapshot_id}/instant_recover`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         if isinstance(remove_network_devices, bool) is False:
             raise InvalidTypeException("The 'remove_network_devices' argument must be True or False.")
@@ -879,6 +1000,9 @@ class Data_Management(_API):
             str -- A combined date/time value formated as `Year-Month-DayTHour:Minute` where Hour:Minute is on the 24-hour clock (ex : 2014-1-15T01:30).
         """
 
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
+
         from datetime import datetime
         import pytz
 
@@ -928,6 +1052,8 @@ class Data_Management(_API):
             dict -- The full API response for `PATCH /v1/vmware/vm/{vm_id}`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         valid_object_type = ['vmware']
 
         if object_type not in valid_object_type:
@@ -962,6 +1088,8 @@ class Data_Management(_API):
             str -- No change required. The 'object_type' object 'object_name' is currently not paused.
             dict -- The full response for `PATCH /v1/vmware/vm/{vm_id}`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         valid_object_type = ['vmware']
 
@@ -998,6 +1126,8 @@ class Data_Management(_API):
             dict -- The full API response for `POST /managed_volume/{id}/begin_snapshot`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("begin_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
         managed_volume_id = self.object_id(name, 'managed_volume', timeout=timeout)
 
@@ -1022,6 +1152,8 @@ class Data_Management(_API):
             str -- No change required. The Managed Volume `name` is already assigned in a read only state.
             dict -- The full API response for `POST /managed_volume/{id}/end_snapshot`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
         managed_volume_id = self.object_id(name, 'managed_volume', timeout=timeout)
@@ -1059,6 +1191,9 @@ class Data_Management(_API):
         Returns:
             dict -- The `name:id` of each object in the provided SLA Domain.
         """
+
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         valid_object_type = ['vmware']
 
@@ -1107,6 +1242,8 @@ class Data_Management(_API):
             dict -- The full API response for `POST /v1/sla_domain`.
             dict -- The full API response for `POST /v2/sla_domain`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         v2_sla = self.minimum_installed_cdm_version("5.0", timeout=timeout)
 
@@ -1291,14 +1428,17 @@ class Data_Management(_API):
             return self.post("v1", "/sla_domain", config, timeout=timeout)
 
     def delete_sla(self, name, timeout=15):
-        """[summary]
+        """Delete an SLA from the Rubrik Cluster
         Arguments:
-            name {[type]} -- [description]
+            name {[type]} -- The name of the SLA you wish to delete.
         Keyword Arguments:
-            timeout {int} -- [description] (default: {15})
+            timeout {int} -- The number of seconds to wait to establish a connection to the Rubrik cluster. (default: {15})
         Returns:
-            [type] -- [description]
+            dict -- The full API response for `DELETE /v1/sla_domain`.
+            dict -- The full API response for `DELETE /v2/sla_domain`.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         try:
             # object_id() will set sla_already_present to something besides False if the SLA is already on the cluter
@@ -1329,6 +1469,9 @@ class Data_Management(_API):
         Returns:
             bool -- True if point_in_time is in the range [start, end]."""
 
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
+
         if start <= end:
             return start <= point_in_time <= end
         else:
@@ -1351,6 +1494,9 @@ class Data_Management(_API):
         if date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
             raise InvalidParameterException(
                 "The date and time arguments most both be 'latest' or a specific date and time.")
+
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
 
@@ -1386,6 +1532,8 @@ class Data_Management(_API):
         Returns:
             dict -- The full response of `DELETE '/vmware/vm/snapshot/mount/{id}?force={bool}'.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         self.log("vsphere_live_unmount: Searching the Rubrik cluster for the Live Mount vSphere VM '{}'.".format(mounted_vm_name))
         mounted_vm_id = self.object_id(mounted_vm_name, 'vmware', timeout=timeout)
@@ -1426,6 +1574,8 @@ class Data_Management(_API):
             dict -- The full response of `DELETE /mssql/db/mount/{id}?force={bool}`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         mounted_db_id = self._validate_sql_db(mounted_db_name, sql_instance, sql_host)
 
         self.log("sql_live_unmount: Getting the MSSQL mount information from the Rubrik cluster.")
@@ -1457,6 +1607,8 @@ class Data_Management(_API):
             dict -- The full response of `GET /v1/vmware/vm/snapshot/mount?vm_id={vm_id}`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("get_vsphere_live_mount: Searching the Rubrik cluster for the mounted vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
@@ -1472,6 +1624,8 @@ class Data_Management(_API):
         Returns:
             list -- A list of the Live Mounted VM names.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
 
         self.log("get_vsphere_live_mount_names: Searching the Rubrik cluster for the mounted vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
@@ -1503,6 +1657,9 @@ class Data_Management(_API):
         Returns:
             str -- The ID of the MSSQL database.
         """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
         mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
 
         self.log("_validate_sql_db: Getting the list of instances on host {}.".format(sql_host))
@@ -1547,6 +1704,8 @@ class Data_Management(_API):
             dict -- The full response of `GET /v1/mssql/db/mount?source_database_id={id}`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
 
         self.log("get_sql_live_mount: Getting the live mounts for mssql db id'{}'.".format(mssql_id))
@@ -1563,6 +1722,10 @@ class Data_Management(_API):
         Returns:
             dict -- A dictionary with values {'is_recovery_point': bool, 'recovery_timestamp': datetime}.
         """
+
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
+
         is_recovery_point = False
         if date and time == 'latest':
             latest_data = self.get('v1', '/mssql/db/{}/snapshot'.format(mssql_id), timeout=timeout)
@@ -1628,6 +1791,8 @@ class Data_Management(_API):
             dict -- The full response of `POST /v1/mssql/db/{id}/restore`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
 
         recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
@@ -1663,6 +1828,8 @@ class Data_Management(_API):
             no content.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("vcenter_refresh_vm: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         data = self.get('v1', '/vmware/vm?name={}'.format(vm_name), timeout)
         if data['data'] == []:
@@ -1696,48 +1863,54 @@ class Data_Management(_API):
         Returns:
             dict -- The full response of `GET /v1/vmware/vm?{query}`
         """
-        
-        parameters = {'effective_sla_domain_id':effective_sla_domain_id,
-                      'primary_cluster_id':primary_cluster_id,
-                      'limit':limit,
-                      'offset':offset,
-                      'is_relic':is_relic,
-                      'name':name,
-                      'moid':moid,
-                      'sla_assignment':sla_assignment,
-                      'guest_os_name':guest_os_name,
-                      'sort_by':sort_by,
-                      'sort_order':sort_order}
-        parameters = {key : value for key, value in parameters.items() if value != None}
 
-        self.log("get_vsphere_vm: checking the provided query parameters.") 
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
+
+        parameters = {'effective_sla_domain_id': effective_sla_domain_id,
+                      'primary_cluster_id': primary_cluster_id,
+                      'limit': limit,
+                      'offset': offset,
+                      'is_relic': is_relic,
+                      'name': name,
+                      'moid': moid,
+                      'sla_assignment': sla_assignment,
+                      'guest_os_name': guest_os_name,
+                      'sort_by': sort_by,
+                      'sort_order': sort_order}
+        parameters = {key: value for key, value in parameters.items() if value is not None}
+
+        self.log("get_vsphere_vm: checking the provided query parameters.")
         valid_sla_assignment = ['Derived', 'Direct', 'Unassigned']
         for key, value in parameters.items():
             if key == 'sla_assignment' and value not in valid_sla_assignment:
-                raise InvalidParameterException('The sla_assignment parameter must be one of the following: {}'.format(valid_sla_assignment))
-        
+                raise InvalidParameterException(
+                    'The sla_assignment parameter must be one of the following: {}'.format(valid_sla_assignment))
+
         valid_sort_by = ['effectiveSlaDomainName', 'name', 'moid', 'folderPath', 'infraPath']
         for key, value in parameters.items():
             if key == 'sort_by' and value not in valid_sort_by:
-                raise InvalidParameterException('The sort_by parameter must be one of the following: {}'.format(valid_sort_by))
-        
+                raise InvalidParameterException(
+                    'The sort_by parameter must be one of the following: {}'.format(valid_sort_by))
+
         valid_sort_order = ['asc', 'desc']
         for key, value in parameters.items():
             if key == 'sort_order' and value not in valid_sort_order:
-                raise InvalidParameterException('The sort_order parameter must be one of the following: {}'.format(valid_sort_order))
+                raise InvalidParameterException(
+                    'The sort_order parameter must be one of the following: {}'.format(valid_sort_order))
 
         for key, value in parameters.items():
-            if key == 'is_relic' and type(value) != bool:
+            if key == 'is_relic' and not isinstance(value, bool):
                 raise InvalidParameterException('The is_relic paremeter must be a boolean: True or False')
-        
+
         for key, value in parameters.items():
-            if ((key == 'limit') or (key == 'offset')) and type(value) != int:
+            if ((key == 'limit') or (key == 'offset')) and not isinstance(value, int):
                 raise InvalidParameterException('The limit and offset paremeter must be an integer')
 
         query = ''
         for key, value in parameters.items():
-            query = query+("{}={}".format(key, value)+'&')
-        
+            query = query + ("{}={}".format(key, value) + '&')
+
         self.log("get_vsphere_vm: Get summary of all the VMs.")
         return self.get('v1', '/vmware/vm?{}'.format(query), timeout)
 
@@ -1751,6 +1924,9 @@ class Data_Management(_API):
             dict -- The full response of `GET /v1/vmware/vm/{vm_id}/snapshot`
         """
 
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("get_vsphere_vm_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
@@ -1760,12 +1936,15 @@ class Data_Management(_API):
     def get_vsphere_vm_details(self, vm_name, timeout=15):  # pylint: ignore
         """Retrieve details for a virtual machine.
         Arguments:
-            vm_name {str} -- Name of the virtual machine.       
+            vm_name {str} -- Name of the virtual machine.
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
         Returns:
             dict -- The full response of `GET /v1/vmware/vm/{vm_id}`
-        """ 
+        """
+
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
 
         self.log("get_vsphere_vm_details: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
@@ -1778,19 +1957,22 @@ class Data_Management(_API):
         Arguments:
             vm_name {str} -- Name of the virtual machine.
             path {str} -- The path query. Use either a path prefix or a filename prefix.
-        Keyword Arguments:    
-            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})   
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
         Returns:
             dict -- The full response of `GET /v1/vmware/vm/{vm_id}/search?path={path}`
         """
 
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
+
         self.log("get_vsphere_vm_file: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
- 
+
         self.log("get_vsphere_vm_file: Search for file/path {} in the snapshots of a virtual machine {}".format(path, vm_id))
         return self.get('v1', '/vmware/vm/{}/search?path={}'.format(vm_id, path), timeout)
 
-    def get_sql_db(self, db_name=None, instance=None, hostname=None, availability_group=None, effective_sla_domain=None, primary_cluster_id='local', sla_assignment=None, limit=None, offset=None,  is_relic=None, is_live_mount=None, is_log_shipping_secondary=None, sort_by=None, sort_order=None, timeout=15):  # pylint: ignore
+    def get_sql_db(self, db_name=None, instance=None, hostname=None, availability_group=None, effective_sla_domain=None, primary_cluster_id='local', sla_assignment=None, limit=None, offset=None, is_relic=None, is_live_mount=None, is_log_shipping_secondary=None, sort_by=None, sort_order=None, timeout=15):  # pylint: ignore
         """Retrieves summary information for SQL databases. Each keyword argument is a query parameter to filter the database details returned i.e. you can query for a specific database name, hostname, instance, is_relic, effective_sla_domain etc.
         Keyword Arguments:
             db_name {str} -- Filter by a substring of the database name.
@@ -1811,6 +1993,10 @@ class Data_Management(_API):
         Returns:
             dict -- The full response of `GET /v1/mssql/db?{query}`
         """
+
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
+
         if availability_group is not None:
             self.log("get_sql_db: Searching the Rubrik cluster for the ID of the availability_group {}.".format(availability_group))
             ag_summary = self.get(
@@ -1820,58 +2006,63 @@ class Data_Management(_API):
                     availability_group_id = ag['id']
         else:
             availability_group_id = None
-        
+
         if effective_sla_domain is not None:
             self.log("get_sql_db: Searching the Rubrik cluster for the ID of the SLA Domain '{}'.".format(effective_sla_domain))
             effective_sla_domain_id = self.object_id(effective_sla_domain, 'sla', timeout=timeout)
         else:
             effective_sla_domain_id = None
 
-        parameters = {'availability_group_id':availability_group_id,
-                      'effective_sla_domain_id':effective_sla_domain_id,
-                      'primary_cluster_id':primary_cluster_id,
-                      'name':db_name,
-                      'sla_assignment':sla_assignment,
-                      'limit':limit,
-                      'offset':offset,
-                      'is_relic':is_relic,
-                      'is_live_mount':is_live_mount,
-                      'is_log_shipping_secondary':is_log_shipping_secondary,
-                      'sort_by':sort_by,
-                      'sort_order':sort_order}
-        parameters = {key : value for key, value in parameters.items() if value != None}
+        parameters = {'availability_group_id': availability_group_id,
+                      'effective_sla_domain_id': effective_sla_domain_id,
+                      'primary_cluster_id': primary_cluster_id,
+                      'name': db_name,
+                      'sla_assignment': sla_assignment,
+                      'limit': limit,
+                      'offset': offset,
+                      'is_relic': is_relic,
+                      'is_live_mount': is_live_mount,
+                      'is_log_shipping_secondary': is_log_shipping_secondary,
+                      'sort_by': sort_by,
+                      'sort_order': sort_order}
+        parameters = {key: value for key, value in parameters.items() if value is not None}
 
-        self.log("get_sql_db: checking the provided query parameters.") 
+        self.log("get_sql_db: checking the provided query parameters.")
         valid_sla_assignment = ['Derived', 'Direct', 'Unassigned']
         for key, value in parameters.items():
             if key == 'sla_assignment' and value not in valid_sla_assignment:
-                raise InvalidParameterException('The sla_assignment parameter must be one of the following: {}'.format(valid_sla_assignment))
-        
+                raise InvalidParameterException(
+                    'The sla_assignment parameter must be one of the following: {}'.format(valid_sla_assignment))
+
         valid_sort_by = ['effectiveSlaDomainName', 'name']
         for key, value in parameters.items():
             if key == 'sort_by' and value not in valid_sort_by:
-                raise InvalidParameterException('The sort_by parameter must be one of the following: {}'.format(valid_sort_by))
-        
+                raise InvalidParameterException(
+                    'The sort_by parameter must be one of the following: {}'.format(valid_sort_by))
+
         valid_sort_order = ['asc', 'desc']
         for key, value in parameters.items():
             if key == 'sort_order' and value not in valid_sort_order:
-                raise InvalidParameterException('The sort_order parameter must be one of the following: {}'.format(valid_sort_order))
+                raise InvalidParameterException(
+                    'The sort_order parameter must be one of the following: {}'.format(valid_sort_order))
 
         for key, value in parameters.items():
-            if ((key == 'is_relic') or (key == 'is_live_mount') or (key == 'is_log_shipping_secondary')) and type(value) != bool:
-                raise InvalidParameterException('The is_relic, is_live_mount, is_log_shipping_secondary paremeter must be a boolean: True or False')
-        
+            if ((key == 'is_relic') or (key == 'is_live_mount') or (
+                    key == 'is_log_shipping_secondary')) and not isinstance(value, bool):
+                raise InvalidParameterException(
+                    'The is_relic, is_live_mount, is_log_shipping_secondary paremeter must be a boolean: True or False')
+
         for key, value in parameters.items():
-            if ((key == 'limit') or (key == 'offset')) and type(value) != int:
+            if ((key == 'limit') or (key == 'offset')) and not isinstance(value, int):
                 raise InvalidParameterException('The limit and offset paremeter must be an integer')
-        
+
         query = ''
         for key, value in parameters.items():
-            query = query+("{}={}".format(key, value)+'&')
-        
+            query = query + ("{}={}".format(key, value) + '&')
+
         self.log("get_sql_db: Get summary of all the databases returned by the query.")
         databases = self.get('v1', '/mssql/db?{}'.format(query), timeout)
-        
+
         result = []
 
         if instance is None and hostname is None:
@@ -1885,9 +2076,9 @@ class Data_Management(_API):
                 for item in databases['data']:
                     for replica in item['replicas']:
                         if replica['instanceName'] == instance:
-                           result.append(item)
+                            result.append(item)
                         break
-            except:
+            except BaseException:
                 pass
             else:
                 result = [item for item in databases['data'] if replica['instanceName'] == instance]
@@ -1896,12 +2087,14 @@ class Data_Management(_API):
                 for item in databases['data']:
                     for replica in item['replicas']:
                         if item['rootProperties']['rootName'] == hostname and replica['instanceName'] == instance:
-                           result.append(item)
+                            result.append(item)
                         break
-            except:
+            except BaseException:
                 pass
             else:
-                result = [item for item in databases['data'] if (item['rootProperties']['rootName'] == hostname and replica['instanceName'] == instance)]
+                result = [
+                    item for item in databases['data'] if (
+                        item['rootProperties']['rootName'] == hostname and replica['instanceName'] == instance)]
         return result
 
     def get_sql_db_files(self, db_name, date, time, sql_instance=None, sql_host=None, timeout=15):  # pylint: ignore
@@ -1918,8 +2111,11 @@ class Data_Management(_API):
             list -- The full response of `GET /internal/mssql/db/{id}/restore_files?time={recovery_point}`.
         """
 
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
+
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
-        
+
         recovery_date_time = self._date_time_conversion(date, time)
         recovery_point = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M').isoformat()
         valid_recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
@@ -1962,6 +2158,8 @@ class Data_Management(_API):
             dict -- The full response of `POST /v1/mssql/db/{id}/export`.
         """
 
+        self.function_name = inspect.currentframe().f_code.co_name
+
         if target_file_paths is None:
             if target_data_file_path is None or target_log_file_path is None:
                 raise InvalidParameterException(
@@ -1983,7 +2181,7 @@ class Data_Management(_API):
         else:
             raise InvalidParameterException(
                 "The target SQL instance {} does not exist, please provide a valid target instance".format(target_instance_name))
-        
+
         try:
             if recovery_point['is_recovery_point'] == False:
                 raise InvalidParameterException(
@@ -2004,7 +2202,6 @@ class Data_Management(_API):
             config['finishRecovery'] = finish_recovery
             config['maxDataStreams'] = max_data_streams
             config['allowOverwrite'] = allow_overwrite
-
 
             self.log(
                 "sql_db_export: Exporting the database '{}' from recovery_point on {} at {} with new name '{}'.".format(
