@@ -252,11 +252,11 @@ class Api():
             authentication=authentication)
 
     def query(self, query, operation_name=None, variables=None, timeout=15, authentication=True):
-        """Send a GraphQL query to CDM cluster
+        """Send a GraphQL query to CDM cluster.
 
         Arguments:
             query {str} -- The main GraphQL query body.
-            operation_name {str} -- Aa meaningful and explicit name for your GraphQL operation. Think of this just like a function name in your favorite programming language. (default: {None})
+            operation_name {str} -- A meaningful and explicit name for your GraphQL operation. Think of this just like a function name in your favorite programming language. (default: {None})
             variables {dict} -- The variables to pass into your query. (default: {None})
 
         Keyword Arguments:
@@ -264,7 +264,7 @@ class Api():
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
         Returns:
-            dict -- The response body of the API call.
+            dict -- The response["data"] body of the API call.
         """
 
         if self.function_name == "":
