@@ -1,4 +1,4 @@
-### Query Only
+### Query only
 
 import rubrik_cdm
 

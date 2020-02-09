@@ -1,6 +1,6 @@
 # query
 
-Send a GraphQL query to CDM cluster.
+Send a GraphQL query to a CDM cluster.
 ```py
 def query(self, query, operation_name=None, variables=None, timeout=15,authentication=True):
 
@@ -26,7 +26,7 @@ def query(self, query, operation_name=None, variables=None, timeout=15,authentic
 
 ## Example
 
-### Query Only
+### Query only
 
 ```py
 import rubrik_cdm

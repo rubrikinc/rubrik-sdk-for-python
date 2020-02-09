@@ -252,7 +252,7 @@ class Api():
             authentication=authentication)
 
     def query(self, query, operation_name=None, variables=None, timeout=15, authentication=True):
-        """Send a GraphQL query to CDM cluster.
+        """Send a GraphQL query to a CDM cluster.
 
         Arguments:
             query {str} -- The main GraphQL query body.
