@@ -26,7 +26,7 @@ def query(self, query, operation_name=None, variables=None, timeout=15,authentic
 
 ## Example
 
-# Query Only
+### Query Only
 
 ```py
 import rubrik_cdm
@@ -44,7 +44,7 @@ query = """
 cluster_details = rubrik.query(query)
 ```
 
-# All parameters used
+### All parameters used
 
 ```py
 import rubrik_cdm
