@@ -77,16 +77,109 @@ snapshot = rubrik.on_demand_snapshot(physical_host_name, object_type, sla, files
 
 ### MSSQL DB
 
+#### Single/Multiple Specified DBs
+
 ```py
 import rubrik_cdm
 
 rubrik = rubrik_cdm.Connect()
 
 # MSSQL DB Snapshot
-object_name = "AdventureWorks2014"
+object_name = ["AdventureWorks2014","master"]
 object_type = "mssql_db"
+sql_host = "mysqlhost.rubrik.com"
+sql_instance = "MSSQLSERVER"
+sql_db_type = "list"
+sql_ag = False
+ 
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sql_host=sql_host, sql_instance=sql_instance, sql_ag=sql_ag)
+```
 
-snapshot = rubrik.on_demand_snapshot(object_name, object_type, sql_host="hostname.rubrik.com", sql_instance="MSSQLSERVER", sql_db="AdventureWorks2014")
+#### All User DBs
+
+```py
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+# MSSQL DB Snapshot
+object_name = None
+object_type = "mssql_db"
+sql_host = "mysqlhost.rubrik.com"
+sql_instance = "MSSQLSERVER"
+sql_db_type = "user"
+sql_ag = False
+ 
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sql_host=sql_host, sql_instance=sql_instance, sql_db_type=sql_db_type, sql_ag=sql_ag)
+```
+
+#### All System DBs
+
+```py
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+# MSSQL DB Snapshot
+object_name = None
+object_type = "mssql_db"
+sql_host = "mysqlhost.rubrik.com"
+sql_instance = "MSSQLSERVER"
+sql_db_type = "system"
+sql_ag = False
+ 
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sql_host=sql_host, sql_instance=sql_instance, sql_db_type=sql_db_type, sql_ag=sql_ag)
+```
+
+#### MSSQL Availability Groups - Single/Mutliple Specified DBs
+
+```py
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+# MSSQL DB Snapshot
+object_name = ["AdventureWorks2014","AdventureWorks2014v2"]
+object_type = "mssql_db"
+sql_instance = "MSSQLAvailabilityGroup.rubrikdemo.com"
+sql_db_type = "list"
+sql_ag = True
+ 
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sql_instance=sql_instance, sql_db_type=sql_db_type, sql_ag=sql_ag)
+```
+
+#### MSSQL Availability Groups - All User DBs
+
+```py
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+# MSSQL DB Snapshot
+object_name = None
+object_type = "mssql_db"
+sql_instance = "MSSQLAvailabilityGroup.rubrikdemo.com"
+sql_db_type = "user"
+sql_ag = True
+ 
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sql_instance=sql_instance, sql_db_type=sql_db_type, sql_ag=sql_ag)
+```
+
+#### MSSQL Availability Groups - All System DBs
+
+```py
+import rubrik_cdm
+
+rubrik = rubrik_cdm.Connect()
+
+# MSSQL DB Snapshot
+object_name = None
+object_type = "mssql_db"
+sql_instance = "MSSQLAvailabilityGroup.rubrikdemo.com"
+sql_db_type = "system"
+sql_ag = True
+ 
+snapshot = rubrik.on_demand_snapshot(object_name, object_type, sql_instance=sql_instance, sql_db_type=sql_db_type, sql_ag=sql_ag)
 ```
 
 ### Oracle DB
