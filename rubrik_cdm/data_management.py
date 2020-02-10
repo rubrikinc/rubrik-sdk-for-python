@@ -32,7 +32,7 @@ import inspect
 class Data_Management(Api):
     """This class contains methods related to backup and restore operations for the various objects managed by the Rubrik cluster."""
 
-    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db=None, hostname=None, force_full=False, share_type=None, timeout=15):  # pylint: ignore
+    def on_demand_snapshot(self, object_name, object_type, sla_name='current', fileset=None, host_os=None, sql_host=None, sql_instance=None, sql_db_type=None, sql_ag=None, hostname=None, force_full=False, share_type=None, timeout=15):  # pylint: ignore
         """Initiate an on-demand snapshot.
         Arguments:
             object_name {str} -- The name of the Rubrik object to take a on-demand snapshot of.
@@ -114,42 +114,253 @@ class Data_Management(Api):
 
         elif object_type == 'mssql_db':
 
+            system_dbs = ['master', 'model', 'msdb', 'SSISDB', 'distribution']
+            bulk_on_demand_api = []
+            bulk_on_demand_snapshots = []
+            sql_snapshot_count = 0
+
             self.log(
                 "on_demand_snapshot: Searching the Rubrik cluster for the MS SQL '{}'.".format(object_name))
 
-            mssql_host = self.object_id(sql_host, 'physical_host', timeout=timeout)
-
-            mssql_instance = self.get(
-                'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
-
-            for instance in mssql_instance['data']:
-                if instance['name'] == sql_instance:
-                    sql_db_id = instance['id']
-
-            mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_db_id), timeout)
-
-            for db in mssql_db['data']:
-                if db['name'] == sql_db:
-                    mssql_id = db['id']
-
-            if sla_name == 'current':
+            if(sql_ag == True):
                 self.log(
-                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(object_name))
+                    "on_demand_snapshot: Skipping Host Check, SQL Availability Group detected."
+                )
+            else:
+                mssql_host = self.object_id(sql_host, 'physical_host', timeout=timeout)
+                
+            if(sql_db_type == 'system'):
+                self.log(
+                    "on_demand_snapshot: System Database Type specified"
+                )
+                if(sql_ag == True):
+                    self.log(
+                        "on_demand_snapshot: Availability Group Detected: {}".format(sql_instance)
+                    )
+                    mssql_ag_instances = self.get(
+                        'internal', '/mssql/availability_group', timeout)
 
-                mssql_summary = self.get('v1', '/mssql/db/{}'.format(mssql_id), timeout)
-                sla_id = mssql_summary['effectiveSlaDomainId']
+                    for mssql_ag_instance in mssql_ag_instances['data']:
+                        if(mssql_ag_instance['name'] == sql_instance):
+                            mssql_ag = mssql_ag_instance
 
-            elif sla_name != 'current':
-                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
-                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+                    mssql_databases = self.get(
+                        'v1', '/mssql/hierarchy/{}/children'.format(mssql_ag['id']), timeout)
 
-            config = {}
-            config['slaId'] = sla_id
+                    for db in mssql_databases['data']:
+                        if(db['name'] in system_dbs):
 
-            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(object_name))
-            api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(mssql_id), config, timeout)
+                            if sla_name == 'current':
+                                self.log(
+                                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(db['name']))
 
-            snapshot_status_url = api_request['links'][0]['href']
+                                mssql_summary = self.get('v1', '/mssql/db/{}'.format(db['id']), timeout)
+                                sla_id = mssql_summary['effectiveSlaDomainId']
+
+                            elif sla_name != 'current':
+                                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+                            config = {}
+                            config['slaId'] = sla_id
+
+                            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(db['name']))
+                            api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(db['id']), config, timeout)
+                            sql_snapshot_count = sql_snapshot_count + 1
+                            bulk_on_demand_api.append(api_request)
+                            bulk_on_demand_snapshots.append(api_request['links'][0]['href'])
+
+                else:
+
+                    mssql_instance = self.get(
+                        'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
+
+                    for instance in mssql_instance['data']:
+                        if(instance['name'] == sql_instance): 
+                            sql_db_id = instance['id']
+
+                    mssql_databases = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_db_id), timeout)
+
+                    for db in mssql_databases['data']:
+                        if(db['name'] in system_dbs):
+
+                            if sla_name == 'current':
+                                self.log(
+                                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(db['name']))
+
+                                mssql_summary = self.get('v1', '/mssql/db/{}'.format(db['id']), timeout)
+                                sla_id = mssql_summary['effectiveSlaDomainId']
+
+                            elif sla_name != 'current':
+                                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+                            config = {}
+                            config['slaId'] = sla_id
+
+                            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(db['name']))
+                            api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(db['id']), config, timeout)
+                            sql_snapshot_count = sql_snapshot_count + 1
+                            bulk_on_demand_api.append(api_request)
+                            bulk_on_demand_snapshots.append(api_request['links'][0]['href'])
+  
+            elif(sql_db_type == 'user'):
+                self.log(
+                    "on_demand_snapshot: User Database Type specified"
+                )
+                if(sql_ag == True):
+                    self.log(
+                        "on_demand_snapshot: Availability Group Detected: {}".format(sql_instance)
+                    )
+                    mssql_ag_instances = self.get(
+                        'internal', '/mssql/availability_group', timeout)
+
+                    for mssql_ag_instance in mssql_ag_instances['data']:
+                        if(mssql_ag_instance['name'] == sql_instance):
+                            mssql_ag = mssql_ag_instance
+                    
+                    mssql_databases = self.get(
+                        'v1', '/mssql/hierarchy/{}/children'.format(mssql_ag['id']), timeout)
+
+                    for db in mssql_databases['data']:
+                        if(db['name'] not in system_dbs):
+
+                            if sla_name == 'current':
+                                self.log(
+                                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(db['name']))
+
+                                mssql_summary = self.get('v1', '/mssql/db/{}'.format(db['id']), timeout)
+                                sla_id = mssql_summary['effectiveSlaDomainId']
+
+                            elif sla_name != 'current':
+                                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+                            config = {}
+                            config['slaId'] = sla_id
+
+                            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(db['name']))
+                            api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(db['id']), config, timeout)
+                            sql_snapshot_count = sql_snapshot_count + 1
+                            bulk_on_demand_api.append(api_request)
+                            bulk_on_demand_snapshots.append(api_request['links'][0]['href'])
+
+                else:
+                    mssql_instance = self.get(
+                        'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
+
+                    for instance in mssql_instance['data']:
+                        if(instance['name'] == sql_instance): 
+                            sql_db_id = instance['id']
+
+                    mssql_databases = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_db_id), timeout)
+
+                    for db in mssql_databases['data']:
+                        if(db['name'] not in system_dbs):
+
+                            if sla_name == 'current':
+                                self.log(
+                                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(db['name']))
+
+                                mssql_summary = self.get('v1', '/mssql/db/{}'.format(db['id']), timeout)
+                                sla_id = mssql_summary['effectiveSlaDomainId']
+
+                            elif sla_name != 'current':
+                                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+                            config = {}
+                            config['slaId'] = sla_id
+
+                            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(db['name']))
+                            api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(db['id']), config, timeout)
+                            sql_snapshot_count = sql_snapshot_count + 1
+                            bulk_on_demand_api.append(api_request)
+                            bulk_on_demand_snapshots.append(api_request['links'][0]['href'])
+
+
+            elif((sql_db_type == 'list') or (sql_db_type == None)):
+                self.log(
+                    "on_demand_snapshot: List Database Type specified"
+                )
+                sql_dbs = object_name
+
+                if(sql_ag == True):
+                    self.log(
+                        "on_demand_snapshot: Availability Group Detected: {}".format(sql_instance)
+                    )
+                    mssql_ag_instances = self.get(
+                        'internal', '/mssql/availability_group', timeout)
+
+                    for mssql_ag_instance in mssql_ag_instances['data']:
+                        if(mssql_ag_instance['name'] == sql_instance):
+                            mssql_ag = mssql_ag_instance
+                            
+                    mssql_databases = self.get(
+                        'v1', '/mssql/hierarchy/{}/children'.format(mssql_ag['id']), timeout)
+
+                    for db in mssql_databases['data']:
+                        if(db['name'] in sql_dbs):
+
+                            if sla_name == 'current':
+                                self.log(
+                                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(db['name']))
+
+                                mssql_summary = self.get('v1', '/mssql/db/{}'.format(db['id']), timeout)
+                                sla_id = mssql_summary['effectiveSlaDomainId']
+
+                            elif sla_name != 'current':
+                                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+                            config = {}
+                            config['slaId'] = sla_id
+
+                            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(db['name']))
+                            api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(db['id']), config, timeout)
+                            sql_snapshot_count = sql_snapshot_count + 1
+                            bulk_on_demand_api.append(api_request)
+                            bulk_on_demand_snapshots.append(api_request['links'][0]['href'])
+
+                else:
+                    mssql_instance = self.get(
+                        'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
+
+                    for instance in mssql_instance['data']:
+                        if(instance['name'] == sql_instance): 
+                            sql_db_id = instance['id']
+
+                    mssql_databases = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_db_id), timeout)
+
+                    for db in mssql_databases['data']:
+                        self.log("Checking if Database is in list to Snapshot: {}".format(db['name']))
+                        if(db['name'] in sql_dbs):
+                            
+                            if sla_name == 'current':
+                                self.log(
+                                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(db['name']))
+
+                                mssql_summary = self.get('v1', '/mssql/db/{}'.format(db['id']), timeout)
+                                sla_id = mssql_summary['effectiveSlaDomainId']
+
+                            elif sla_name != 'current':
+                                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                                sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
+
+                            config = {}
+                            config['slaId'] = sla_id
+
+                            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(db['name']))
+                            api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(db['id']), config, timeout)
+
+                            sql_snapshot_count = sql_snapshot_count + 1
+                            bulk_on_demand_api.append(api_request)
+                            bulk_on_demand_snapshots.append(api_request['links'][0]['href'])
+            
+            api_request = bulk_on_demand_api
+            snapshot_status_url = bulk_on_demand_snapshots
+
+            self.log("on_demand_snapshot: MS SQL On Demand Snapshot Requested for {} Database(s)".format(sql_snapshot_count))
 
         elif object_type == 'physical_host':
             if host_os is None:
