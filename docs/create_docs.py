@@ -29,6 +29,15 @@ def is_internal_function(name):
     return name.startswith('_')
 
 
+def get_all_internal_functions():
+    connect_internals = inspect.getmembers(rubrik_cdm.Connect, 
+        lambda o: inspect.isfunction(o) and is_internal_function(o.__name__) and o.__name__ != '__init__')
+    bootstrap_internals = inspect.getmembers(rubrik_cdm.Bootstrap,
+        lambda o: inspect.isfunction(o) and is_internal_function(o.__name__) and o.__name__ != '__init__' and o.__name__ not in [fn[0] for fn in connect_internals])
+
+    return connect_internals + bootstrap_internals
+
+
 def write_doc_section(f, docstring, section):
     if section is 'arguments':
         for line in docstring:
@@ -102,6 +111,11 @@ def write_doc_section(f, docstring, section):
 
             if line[0] is not '':
                 f.write('| {}  | {} |\n'.format(line[0], line[1]))
+
+
+def write_function_links(f, functions):
+    for function in functions:
+        f.write('* [{}]({}.md)\n'.format(function, function))
 
 
 def parse_docstring(docstring):
@@ -183,6 +197,7 @@ def generate_summary_doc():
     combined_function_list = base_api_functions + cluster_functions + data_management_functions + physical_functions + cloud_functions
     connect_functions = get_module_function_names(rubrik_cdm.rubrik_cdm.Connect, exclude=combined_function_list)
     bootstrap_functions = get_module_function_names(rubrik_cdm.rubrik_cdm.Bootstrap, exclude=combined_function_list+connect_functions)
+    internal_functions = [fn[0] for fn in get_all_internal_functions()]
 
     # Create the SUMMARY (side navigation) Document
 
@@ -193,51 +208,33 @@ def generate_summary_doc():
     markdown.write('* [Quick Start](README.md)\n\n')
 
     markdown.write('### Base API Calls\n')
-    for function in base_api_functions:
-        if not is_internal_function(function[0]):
-            markdown.write('* [{}]({}.md)\n'.format(function, function))
+    write_function_links(markdown, [f for f in base_api_functions if not is_internal_function(f)])
 
     markdown.write('\n### Bootstrap Functions\n')
-    for function in bootstrap_functions:
-        if not is_internal_function(function[0]):
-            markdown.write('* [{}]({}.md)\n'.format(function, function))
+    write_function_links(markdown, [f for f in bootstrap_functions if not is_internal_function(f)])
 
     markdown.write('\n### Cluster Functions\n')
-    for function in cluster_functions:
-        markdown.write('* [{}]({}.md)\n'.format(function, function))
+    write_function_links(markdown, cluster_functions)
 
     markdown.write('\n### Cloud Functions\n')
-    for function in cloud_functions:
-        markdown.write('* [{}]({}.md)\n'.format(function, function))
+    write_function_links(markdown, cloud_functions)
 
     markdown.write('\n### Data Management Functions\n')
-    for function in data_management_functions:
-        if not is_internal_function(function[0]):
-            markdown.write('* [{}]({}.md)\n'.format(function, function))
+    write_function_links(markdown, [f for f in data_management_functions if not is_internal_function(f)])
 
     markdown.write('\n### Physical Host Functions\n')
-    for function in physical_functions:
-        if not is_internal_function(function[0]):
-            markdown.write('* [{}]({}.md)\n'.format(function, function))
+    write_function_links(markdown, [f for f in physical_functions if not is_internal_function(f)])
 
     markdown.write('\n### SDK Helper Functions\n')
-    for function in connect_functions:
-        if not is_internal_function(function[0]):
-            markdown.write('* [{}]({}.md)\n'.format(function, function))
+    write_function_links(markdown, [f for f in connect_functions if not is_internal_function(f)])
 
     markdown.write('\n### Internal Functions\n')
-    for function in connect_functions:
-        if is_internal_function(function[0]):
-            markdown.write('* [{}]({}.md)\n'.format(function, function))
-    for function in combined_function_list:
-        if is_internal_function(function[0]):
-            markdown.write('* [{}]({}.md)\n'.format(function, function))
+    write_function_links(markdown, internal_functions)
 
     markdown.close()
 
 
 if __name__ == "__main__":
-    get_base_api_functions()
     sdk_functions = get_all_sdk_functions()
     for name, obj in sdk_functions:
         generate_function_doc(name, obj)
