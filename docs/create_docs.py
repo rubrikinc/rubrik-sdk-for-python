@@ -1,24 +1,65 @@
-import inspect
-import os
-import reprlib
-import sys
+# Copyright 2018 Rubrik, Inc.
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
 
+import inspect
 import rubrik_cdm
 
 
-def get_all_sdk_functions():
-    connect_functions = inspect.getmembers(rubrik_cdm.Connect, 
-        lambda o: inspect.isfunction(o) and o.__name__ != '__init__')
-    bootstrap_functions = inspect.getmembers(rubrik_cdm.Bootstrap, 
-        lambda o: inspect.isfunction(o) and o.__name__ in ['setup_cluster', 'status'])
+def get_sdk_functions():
+    classes = [
+        rubrik_cdm.api.Api,
+        rubrik_cdm.cloud.Cloud, 
+        rubrik_cdm.cluster.Cluster, 
+        rubrik_cdm.data_management.Data_Management, 
+        rubrik_cdm.physical.Physical,
+        rubrik_cdm.rubrik_cdm.Connect,
+    ]
 
-    return connect_functions + bootstrap_functions
+    class_functions = {}
+
+    excluded = ['__init__']
+
+    for c in classes:
+        functions = inspect.getmembers(c, lambda o: inspect.isfunction(o) and o.__name__ not in excluded and o.__module__ == c.__module__)
+        class_functions[c.__name__] = {
+            'public': [],
+            'private': []
+        }
+        for f in functions:
+            if is_internal_function(f[0]):
+                class_functions[c.__name__]['private'].append(f)
+            else:
+                class_functions[c.__name__]['public'].append(f)
 
 
-def get_base_api_functions():
-    base_api_functions = inspect.getmembers(rubrik_cdm.api.Api, 
-        lambda o: inspect.isfunction(o) and o.__name__ != '__init__')
-    return base_api_functions
+    # Special care for the Bootstrap class due to it's current design
+
+    included = ['setup_cluster', 'status']
+
+    bootstrap_functions = inspect.getmembers(rubrik_cdm.Bootstrap, lambda o: inspect.isfunction(o) and o.__name__ in included and o.__module__ == c.__module__)
+    class_functions['Bootstrap'] = {
+        'public': bootstrap_functions,
+        'private': []
+    }
+
+    return class_functions
 
 
 def get_function_signature(fn):
@@ -29,13 +70,30 @@ def is_internal_function(name):
     return name.startswith('_')
 
 
-def get_all_internal_functions():
-    connect_internals = inspect.getmembers(rubrik_cdm.Connect, 
-        lambda o: inspect.isfunction(o) and is_internal_function(o.__name__) and o.__name__ != '__init__')
-    bootstrap_internals = inspect.getmembers(rubrik_cdm.Bootstrap,
-        lambda o: inspect.isfunction(o) and is_internal_function(o.__name__) and o.__name__ != '__init__' and o.__name__ not in [fn[0] for fn in connect_internals])
+def parse_docstring(docstring):
+    r = {
+        'description': [],
+        'arguments': [],
+        'keyword_arguments': [],
+        'returns': []
+    }
 
-    return connect_internals + bootstrap_internals
+    current_section = 'description'
+    for line in docstring.splitlines():
+        if 'Returns' in line:
+            current_section = 'returns'
+            continue
+        elif 'Arguments' in line and 'Keyword' not in line:
+            current_section = 'arguments'
+            continue
+        elif 'Keyword Arguments' in line:
+            current_section = 'keyword_arguments'
+            continue
+        else:
+            if len(line.strip()) > 0:
+                r[current_section].append(line.strip())
+
+    return r
 
 
 def write_doc_section(f, docstring, section):
@@ -70,16 +128,14 @@ def write_doc_section(f, docstring, section):
                 # Name | Type | Description | Choices | Default
                 # (default: {'latest'})
                 if '(default: {' in description:
-
                     default = description.split("(default: {")
-
                     default = default[1].replace("})", "").strip()
+
                     if "(choices:" in default:
                         default = default.split('(choices')
                         default = default[0]
 
                     default = default.replace("'", "").replace('"', '')
-
                 else:
                     default = ''
 
@@ -87,7 +143,6 @@ def write_doc_section(f, docstring, section):
                     choices = description.split("(choices: {")
                     choices = choices[1].replace("})", "").strip()
                     choices = choices.replace("'", "").replace('"', '')
-
                 else:
                     choices = ''
 
@@ -113,35 +168,8 @@ def write_doc_section(f, docstring, section):
                 f.write('| {}  | {} |\n'.format(line[0], line[1]))
 
 
-def write_function_links(f, functions):
-    for function in functions:
-        f.write('* [{}]({}.md)\n'.format(function, function))
-
-
-def parse_docstring(docstring):
-    r = {
-        'description': [],
-        'arguments': [],
-        'keyword_arguments': [],
-        'returns': []
-    }
-
-    current_section = 'description'
-    for line in docstring.splitlines():
-        if 'Returns' in line:
-            current_section = 'returns'
-            continue
-        elif 'Arguments' in line and 'Keyword' not in line:
-            current_section = 'arguments'
-            continue
-        elif 'Keyword Arguments' in line:
-            current_section = 'keyword_arguments'
-            continue
-        else:
-            if len(line.strip()) > 0:
-                r[current_section].append(line.strip())
-
-    return r
+def markdown_function_links(functions):
+    return ''.join(map(lambda fn: '* [{}]({}.md)\n'.format(fn, fn), functions))
 
 
 def generate_function_doc(name, obj):
@@ -179,64 +207,49 @@ def generate_function_doc(name, obj):
     markdown.close()
 
 
-def get_module_function_names(module, include_internal=True, exclude=[]):
-    search = inspect.getmembers(module, 
-        lambda o: inspect.isfunction(o) and o.__name__ not in exclude and o.__name__ != '__init__')
-    if not include_internal:
-        search = [fn for fn in search if not is_internal_function(fn[1].__name__)]
+def generate_summary_doc(functions):
+    """ Create the SUMMARY (side navigation) document """
 
-    return [fn[0] for fn in search]
+    md = open('SUMMARY.md', 'w')
 
+    md.write('# Summary\n')
 
-def generate_summary_doc():
-    base_api_functions = [fn[0] for fn in get_base_api_functions()]
-    cluster_functions = get_module_function_names(rubrik_cdm.cluster.Cluster, exclude=base_api_functions)
-    data_management_functions = get_module_function_names(rubrik_cdm.data_management.Data_Management, exclude=base_api_functions)
-    physical_functions = get_module_function_names(rubrik_cdm.physical.Physical, exclude=base_api_functions)
-    cloud_functions = get_module_function_names(rubrik_cdm.cloud.Cloud, exclude=base_api_functions)
-    combined_function_list = base_api_functions + cluster_functions + data_management_functions + physical_functions + cloud_functions
-    connect_functions = get_module_function_names(rubrik_cdm.rubrik_cdm.Connect, exclude=combined_function_list)
-    bootstrap_functions = get_module_function_names(rubrik_cdm.rubrik_cdm.Bootstrap, exclude=combined_function_list+connect_functions)
-    internal_functions = [fn[0] for fn in get_all_internal_functions()]
+    md.write('\n### Getting Started\n\n')
+    md.write('* [Quick Start](README.md)\n')
+    
+    md.write('\n### Base API Calls\n\n')
+    md.write(markdown_function_links([f[0] for f in functions['Api']['public']]))
+    
+    md.write('\n### Bootstrap Functions\n\n')
+    md.write(markdown_function_links([f[0] for f in functions['Bootstrap']['public']]))
+    
+    md.write('\n### Cluster Functions\n\n')
+    md.write(markdown_function_links([f[0] for f in functions['Cluster']['public']]))
+    
+    md.write('\n### Cloud Functions\n\n')
+    md.write(markdown_function_links([f[0] for f in functions['Cloud']['public']]))
+    
+    md.write('\n### Data Management Functions\n\n')
+    md.write(markdown_function_links([f[0] for f in functions['Data_Management']['public']]))
+    
+    md.write('\n### Physical Host Functions\n\n')
+    md.write(markdown_function_links([f[0] for f in functions['Physical']['public']]))
+    
+    md.write('\n### SDK Helper Functions\n\n')
+    md.write(markdown_function_links([f[0] for f in functions['Connect']['public']]))
+    md.write('* [exceptions](exceptions.md)\n')
+    
+    md.write('\n### Internal Functions\n\n')
+    for funcs in functions.values():
+        md.write(markdown_function_links([f[0] for f in funcs['private']]))
 
-    # Create the SUMMARY (side navigation) Document
-
-    markdown = open('SUMMARY.md', 'w')
-    markdown.write('# Summary\n\n')
-
-    markdown.write('### Getting Started\n\n')
-    markdown.write('* [Quick Start](README.md)\n\n')
-
-    markdown.write('### Base API Calls\n')
-    write_function_links(markdown, [f for f in base_api_functions if not is_internal_function(f)])
-
-    markdown.write('\n### Bootstrap Functions\n')
-    write_function_links(markdown, [f for f in bootstrap_functions if not is_internal_function(f)])
-
-    markdown.write('\n### Cluster Functions\n')
-    write_function_links(markdown, cluster_functions)
-
-    markdown.write('\n### Cloud Functions\n')
-    write_function_links(markdown, cloud_functions)
-
-    markdown.write('\n### Data Management Functions\n')
-    write_function_links(markdown, [f for f in data_management_functions if not is_internal_function(f)])
-
-    markdown.write('\n### Physical Host Functions\n')
-    write_function_links(markdown, [f for f in physical_functions if not is_internal_function(f)])
-
-    markdown.write('\n### SDK Helper Functions\n')
-    write_function_links(markdown, [f for f in connect_functions if not is_internal_function(f)])
-
-    markdown.write('\n### Internal Functions\n')
-    write_function_links(markdown, internal_functions)
-
-    markdown.close()
+    md.close()
 
 
 if __name__ == "__main__":
-    sdk_functions = get_all_sdk_functions()
-    for name, obj in sdk_functions:
-        generate_function_doc(name, obj)
-
-    generate_summary_doc()
+    sdk_functions = get_sdk_functions()
+    
+    for funcs in sdk_functions.values():
+        [generate_function_doc(f[0], f[1]) for f in funcs['public']+funcs['private']]
+    
+    generate_summary_doc(sdk_functions)
