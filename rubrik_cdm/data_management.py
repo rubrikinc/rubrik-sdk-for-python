@@ -273,7 +273,7 @@ class Data_Management(Api):
         """Get the ID of a Rubrik object by providing its name.
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location, share})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share})
         Keyword Arguments:
             host_os {str} -- The operating system for the host. (default: {'None'})
             hostname {str} -- The hostname, for Oracle one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db or share.
@@ -299,6 +299,7 @@ class Data_Management(Api):
             'ahv',
             'aws_native',
             'oracle_db',
+            'oracle_host',
             'volume_group',
             'archival_location',
             'share']
@@ -375,6 +376,10 @@ class Data_Management(Api):
                 "api_version": "internal",
                 "api_endpoint": "/oracle/db?name={}".format(object_name)
             },
+            "oracle_host": {
+                "api_version": "internal",
+                "api_endpoint": "/oracle/hierarchy/root/children?name={}".format(object_name)
+            },            
             "volume_group": {
                 "api_version": "internal",
                 "api_endpoint": "/volume_group?is_relic=false"
@@ -456,31 +461,38 @@ class Data_Management(Api):
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
-    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, timeout=30):  # pytest: ignore
+    def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, log_backup_frequency_in_minutes=None, num_channels=4, hostname=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.
         Arguments:
             object_name {str or list} -- The name of the Rubrik object you wish to assign to an SLA Domain. When the 'object_type' is 'volume_group', the object_name can be a list of volumes.
             sla_name {str} -- The name of the SLA Domain you wish to assign an object to. To exclude the object from all SLA assignments use `do not protect` as the `sla_name`. To assign the selected object to the SLA of the next higher level object use `clear` as the `sla_name`.
-            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {vmware, mssql_host, volume_group})
+            object_type {str} -- The Rubrik object type you want to assign to the SLA Domain. (choices: {ahv, mssql_host, oracle_host, vmware, volume_group})
         Keyword Arguments:
-            log_backup_frequency_in_seconds {str} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
-            log_retention_hours {int} -- The MSSQL Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
-            copy_only {int} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
+            log_backup_frequency_in_seconds {int} -- The MSSQL Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`. (default {None})
+            log_retention_hours {int} -- The MSSQL or Oracle Log Retention frequency you'd like to specify with the SLA. Required when the `object_type` is `mssql_host`, `oracle_db` or 'oracle_host'. (default {None})
+            copy_only {bool} -- Take Copy Only Backups with MSSQL. Required when the `object_type` is `mssql_host`. (default {None})
             windows_host {str} -- The name of the Windows host that contains the relevant volume group. Required when the `object_type` is `volume_group`. (default {None})
             nas_host {str} -- The name of the NAS host that contains the relevant share. Required when the `object_type` is `fileset`. (default {None})
             share {str} -- The name of the network share a fileset will be created for. Required when the `object_type` is `fileset`. (default {None})
-            timeout {bool} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+            log_backup_frequency_in_minutes {int} - The Oracle Log Backup frequency you'd like to specify with the SLA. Required when the `object_type` is `oracle_db` or `oracle_host`. (default {None})
+            num_channels {int} - Number of RMAN channels used to backup the Oracle database. Required when the `object_type` is `oracle_host`. (default {"4""})
+            hostname {str} -- The hostname, or one of the hostnames in a RAC cluster, or the RAC cluster name. Required when the object_type is `oracle_db`. (default {None})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             str -- No change required. The vSphere VM '`object_name`' is already assigned to the '`sla_name`' SLA Domain.
             str -- No change required. The MSSQL Instance '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`, log_retention_hours: `log_retention_hours` and copy_only: `copy_only`
+            str -- No change required. The Oracle Database '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_minutes: `log_backup_frequency_in_seconds`, log_retention_hours: `log_retention_hours` and num_channels: `num_channels`.
+            str -- No change required. The Oracle Host '`object_name`' is already assigned to the '`sla_name`' SLA Domain with the following log settings: log_backup_frequency_in_seconds: `log_backup_frequency_in_seconds`. log_retention_hours: `log_retention_hours`, and num_channels: `num_channels`
             str -- No change required. The '`object_name`' volume_group is already assigned to the '`sla_name`' SLA Domain.
             dict -- The full API response for `POST /internal/sla_domain/{sla_id}/assign`.
             dict -- The full API response for `PATCH /internal/volume_group/{id}`.
+            dict -- The full API response for `PATCH /internal/oracle/db/{id}.`
+            dict -- The full API response for `PATCH /internal/oracle/host/{id}`.
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'fileset', 'ahv']
+        valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'fileset', 'ahv', 'oracle_db', 'oracle_host']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -490,6 +502,16 @@ class Data_Management(Api):
             if log_backup_frequency_in_seconds is None or log_retention_hours is None or copy_only is None:
                 raise InvalidParameterException(
                     "When the object_type is 'mssql_host' the 'log_backup_frequency_in_seconds', 'log_retention_hours', 'copy_only' paramaters must be populated.")
+
+        if object_type == "oracle_host":
+            if log_backup_frequency_in_minutes is None or log_retention_hours is None or num_channels is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'oracle_host' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' paramaters must be populated.")                    
+
+        if object_type == "oracle_db":
+            if log_backup_frequency_in_minutes is None or log_retention_hours is None or num_channels is None or hostname is None:
+                raise InvalidParameterException(
+                    "When the object_type is 'oracle_db' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' and 'hostname' paramaters must be populated.")    
 
         if object_type == "fileset":
             if nas_host is None or share is None:
@@ -665,6 +687,94 @@ class Data_Management(Api):
                     "Host ID not found for instance '{}'").format(object_name)
 
             return db_sla_lst
+
+        elif object_type == 'oracle_db':
+
+            oracle_db_id = ''
+
+            self.log('Searching the Rubrik cluster for the current Oracle databases.')
+            oracle_db_id = self.object_id(object_name, object_type, hostname=hostname)
+
+            if(oracle_db_id):
+                self.log(
+                    "assign_sla: Determing the SLA Domain currently assigned to the Oracle Database '{}'.".format(object_name))
+
+                oracle_summary = self.get(
+                    'internal',
+                    '/oracle/db/{}'.format(oracle_db_id),
+                    timeout=timeout)
+
+                if (sla_id == oracle_summary['configuredSlaDomainId'] and log_backup_frequency_in_minutes == oracle_summary['logBackupFrequencyInMinutes'] and
+                        log_retention_hours == oracle_summary['logRetentionHours'] and num_channels == oracle_summary['numChannels']):
+                    return "No change required. The Oracle Database '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
+                            " log_backup_frequency_in_minutes: {}, log_retention_hours: {} and num_channels: {}.".format(
+                                object_name, sla_name, log_backup_frequency_in_minutes, log_retention_hours, num_channels)
+
+                else:
+                    self.log(
+                        "assign_sla: Assigning the Oracle Database '{}' to the '{}' SLA Domain.".format(
+                            object_name, sla_name))
+
+                    config = {}
+                    if log_backup_frequency_in_minutes is not None:
+                        config['logBackupFrequencyInMinutes'] = log_backup_frequency_in_minutes
+                    if log_retention_hours is not None:
+                        config['logRetentionHours'] = log_retention_hours
+                    if num_channels is not None:
+                        config['numChannels'] = num_channels
+
+                    config['configuredSlaDomainId'] = sla_id
+
+                    patch_resp = self.patch("internal", "/oracle/db/{}".format(oracle_db_id), config, timeout)
+            else:
+                raise InvalidParameterException(
+                    "Database ID not found for instance '{}'").format(object_name)
+            
+            return patch_resp
+
+        elif object_type == 'oracle_host':
+
+            host_id = ''
+
+            self.log('Searching the Rubrik cluster for the current Oracle hosts.')
+            host_id = self.object_id(object_name, object_type)
+
+            if(host_id):
+                self.log(
+                    "assign_sla: Determing the SLA Domain currently assigned to the Oracle Host '{}'.".format(object_name))
+
+                oracle_summary = self.get(
+                    'internal',
+                    '/oracle/host/{}'.format(host_id),
+                    timeout=timeout)
+
+                if (sla_id == oracle_summary['configuredSlaDomainId'] and log_backup_frequency_in_minutes == oracle_summary['logBackupFrequencyInMinutes'] and
+                        log_retention_hours == oracle_summary['logRetentionHours'] and num_channels == oracle_summary['numChannels']):
+                    return "No change required. The Oracle Host '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
+                            " log_backup_frequency_in_minutes: {}, log_retention_hours: {} and num_channels: {}.".format(
+                                object_name, sla_name, log_backup_frequency_in_minutes, log_retention_hours, num_channels)
+
+                else:
+                    self.log(
+                        "assign_sla: Assigning the Oracle Host '{}' to the '{}' SLA Domain.".format(
+                            object_name, sla_name))
+
+                    config = {}
+                    if log_backup_frequency_in_minutes is not None:
+                        config['logBackupFrequencyInMinutes'] = log_backup_frequency_in_minutes
+                    if log_retention_hours is not None:
+                        config['logRetentionHours'] = log_retention_hours
+                    if num_channels is not None:
+                        config['numChannels'] = num_channels
+
+                    config['configuredSlaDomainId'] = sla_id
+
+                    patch_resp = self.patch("internal", "/oracle/host/{}".format(host_id), config, timeout)
+            else:
+                raise InvalidParameterException(
+                    "Host ID not found for instance '{}'").format(object_name)
+
+            return patch_resp           
 
         elif object_type == "volume_group":
 
@@ -1367,20 +1477,23 @@ class Data_Management(Api):
         else:
             return start <= point_in_time or point_in_time <= end
 
-    def sql_live_mount(self, db_name, date, time, sql_instance=None, sql_host=None, mount_name=None, timeout=30):  # pylint: ignore
+    def sql_live_mount(self, db_name, sql_instance, sql_host, mount_name, date='latest', time='latest', timeout=30):  # pylint: ignore
         """Live Mount a database from a specified recovery point.
         Arguments:
             db_name {str} -- The name of the database to Live Mount.
-            date {str} -- The recovery_point date to recovery to formated as `Month-Day-Year` (ex: 1-15-2014).
-            time {str} -- The recovery_point time to recovery to formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
-        Keyword Arguments:
             sql_instance {str} -- The SQL instance name with the database you wish to Live Mount.
             sql_host {str} -- The SQL Host of the database/instance to Live Mount.
             mount_name {str} -- The name given to the Live Mounted database i.e. AdventureWorks_Clone.
+        Keyword Arguments:
+            date {str} -- The recovery_point date to recovery to formated as `Month-Day-Year` (ex: 1-15-2014). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
+            time {str} -- The recovery_point time to recovery to formated as `Hour:Minute AM/PM` (ex: 1:30 AM). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             dict -- The full response of `POST /v1/mssql/db/{id}/mount`.
         """
+        if date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
+            raise InvalidParameterException(
+                "The date and time arguments most both be 'latest' or a specific date and time.")
 
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
@@ -1390,7 +1503,7 @@ class Data_Management(Api):
         recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
 
         try:
-            if recovery_point['is_recovery_point'] == False:
+            if not recovery_point['is_recovery_point']:
                 raise InvalidParameterException(
                     "The database '{}' does not have a recovery_point taken on {} at {}.".format(
                         db_name, date, time))
@@ -1533,23 +1646,19 @@ class Data_Management(Api):
                 continue
         return mounted_vm_name
 
-    def _validate_sql_db(self, db_name, sql_instance=None, sql_host=None, timeout=30):  # pylint: ignore
+    def _validate_sql_db(self, db_name, sql_instance, sql_host, timeout=30):  # pylint: ignore
         """Checks whether a database exist on an SQL Instance and Host.
         Arguments:
             db_name {str} -- The name of the database.
-        Keyword Arguments:
             sql_instance {str} -- The SQL instance.
             sql_host {str} -- The SQL server hostname.
+        Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             str -- The ID of the MSSQL database.
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
-
-        if sql_instance is None or sql_host is None:
-            raise InvalidParameterException(
-                "To retrieve live mounts of an mssql database the 'sql_instance' and 'sql_host' paramaters must be populated.")
 
         mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
 
@@ -1617,33 +1726,54 @@ class Data_Management(Api):
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("_validate_sql_recovery_point: Getting the recoverable range for mssql db ID:'{}'.".format(mssql_id))
-        range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
+        is_recovery_point = False
+        if date and time == 'latest':
+            latest_data = self.get('v1', '/mssql/db/{}/snapshot'.format(mssql_id), timeout=timeout)
+            try:
+                latest_date_time = latest_data['data'][0]['date']
+            except:
+                raise InvalidParameterException(
+                    "The database with ID {} does not have any existing snapshots.".format(mssql_id))
+            # Parsing latest snapshot time string value to a datetime object as YYYY-MM-DDTHH:MM
+            data_str = datetime.strptime(latest_date_time[:16], '%Y-%m-%dT%H:%M')
+            # Create date & time strings from datetime object as MM-DD-YYYY & HH:MM AM/PM
+            date_str, time_str = [data_str.strftime('%m-%d-%Y'), data_str.strftime('%I:%M %p')]
+            # Convert the date & time to cluster timezone, see _date_time_conversion function for details
+            recovery_date_time = self._date_time_conversion(date_str, time_str)
+            # Parse again to datetime object
+            recovery_date_time = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
+            # Create recovery timestamp in (ms) as integer from datetime object
+            recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
+            is_recovery_point = True
+        else:
+            self.log("_validate_sql_recovery_point: Getting the recoverable range for db ID:'{}'.".format(mssql_id))
+            range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
 
-        self.log("_validate_sql_recovery_point: Converting the provided date/time into UTC.")
-        recovery_date_time = self._date_time_conversion(date, time)
-        recovery_date_time = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
-        recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
+            self.log("_validate_sql_recovery_point: Converting the provided date/time into UTC.")
+            # Convert the date & time to cluster timezone, see _date_time_conversion function for details
+            recovery_date_time = self._date_time_conversion(date, time)
+            # Parse to datetime object
+            recovery_date_time = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
+            # Create recovery timestamp in (ms) as integer from datetime object
+            recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
 
-        for range in range_summary['data']:
-            startstr = range['beginTime']
-            endstr = range['endTime']
-            startsplit = startstr[:16]
-            endsplit = endstr[:16]
-            start = datetime.strptime(startsplit, '%Y-%m-%dT%H:%M')
-            end = datetime.strptime(endsplit, '%Y-%m-%dT%H:%M')
+            for range in range_summary['data']:
+                start_str, end_str = [range['beginTime'], range['endTime']]
+                # Parsing the range beginTime and endTime values to a datetime object as YYYY-MM-DDTHH:MM
+                start, end = [datetime.strptime(start_str[:16], '%Y-%m-%dT%H:%M'),
+                              datetime.strptime(end_str[:16], '%Y-%m-%dT%H:%M')]
 
-            self.log("_validate_sql_recovery_point: Searching for the provided recovery_point.")
-            is_recovery_point = self._time_in_range(start, end, recovery_date_time)
-            if is_recovery_point == False:
-                continue
-            else:
-                break
-        recovery_point = {}
-        recovery_point['is_recovery_point'] = is_recovery_point
-        recovery_point['recovery_timestamp'] = recovery_timestamp
+                self.log("_validate_sql_recovery_point: Searching for the provided recovery_point.")
+                is_recovery_point = self._time_in_range(start, end, recovery_date_time)
+                if not is_recovery_point:
+                    continue
+                else:
+                    break
 
-        return recovery_point
+        return {
+            "is_recovery_point": is_recovery_point,
+            "recovery_timestamp": recovery_timestamp
+        }
 
     def sql_instant_recovery(self, db_name, date, time, sql_instance=None, sql_host=None, finish_recovery=True, max_data_streams=0, timeout=30):  # pylint: ignore
         """Perform an instant recovery for MSSQL database from a specified recovery point.
