@@ -22,7 +22,6 @@ def put(api_version, api_endpoint, config, timeout=15, authentication=True)
 |------|------------------------------------|
 | dict | The response body of the API call. |
 ## Example
-## Example
 ```py
 import rubrik_cdm
 
