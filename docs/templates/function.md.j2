@@ -1,0 +1,41 @@
+# {{ name }}
+
+{{ description }}
+
+{% if arguments %}
+## Arguments
+
+| Name        | Type | Description                                                                 | Choices |
+|-------------|------|-----------------------------------------------------------------------------|---------|
+{% for arg in arguments %}
+| {{ arg.name }} | {{ arg.type }} | {{ arg.description }} | {{ arg.choices }} |
+{% endfor %}
+{% endif %}
+
+{% if keyword_arguments %}
+## Keyword Arguments
+
+| Name        | Type | Description                                                                 | Choices | Default |
+|-------------|------|-----------------------------------------------------------------------------|---------|---------|
+{% for arg in keyword_arguments %}
+| {{ arg.name }} | {{ arg.type }} | {{ arg.description }} | {{ arg.choices }} | {{ arg.default }} |
+{% endfor %}
+{% endif %}
+
+{% if returns %}
+## Returns
+
+| Type | Return Value                                                                                  |
+|------|-----------------------------------------------------------------------------------------------|
+{% for r in returns %}
+| {{ r.type }} | {{ r.description }} |
+{% endfor %}
+{% endif %}
+
+{% if example -%}
+## Example
+
+```py
+{{ example }}
+```
+{% endif %}
