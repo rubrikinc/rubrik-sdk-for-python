@@ -946,7 +946,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
         }
 
     def mock_post_v1_mysql_db_snapshot():
-        return [{
+        return {
             "id": "string",
             "status": "string",
             "progress": 0,
@@ -962,7 +962,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
                     "rel": "string"
                 }
             ]
-        }]
+        }
 
     mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0"
