@@ -946,7 +946,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
         }
 
     def mock_post_v1_mysql_db_snapshot():
-        return {
+        return [{
             "id": "string",
             "status": "string",
             "progress": 0,
@@ -962,7 +962,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
                     "rel": "string"
                 }
             ]
-        }
+        }]
 
     mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0"
@@ -978,7 +978,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
     mock_post.return_value = mock_post_v1_mysql_db_snapshot()
 
     assert rubrik.on_demand_snapshot("object_name", "mssql_db", sql_host="sql_host", sql_instance="sql_instance", sql_db_type="user", sql_ag=False) == \
-        (mock_post_v1_mysql_db_snapshot(), ["href_string"])
+        (mock_post_v1_mysql_db_snapshot(), "href_string")
 
 
 def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
