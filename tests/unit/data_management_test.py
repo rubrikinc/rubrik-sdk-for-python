@@ -977,11 +977,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
     mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_mysql_db_snapshot()
 
-<<<<<<< HEAD
-    assert rubrik.on_demand_snapshot("object_name", "mssql_db", sql_host="sql_host", sql_instance="sql_instance") == \
-=======
-    assert rubrik.on_demand_snapshot("object_name", "mssql_db", sql_host="sql_host", sql_instance="sql_instance", sql_db_type="user", sql_ag=False) == \
->>>>>>> Fix Unit Test
+    assert rubrik.on_demand_snapshot("object_name", "mssql_db", sql_host="sql_host", sql_instance="sql_instance", sql_db_type="list", sql_ag=False) == \
         (mock_post_v1_mysql_db_snapshot(), "href_string")
 
 
