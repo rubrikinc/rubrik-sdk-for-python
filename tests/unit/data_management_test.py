@@ -946,7 +946,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
         }
 
     def mock_post_v1_mysql_db_snapshot():
-        return [{
+        return {
             "id": "string",
             "status": "string",
             "progress": 0,
@@ -962,7 +962,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
                     "rel": "string"
                 }
             ]
-        }]
+        }
     
     def href_string():
         return [
@@ -984,7 +984,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
     mock_post.return_value = mock_post_v1_mysql_db_snapshot()
     
     assert rubrik.on_demand_snapshot("object_name", "mssql_db", sql_host="sql_host", sql_instance="sql_instance", sql_db_type="user", sql_ag=False) == \
-        (mock_post_v1_mysql_db_snapshot()[0], href_string()[0])
+        (mock_post_v1_mysql_db_snapshot(), href_string()[0])
 
 
 def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
@@ -1189,7 +1189,7 @@ def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
         }
 
     def mock_post_v1_mysql_db_snapshot():
-        return [{
+        return {
             "id": "string",
             "status": "string",
             "progress": 0,
@@ -1205,7 +1205,7 @@ def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
                     "rel": "string"
                 }
             ]
-        }]
+        }
 
     def href_string():
         return [
@@ -1299,7 +1299,7 @@ def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
     mock_post.return_value = mock_post_v1_mysql_db_snapshot()
 
     assert rubrik.on_demand_snapshot("object_name", "mssql_db", "Gold", sql_host="sql_host", sql_instance="sql_instance", sql_db_type="user", sql_ag=False) == \
-        (mock_post_v1_mysql_db_snapshot()[0], href_string()[0])
+        (mock_post_v1_mysql_db_snapshot(), href_string()[0])
 
 
 def test_on_demand_snapshot_physical_host_host_os_not_populated(rubrik, mocker):
