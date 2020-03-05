@@ -429,7 +429,6 @@ class Data_Management(Api):
             else:
                 name_value = 'name'
 
-            host_match = False
             for item in api_request['data']:
                 if object_type == 'oracle_db':
                     if 'standaloneHostName' in item.keys():
