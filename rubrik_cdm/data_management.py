@@ -320,14 +320,17 @@ class Data_Management(Api):
         if object_type == 'oracle_db':
             if hostname is None:
                 raise InvalidParameterException(
-                    "You must provide the host or one of the hosts in a RAC cluster for the Oracle DB object.")
+                    "You must provide the hostname, the RAC cluster name, or one of the hosts in the RAC cluster for the Oracle DB object.")
+            # Regular expression to test for an IP Address.
             regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
                                         25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
                                         25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
                                         25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)'''
+            # Check to make sure the hostname is not an IP address.
             if re.search(regex, hostname):
                 raise InvalidParameterException(
-                    "You must provide the hostname, RAC cluster name or one of the hosts in a RAC cluster for the Oracle DB object. Using an IP is not supported.")
+                    "You must provide the hostname, RAC cluster name or one of the hosts in a RAC cluster for the Oracle DB object. Using an IP address is not supported.")
+            # Remove the domain name if present. Hostnames may be stored with and without domain names. Using just the hostname for a consistent match.
             hostname = hostname.split('.')[0]
 
         if object_type == 'share':
