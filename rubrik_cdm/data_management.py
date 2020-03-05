@@ -276,7 +276,7 @@ class Data_Management(Api):
             object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, volume_group, archival_location, share})
         Keyword Arguments:
             host_os {str} -- The operating system for the host. (default: {'None'})
-            hostname {str} -- The hostname, for Oracle one of the hostnames in the cluster, that the Oracle database is running. Required when the object_type is oracle_db or share.
+            hostname {str} -- The Oracle hostname, Oracle RAC cluster name, or one of the hostnames in the Oracle RAC cluster. Required when the object_type is oracle_db or share. Using the IP is not supported.
             share_type {str} -- The type of NAS share i.e. NFS or SMB
             timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
         Returns:
@@ -321,6 +321,14 @@ class Data_Management(Api):
             if hostname is None:
                 raise InvalidParameterException(
                     "You must provide the host or one of the hosts in a RAC cluster for the Oracle DB object.")
+            regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)'''
+            if re.search(regex, hostname):
+                raise InvalidParameterException(
+                    "You must provide the hostname, RAC cluster name or one of the hosts in a RAC cluster for the Oracle DB object. Using an IP is not supported.")
+            hostname = hostname.split('.')[0]
 
         if object_type == 'share':
             if hostname is None:
@@ -424,27 +432,23 @@ class Data_Management(Api):
             host_match = False
             for item in api_request['data']:
                 if object_type == 'oracle_db':
-                    # Find the oracle_db object with the correct hostName or RAC cluster name. Checks the instances for a match, set the host_match flag if matched.
-                    # Instance names can be stored/entered with and without the domain name so
-                    # we will compare the hostname with the domain.
-                    for instance in item['instances']:
-                        if hostname.split('.')[0] in instance['hostName'] and not host_match:
+                    if 'standaloneHostName' in item.keys():
+                        if hostname == item['standaloneHostName'].split('.')[0]:
                             object_ids.append(item['id'])
-                            host_match = True
-                    # The instance or RAC cluster name can also be in the infraPath
-                    if hostname.split('.')[0] in item['infraPath'] and not host_match:
-                        object_ids.append(item['id'])
-                        host_match = True
+                            break
+                    elif 'racName' in item.keys():
+                        if hostname == item['racName']:
+                            object_ids.append(item['id'])
+                            break
+                        if any(instance['hostName'] == hostname for instance in item['instances']):
+                            object_ids.append(item['id'])
+                            break
                 elif object_type == 'share' and item[name_value] == object_name:
                     if item['hostId'] == host_id:
                         object_ids.append(item['id'])
-                        host_match = True
                 elif item[name_value] == object_name:
                     object_ids.append(item['id'])
-            if object_type == 'oracle_db' and not host_match:
-                raise InvalidParameterException(
-                    "The {} object '{}' on the host '{}' was not found on the Rubrik cluster.".format(object_type, object_name, hostname))
-            elif len(object_ids) > 1:
+            if len(object_ids) > 1:
                 raise InvalidParameterException(
                     "Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(object_type, object_name))
             elif len(object_ids) == 0:
