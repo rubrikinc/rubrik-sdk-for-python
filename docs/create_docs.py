@@ -19,7 +19,13 @@
 #  DEALINGS IN THE SOFTWARE.
 
 import inspect
+
+import jinja2
 import rubrik_cdm
+
+
+def _is_internal_function(name):
+    return name.startswith('_')
 
 
 def get_sdk_functions():
@@ -37,13 +43,18 @@ def get_sdk_functions():
     excluded = ['__init__']
 
     for c in classes:
-        functions = inspect.getmembers(c, lambda o: inspect.isfunction(o) and o.__name__ not in excluded and o.__module__ == c.__module__)
+        functions = inspect.getmembers(c, 
+            lambda o:
+                inspect.isfunction(o) and 
+                o.__name__ not in excluded and 
+                o.__module__ == c.__module__
+        )
         class_functions[c.__name__] = {
             'public': [],
             'private': []
         }
         for f in functions:
-            if is_internal_function(f[0]):
+            if _is_internal_function(f[0]):
                 class_functions[c.__name__]['private'].append(f)
             else:
                 class_functions[c.__name__]['public'].append(f)
@@ -53,7 +64,11 @@ def get_sdk_functions():
 
     included = ['setup_cluster', 'status']
 
-    bootstrap_functions = inspect.getmembers(rubrik_cdm.rubrik_cdm.Bootstrap, lambda o: inspect.isfunction(o) and o.__name__ in included and o.__module__ == 'rubrik_cdm.rubrik_cdm')
+    bootstrap_functions = inspect.getmembers(rubrik_cdm.rubrik_cdm.Bootstrap, 
+        lambda o: inspect.isfunction(o) and 
+                  o.__name__ in included and 
+                  o.__module__ == 'rubrik_cdm.rubrik_cdm'
+    )
     class_functions['Bootstrap'] = {
         'public': bootstrap_functions,
         'private': []
@@ -62,12 +77,91 @@ def get_sdk_functions():
     return class_functions
 
 
-def function_signature(fn):
-    return fn.__name__ + str(inspect.signature(fn)).replace('self, ', '')
+def _parse_arguments(docstring):
+    arguments = []
+
+    for line in docstring:
+        line = line.replace(' -- ', '').strip().split('}', 1)
+        value_type = line[0].split('{', 1)
+
+        if value_type[0] is not '':
+            function_name = value_type[0]
+            python_type = value_type[1]
+            description = line[1]
+
+            if '(choices: {' in description:
+                choices = description.split("(choices: {")
+                choices = choices[1].replace("})", "").strip()
+
+                description = description.split("(choices: {")
+                description = description[0]
+            else:
+                choices = ''
+            
+            arguments.append({
+                'name': function_name,
+                'type': python_type,
+                'description': description,
+                'choices': choices
+            })
+
+    return arguments
 
 
-def is_internal_function(name):
-    return name.startswith('_')
+def _parse_keyword_arguments(docstring):
+    keyword_arguments = []
+
+    for line in docstring:
+        line = line.replace(' -- ', '').strip().split('}', 1)
+        value_type = line[0].split('{', 1)
+        if value_type[0] is not '':
+            name = value_type[0]
+            python_type = value_type[1]
+            description = line[1]
+
+            if '(default: {' in description:
+                default = description.split("(default: {")
+                default = default[1].replace("})", "").strip()
+
+                if "(choices:" in default:
+                    default = default.split('(choices')
+                    default = default[0]
+
+                default = default.replace("'", "").replace('"', '')
+            else:
+                default = ''
+
+            if '(choices: {' in description:
+                choices = description.split("(choices: {")
+                choices = choices[1].replace("})", "").strip()
+                choices = choices.replace("'", "").replace('"', '')
+            else:
+                choices = ''
+
+            if '(default: {' in description:
+                description = description.split("(default: {")
+                description = description[0]
+
+            keyword_arguments.append({
+                'name': name,
+                'type': python_type,
+                'description': description,
+                'choices': choices,
+                'default': default
+            })
+
+    return keyword_arguments
+
+
+def _parse_return_values(docstring):
+    return_values = []
+
+    for line in docstring:
+        line = line.strip().split(' -- ', 1)
+        if line[0] is not '':
+            return_values.append({'type': line[0], 'description': line[1]})
+
+    return return_values
 
 
 def parse_docstring(docstring):
@@ -93,177 +187,74 @@ def parse_docstring(docstring):
             if len(line.strip()) > 0:
                 sections[current_section].append(line.strip())
 
-    return sections
+    return {
+        'description': ' '.join(sections['description']),
+        'arguments': _parse_arguments(sections['arguments']),
+        'keyword_arguments': _parse_keyword_arguments(sections['keyword_arguments']),
+        'returns': _parse_return_values(sections['returns'])
+    }
 
 
-def markdown_function_description(docstring):
-    return ' '.join(docstring) + '\n'
-
-
-def markdown_function_arguments(docstring):
-    md = ''
-
-    for line in docstring:
-        line = line.replace(' -- ', '').strip().split('}', 1)
-        value_type = line[0].split('{', 1)
-
-        if value_type[0] is not '':
-            function_name = value_type[0]
-            python_type = value_type[1]
-            description = line[1]
-
-            # Name | Type | Description | Choices |
-            if '(choices: {' in description:
-                choices = description.split("(choices: {")
-                choices = choices[1].replace("})", "").strip()
-
-                description = description.split("(choices: {")
-                description = description[0]
-            else:
-                choices = ''
-            
-            md += '| {} | {}  | {} |    {}     |\n'.format(function_name, python_type, description, choices)
-
-    return md
-
-
-def markdown_function_keyword_arguments(docstring):
-    md = ''
-
-    for line in docstring:
-        line = line.replace(' -- ', '').strip().split('}', 1)
-        value_type = line[0].split('{', 1)
-        if value_type[0] is not '':
-            name = value_type[0]
-            python_type = value_type[1]
-            description = line[1]
-
-            # Name | Type | Description | Choices | Default
-            # (default: {'latest'})
-            if '(default: {' in description:
-                default = description.split("(default: {")
-                default = default[1].replace("})", "").strip()
-
-                if "(choices:" in default:
-                    default = default.split('(choices')
-                    default = default[0]
-
-                default = default.replace("'", "").replace('"', '')
-            else:
-                default = ''
-
-            if '(choices: {' in description:
-                choices = description.split("(choices: {")
-                choices = choices[1].replace("})", "").strip()
-                choices = choices.replace("'", "").replace('"', '')
-            else:
-                choices = ''
-
-            if '(default: {' in description:
-                description = description.split("(default: {")
-                description = description[0]
-
-            md += '| {} | {}  | {} |    {}     |    {}     |\n'.format(name, python_type, description, choices, default)
-
-    return md
-
-
-def markdown_function_returns(docstring):
-    md  = '| Type | Return Value                                                                                   |\n'
-    md += '|------|-----------------------------------------------------------------------------------------------|\n'
-    for line in docstring:
-        line = line.strip().split(' -- ', 1)
-        if line[0] is not '':
-            md += '| {}  | {} |\n'.format(line[0], line[1])
-    
-    return md
-
-
-def markdown_function_links(functions, sort=False):
-    if sort:
-        functions = sorted(functions, key=lambda f: f[0])
-
-    return ''.join(map(lambda fn: '* [{}]({}.md)\n'.format(fn[0], fn[0]), functions))
-
-
-def generate_function_doc(name, obj):
+def generate_function_doc(env, name, obj):
     sections = parse_docstring(obj.__doc__)
     
-    md = open('{}.md'.format(name), 'w')
-    md.write('# {}\n\n'.format(name))
-
-    md.write(markdown_function_description(sections['description']))
-
-    if sections['arguments']:
-        md.write('## Arguments\n')
-        md.write('| Name        | Type | Description                                                                 | Choices |\n')
-        md.write('|-------------|------|-----------------------------------------------------------------------------|---------|\n')
-        md.write(markdown_function_arguments(sections['arguments']))
-    
-    if sections['keyword_arguments']:
-        md.write('## Keyword Arguments\n')
-        md.write('| Name        | Type | Description                                                                 | Choices | Default |\n')
-        md.write('|-------------|------|-----------------------------------------------------------------------------|---------|---------|\n')
-        md.write(markdown_function_keyword_arguments(sections['keyword_arguments']))
-
-    if sections['returns']:
-        md.write('\n## Returns\n')
-        md.write(markdown_function_returns(sections['returns']))
-
-    if not is_internal_function(name):
+    example_code = None
+    if not _is_internal_function(name):
         with open("../sample/{}.py".format(name)) as code:
             example_code = code.read()
-        md.write("## Example\n```py\n{0}```".format(example_code))
 
-    md.close()
+    template = env.get_template('function.md.j2')
+
+    with open('{}.md'.format(name), 'w') as md:
+        md.write(template.render(
+            name=name, 
+            description=sections['description'],
+            arguments=sections['arguments'],
+            keyword_arguments=sections['keyword_arguments'],
+            returns=sections['returns'],
+            example=example_code
+        ))
 
 
-def generate_summary_doc(functions):
-    md = open('SUMMARY.md', 'w')
+def _sorted(functions):
+    return sorted(functions, key=lambda f: f[0])
 
-    md.write('# Summary\n')
 
-    md.write('\n### Getting Started\n\n')
-    md.write('* [Quick Start](README.md)\n')
-    
-    md.write('\n### Base API Calls\n\n')
-    md.write(markdown_function_links(functions['Api']['public'], sort=True))
-    
-    md.write('\n### Bootstrap Functions\n\n')
-    md.write(markdown_function_links(functions['Bootstrap']['public'], sort=True))
-    
-    md.write('\n### Cluster Functions\n\n')
-    md.write(markdown_function_links(functions['Cluster']['public'], sort=True))
-    
-    md.write('\n### Cloud Functions\n\n')
-    md.write(markdown_function_links(functions['Cloud']['public'], sort=True))
-    
-    md.write('\n### Data Management Functions\n\n')
-    md.write(markdown_function_links(functions['Data_Management']['public'], sort=True))
-    
-    md.write('\n### Physical Host Functions\n\n')
-    md.write(markdown_function_links(functions['Physical']['public'], sort=True))
-    
-    md.write('\n### SDK Helper Functions\n\n')
-    md.write(markdown_function_links(functions['Connect']['public'], sort=True))
-    md.write('* [exceptions](exceptions.md)\n')
-    
-    md.write('\n### Internal Functions\n\n')
+def generate_summary_doc(env, functions):
     all_internal_functions = []
     for fns in functions.values():
         all_internal_functions += fns['private']
-    md.write(markdown_function_links(all_internal_functions, sort=True))
 
-    md.close()
+    template = env.get_template('SUMMARY.md.j2')
+
+    with open('SUMMARY.md', 'w') as md:
+        md.write(template.render(
+            base_functions=_sorted(functions['Api']['public']), 
+            bootstrap_functions=_sorted(functions['Bootstrap']['public']),
+            cluster_functions=_sorted(functions['Cluster']['public']),
+            cloud_functions=_sorted(functions['Cloud']['public']),
+            data_management_functions=_sorted(functions['Data_Management']['public']),
+            physical_functions=_sorted(functions['Physical']['public']),
+            helper_functions=_sorted(functions['Connect']['public']),
+            internal_functions=_sorted(all_internal_functions)
+        ))
 
 
 if __name__ == "__main__":
+    # Create template environment
+    env = jinja2.Environment(
+        loader=jinja2.PackageLoader('create_docs', 'templates'),
+        trim_blocks=True,
+        lstrip_blocks=True
+    )
+
+    # Get all functions defined in the SDK, both public and internal ones
     sdk_functions = get_sdk_functions()
 
     # Generate the function documentation files
     for class_fns in sdk_functions.values():
         for fn in (class_fns['public'] + class_fns['private']):
-            generate_function_doc(fn[0], fn[1])
+            generate_function_doc(env, fn[0], fn[1])
     
     # Generate the summary (side navigation) file
-    generate_summary_doc(sdk_functions)
+    generate_summary_doc(env, sdk_functions)
