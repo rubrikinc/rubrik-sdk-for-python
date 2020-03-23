@@ -211,12 +211,25 @@ def parse_docstring(docstring):
 
 
 def generate_function_doc(env, name, obj):
+    skip = ['setup_cluster']
+    # Don't generate docs for functions with custom documentation
+    if name in skip:
+        log.debug('Skipping function documentation for {}'.format(name))
+        return
+
     sections = parse_docstring(obj.__doc__)
+
+    # Grab the function definition, removing whitepsace and any pylint directives
+    funcdef = inspect.getsource(obj).partition('\n')[0]
+    funcdef = funcdef.partition('#')[0].strip()
     
+    if funcdef == "@staticmethod":
+        funcdef = ""
+
     example_code = None
     template = env.get_template('function.md.j2')
 
-    log.debug('Generating function code for {}'.format(name))
+    log.debug('Generating function documentation for {}'.format(name))
     try:
         if not _is_internal_function(name):
             with open("../sample/{}.py".format(name)) as code:
@@ -226,7 +239,8 @@ def generate_function_doc(env, name, obj):
         log.debug('Skipping code example for {}'.format(name))
         with open('{}.md'.format(name), 'w') as md:
             md.write(template.render(
-                name=name, 
+                name=name,
+                funcdef=funcdef, 
                 description=sections['description'],
                 arguments=sections['arguments'],
                 keyword_arguments=sections['keyword_arguments'],
@@ -236,7 +250,8 @@ def generate_function_doc(env, name, obj):
     else:
         with open('{}.md'.format(name), 'w') as md:
             md.write(template.render(
-                name=name, 
+                name=name,
+                funcdef=funcdef,
                 description=sections['description'],
                 arguments=sections['arguments'],
                 keyword_arguments=sections['keyword_arguments'],
