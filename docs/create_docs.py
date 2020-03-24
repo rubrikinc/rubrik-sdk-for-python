@@ -22,7 +22,17 @@ import inspect
 
 import jinja2
 import rubrik_cdm
+import logging
 
+# Define the logging params
+console_output_handler = logging.StreamHandler()
+formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] -- %(message)s")
+console_output_handler.setFormatter(formatter)
+
+log = logging.getLogger(__name__)
+log.addHandler(console_output_handler)
+# Uncomment to enable debug logging
+# log.setLevel(logging.DEBUG)
 
 def _is_internal_function(name):
     return name.startswith('_')
@@ -159,9 +169,13 @@ def _parse_return_values(docstring):
     for line in docstring:
         line = line.strip().split(' -- ', 1)
         if line[0] is not '':
-            return_values.append({'type': line[0], 'description': line[1]})
-
-    return return_values
+            try:
+                return_values.append({'type': line[0], 'description': line[1]})
+            except:
+                log.debug("Found malformed section")
+                return ""
+            else:
+                return return_values
 
 
 def parse_docstring(docstring):
@@ -172,6 +186,7 @@ def parse_docstring(docstring):
         'returns': []
     }
 
+    #log.debug('Parsing: {}'.format(docstring))
     current_section = 'description'
     for line in docstring.splitlines():
         if 'Returns' in line:
@@ -196,24 +211,54 @@ def parse_docstring(docstring):
 
 
 def generate_function_doc(env, name, obj):
-    sections = parse_docstring(obj.__doc__)
-    
-    example_code = None
-    if not _is_internal_function(name):
-        with open("../sample/{}.py".format(name)) as code:
-            example_code = code.read()
+    skip = ['setup_cluster']
+    # Don't generate docs for functions with custom documentation
+    if name in skip:
+        log.debug('Skipping function documentation for {}'.format(name))
+        return
 
+    sections = parse_docstring(obj.__doc__)
+
+    # Grab the function definition, removing whitepsace and any pylint directives
+    funcdef = inspect.getsource(obj).partition('\n')[0]
+    funcdef = funcdef.partition('#')[0].strip()
+    
+    if funcdef == "@staticmethod":
+        funcdef = ""
+
+    example_code = None
     template = env.get_template('function.md.j2')
 
-    with open('{}.md'.format(name), 'w') as md:
-        md.write(template.render(
-            name=name, 
-            description=sections['description'],
-            arguments=sections['arguments'],
-            keyword_arguments=sections['keyword_arguments'],
-            returns=sections['returns'],
-            example=example_code
-        ))
+    log.debug('Generating function documentation for {}'.format(name))
+    try:
+        if not _is_internal_function(name):
+            with open("../sample/{}.py".format(name)) as code:
+                example_code = code.read()
+    except Exception as err:
+        log.debug(err)
+        log.debug('Skipping code example for {}'.format(name))
+        with open('{}.md'.format(name), 'w') as md:
+            md.write(template.render(
+                name=name,
+                funcdef=funcdef, 
+                description=sections['description'],
+                arguments=sections['arguments'],
+                keyword_arguments=sections['keyword_arguments'],
+                returns=sections['returns'],
+                example=""
+            ))
+    else:
+        with open('{}.md'.format(name), 'w') as md:
+            md.write(template.render(
+                name=name,
+                funcdef=funcdef,
+                description=sections['description'],
+                arguments=sections['arguments'],
+                keyword_arguments=sections['keyword_arguments'],
+                returns=sections['returns'],
+                example=example_code
+            ))
+    log.debug('Wrote {}.md'.format(name))
 
 
 def _sorted(functions):

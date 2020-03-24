@@ -2,6 +2,12 @@
 
 {{ description }}
 
+{% if funcdef != "" %}
+```py
+{{ funcdef }}
+```
+{% endif %}
+
 {% if arguments %}
 ## Arguments
 
