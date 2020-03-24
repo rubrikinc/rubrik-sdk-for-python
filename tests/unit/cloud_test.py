@@ -380,7 +380,7 @@ def test_aws_s3_cloudon_idempotence(rubrik, mocker):
     mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_archive_object_store()
 
-    assert rubrik.aws_s3_cloudon("archive_name", "vpc_id", "subnet_id", "security_group_id") \
+    assert rubrik.aws_s3_cloudon("archive_name", "vpc_id", "subnet_id", "security_group_id", True) \
         == "No change required. The 'archive_name' archival location is already configured for CloudOn."
 
 
@@ -420,6 +420,45 @@ def test_aws_s3_cloudon_archive_name_not_found(rubrik, mocker):
 
     assert error_message == "The Rubrik cluster does not have an archive location named 'archive_name'."
 
+def test_aws_s3_cloudon_update_enable_consolidation(rubrik, mocker):
+
+    def mock_get_internal_archive_object_store():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "polarisManagedId": "string",
+                    "definition": {
+                        "objectStoreType": "S3",
+                        "name": "archive_name",
+                        "accessKey": "aws_access_key",
+                        "bucket": "awsbucketname",
+                        "defaultRegion": "ap-south-1",
+                        "isComputeEnabled": True,
+                        "isConsolidationEnabled": True,
+                        "storageClass": "STANDARD",
+                        "encryptionType": "RSA_KEY_ENCRYPTION"
+                    },
+
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_patch_internal_archive_object_store():
+        return {
+            "jobInstanceId": "string"
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_archive_object_store()
+
+    mock_patch = mocker.patch('rubrik_cdm.Connect.patch', autospec=True, spec_set=True)
+    mock_patch.return_value = mock_patch_internal_archive_object_store()
+
+    assert rubrik.aws_s3_cloudon("archive_name", "vpc_id", "subnet_id", "security_group_id") \
+        == mock_patch_internal_archive_object_store()
 
 def test_aws_s3_cloudon(rubrik, mocker):
 
@@ -460,6 +499,7 @@ def test_aws_s3_cloudon(rubrik, mocker):
 
     assert rubrik.aws_s3_cloudon("archive_name", "vpc_id", "subnet_id", "security_group_id") \
         == mock_patch_internal_archive_object_store()
+
 
 
 @pytest.mark.parametrize('container', ["_", "/", "*", "?", "%", ".", ":", "|", "<", ">"])
