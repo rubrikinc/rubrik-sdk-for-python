@@ -1,372 +1,305 @@
+# Copyright 2018 Rubrik, Inc.
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
+
 import inspect
+
+import jinja2
 import rubrik_cdm
-import os
-import sys
-import reprlib
+import logging
+
+# Define the logging params
+console_output_handler = logging.StreamHandler()
+formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] -- %(message)s")
+console_output_handler.setFormatter(formatter)
+
+log = logging.getLogger(__name__)
+log.addHandler(console_output_handler)
+# Uncomment to enable debug logging
+# log.setLevel(logging.DEBUG)
+
+def _is_internal_function(name):
+    return name.startswith('_')
 
 
-def print_doc_string(doc_string, section):
+def get_sdk_functions():
+    classes = [
+        rubrik_cdm.api.Api,
+        rubrik_cdm.cloud.Cloud, 
+        rubrik_cdm.cluster.Cluster, 
+        rubrik_cdm.data_management.Data_Management, 
+        rubrik_cdm.physical.Physical,
+        rubrik_cdm.rubrik_cdm.Connect,
+    ]
 
-    if section is 'arguments':
-        for line in doc_string:
-            line = line.replace(' -- ', '').strip().split('}', 1)
-            value_type = line[0].split('{', 1)
-            if value_type[0] is not '':
-                function_name = value_type[0]
-                python_type = value_type[1]
-                description = line[1]
-                # Name | Type | Description | Choices |
-                if '(choices: {' in description:
-                    choices = description.split("(choices: {")
-                    choices = choices[1].replace("})", "").strip()
+    class_functions = {}
 
-                    description = description.split("(choices: {")
-                    description = description[0]
+    excluded = ['__init__']
 
-                else:
-                    choices = ''
-                markdown.write('| {} | {}  | {} |    {}     |\n'.format(
-                    function_name, python_type, description, choices))
-
-    elif section is 'keyword_arguments':
-        for line in doc_string:
-            line = line.replace(' -- ', '').strip().split('}', 1)
-            value_type = line[0].split('{', 1)
-            if value_type[0] is not '':
-                name = value_type[0]
-                python_type = value_type[1]
-                description = line[1]
-                # Name | Type | Description | Choices | Default
-                # (default: {'latest'})
-                if '(default: {' in description:
-
-                    default = description.split("(default: {")
-
-                    default = default[1].replace("})", "").strip()
-                    if "(choices:" in default:
-                        default = default.split('(choices')
-                        default = default[0]
-
-                    default = default.replace("'", "").replace('"', '')
-
-                else:
-                    default = ''
-
-                if '(choices: {' in description:
-                    choices = description.split("(choices: {")
-                    choices = choices[1].replace("})", "").strip()
-                    choices = choices.replace("'", "").replace('"', '')
-
-                else:
-                    choices = ''
-
-                if '(default: {' in description:
-                    description = description.split("(default: {")
-                    description = description[0]
-
-                markdown.write('| {} | {}  | {} |    {}     |    {}     |\n'.format(
-                    name, python_type, description, choices, default))
-
-    elif section is 'description':
-        for line in doc_string:
-            markdown.write(line)
-        markdown.write('\n')
-    elif section is 'returns':
-        markdown.write(
-            '| Type | Return Value                                                                                   |\n')
-        markdown.write(
-            '|------|-----------------------------------------------------------------------------------------------|\n')
-        for line in doc_string:
-            line = line.strip().split(' -- ', 1)
-
-            if line[0] is not '':
-                markdown.write('| {}  | {} |\n'.format(line[0], line[1]))
+    for c in classes:
+        functions = inspect.getmembers(c, 
+            lambda o:
+                inspect.isfunction(o) and 
+                o.__name__ not in excluded and 
+                o.__module__ == c.__module__
+        )
+        class_functions[c.__name__] = {
+            'public': [],
+            'private': []
+        }
+        for f in functions:
+            if _is_internal_function(f[0]):
+                class_functions[c.__name__]['private'].append(f)
+            else:
+                class_functions[c.__name__]['public'].append(f)
 
 
-def doc_string_description(doc_string):
-    for index, line in enumerate(doc_string):
-        if not line.strip():
-            return index
+    # Special care for the Bootstrap class due to it's current design
+
+    included = ['setup_cluster', 'status']
+
+    bootstrap_functions = inspect.getmembers(rubrik_cdm.rubrik_cdm.Bootstrap, 
+        lambda o: inspect.isfunction(o) and 
+                  o.__name__ in included and 
+                  o.__module__ == 'rubrik_cdm.rubrik_cdm'
+    )
+    class_functions['Bootstrap'] = {
+        'public': bootstrap_functions,
+        'private': []
+    }
+
+    return class_functions
 
 
-def doc_string_ending(doc_string):
-    ending_lines = []
-    for index, line in enumerate(doc_string):
-        if not line.strip():
-            ending_lines.append(index)
+def _parse_arguments(docstring):
+    arguments = []
 
-    return ending_lines
+    for line in docstring:
+        line = line.replace(' -- ', '').strip().split('}', 1)
+        value_type = line[0].split('{', 1)
 
+        if value_type[0] is not '':
+            function_name = value_type[0]
+            python_type = value_type[1]
+            description = line[1]
 
-def doc_string_end_block(ending_lines, starting_line):
-    for index in ending_lines:
-        if index > starting_line:
-            return index
+            if '(choices: {' in description:
+                choices = description.split("(choices: {")
+                choices = choices[1].replace("})", "").strip()
 
+                description = description.split("(choices: {")
+                description = description[0]
+            else:
+                choices = ''
+            
+            arguments.append({
+                'name': function_name,
+                'type': python_type,
+                'description': description,
+                'choices': choices
+            })
 
-def example_code(function_name):
-    print()
-
-
-connect_functions = inspect.getmembers(rubrik_cdm.Connect, inspect.isfunction)
-bootstrap_functions_all = inspect.getmembers(rubrik_cdm.Bootstrap, inspect.isfunction)
-
-bootstrap_functions = []
-for function in bootstrap_functions_all:
-    if 'setup_cluster' in function or 'status' in function and 'job_status' not in function:
-        bootstrap_functions.append(function)
-rubrk_sdk_functions = connect_functions + bootstrap_functions
-
-# rubrk_sdk_functions = connect_functions + bootstrap_functions
-# rubrk_sdk_functions = inspect.getmembers(rubrik.Connect, inspect.isfunction)
-function_examples = {}
-function_documentation = {}
-
-for function in rubrk_sdk_functions:
-
-    function_documentation[function[0]] = function[1].__doc__
-
-    function_code = inspect.getsource(function[1])
-
-    if '@staticmethod' in function_code:
-        function_code = function_code.replace('@staticmethod\n', '')
-        function_code = function_code.splitlines()[0].replace(
-            'self, ', '').replace('self', '').replace(':', '').strip()
-
-    else:
-        function_code = function_code.splitlines()[0].replace(
-            'self, ', '').replace('self', '').replace(':', '').strip()
-
-    function_examples[function[0]] = function_code
+    return arguments
 
 
-for function_name, function_doc_string in function_documentation.items():
+def _parse_keyword_arguments(docstring):
+    keyword_arguments = []
 
-    # print(function_name)
+    for line in docstring:
+        line = line.replace(' -- ', '').strip().split('}', 1)
+        value_type = line[0].split('{', 1)
+        if value_type[0] is not '':
+            name = value_type[0]
+            python_type = value_type[1]
+            description = line[1]
 
-    if 'init' not in function_name:
-        arguments_start = None
-        keyword_argument_start = None
-        return_start = None
-        arguments_present = False
-        arguments_present = False
+            if '(default: {' in description:
+                default = description.split("(default: {")
+                default = default[1].replace("})", "").strip()
 
-        markdown = open('{}.md'.format(function_name), 'w')
-        markdown.write('# {}\n\n'.format(function_name))
+                if "(choices:" in default:
+                    default = default.split('(choices')
+                    default = default[0]
 
-        doc_string = function_documentation[function_name]
-        doc_string = doc_string.splitlines()
+                default = default.replace("'", "").replace('"', '')
+            else:
+                default = ''
 
-        description_start = doc_string_description(doc_string)
-        ending_lines = doc_string_ending(doc_string)
+            if '(choices: {' in description:
+                choices = description.split("(choices: {")
+                choices = choices[1].replace("})", "").strip()
+                choices = choices.replace("'", "").replace('"', '')
+            else:
+                choices = ''
 
-        for index, line in enumerate(doc_string):
-            if 'Arguments' in line and 'Keyword' not in line:
-                arguments_start = index
-            if 'Keyword Arguments' in line:
-                keyword_argument_start = index
-            if 'Returns' in line:
-                return_start = index
+            if '(default: {' in description:
+                description = description.split("(default: {")
+                description = description[0]
 
-        description = []
-        arguments = []
-        keyword_arguments = []
-        returns = []
+            keyword_arguments.append({
+                'name': name,
+                'type': python_type,
+                'description': description,
+                'choices': choices,
+                'default': default
+            })
 
-        # # Doc Sring Returns
-        for index, line in enumerate(doc_string):
-            # Parse the function description
-            if index < description_start:
-                if len(line) is not 0:
-                    description.append(line.replace('\n', ''))
+    return keyword_arguments
 
+
+def _parse_return_values(docstring):
+    return_values = []
+
+    for line in docstring:
+        line = line.strip().split(' -- ', 1)
+        if line[0] is not '':
             try:
-                if arguments_start:
-                    argument_ending = doc_string_end_block(ending_lines, arguments_start)
-                    if arguments_start + 1 <= index <= argument_ending - 1:
-                        if len(line) is not 0:
-                            arguments.append(line)
-                    arguments_present = True
+                return_values.append({'type': line[0], 'description': line[1]})
+            except:
+                log.debug("Found malformed section")
+                return ""
+            else:
+                return return_values
 
-            except NameError:
-                pass
 
-            try:
-                if keyword_argument_start:
-                    keyword_argument_ending = doc_string_end_block(ending_lines, keyword_argument_start)
-                    if keyword_argument_start + 1 <= index <= keyword_argument_ending - 1:
-                        if len(line) is not 0:
-                            keyword_arguments.append(line)
-                    arguments_present = True
+def parse_docstring(docstring):
+    sections = {
+        'description': [],
+        'arguments': [],
+        'keyword_arguments': [],
+        'returns': []
+    }
 
-            except NameError:
-                pass
+    #log.debug('Parsing: {}'.format(docstring))
+    current_section = 'description'
+    for line in docstring.splitlines():
+        if 'Returns' in line:
+            current_section = 'returns'
+            continue
+        elif 'Arguments' in line and 'Keyword' not in line:
+            current_section = 'arguments'
+            continue
+        elif 'Keyword Arguments' in line:
+            current_section = 'keyword_arguments'
+            continue
+        else:
+            if len(line.strip()) > 0:
+                sections[current_section].append(line.strip())
 
-            try:
-                if return_start:
-                    return_ending = doc_string_end_block(ending_lines, return_start)
-                    if return_start + 1 <= index <= return_ending - 1:
-                        if len(line) is not 0:
-                            returns.append(line)
-            except NameError:
-                pass
+    return {
+        'description': ' '.join(sections['description']),
+        'arguments': _parse_arguments(sections['arguments']),
+        'keyword_arguments': _parse_keyword_arguments(sections['keyword_arguments']),
+        'returns': _parse_return_values(sections['returns'])
+    }
 
-        if len(description) > 1:
-            # Combine the multi-line description into a single line
-            parse_description = ''.join(description).split()
-            parse_description = ' '.join(parse_description)
-            description = []
-            description.append(parse_description)
-        print_doc_string(description, 'description')
 
-        for function, function_code_example in function_examples.items():
-            if function_name is function:
-                markdown.write('```py\n')
-                markdown.write(function_code_example)
-                markdown.write('\n```\n\n')
+def generate_function_doc(env, name, obj):
+    skip = ['setup_cluster']
+    # Don't generate docs for functions with custom documentation
+    if name in skip:
+        log.debug('Skipping function documentation for {}'.format(name))
+        return
 
-        if arguments:
-            markdown.write('## Arguments\n')
+    sections = parse_docstring(obj.__doc__)
 
-            markdown.write(
-                '| Name        | Type | Description                                                                 | Choices |\n')
-            markdown.write(
-                '|-------------|------|-----------------------------------------------------------------------------|---------|\n')
-            print_doc_string(arguments, 'arguments')
+    # Grab the function definition, removing whitepsace and any pylint directives
+    funcdef = inspect.getsource(obj).partition('\n')[0]
+    funcdef = funcdef.partition('#')[0].strip()
+    
+    if funcdef == "@staticmethod":
+        funcdef = ""
 
-        if keyword_arguments:
-            markdown.write('## Keyword Arguments\n')
+    example_code = None
+    template = env.get_template('function.md.j2')
 
-            markdown.write(
-                '| Name        | Type | Description                                                                 | Choices | Default |\n')
-            markdown.write(
-                '|-------------|------|-----------------------------------------------------------------------------|---------|---------|\n')
-            print_doc_string(keyword_arguments, 'keyword_arguments')
-
-        if returns:
-            markdown.write('\n## Returns\n')
-            print_doc_string(returns, 'returns')
-
-        if function_name[0] is not '_':
-            with open("../sample/{}.py".format(function_name)) as code:
+    log.debug('Generating function documentation for {}'.format(name))
+    try:
+        if not _is_internal_function(name):
+            with open("../sample/{}.py".format(name)) as code:
                 example_code = code.read()
-            markdown.write('## Example\n')
-            markdown.write("```py\n")
-            markdown.write(example_code)
-            markdown.write("```")
-
-        markdown.close()
-
-
-base_api_functions_search = inspect.getmembers(rubrik_cdm.api.Api, inspect.isfunction)
-base_api_functions = []
-for function in base_api_functions_search:
-    # If first character of the function name...
-    base_api_functions.append(function[0])
-del base_api_functions[0]
-
-cluster_functions_search = inspect.getmembers(rubrik_cdm.cluster.Cluster, inspect.isfunction)
-cluster_functions = []
-for function in cluster_functions_search:
-    if function[0] not in base_api_functions:
-        cluster_functions.append(function[0])
-for function in cluster_functions:
-    if function[0] is '_':
-        cluster_functions.remove(function)
-
-data_management_search = inspect.getmembers(rubrik_cdm.data_management.Data_Management, inspect.isfunction)
-data_management_functions = []
-for function in data_management_search:
-    if function[0] not in base_api_functions:
-        data_management_functions.append(function[0])
-for function in data_management_functions:
-    if function[0] is '_':
-        data_management_functions.remove(function)
-
-physical_search = inspect.getmembers(rubrik_cdm.physical.Physical, inspect.isfunction)
-physical_functions = []
-for function in physical_search:
-    if function[0] not in base_api_functions:
-        physical_functions.append(function[0])
-for function in physical_functions:
-    if function[0] is '_':
-        physical_functions.remove(function)
-
-cloud_search = inspect.getmembers(rubrik_cdm.cloud.Cloud, inspect.isfunction)
-cloud_functions = []
-for function in cloud_search:
-    if function[0] not in base_api_functions:
-        cloud_functions.append(function[0])
-for function in cloud_functions:
-    if function[0] is '_':
-        cloud_functions.remove(function)
+    except Exception as err:
+        log.debug(err)
+        log.debug('Skipping code example for {}'.format(name))
+        with open('{}.md'.format(name), 'w') as md:
+            md.write(template.render(
+                name=name,
+                funcdef=funcdef, 
+                description=sections['description'],
+                arguments=sections['arguments'],
+                keyword_arguments=sections['keyword_arguments'],
+                returns=sections['returns'],
+                example=""
+            ))
+    else:
+        with open('{}.md'.format(name), 'w') as md:
+            md.write(template.render(
+                name=name,
+                funcdef=funcdef,
+                description=sections['description'],
+                arguments=sections['arguments'],
+                keyword_arguments=sections['keyword_arguments'],
+                returns=sections['returns'],
+                example=example_code
+            ))
+    log.debug('Wrote {}.md'.format(name))
 
 
-combined_function_list = base_api_functions + cluster_functions + \
-    data_management_functions + physical_functions + cloud_functions
-
-connect_functions_search = inspect.getmembers(rubrik_cdm.rubrik_cdm.Connect, inspect.isfunction)
-connect_functions = []
-for function in connect_functions_search:
-    if function[0] not in combined_function_list:
-        connect_functions.append(function[0])
-del connect_functions[0]
-
-bootstrap_functions_search = inspect.getmembers(rubrik_cdm.rubrik_cdm.Bootstrap, inspect.isfunction)
-bootstrap_functions = []
-for function in bootstrap_functions_search:
-    if function[0] not in combined_function_list:
-        bootstrap_functions.append(function[0])
-
-del bootstrap_functions[0]
-del bootstrap_functions[2]
-
-# Create the SUMMARY (side navigation) Document
-markdown = open('SUMMARY.md', 'w')
-markdown.write('# Summary\n\n')
+def _sorted(functions):
+    return sorted(functions, key=lambda f: f[0])
 
 
-markdown.write('### Getting Started\n\n')
-markdown.write('* [Quick Start](README.md)\n\n')
+def generate_summary_doc(env, functions):
+    all_internal_functions = []
+    for fns in functions.values():
+        all_internal_functions += fns['private']
 
-markdown.write('### Base API Calls\n')
-for function in base_api_functions:
-    if function[0] is not '_':
-        markdown.write('* [{}]({}.md)\n'.format(function, function))
+    template = env.get_template('SUMMARY.md.j2')
 
-markdown.write('\n### Bootstrap Functions\n')
-for function in bootstrap_functions:
-    if function[0] is not '_':
-        markdown.write('* [{}]({}.md)\n'.format(function, function))
+    with open('SUMMARY.md', 'w') as md:
+        md.write(template.render(
+            base_functions=_sorted(functions['Api']['public']), 
+            bootstrap_functions=_sorted(functions['Bootstrap']['public']),
+            cluster_functions=_sorted(functions['Cluster']['public']),
+            cloud_functions=_sorted(functions['Cloud']['public']),
+            data_management_functions=_sorted(functions['Data_Management']['public']),
+            physical_functions=_sorted(functions['Physical']['public']),
+            helper_functions=_sorted(functions['Connect']['public']),
+            internal_functions=_sorted(all_internal_functions)
+        ))
 
-markdown.write('\n### Cluster Functions\n')
-for function in cluster_functions:
-    markdown.write('* [{}]({}.md)\n'.format(function, function))
 
-markdown.write('\n### Cloud Functions\n')
-for function in cloud_functions:
-    markdown.write('* [{}]({}.md)\n'.format(function, function))
+if __name__ == "__main__":
+    # Create template environment
+    env = jinja2.Environment(
+        loader=jinja2.PackageLoader('create_docs', 'templates'),
+        trim_blocks=True,
+        lstrip_blocks=True
+    )
 
-markdown.write('\n### Data Management Functions\n')
-for function in data_management_functions:
-    if function[0] is not '_':
-        markdown.write('* [{}]({}.md)\n'.format(function, function))
+    # Get all functions defined in the SDK, both public and internal ones
+    sdk_functions = get_sdk_functions()
 
-markdown.write('\n### Physical Host Functions\n')
-for function in physical_functions:
-    if function[0] is not '_':
-        markdown.write('* [{}]({}.md)\n'.format(function, function))
-
-markdown.write('\n### SDK Helper Functions\n')
-for function in connect_functions:
-    if function[0] is not '_':
-        markdown.write('* [{}]({}.md)\n'.format(function, function))
-
-markdown.write('\n### Internal Functions\n')
-for function in connect_functions:
-    if function[0] is '_':
-        markdown.write('* [{}]({}.md)\n'.format(function, function))
-for function in combined_function_list:
-    if function[0] is '_':
-        markdown.write('* [{}]({}.md)\n'.format(function, function))
-markdown.close()
+    # Generate the function documentation files
+    for class_fns in sdk_functions.values():
+        for fn in (class_fns['public'] + class_fns['private']):
+            generate_function_doc(env, fn[0], fn[1])
+    
+    # Generate the summary (side navigation) file
+    generate_summary_doc(env, sdk_functions)

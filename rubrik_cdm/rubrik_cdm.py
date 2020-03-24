@@ -166,7 +166,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             raise InvalidParameterException(
                 "You must provide either a username and password or API Token for authentication.")
 
-        self.sdk_version = "2.0.6"
+        self.sdk_version = "2.0.7"
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
@@ -362,7 +362,7 @@ class Bootstrap(Api):
         if node_resolution is False:
             raise RubrikException("Error: Could not resolve address for cluster, or invalid IP/address supplied")
 
-        self.sdk_version = "2.0.6"
+        self.sdk_version = "2.0.7"
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
@@ -488,6 +488,9 @@ class Bootstrap(Api):
 
         number_of_attempts = 1
 
+        # Get the first node IP address so we can use it to check bootstrap status if IPv6 is disabled.
+        self.ipv4_addr = list(node_config.values())[0]
+
         while True:
 
             try:
@@ -521,7 +524,7 @@ class Bootstrap(Api):
         if wait_for_completion:
             self.log('bootstrap: Waiting for the bootstrap process to complete.')
             while True:
-                status = self.status(request_id)
+                status = self.status(request_id,ipv4_addr=self.ipv4_addr)
 
                 if status['status'] == 'IN_PROGRESS':
                     self.log("bootstrap_status: {}\n".format(status))
@@ -535,7 +538,7 @@ class Bootstrap(Api):
 
         return api_request
 
-    def status(self, request_id="1", timeout=15):
+    def status(self, request_id="1", timeout=15, ipv4_addr=None):
         """Retrieves status of in progress bootstrap requests
 
         Keyword Arguments:
@@ -552,8 +555,16 @@ class Bootstrap(Api):
         bootstrap_status_api_endpoint = '/cluster/me/bootstrap?request_id={}'.format(
             request_id)
         self.log(bootstrap_status_api_endpoint)
-        api_request = self.get(
-            'internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
+        try:
+            api_request = self.get(
+                'internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
+
+        except APICallException:
+            # if connection failed, then try to reconnect on the IPv4 address of one of the nodes
+            ipv4_conn = Connect(node_ip=ipv4_addr, api_token='abcd')
+            api_request = ipv4_conn.get(
+                'internal', bootstrap_status_api_endpoint, timeout=timeout, authentication=False)
+            return api_request
 
         return api_request
 
