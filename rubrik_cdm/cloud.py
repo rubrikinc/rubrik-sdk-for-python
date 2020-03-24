@@ -231,16 +231,17 @@ class Cloud(Api):
         self.log("update_aws_s3_cloudout: Updating the AWS S3 archive location named {}.".format(current_archive_name))
         return self.patch('internal', '/archive/object_store/{}'.format(archive_id), update_config, timeout)
 
-    def aws_s3_cloudon(self, archive_name, vpc_id, subnet_id, security_group_id, timeout=30):
+    def aws_s3_cloudon(self, archive_name, vpc_id, subnet_id, security_group_id, enable_archive_consolidation=False, timeout=30):
         """Enable CloudOn for an exsiting AWS S3 archival location.
 
         Arguments:
             archive_name {str} -- The name of the archive location used in the Rubrik GUI.
-
-        Keyword Arguments:
             vpc_id {str} -- The AWS VPC ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation.
             subnet_id {str} -- The AWS Subnet ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation.
             security_group_id {str} -- The AWS Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in AWS for instantiation.
+
+        Keyword Arguments:
+            enable_archive_consolidation {bool} - Flag that determines whether archive consolidation is enabled. (default: {False})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
         Returns:
@@ -250,23 +251,38 @@ class Cloud(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
+        if not isinstance(enable_archive_consolidation, bool):
+            raise InvalidTypeException("The enable_archive_consolidation value must a boolean value (True or False).")
+
         self.log("aws_s3_cloudon: Searching the Rubrik cluster for archival locations.")
         archives_on_cluster = self.get('internal', '/archive/object_store', timeout=timeout)
+
 
         config = {}
         config['defaultComputeNetworkConfig'] = {}
         config['defaultComputeNetworkConfig']['subnetId'] = subnet_id
         config['defaultComputeNetworkConfig']['vNetId'] = vpc_id
         config['defaultComputeNetworkConfig']['securityGroupId'] = security_group_id
+        config['isConsolidationEnabled'] = enable_archive_consolidation
 
         for archive in archives_on_cluster['data']:
             if archive['definition']['objectStoreType'] == 'S3' and archive['definition']['name'] == archive_name:
                 # If present, remove the Cloud On configuration for proper
                 # comparison
                 try:
-                    if archive['definition']['defaultComputeNetworkConfig'] == config['defaultComputeNetworkConfig']:
+                    if archive['definition']['defaultComputeNetworkConfig'] == config['defaultComputeNetworkConfig'] and archive['definition']['isConsolidationEnabled'] == config['isConsolidationEnabled']:
                         return "No change required. The '{}' archival location is already configured for CloudOn.".format(
                             archive_name)
+
+                    if archive['definition']['defaultComputeNetworkConfig'] != config['defaultComputeNetworkConfig']:
+                        self.log("aws_s3_cloudon: Updating the archive location Cloud Compute network settings.")
+                        return self.patch('internal', "/archive/object_store/{}".format(archive['id']), config, timeout)
+
+                    if archive['definition']['isConsolidationEnabled'] != config['isConsolidationEnabled']:
+                        self.log("aws_s3_cloudon: Updating the archive location Cloud Compute consolidation settings.")
+                        return self.patch('internal', "/archive/object_store/{}".format(archive['id']), config, timeout)
+
+
                 except KeyError:
                     self.log("aws_s3_cloudon: Updating the archive location for CloudOn.")
                     return self.patch('internal', "/archive/object_store/{}".format(archive['id']), config, timeout)
@@ -363,7 +379,7 @@ class Cloud(Api):
         return self.post('internal', '/archive/object_store', config)
 
     def azure_cloudon(self, archive_name, container, storage_account_name, application_id, application_key, tenant_id, region, virtual_network_id, subnet_name, security_group_id, timeout=30):  # pylint: ignore
-        """Enable CloudOn for an exsiting AWS S3 archival location.
+        """Enable CloudOn for an existing Azure archival location.
 
         Arguments:
             archive_name {str} -- The name of the archive location used in the Rubrik GUI.
