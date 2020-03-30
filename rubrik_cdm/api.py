@@ -184,20 +184,19 @@ class Api():
                 if call_type == "QUERY":
                     try:
                         error_message
-                        raise BaseException
+                        raise APICallException(error_message)
                     except NameError:
                         try:
                             return api_request.json()["data"]
                         except BaseException:
                             pass
                 
-                # request.json() will fail on a 204 (No Content), so return an empty string
+                # request.json() will fail on a 204 (No Content), so just the response code
                 if api_request.status_code != 204:
                     return api_request.json()
                 else:
-                    return ""
+                    return {'status_code': api_request.status_code}
             except BaseException:
-                raise APICallException(error_message)
                 return {'status_code': api_request.status_code}
 
     def get(self, api_version, api_endpoint, timeout=15, authentication=True, params=None):
