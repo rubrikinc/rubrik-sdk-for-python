@@ -136,17 +136,19 @@ class Api():
 
             self.log(str(api_request) + "\n")
             try:
-                api_response = api_request.json()
-                # Check to see if an error message has been provided by Rubrik
-                for key, value in api_response.items():
-                    if key == "errorType" or key == 'message':
-                        error_message = api_response['message']
-                        api_request.raise_for_status()
+                # request.json() will fail on a 204 (No Content) so skip the response check
+                if api_request.status_code != 204:
+                    api_response = api_request.json()
+                    # Check to see if an error message has been provided by Rubrik
+                    for key, value in api_response.items():
+                        if key == "errorType" or key == 'message':
+                            error_message = api_response['message']
+                            api_request.raise_for_status()
 
-                    # Check for GQL error message in the data response
-                    if key == "error":
-                        error_message = api_response['error']
-                        api_request.raise_for_status()
+                        # Check for GQL error message in the data response
+                        if key == "error":
+                            error_message = api_response['error']
+                            api_request.raise_for_status()
 
             except BaseException:
                 api_request.raise_for_status()
@@ -182,16 +184,19 @@ class Api():
                 if call_type == "QUERY":
                     try:
                         error_message
-                        raise BaseException
+                        raise APICallException(error_message)
                     except NameError:
                         try:
                             return api_request.json()["data"]
                         except BaseException:
                             pass
-
-                return api_request.json()
+                
+                # request.json() will fail on a 204 (No Content), so just the response code
+                if api_request.status_code != 204:
+                    return api_request.json()
+                else:
+                    return {'status_code': api_request.status_code}
             except BaseException:
-                raise APICallException(error_message)
                 return {'status_code': api_request.status_code}
 
     def get(self, api_version, api_endpoint, timeout=15, authentication=True, params=None):

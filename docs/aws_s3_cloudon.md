@@ -2,7 +2,7 @@
 
 Enable CloudOn for an exsiting AWS S3 archival location.
 ```py
-def aws_s3_cloudon(archive_name, vpc_id, subnet_id, security_group_id, timeout=30)
+def aws_s3_cloudon(archive_name, vpc_id, subnet_id, security_group_id, enable_archive_consolidation=False, timeout=30)
 ```
 
 ## Arguments
