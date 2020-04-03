@@ -370,7 +370,7 @@ class Data_Management(Api):
             },
             "vcenter": {
                 "api_version": "v1",
-                "api_endpoint": "/vmware/vcenter"
+                "api_endpoint": "/vmware/vcenter?primary_cluster_id=local"
             },
             "oracle_db": {
                 "api_version": "internal",
