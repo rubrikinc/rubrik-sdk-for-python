@@ -40,7 +40,7 @@ class Api():
     def __init__(self, node_ip):
         super().__init__(node_ip)
 
-    def _common_api(self, call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=15, authentication=True, params=None):  # pylint: ignore
+    def _common_api(self, call_type, api_version, api_endpoint, config=None, job_status_url=None, timeout=15, authentication=True, params=None, gql_operation_name=None, gql_query=None, gql_variables=None):  # pylint: ignore
         """Internal method that consolidates the base API functions.
 
         Arguments:
@@ -112,18 +112,43 @@ class Api():
             elif call_type == 'JOB_STATUS':
                 self.log('JOB STATUS for {}'.format(job_status_url))
                 api_request = requests.get(job_status_url, verify=False, headers=header, timeout=timeout)
+            elif call_type == 'QUERY':
+                config = json.dumps(config)
+                request_url = "https://{}/api/internal/graphql".format(self.node_ip)
+                self.log('POST {}'.format(request_url))
+                if gql_operation_name is not None:
+                    self.log('Operation Name: {}'.format(gql_operation_name))
+                self.log('Query: {}'.format(gql_query))
+                if gql_variables is not None:
+                    self.log('Variables: {}'.format(gql_variables))
+                api_request = requests.post(
+                    request_url,
+                    verify=False,
+                    headers=header,
+                    json={
+                        "operationName": gql_operation_name,
+                        "variables": gql_variables,
+                        "query": "query {}".format(gql_query)},
+                    timeout=timeout)
             else:
                 raise InvalidParameterException('the _common_api() call_type must be one of the following: {}'.format(
-                    ['GET', 'POST', 'PATCH', 'DELETE', 'JOB_STATUS']))
+                    ['GET', 'POST', 'PATCH', 'DELETE', 'QUERY', 'JOB_STATUS']))
 
             self.log(str(api_request) + "\n")
             try:
-                api_response = api_request.json()
-                # Check to see if an error message has been provided by Rubrik
-                for key, value in api_response.items():
-                    if key == "errorType" or key == 'message':
-                        error_message = api_response['message']
-                        api_request.raise_for_status()
+                # request.json() will fail on a 204 (No Content) so skip the response check
+                if api_request.status_code != 204:
+                    api_response = api_request.json()
+                    # Check to see if an error message has been provided by Rubrik
+                    for key, value in api_response.items():
+                        if key == "errorType" or key == 'message':
+                            error_message = api_response['message']
+                            api_request.raise_for_status()
+
+                        # Check for GQL error message in the data response
+                        if key == "error":
+                            error_message = api_response['error']
+                            api_request.raise_for_status()
 
             except BaseException:
                 api_request.raise_for_status()
@@ -135,6 +160,7 @@ class Api():
             raise APICallException(
                 "The Rubrik cluster did not respond to the API request in the allotted amount of time. To fix this issue, increase the timeout value.")
         except requests.exceptions.HTTPError as error:
+
             try:
                 error_message = json.loads(error.response.text)["message"]
             except BaseException:
@@ -152,7 +178,24 @@ class Api():
                 raise APICallException('' + error_message)
         else:
             try:
-                return api_request.json()
+                # GQL error messages may not be flag as exceptions so we need to
+                # manually check to determine if the error has occured to
+                # raise an error on the provided message
+                if call_type == "QUERY":
+                    try:
+                        error_message
+                        raise APICallException(error_message)
+                    except NameError:
+                        try:
+                            return api_request.json()["data"]
+                        except BaseException:
+                            pass
+                
+                # request.json() will fail on a 204 (No Content), so just the response code
+                if api_request.status_code != 204:
+                    return api_request.json()
+                else:
+                    return {'status_code': api_request.status_code}
             except BaseException:
                 return {'status_code': api_request.status_code}
 
@@ -212,6 +255,38 @@ class Api():
             job_status_url=None,
             timeout=timeout,
             authentication=authentication)
+
+    def query(self, query, operation_name=None, variables=None, timeout=15, authentication=True):
+        """Send a GraphQL query to a CDM cluster.
+
+        Arguments:
+            query {str} -- The main GraphQL query body.
+            operation_name {str} -- A meaningful and explicit name for your GraphQL operation. Think of this just like a function name in your favorite programming language. (default: {None})
+            variables {dict} -- The variables to pass into your query. (default: {None})
+
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+            authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
+
+        Returns:
+            dict -- The response["data"] body of the API call.
+        """
+
+        if self.function_name == "":
+            self.function_name = inspect.currentframe().f_code.co_name
+
+        return self._common_api(
+            'QUERY',
+            api_version=None,
+            api_endpoint=None,
+            config=None,
+            job_status_url=None,
+            timeout=timeout,
+            authentication=authentication,
+            params=None,
+            gql_operation_name=operation_name,
+            gql_query=query,
+            gql_variables=variables)
 
     def patch(self, api_version, api_endpoint, config, timeout=15, authentication=True):
         """Send a PATCH request to the provided Rubrik API endpoint.
