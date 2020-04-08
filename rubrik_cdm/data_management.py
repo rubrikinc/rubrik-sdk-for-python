@@ -453,7 +453,7 @@ class Data_Management(Api):
                 elif object_type == 'share' and item[name_value] == object_name:
                     if item['hostId'] == host_id:
                         object_ids.append(item['id'])
-                elif item[name_value] == object_name:
+                elif item[name_value].lower() == object_name.lower():
                     object_ids.append(item['id'])
             if len(object_ids) > 1:
                 raise InvalidParameterException(
