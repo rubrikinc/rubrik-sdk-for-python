@@ -9019,7 +9019,7 @@ def test_get_all_hosts_return_object(rubrik, mocker):
 
     def mock_get_v1_host():
         return {
-            "hasMore": true,
+            "hasMore": True,
             "data": [
                 {
                 "id": "string",
@@ -9049,6 +9049,6 @@ def test_get_all_hosts_return_object(rubrik, mocker):
         }
 
     mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.return_value = mock_get_v1_host()
+    mock_get.return_value = [mock_get_v1_host()]
 
     assert rubrik.get_all_hosts() == {"name": "all_hosts_return_value"}
