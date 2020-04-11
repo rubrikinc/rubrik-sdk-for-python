@@ -9051,4 +9051,4 @@ def test_get_all_hosts_return_object(rubrik, mocker):
     mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
     mock_get.return_value = [mock_get_v1_host()]
 
-    assert rubrik.get_all_hosts() == mock_get_v1_host()
+    assert rubrik.get_all_hosts()['name'] == "all_hosts_return_value"
