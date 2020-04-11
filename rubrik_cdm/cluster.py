@@ -1103,5 +1103,5 @@ class Cluster(Api):
             dict -- The full API response for `GET /v1/vmware/vcenter`.
         """
 
-        self.log('get_all_vcenters: Getting information for each vCenter connected  to thhe Rubrik cluster.')
+        self.log('get_all_vcenters: Getting information for each vCenter connected  to the Rubrik cluster.')
         return self.get('v1', '/vmware/vcenter', timeout=timeout)
