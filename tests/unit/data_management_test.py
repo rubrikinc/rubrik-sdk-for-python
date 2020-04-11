@@ -9005,4 +9005,50 @@ def test_get_all_hosts_invalid_parameter(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "TypeError: get_all_hosts() got an unexpected keyword argument 'param'"
+    assert error_message == "get_all_hosts() got an unexpected keyword argument 'param'"
+
+def test_register_vm_invalid_parameter(rubrik):
+    with pytest.raises(TypeError) as error:
+        rubrik.register_vm(timeout=30, param="does not exist")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "register_vm() got an unexpected keyword argument 'param'"
+
+def test_get_all_hosts_return_object(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": true,
+            "data": [
+                {
+                "id": "string",
+                "name": "all_hosts_return_value",
+                "hostname": "string",
+                "alias": "string",
+                "primaryClusterId": "string",
+                "operatingSystem": "string",
+                "operatingSystemType": "string",
+                "status": "string",
+                "nasBaseConfig": {
+                    "vendorType": "string",
+                    "apiUsername": "string",
+                    "apiCertificate": "string",
+                    "apiHostname": "string",
+                    "apiEndpoint": "string",
+                    "zoneName": "string",
+                    "isSnapdiffEnabled": true
+                },
+                "mssqlCbtEnabled": "Enabled",
+                "mssqlCbtEffectiveStatus": "On",
+                "organizationId": "string",
+                "organizationName": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_v1_host()
+
+    assert rubrik.get_all_hosts() == {"name": "all_hosts_return_value"}
