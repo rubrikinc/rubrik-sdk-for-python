@@ -9000,7 +9000,7 @@ def test_get_sla_objects(rubrik, mocker):
     assert rubrik.get_sla_objects("Gold", "vmware") == {'object_name': 'sla_id'}
 
 def test_get_all_hosts_invalid_parameter(rubrik):
-    with pytest.raises(InvalidParameterException) as error:
+    with pytest.raises(TypeError) as error:
         rubrik.get_all_hosts(timeout=30, param="does not exist")
 
     error_message = error.value.args[0]
