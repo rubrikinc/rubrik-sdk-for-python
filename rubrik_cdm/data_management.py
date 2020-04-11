@@ -1913,9 +1913,7 @@ class Data_Management(Api):
             if ((key == 'limit') or (key == 'offset')) and not isinstance(value, int):
                 raise InvalidParameterException('The limit and offset paremeter must be an integer')
 
-        query = ''
-        for key, value in parameters.items():
-            query = query + ("{}={}".format(key, value) + '&')
+        query = '&'.join(['%s=%s' % kv for kv in parameters.items()])
 
         self.log("get_vsphere_vm: Get summary of all the VMs.")
         return self.get('v1', '/vmware/vm?{}'.format(query), timeout)
@@ -2062,9 +2060,7 @@ class Data_Management(Api):
             if ((key == 'limit') or (key == 'offset')) and not isinstance(value, int):
                 raise InvalidParameterException('The limit and offset paremeter must be an integer')
 
-        query = ''
-        for key, value in parameters.items():
-            query = query + ("{}={}".format(key, value) + '&')
+        query = '&'.join(['%s=%s' % kv for kv in parameters.items()])
 
         self.log("get_sql_db: Get summary of all the databases returned by the query.")
         databases = self.get('v1', '/mssql/db?{}'.format(query), timeout)
