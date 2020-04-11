@@ -2272,25 +2272,25 @@ class Data_Management(Api):
 
             return current_hosts
 
-        def register_vm(self, name, timeout=15):
-            """Register the Rubrik Backup Service on a vSphere VM.
-            Arguments:
-                name {str} -- The name of the vSphere VM.
-                timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-            Keyword Arguments:
-                timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
-            Returns:
-                str -- No change required. The VM `name` is already registered.
-                dict -- The result of the call for `POST /v1/vmware/vm/{id}/register_agent`.
-            """
+    def register_vm(self, name, timeout=15):
+        """Register the Rubrik Backup Service on a vSphere VM.
+        Arguments:
+            name {str} -- The name of the vSphere VM.
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+        Returns:
+            str -- No change required. The VM `name` is already registered.
+            dict -- The result of the call for `POST /v1/vmware/vm/{id}/register_agent`.
+        """
 
-            vm_id = self.object_id(name, 'vmware', timeout=timeout)
+        vm_id = self.object_id(name, 'vmware', timeout=timeout)
 
-            self.log('register_vm: Determining if the agent state of the VM. ]')
-            vm_details = rubrik.get("v1", "/vmware/vm/{}".format(vm_id))
+        self.log('register_vm: Determining if the agent state of the VM. ]')
+        vm_details = rubrik.get("v1", "/vmware/vm/{}".format(vm_id))
 
-            if vm_details["isAgentRegistered"] is True:
-                return "No change required. The VM {} is already registered.".format(name)
+        if vm_details["isAgentRegistered"] is True:
+            return "No change required. The VM {} is already registered.".format(name)
 
-            self.log('register_vm: Registering the RBS agent.')
-            return self.post('v1', '/vmware/vm/{}/register_agent'.format(vm_id), {}, timeout=timeout)
+        self.log('register_vm: Registering the RBS agent.')
+        return self.post('v1', '/vmware/vm/{}/register_agent'.format(vm_id), {}, timeout=timeout)
