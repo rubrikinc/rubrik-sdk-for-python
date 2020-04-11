@@ -8998,3 +8998,11 @@ def test_get_sla_objects(rubrik, mocker):
     mock_get.side_effect = [mock_get_v1_sla_domain(), mock_get_v1_vmware_vm()]
 
     assert rubrik.get_sla_objects("Gold", "vmware") == {'object_name': 'sla_id'}
+
+def test_get_all_hosts_invalid_parameter(rubrik):
+    with pytest.raises(InvalidParameterException) as error:
+        rubrik.get_all_hosts(timeout=30, param="does not exist")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "TypeError: get_all_hosts() got an unexpected keyword argument 'param'"
