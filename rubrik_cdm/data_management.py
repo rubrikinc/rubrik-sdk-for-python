@@ -2287,7 +2287,7 @@ class Data_Management(Api):
         vm_id = self.object_id(name, 'vmware', timeout=timeout)
 
         self.log('register_vm: Determining if the agent state of the VM. ]')
-        vm_details = rubrik.get("v1", "/vmware/vm/{}".format(vm_id))
+        vm_details = self.get("v1", "/vmware/vm/{}".format(vm_id))
 
         if vm_details["isAgentRegistered"] is True:
             return "No change required. The VM {} is already registered.".format(name)
