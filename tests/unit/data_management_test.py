@@ -9037,7 +9037,7 @@ def test_get_all_hosts_return_object(rubrik, mocker):
                     "apiHostname": "string",
                     "apiEndpoint": "string",
                     "zoneName": "string",
-                    "isSnapdiffEnabled": true
+                    "isSnapdiffEnabled": True
                 },
                 "mssqlCbtEnabled": "Enabled",
                 "mssqlCbtEffectiveStatus": "On",
