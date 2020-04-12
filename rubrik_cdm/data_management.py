@@ -1913,6 +1913,7 @@ class Data_Management(Api):
             if ((key == 'limit') or (key == 'offset')) and not isinstance(value, int):
                 raise InvalidParameterException('The limit and offset paremeter must be an integer')
 
+        # String joins by iterating through the key-value pairs in the parameters dictionary and concatenating it into a query
         query = '&'.join(['%s=%s' % kv for kv in parameters.items()])
 
         self.log("get_vsphere_vm: Get summary of all the VMs.")
@@ -2060,6 +2061,7 @@ class Data_Management(Api):
             if ((key == 'limit') or (key == 'offset')) and not isinstance(value, int):
                 raise InvalidParameterException('The limit and offset paremeter must be an integer')
 
+        # String joins by iterating through the key-value pairs in the parameters dictionary and concatenating it into a query
         query = '&'.join(['%s=%s' % kv for kv in parameters.items()])
 
         self.log("get_sql_db: Get summary of all the databases returned by the query.")
@@ -2256,17 +2258,16 @@ class Data_Management(Api):
         return self.get('internal', '/vmware/config/esx_subnets', timeout)
 
     def get_all_hosts(self, timeout=15):
-            """Retrieve information for each host connected to the Rubrik cluster.
-            Arguments:
-                timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-            Returns:
-                dict -- The result of the API call `GET /v1/host`
-            """
+        """Retrieve information for each host connected to the Rubrik cluster.
+        Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+        Returns:
+            dict -- The result of the API call `GET /v1/host`
+        """
 
-            self.log('get_all_hosts: Getting information for each host on the Rubrik cluster.')
-            current_hosts = self.get('v1', '/host', timeout=timeout)
+        self.log('get_all_hosts: Getting information for each host on the Rubrik cluster.')
 
-            return current_hosts
+        return self.get('v1', '/host', timeout=timeout)
 
     def register_vm(self, name, timeout=15):
         """Register the Rubrik Backup Service on a vSphere VM.
