@@ -1913,9 +1913,8 @@ class Data_Management(Api):
             if ((key == 'limit') or (key == 'offset')) and not isinstance(value, int):
                 raise InvalidParameterException('The limit and offset paremeter must be an integer')
 
-        query = ''
-        for key, value in parameters.items():
-            query = query + ("{}={}".format(key, value) + '&')
+        # String joins by iterating through the key-value pairs in the parameters dictionary and concatenating it into a query
+        query = '&'.join(['%s=%s' % kv for kv in parameters.items()])
 
         self.log("get_vsphere_vm: Get summary of all the VMs.")
         return self.get('v1', '/vmware/vm?{}'.format(query), timeout)
@@ -2062,9 +2061,8 @@ class Data_Management(Api):
             if ((key == 'limit') or (key == 'offset')) and not isinstance(value, int):
                 raise InvalidParameterException('The limit and offset paremeter must be an integer')
 
-        query = ''
-        for key, value in parameters.items():
-            query = query + ("{}={}".format(key, value) + '&')
+        # String joins by iterating through the key-value pairs in the parameters dictionary and concatenating it into a query
+        query = '&'.join(['%s=%s' % kv for kv in parameters.items()])
 
         self.log("get_sql_db: Get summary of all the databases returned by the query.")
         databases = self.get('v1', '/mssql/db?{}'.format(query), timeout)
@@ -2258,3 +2256,38 @@ class Data_Management(Api):
         self.log("get_esx_subnets: Retrieving the preferred subnets used to reach the ESXi hosts.")
 
         return self.get('internal', '/vmware/config/esx_subnets', timeout)
+
+    def get_all_hosts(self, timeout=15):
+        """Retrieve information for each host connected to the Rubrik cluster.
+        Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+        Returns:
+            dict -- The result of the API call `GET /v1/host`
+        """
+
+        self.log('get_all_hosts: Getting information for each host on the Rubrik cluster.')
+
+        return self.get('v1', '/host', timeout=timeout)
+
+    def register_vm(self, name, timeout=15):
+        """Register the Rubrik Backup Service on a vSphere VM.
+        Arguments:
+            name {str} -- The name of the vSphere VM.
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+        Returns:
+            str -- No change required. The VM `name` is already registered.
+            dict -- The result of the call for `POST /v1/vmware/vm/{id}/register_agent`.
+        """
+
+        vm_id = self.object_id(name, 'vmware', timeout=timeout)
+
+        self.log('register_vm: Determining if the agent state of the VM. ]')
+        vm_details = self.get("v1", "/vmware/vm/{}".format(vm_id))
+
+        if vm_details["isAgentRegistered"] is True:
+            return "No change required. The VM {} is already registered.".format(name)
+
+        self.log('register_vm: Registering the RBS agent.')
+        return self.post('v1', '/vmware/vm/{}/register_agent'.format(vm_id), {}, timeout=timeout)
