@@ -422,7 +422,7 @@ Rubrik prides itself upon its API-first architecture, ensuring everything availa
 
 The Rubrik SDK for Python contains built-in functions and configurations to help assist with troubleshooting any errors that may arise.
 
-### Enabling Debug Mode
+### Enabling Logging
 
 The `rubrik_cdm.Connect()` function contains a built-in, verbose logging mechanism which is disabled by default. To enable the logging mechanism, set the `enable_logging` argument to true when connecting to the Rubrik cluster as follows:
 
@@ -430,16 +430,28 @@ The `rubrik_cdm.Connect()` function contains a built-in, verbose logging mechani
 rubrik = rubrik_cdm.Connect(enable_logging=True)
 ```
 
+The `logging_level` argument can then be used to set the specific logging level you wish to use. The following levels are valid choices:
+
+* `debug` (default value)
+* `critical` 
+* `error` 
+* `warning` 
+* `info`
+
+```
+rubrik = rubrik_cdm.Connect(enable_logging=True, logging_level="info")
+```
+
 When doing so, more verbose debug messages will be displayed on the console when executing various commands and functions within the Rubrik SDK for Python. For example, the `Connect()` function itself displays no information by default, however running the same function specifying enable_logging=True outputs the following:
 
 ```
-[2018-08-08 09:18:59,687] [DEBUG] -- User Provided Node IP: 172.21.8.53
-[2018-08-08 09:18:59,687] [DEBUG] -- Username: demo
-[2018-08-08 09:18:59,687] [DEBUG] -- Password: *******
+[2018-08-08 09:18:59,687] [INFO] -- User Provided Node IP: 172.21.8.53
+[2018-08-08 09:18:59,687] [INFO] -- Username: demo
+[2018-08-08 09:18:59,687] [INFO] -- Password: *******
 ​
-[2018-08-08 09:18:59,687] [DEBUG] -- cluster_node_ip: Generating a list of all Cluster Node IPs.
-[2018-08-08 09:18:59,687] [DEBUG] -- GET https://172.21.8.53/api/internal/cluster/me/node
-[2018-08-08 09:19:00,062] [DEBUG] -- <Response [200]>
+[2018-08-08 09:18:59,687] [INFO] -- cluster_node_ip: Generating a list of all Cluster Node IPs.
+[2018-08-08 09:18:59,687] [INFO] -- GET https://172.21.8.53/api/internal/cluster/me/node
+[2018-08-08 09:19:00,062] [INFO] -- <Response [200]>
 ​
 ```
 
