@@ -62,8 +62,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             enable_logging {bool} -- Flag to determine if logging will be enabled for the SDK. (default: {False})
             logging_level {str} -- Sets the threshold for logging to the provided to level. Logging messages which are less severe than level will be ignored. (default: {debug}) (choices: {debug, critical, error, warning, info})
         """
-        
-        
 
         set_logging = {
             "debug": logging.DEBUG,
@@ -72,17 +70,15 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             "warning": logging.WARNING,
             "info": logging.INFO,
         }
-        
 
         if logging_level not in set_logging:
-            raise InvalidParameterException("'{}' is not a valid logging_level. Valid choices are 'debug', 'critical', 'error', 'warning', or 'info'.".format(logging_level))
-
+            raise InvalidParameterException(
+                "'{}' is not a valid logging_level. Valid choices are 'debug', 'critical', 'error', 'warning', or 'info'.".format(logging_level))
 
         # Enable logging for the SDK
         self.logging_level = logging_level
         if enable_logging:
             logging.getLogger().setLevel(set_logging[self.logging_level])
-            
 
         if node_ip is None:
             node_ip = os.environ.get('rubrik_cdm_node_ip')
@@ -187,7 +183,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             raise InvalidParameterException(
                 "You must provide either a username and password or API Token for authentication.")
 
-        self.sdk_version = "2.0.8"
+        self.sdk_version = "2.0.9"
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
@@ -200,7 +196,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         Arguments:
             log_message {str} -- The message to pass to the debug log.
         """
-    
 
         log = logging.getLogger(__name__)
 
@@ -213,7 +208,6 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         }
         set_logging[self.logging_level](log_message)
-
 
     def _authorization_header(self):
         """Internal method used to create the authorization header used in the API calls.
@@ -404,7 +398,7 @@ class Bootstrap(Api):
             raise RubrikException(
                 "Error: Could not resolve address for cluster, or invalid IP/address supplied")
 
-        self.sdk_version = "2.0.8"
+        self.sdk_version = "2.0.9"
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
