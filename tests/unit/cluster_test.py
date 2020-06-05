@@ -1143,3 +1143,46 @@ def test_read_only_authorization(rubrik, mocker):
     mock_post.return_value = mock_post_internal_authorization_role_read_only_admin()
 
     assert rubrik.read_only_authorization("username") == mock_post_internal_authorization_role_read_only_admin()
+
+def test_get_all_vcenters_invalid_parameter(rubrik):
+    with pytest.raises(TypeError) as error:
+        rubrik.get_all_vcenters(timeout=30, param="does not exist")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "get_all_vcenters() got an unexpected keyword argument 'param'"
+
+def test_get_all_vcenters_return_object(rubrik, mocker):
+
+    def mock_get_v1_vmware_vcenter():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                "caCerts": "string",
+                "configuredSlaDomainId": "string",
+                "id": "string",
+                "name": "string",
+                "configuredSlaDomainName": "string",
+                "primaryClusterId": "string",
+                "isConfiguredSlaDomainRetentionLocked": True,
+                "hostname": "string",
+                "username": "string",
+                "version": "string",
+                "connectionStatus": {
+                    "status": "Disconnected",
+                    "message": "string"
+                },
+                "conflictResolutionAuthz": "AllowAutoConflictResolution",
+                "configuredSlaDomainPolarisManagedId": "string",
+                "lastRefreshTime": "2020-04-11T19:09:18.128Z",
+                "isIoFilterInstalled": True
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_vmware_vcenter()]
+
+    assert (rubrik.get_all_vcenters())['data'] ==  mock_get_v1_vmware_vcenter()['data']

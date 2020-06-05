@@ -1,4 +1,4 @@
-# Copyright 2018 Rubrik, Inc.
+# Copyright 2020 Rubrik, Inc.
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to

@@ -8998,3 +8998,631 @@ def test_get_sla_objects(rubrik, mocker):
     mock_get.side_effect = [mock_get_v1_sla_domain(), mock_get_v1_vmware_vm()]
 
     assert rubrik.get_sla_objects("Gold", "vmware") == {'object_name': 'sla_id'}
+
+def test_get_all_hosts_invalid_parameter(rubrik):
+    with pytest.raises(TypeError) as error:
+        rubrik.get_all_hosts(timeout=30, param="does not exist")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "get_all_hosts() got an unexpected keyword argument 'param'"
+
+def test_get_all_hosts_return_object(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                "id": "string",
+                "name": "all_hosts_return_value",
+                "hostname": "string",
+                "alias": "string",
+                "primaryClusterId": "string",
+                "operatingSystem": "string",
+                "operatingSystemType": "string",
+                "status": "string",
+                "nasBaseConfig": {
+                    "vendorType": "string",
+                    "apiUsername": "string",
+                    "apiCertificate": "string",
+                    "apiHostname": "string",
+                    "apiEndpoint": "string",
+                    "zoneName": "string",
+                    "isSnapdiffEnabled": True
+                },
+                "mssqlCbtEnabled": "Enabled",
+                "mssqlCbtEffectiveStatus": "On",
+                "organizationId": "string",
+                "organizationName": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_host()]
+
+    assert (rubrik.get_all_hosts())['data'] == mock_get_v1_host()['data']
+
+def test_register_vm_invalid_parameter(rubrik):
+    with pytest.raises(TypeError) as error:
+        rubrik.register_vm(timeout=30, param="does not exist")
+
+    error_message = error.value.args[0]
+
+    assert error_message == "register_vm() got an unexpected keyword argument 'param'"
+
+def test_register_vm_already_registered(rubrik, mocker):
+
+    def mock_get_v1_vmware_vm():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "object_name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "moid": "string",
+                    "vcenterId": "string",
+                    "hostName": "string",
+                    "hostId": "string",
+                    "clusterName": "string",
+                    "snapshotConsistencyMandate": "UNKNOWN",
+                    "powerStatus": "string",
+                    "protectionDate": "2019-05-05T18:57:06.133Z",
+                    "ipAddress": "string",
+                    "agentStatus": {
+                        "agentStatus": "string",
+                        "disconnectReason": "string"
+                    },
+                    "toolsInstalled": True,
+                    "guestOsName": "string",
+                    "isReplicationEnabled": True,
+                    "folderPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "infraPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "vmwareToolsInstalled": True,
+                    "isRelic": True,
+                    "guestCredentialAuthorizationStatus": "string",
+                    "cloudInstantiationSpec": {
+                        "imageRetentionInSeconds": 0
+                    },
+                    "parentAppInfo": {
+                        "id": "string",
+                        "isProtectedThruHierarchy": True
+                    }
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_vmware_vm_id():
+        return {
+            "maxNestedVsphereSnapshots": 0,
+            "isVmPaused": True,
+            "configuredSlaDomainId": "string",
+            "snapshotConsistencyMandate": "UNKNOWN",
+            "preBackupScript": {
+                "scriptPath": "string",
+                "timeoutMs": 0,
+                "failureHandling": "abort"
+            },
+            "postSnapScript": {
+                "scriptPath": "string",
+                "timeoutMs": 0,
+                "failureHandling": "abort"
+            },
+            "postBackupScript": {
+                "scriptPath": "string",
+                "timeoutMs": 0,
+                "failureHandling": "abort"
+            },
+            "isArrayIntegrationEnabled": True,
+            "cloudInstantiationSpec": {
+                "imageRetentionInSeconds": 0
+            },
+            "throttlingSettings": {
+                "ioLatencyThreshold": 0,
+                "datastoreIoLatencyThreshold": 0,
+                "cpuUtilizationThreshold": 0
+            },
+            "id": "string",
+            "name": "object_name",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "slaAssignment": "Derived",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "effectiveSlaSourceObjectId": "string",
+            "effectiveSlaSourceObjectName": "string",
+            "moid": "string",
+            "vcenterId": "string",
+            "hostName": "string",
+            "hostId": "string",
+            "clusterName": "string",
+            "powerStatus": "string",
+            "protectionDate": "2019-05-05T18:57:06.257Z",
+            "ipAddress": "string",
+            "agentStatus": {
+                "agentStatus": "string",
+                "disconnectReason": "string"
+            },
+            "toolsInstalled": True,
+            "guestOsName": "string",
+            "isReplicationEnabled": True,
+            "folderPath": [
+                {
+                    "id": "string",
+                    "managedId": "string",
+                    "name": "string"
+                }
+            ],
+            "infraPath": [
+                {
+                    "id": "string",
+                    "managedId": "string",
+                    "name": "string"
+                }
+            ],
+            "vmwareToolsInstalled": True,
+            "isRelic": True,
+            "guestCredentialAuthorizationStatus": "string",
+            "parentAppInfo": {
+                "id": "string",
+                "isProtectedThruHierarchy": True
+            },
+            "blackoutWindowStatus": {
+                "isGlobalBlackoutActive": True,
+                "isSnappableBlackoutActive": True
+            },
+            "blackoutWindows": {
+                "globalBlackoutWindows": [
+                    {
+                        "startTime": "string",
+                        "endTime": "string"
+                    }
+                ],
+                "snappableBlackoutWindows": [
+                    {
+                        "startTime": "string",
+                        "endTime": "string"
+                    }
+                ]
+            },
+            "effectiveSlaDomain": {
+                "id": "string",
+                "primaryClusterId": "string",
+                "name": "string",
+                "frequencies": [
+                    {
+                        "timeUnit": "string",
+                        "frequency": 0,
+                        "retention": 0
+                    }
+                ],
+                "allowedBackupWindows": [
+                    {
+                        "startTimeAttributes": {
+                            "minutes": 0,
+                            "hour": 0,
+                            "dayOfWeek": 0
+                        },
+                        "durationInHours": 0
+                    }
+                ],
+                "firstFullAllowedBackupWindows": [
+                    {
+                        "startTimeAttributes": {
+                            "minutes": 0,
+                            "hour": 0,
+                            "dayOfWeek": 0
+                        },
+                        "durationInHours": 0
+                    }
+                ],
+                "localRetentionLimit": 0,
+                "maxLocalRetentionLimit": 0,
+                "archivalSpecs": [
+                    {
+                        "locationId": "string",
+                        "archivalThreshold": 0
+                    }
+                ],
+                "replicationSpecs": [
+                    {
+                        "locationId": "string",
+                        "retentionLimit": 0
+                    }
+                ],
+                "numDbs": 0,
+                "numOracleDbs": 0,
+                "numFilesets": 0,
+                "numHypervVms": 0,
+                "numNutanixVms": 0,
+                "numManagedVolumes": 0,
+                "numStorageArrayVolumeGroups": 0,
+                "numWindowsVolumeGroups": 0,
+                "numLinuxHosts": 0,
+                "numShares": 0,
+                "numWindowsHosts": 0,
+                "numVms": 0,
+                "numEc2Instances": 0,
+                "numVcdVapps": 0,
+                "numProtectedObjects": 0,
+                "isDefault": True,
+                "uiColor": "string"
+            },
+            "currentHost": {
+                "id": "string",
+                "name": "string",
+                "configuredSlaDomainId": "string",
+                "configuredSlaDomainName": "string",
+                "primaryClusterId": "string",
+                "datacenterId": "string",
+                "computeClusterId": "string",
+                "datastores": [
+                    {
+                        "id": "string",
+                        "name": "string",
+                        "capacity": 0,
+                        "dataStoreType": "string",
+                        "dataCenterName": "string",
+                        "isLocal": True
+                    }
+                ],
+                "effectiveSlaDomainId": "string",
+                "effectiveSlaDomainName": "string",
+                "effectiveSlaSourceObjectId": "string",
+                "effectiveSlaSourceObjectName": "string",
+                "effectiveSlaDomainPolarisManagedId": "string"
+            },
+            "virtualDiskIds": [
+                "string"
+            ],
+            "snapshots": [
+                {
+                    "id": "string",
+                    "date": "2019-05-05T18:57:06.257Z",
+                    "expirationDate": "2019-05-05T18:57:06.257Z",
+                    "sourceObjectType": "string",
+                    "isOnDemandSnapshot": True,
+                    "cloudState": 0,
+                    "consistencyLevel": "string",
+                    "indexState": 0,
+                    "replicationLocationIds": [
+                        "string"
+                    ],
+                    "archivalLocationIds": [
+                        "string"
+                    ],
+                    "slaId": "string",
+                    "slaName": "string",
+                    "vmName": "string"
+                }
+            ],
+            "snapshotCount": 0,
+            "physicalStorage": 0,
+            "guestOsType": "Linux",
+            "isArrayIntegrationPossible": True,
+            "guestCredential": {
+                "username": "string"
+            },
+            "isAgentRegistered": True
+        }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+
+    assert rubrik.register_vm(name='object_name') == "No change required. The VM object_name is already registered."
+
+
+def test_register_vm_already_registered(rubrik, mocker):
+
+    def mock_get_v1_vmware_vm():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string",
+                    "name": "object_name",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainName": "string",
+                    "primaryClusterId": "string",
+                    "slaAssignment": "Derived",
+                    "effectiveSlaDomainId": "string",
+                    "effectiveSlaDomainName": "string",
+                    "effectiveSlaDomainPolarisManagedId": "string",
+                    "effectiveSlaSourceObjectId": "string",
+                    "effectiveSlaSourceObjectName": "string",
+                    "moid": "string",
+                    "vcenterId": "string",
+                    "hostName": "string",
+                    "hostId": "string",
+                    "clusterName": "string",
+                    "snapshotConsistencyMandate": "UNKNOWN",
+                    "powerStatus": "string",
+                    "protectionDate": "2019-05-05T18:57:06.133Z",
+                    "ipAddress": "string",
+                    "agentStatus": {
+                        "agentStatus": "string",
+                        "disconnectReason": "string"
+                    },
+                    "toolsInstalled": True,
+                    "guestOsName": "string",
+                    "isReplicationEnabled": True,
+                    "folderPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "infraPath": [
+                        {
+                            "id": "string",
+                            "managedId": "string",
+                            "name": "string"
+                        }
+                    ],
+                    "vmwareToolsInstalled": True,
+                    "isRelic": True,
+                    "guestCredentialAuthorizationStatus": "string",
+                    "cloudInstantiationSpec": {
+                        "imageRetentionInSeconds": 0
+                    },
+                    "parentAppInfo": {
+                        "id": "string",
+                        "isProtectedThruHierarchy": True
+                    }
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_vmware_vm_id():
+        return {
+            "maxNestedVsphereSnapshots": 0,
+            "isVmPaused": True,
+            "configuredSlaDomainId": "string",
+            "snapshotConsistencyMandate": "UNKNOWN",
+            "preBackupScript": {
+                "scriptPath": "string",
+                "timeoutMs": 0,
+                "failureHandling": "abort"
+            },
+            "postSnapScript": {
+                "scriptPath": "string",
+                "timeoutMs": 0,
+                "failureHandling": "abort"
+            },
+            "postBackupScript": {
+                "scriptPath": "string",
+                "timeoutMs": 0,
+                "failureHandling": "abort"
+            },
+            "isArrayIntegrationEnabled": True,
+            "cloudInstantiationSpec": {
+                "imageRetentionInSeconds": 0
+            },
+            "throttlingSettings": {
+                "ioLatencyThreshold": 0,
+                "datastoreIoLatencyThreshold": 0,
+                "cpuUtilizationThreshold": 0
+            },
+            "id": "string",
+            "name": "object_name",
+            "configuredSlaDomainName": "string",
+            "primaryClusterId": "string",
+            "slaAssignment": "Derived",
+            "effectiveSlaDomainId": "string",
+            "effectiveSlaDomainName": "string",
+            "effectiveSlaDomainPolarisManagedId": "string",
+            "effectiveSlaSourceObjectId": "string",
+            "effectiveSlaSourceObjectName": "string",
+            "moid": "string",
+            "vcenterId": "string",
+            "hostName": "string",
+            "hostId": "string",
+            "clusterName": "string",
+            "powerStatus": "string",
+            "protectionDate": "2019-05-05T18:57:06.257Z",
+            "ipAddress": "string",
+            "agentStatus": {
+                "agentStatus": "string",
+                "disconnectReason": "string"
+            },
+            "toolsInstalled": True,
+            "guestOsName": "string",
+            "isReplicationEnabled": True,
+            "folderPath": [
+                {
+                    "id": "string",
+                    "managedId": "string",
+                    "name": "string"
+                }
+            ],
+            "infraPath": [
+                {
+                    "id": "string",
+                    "managedId": "string",
+                    "name": "string"
+                }
+            ],
+            "vmwareToolsInstalled": True,
+            "isRelic": True,
+            "guestCredentialAuthorizationStatus": "string",
+            "parentAppInfo": {
+                "id": "string",
+                "isProtectedThruHierarchy": True
+            },
+            "blackoutWindowStatus": {
+                "isGlobalBlackoutActive": True,
+                "isSnappableBlackoutActive": True
+            },
+            "blackoutWindows": {
+                "globalBlackoutWindows": [
+                    {
+                        "startTime": "string",
+                        "endTime": "string"
+                    }
+                ],
+                "snappableBlackoutWindows": [
+                    {
+                        "startTime": "string",
+                        "endTime": "string"
+                    }
+                ]
+            },
+            "effectiveSlaDomain": {
+                "id": "string",
+                "primaryClusterId": "string",
+                "name": "string",
+                "frequencies": [
+                    {
+                        "timeUnit": "string",
+                        "frequency": 0,
+                        "retention": 0
+                    }
+                ],
+                "allowedBackupWindows": [
+                    {
+                        "startTimeAttributes": {
+                            "minutes": 0,
+                            "hour": 0,
+                            "dayOfWeek": 0
+                        },
+                        "durationInHours": 0
+                    }
+                ],
+                "firstFullAllowedBackupWindows": [
+                    {
+                        "startTimeAttributes": {
+                            "minutes": 0,
+                            "hour": 0,
+                            "dayOfWeek": 0
+                        },
+                        "durationInHours": 0
+                    }
+                ],
+                "localRetentionLimit": 0,
+                "maxLocalRetentionLimit": 0,
+                "archivalSpecs": [
+                    {
+                        "locationId": "string",
+                        "archivalThreshold": 0
+                    }
+                ],
+                "replicationSpecs": [
+                    {
+                        "locationId": "string",
+                        "retentionLimit": 0
+                    }
+                ],
+                "numDbs": 0,
+                "numOracleDbs": 0,
+                "numFilesets": 0,
+                "numHypervVms": 0,
+                "numNutanixVms": 0,
+                "numManagedVolumes": 0,
+                "numStorageArrayVolumeGroups": 0,
+                "numWindowsVolumeGroups": 0,
+                "numLinuxHosts": 0,
+                "numShares": 0,
+                "numWindowsHosts": 0,
+                "numVms": 0,
+                "numEc2Instances": 0,
+                "numVcdVapps": 0,
+                "numProtectedObjects": 0,
+                "isDefault": True,
+                "uiColor": "string"
+            },
+            "currentHost": {
+                "id": "string",
+                "name": "string",
+                "configuredSlaDomainId": "string",
+                "configuredSlaDomainName": "string",
+                "primaryClusterId": "string",
+                "datacenterId": "string",
+                "computeClusterId": "string",
+                "datastores": [
+                    {
+                        "id": "string",
+                        "name": "string",
+                        "capacity": 0,
+                        "dataStoreType": "string",
+                        "dataCenterName": "string",
+                        "isLocal": True
+                    }
+                ],
+                "effectiveSlaDomainId": "string",
+                "effectiveSlaDomainName": "string",
+                "effectiveSlaSourceObjectId": "string",
+                "effectiveSlaSourceObjectName": "string",
+                "effectiveSlaDomainPolarisManagedId": "string"
+            },
+            "virtualDiskIds": [
+                "string"
+            ],
+            "snapshots": [
+                {
+                    "id": "string",
+                    "date": "2019-05-05T18:57:06.257Z",
+                    "expirationDate": "2019-05-05T18:57:06.257Z",
+                    "sourceObjectType": "string",
+                    "isOnDemandSnapshot": True,
+                    "cloudState": 0,
+                    "consistencyLevel": "string",
+                    "indexState": 0,
+                    "replicationLocationIds": [
+                        "string"
+                    ],
+                    "archivalLocationIds": [
+                        "string"
+                    ],
+                    "slaId": "string",
+                    "slaName": "string",
+                    "vmName": "string"
+                }
+            ],
+            "snapshotCount": 0,
+            "physicalStorage": 0,
+            "guestOsType": "Linux",
+            "isArrayIntegrationPossible": True,
+            "guestCredential": {
+                "username": "string"
+            },
+            "isAgentRegistered": False
+        }
+
+    def mock_post_v1_vm_register_agent():
+        return {"status_code": "204"}
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+
+    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post.return_value = mock_post_v1_vm_register_agent()
+
+    #assert rubrik.register_vm(name='object_name') == '{''status_code'': ''204''}'
+    assert rubrik.register_vm(name='object_name') == {"status_code": "204"}

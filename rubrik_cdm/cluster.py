@@ -1,4 +1,4 @@
-# Copyright 2018 Rubrik, Inc.
+# Copyright 2020 Rubrik, Inc.
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -1094,3 +1094,14 @@ class Cluster(Api):
         config = self.get('internal', '/node_management/cluster_ip')
 
         return config
+
+    def get_all_vcenters(self, timeout=15):
+        """Retrieve information for each vCenter connected to the Rubrik cluster.
+        Keyword Arguments:
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
+        Returns:
+            dict -- The full API response for `GET /v1/vmware/vcenter`.
+        """
+
+        self.log('get_all_vcenters: Getting information for each vCenter connected  to the Rubrik cluster.')
+        return self.get('v1', '/vmware/vcenter', timeout=timeout)

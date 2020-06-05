@@ -1,4 +1,4 @@
-# Copyright 2018 Rubrik, Inc.
+# Copyright 2020 Rubrik, Inc.
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -72,9 +72,8 @@ class Api():
             if call_type == 'GET':
                 request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
                 if params is not None:
-                    request_url = request_url + "?" + '&'.join("{}={}".format(key, val)
+                    request_url = request_url + "?" + '&'.join("{}={}".format(key, quote(val))
                                                                for (key, val) in params.items())
-                request_url = quote(request_url, '://?=&[]')
                 self.log('GET {}'.format(request_url))
                 api_request = requests.get(
                     request_url, verify=False, headers=header, timeout=timeout)

@@ -1,4 +1,4 @@
-# Copyright 2018 Rubrik, Inc.
+# Copyright 2020 Rubrik, Inc.
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -51,7 +51,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
         Cloud {class} - This class contains methods for the managment of Cloud related functionality on the Rubrik cluster.
     """
 
-    def __init__(self, node_ip=None, username=None, password=None, api_token=None, enable_logging=False):
+    def __init__(self, node_ip=None, username=None, password=None, api_token=None, enable_logging=False, logging_level="debug"):
         """Constructor for the Connect class which is used to initialize the class variables.
 
         Keyword Arguments:
@@ -60,15 +60,31 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             password {str} -- The Password you wish to use to connect to the Rubrik cluster. If a value is not provided we will check for a `rubrik_cdm_password` environment variable. (default: {None})
             api_token {str} -- The API Token you wish to use to connect to the Rubrik cluster. If populated, the `username` and `password` fields will be ignored. If a value is not provided we will check for a `rubrik_cdm_token` environment variable.  (default: {None})
             enable_logging {bool} -- Flag to determine if logging will be enabled for the SDK. (default: {False})
+            logging_level {str} -- Sets the threshold for logging to the provided to level. Logging messages which are less severe than level will be ignored. (default: {debug}) (choices: {debug, critical, error, warning, info})
         """
 
+        set_logging = {
+            "debug": logging.DEBUG,
+            "critical": logging.CRITICAL,
+            "error": logging.ERROR,
+            "warning": logging.WARNING,
+            "info": logging.INFO,
+        }
+
+        if logging_level not in set_logging:
+            raise InvalidParameterException(
+                "'{}' is not a valid logging_level. Valid choices are 'debug', 'critical', 'error', 'warning', or 'info'.".format(logging_level))
+
+        # Enable logging for the SDK
+        self.logging_level = logging_level
         if enable_logging:
-            logging.getLogger().setLevel(logging.DEBUG)
+            logging.getLogger().setLevel(set_logging[self.logging_level])
 
         if node_ip is None:
             node_ip = os.environ.get('rubrik_cdm_node_ip')
             if node_ip is None:
-                raise InvalidParameterException("The Rubrik CDM Node IP has not been provided.")
+                raise InvalidParameterException(
+                    "The Rubrik CDM Node IP has not been provided.")
             else:
                 self.node_ip = node_ip
         else:
@@ -109,7 +125,8 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             if api_token is not None:
                 credentials_env_var_provided.append("api_token")
 
-        all_credentials_provided = credentials_manually_provided + credentials_env_var_provided
+        all_credentials_provided = credentials_manually_provided + \
+            credentials_env_var_provided
 
         if len(credentials_manually_provided) == 3:
             raise InvalidParameterException(
@@ -166,22 +183,31 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             raise InvalidParameterException(
                 "You must provide either a username and password or API Token for authentication.")
 
-        self.sdk_version = "2.0.8"
+        self.sdk_version = "2.0.9"
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
         # Optional value to define the Platform using the SDK (Ex. Ansible)
         self.platform = ""
 
-    @staticmethod
-    def log(log_message):
+    def log(self, log_message):
         """Create properly formatted debug log messages.
 
         Arguments:
             log_message {str} -- The message to pass to the debug log.
         """
+
         log = logging.getLogger(__name__)
-        log.debug(log_message)
+
+        set_logging = {
+            "debug": log.debug,
+            "critical": log.critical,
+            "error": log.error,
+            "warning": log.warning,
+            "info": log.info
+
+        }
+        set_logging[self.logging_level](log_message)
 
     def _authorization_header(self):
         """Internal method used to create the authorization header used in the API calls.
@@ -190,7 +216,8 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             dict -- The authorization header that utilizes Basic authentication.
         """
 
-        user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+        user_agent = "RubrikPythonSDK--{}--{}".format(
+            self.sdk_version, self.python_version)
         if self.platform != "":
             user_agent = user_agent + '--' + self.platform
 
@@ -211,11 +238,13 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             # Convert to String for API Call
             authorization = authorization.decode()
 
-            authorization_header["Authorization"] = 'Basic {}'.format(authorization)
+            authorization_header["Authorization"] = 'Basic {}'.format(
+                authorization)
 
         else:
 
-            authorization_header["Authorization"] = 'Bearer {}'.format(self.api_token)
+            authorization_header["Authorization"] = 'Bearer {}'.format(
+                self.api_token)
 
         return authorization_header
 
@@ -226,7 +255,8 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             dict -- The header that does not include any authorization.
         """
 
-        user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+        user_agent = "RubrikPythonSDK--{}--{}".format(
+            self.sdk_version, self.python_version)
         if self.platform != "":
             user_agent = user_agent + '--' + self.platform
 
@@ -279,11 +309,12 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
 
         platform_user_agent = ""
 
-        if platform_name is not "":
+        if platform_name != "":
             platform_user_agent = "platform_name--{}".format(platform_name)
 
-        if platform_version is not "":
-            platform_user_agent = platform_user_agent + "--platform_version--{}".format(platform_version)
+        if platform_version != "":
+            platform_user_agent = platform_user_agent + \
+                "--platform_version--{}".format(platform_version)
 
         self.platform = platform_user_agent
 
@@ -334,17 +365,21 @@ class Bootstrap(Api):
                     self.log("IPv6 scope: {}".format(self.ipv6_scope))
                     if self.ipv6_scope == "0":
                         # Scope 0 is invalid, so find the first non-loopback interface and use that as the scope
-                        self.log('IPv6 link local scope not resolved, searching for a usable scope')
+                        self.log(
+                            'IPv6 link local scope not resolved, searching for a usable scope')
                         interfaces = socket.if_nameindex()
                         for sock_interface, name in interfaces:
                             if 'lo' not in name:
-                                self.log("Using scope {}, interface {}".format(sock_interface, name))
+                                self.log("Using scope {}, interface {}".format(
+                                    sock_interface, name))
                                 self.ipv6_scope = sock_interface
                                 break
                         if self.ipv6_scope == 0:
-                            sys.exit("Error: Unable to find a usable IPv6 link local scope")
+                            sys.exit(
+                                "Error: Unable to find a usable IPv6 link local scope")
                 # Properly format link-local IPv6 address with scope
-                self.node_ip = ('[{}%{}]').format(self.ipv6_addr, self.ipv6_scope)
+                self.node_ip = ('[{}%{}]').format(
+                    self.ipv6_addr, self.ipv6_scope)
                 self.log("Resolved Node IP: {}".format(self.node_ip))
                 node_resolution = True
         except socket.gaierror:
@@ -360,9 +395,10 @@ class Bootstrap(Api):
                 self.log('Could not resolve IPv4 address for cluster.')
 
         if node_resolution is False:
-            raise RubrikException("Error: Could not resolve address for cluster, or invalid IP/address supplied")
+            raise RubrikException(
+                "Error: Could not resolve address for cluster, or invalid IP/address supplied")
 
-        self.sdk_version = "2.0.8"
+        self.sdk_version = "2.0.9"
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
@@ -420,12 +456,14 @@ class Bootstrap(Api):
         if dns_nameservers is None:
             dns_nameservers = ['8.8.8.8']
         elif isinstance(dns_nameservers, list) is not True:
-            raise InvalidParameterException('You must provide a valid list for "dns_nameservers".')
+            raise InvalidParameterException(
+                'You must provide a valid list for "dns_nameservers".')
 
         if ntp_servers is None:
             ntp_servers = ['pool.ntp.org']
         elif isinstance(ntp_servers, list) is not True:
-            raise InvalidParameterException('You must provide a valid list for "ntp_servers".')
+            raise InvalidParameterException(
+                'You must provide a valid list for "ntp_servers".')
 
         using_ipmi_config = False
         using_data_config = False
@@ -467,7 +505,8 @@ class Bootstrap(Api):
         if (using_ipmi_config):
             for node_name, ipmi_ip in node_ipmi_ips.items():
                 if node_name not in bootstrap_config["nodeConfigs"]:
-                    raise InvalidParameterException('Non-existent node name specified in IPMI addresses.')
+                    raise InvalidParameterException(
+                        'Non-existent node name specified in IPMI addresses.')
                 bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig'] = {}
                 bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['netmask'] = ipmi_subnet_mask
                 bootstrap_config["nodeConfigs"][node_name]['ipmiIpConfig']['gateway'] = ipmi_gateway
@@ -478,7 +517,8 @@ class Bootstrap(Api):
         if (using_data_config):
             for node_name, data_ip in node_data_ips.items():
                 if node_name not in bootstrap_config["nodeConfigs"]:
-                    raise InvalidParameterException('Non-existent node name specified in DATA addresses.')
+                    raise InvalidParameterException(
+                        'Non-existent node name specified in DATA addresses.')
                 bootstrap_config["nodeConfigs"][node_name]['dataIpConfig'] = {}
                 bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['netmask'] = data_subnet_mask
                 bootstrap_config["nodeConfigs"][node_name]['dataIpConfig']['gateway'] = data_gateway
@@ -524,7 +564,7 @@ class Bootstrap(Api):
         if wait_for_completion:
             self.log('bootstrap: Waiting for the bootstrap process to complete.')
             while True:
-                status = self.status(request_id,ipv4_addr=self.ipv4_addr)
+                status = self.status(request_id, ipv4_addr=self.ipv4_addr)
 
                 if status['status'] == 'IN_PROGRESS':
                     self.log("bootstrap_status: {}\n".format(status))
@@ -585,7 +625,8 @@ class Bootstrap(Api):
             dict - - The header that does not include any authorization.
         """
 
-        user_agent = "RubrikPythonSDK--{}--{}".format(self.sdk_version, self.python_version)
+        user_agent = "RubrikPythonSDK--{}--{}".format(
+            self.sdk_version, self.python_version)
         if self.platform != "":
             user_agent = user_agent + '--' + self.platform
 

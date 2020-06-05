@@ -62,9 +62,17 @@ rubrik = rubrik_cdm.Connect(node_ip, api_token=api_token)
 ```
 
 
-## Debug
+## Logging
 
-To enable debuging set the `Connect()` `enable_logging` keyword argument to `True`.
+To enable logging, set the `Connect()` `enable_logging` keyword argument to `True`.
+
+The `logging_level` argument can then be used to set the specific logging level you wish to use. The following levels are valid choices:
+
+* `debug` (default value)
+* `critical` 
+* `error` 
+* `warning` 
+* `info`
 
 ### Example
 
@@ -72,7 +80,7 @@ Script:
 
 ```py
 import rubrik_cdm
-rubrik = rubrik_cdm.Connect(enable_logging=True)
+rubrik = rubrik_cdm.Connect(enable_logging=True, logging_level="info)
 
 cluster_version = rubrik.cluster_version()
 print(cluster_version)
@@ -81,13 +89,13 @@ print(cluster_version)
 Output:
 
 ```
-[2018-08-08 09:18:59,687] [DEBUG] -- Node IP: 172.21.8.53
-[2018-08-08 09:18:59,687] [DEBUG] -- Username: demo
-[2018-08-08 09:18:59,687] [DEBUG] -- Password: *******
+[2018-08-08 09:18:59,687] [INFO] -- Node IP: 172.21.8.53
+[2018-08-08 09:18:59,687] [INFO] -- Username: demo
+[2018-08-08 09:18:59,687] [INFO] -- Password: *******
 
-[2018-08-08 09:19:00,062] [DEBUG] -- cluster_version: Getting the software version of the Rubrik Cluster.
-[2018-08-08 09:19:00,062] [DEBUG] -- GET https://172.21.8.54/api/v1/cluster/me/version
-[2018-08-08 09:19:00,443] [DEBUG] -- <Response [200]>
+[2018-08-08 09:19:00,062] [INFO] -- cluster_version: Getting the software version of the Rubrik Cluster.
+[2018-08-08 09:19:00,062] [INFO] -- GET https://172.21.8.54/api/v1/cluster/me/version
+[2018-08-08 09:19:00,443] [INFO] -- <Response [200]>
 
 4.1.2-2366
 ```
