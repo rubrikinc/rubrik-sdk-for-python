@@ -323,9 +323,9 @@ class Data_Management(Api):
                 raise InvalidParameterException(
                     "You must provide the hostname, the RAC cluster name, or one of the hosts in the RAC cluster for the Oracle DB object.")
             # Regular expression to test for an IP Address.
-            regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
-                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
-                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+            regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(
+                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(
+                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(
                                         25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)'''
             # Check to make sure the hostname is not an IP address.
             if re.search(regex, hostname):
@@ -390,7 +390,7 @@ class Data_Management(Api):
             "oracle_host": {
                 "api_version": "internal",
                 "api_endpoint": "/oracle/hierarchy/root/children?name={}".format(object_name)
-            },            
+            },
             "volume_group": {
                 "api_version": "internal",
                 "api_endpoint": "/volume_group?is_relic=false"
@@ -512,12 +512,12 @@ class Data_Management(Api):
         if object_type == "oracle_host":
             if log_backup_frequency_in_minutes is None or log_retention_hours is None or num_channels is None:
                 raise InvalidParameterException(
-                    "When the object_type is 'oracle_host' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' paramaters must be populated.")                    
+                    "When the object_type is 'oracle_host' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' paramaters must be populated.")
 
         if object_type == "oracle_db":
             if log_backup_frequency_in_minutes is None or log_retention_hours is None or num_channels is None or hostname is None:
                 raise InvalidParameterException(
-                    "When the object_type is 'oracle_db' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' and 'hostname' paramaters must be populated.")    
+                    "When the object_type is 'oracle_db' the 'log_backup_frequency_in_minutes', 'log_retention_hours', 'num_channels' and 'hostname' paramaters must be populated.")
 
         if object_type == "fileset":
             if nas_host is None or share is None:
@@ -690,7 +690,7 @@ class Data_Management(Api):
                         db_sla_lst.append(patch_resp)
             else:
                 raise InvalidParameterException(
-                    "Host ID not found for instance '{}'").format(object_name)
+                    "Host ID not found for instance '{}'".format(object_name))
 
             return db_sla_lst
 
@@ -734,8 +734,8 @@ class Data_Management(Api):
                     patch_resp = self.patch("internal", "/oracle/db/{}".format(oracle_db_id), config, timeout)
             else:
                 raise InvalidParameterException(
-                    "Database ID not found for instance '{}'").format(object_name)
-            
+                    "Database ID not found for instance '{}'".format(object_name))
+
             return patch_resp
 
         elif object_type == 'oracle_host':
@@ -778,9 +778,9 @@ class Data_Management(Api):
                     patch_resp = self.patch("internal", "/oracle/host/{}".format(host_id), config, timeout)
             else:
                 raise InvalidParameterException(
-                    "Host ID not found for instance '{}'").format(object_name)
+                    "Host ID not found for instance '{}'".format(object_name))
 
-            return patch_resp           
+            return patch_resp
 
         elif object_type == "volume_group":
 
