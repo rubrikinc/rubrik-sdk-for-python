@@ -1304,7 +1304,7 @@ class Data_Management(Api):
         """Retrieve the name and ID of a specific object type.
         Arguments:
             sla {str} -- The name of the SLA Domain you wish to search.
-            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware, hyper-v, mssql_db, ec2_instance})
+            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware, hyper-v, mssql_db, ec2_instance, oracle_db})
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {15})
         Returns:
@@ -1313,8 +1313,10 @@ class Data_Management(Api):
 
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
-
-        valid_object_type = ['vmware', 'hyper-v', 'mssql_db', 'ec2_instance']
+        # valid_object_type = ['vmware', 'physical_host',
+        #                      'ahv', 'mssql_db', 'oracle_db', 'share']
+        valid_object_type = ['vmware', 'hyper-v',
+                             'mssql_db', 'ec2_instance', 'oracle_db', 'vcd', 'managed_volume', 'ahv', 'nas_shares']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -1322,29 +1324,20 @@ class Data_Management(Api):
 
         sla_id = self.object_id(sla, "sla", timeout=timeout)
         vm_name_id = {}
-        # Used to determine how the data should be processed. The default value
-        # here is rest. Otherwise, it will be set to gql
-        api_call_type = "rest"
-        if object_type == 'vmware':
 
-            all_vms_in_sla = self.get(
-                "v1",
-                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(
-                    sla_id),
-                timeout=timeout)
-
-        elif object_type == 'hyper-v':
-            api_call_type = "gql"
-            operation_name = "SlaDomainHypervVm"
+        if object_type == "nas_shares":
+            # The REST API does not have an easy way to filter by SLA so we will use the GQL call
+            operation_name = "NasAssignedSLA"
 
             query = """
-            SlaDomainHypervVm($effectiveSlaDomainId: String) {
-                hypervVmConnection(effectiveSlaDomainId: $effectiveSlaDomainId) {
+             NasAssignedSLA($effectiveSlaDomainId: String) {
+                nasShareConnection(effectiveSlaDomainId: $effectiveSlaDomainId) {
                     nodes {
-                        id
-                        name
+                    id
+                    hostname
+
                     }
-                 }
+                }
                 }
             """
 
@@ -1352,27 +1345,55 @@ class Data_Management(Api):
                 "effectiveSlaDomainId": sla_id
             }
 
-            all_vms_in_sla = self.query(
-                query, operation_name, variables, timeout=timeout)
+            all_vms_in_sla = self.query(query, operation_name, variables)
 
             for vm in all_vms_in_sla["hypervVmConnection"]["nodes"]:
                 vm_name_id[vm["name"]] = vm["id"]
+        else:
 
-        elif object_type == "mssql_db":
+            api_call = {
+                "vmware": {
+                    "api_version": "v1",
+                    "api_endpoint": "/vmware/vm"
+                },
+                "hyper-v": {
+                    "api_version": "internal",
+                    "api_endpoint": "/hyperv/vm"
+                },
+                "mssql_db": {
+                    "api_version": "v1",
+                    "api_endpoint": "/mssql/db"
+                },
+                "ec2_instance": {
+                    "api_version": "internal",
+                    "api_endpoint": "/aws/ec2_instance"
+                },
+                "oracle_db": {
+                    "api_version": "internal",
+                    "api_endpoint": "/oracle/db"
+                },
+                "vcd": {
+                    "api_version": "internal",
+                    "api_endpoint": "/vcd/vapp"
+                },
+                "managed_volume": {
+                    "api_version": "internal",
+                    "api_endpoint": "/managed_volume"
+                },
+                "ahv": {
+                    "api_version": "internal",
+                    "api_endpoint": "/nutanix/vm"
+                },
+
+
+            }
+
             all_vms_in_sla = self.get(
-                "v1",
-                "/mssql/db?effective_sla_domain_id={}&is_relic=false".format(
-                    sla_id),
+                api_call[object_type]["api_version"],
+                api_call[object_type]["api_endpoint"] +
+                "?effective_sla_domain_id={}&is_relic=false".format(sla_id),
                 timeout=timeout)
 
-        elif object_type == "ec2_instance":
-            all_vms_in_sla = self.get(
-                "internal",
-                "/aws/ec2_instance?effective_sla_domain_id={}&is_relic=false".format(
-                    sla_id),
-                timeout=timeout)
-
-        if api_call_type == "rest":
             for vm in all_vms_in_sla["data"]:
                 vm_name_id[vm["name"]] = vm["id"]
 
