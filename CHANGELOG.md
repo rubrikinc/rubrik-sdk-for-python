@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## Changed
+
+- The create_sla() function will return a more clear error message when the SLA was found on the Rubrik cluster but with a different configuraiton than the one provided. ([Issue 236](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/236))
+
 ## Fixed
 
 - When calling create_sla() an error will not longer be thrown for frequencies and retentions that have a default None value provided ([Issue 232](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/232))
