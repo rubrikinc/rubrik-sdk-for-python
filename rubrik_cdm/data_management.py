@@ -362,9 +362,9 @@ class Data_Management(Api):
                 raise InvalidParameterException(
                     "You must provide the hostname, the RAC cluster name, or one of the hosts in the RAC cluster for the Oracle DB object.")
             # Regular expression to test for an IP Address.
-            regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
-                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
-                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.( 
+            regex = '''^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(
+                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(
+                                        25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\.(
                                         25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)'''
             # Check to make sure the hostname is not an IP address.
             if re.search(regex, hostname):
@@ -757,7 +757,7 @@ class Data_Management(Api):
                         db_sla_lst.append(patch_resp)
             else:
                 raise InvalidParameterException(
-                    "Host ID not found for instance '{}'").format(object_name)
+                    "Host ID not found for instance '{}'".format(object_name))
 
             return db_sla_lst
 
@@ -804,7 +804,8 @@ class Data_Management(Api):
                         "internal", "/oracle/db/{}".format(oracle_db_id), config, timeout)
             else:
                 raise InvalidParameterException(
-                    "Database ID not found for instance '{}'").format(object_name)
+                    "Database ID not found for instance '{}'".format(object_name))
+
 
             return patch_resp
 
@@ -849,7 +850,7 @@ class Data_Management(Api):
                         "internal", "/oracle/host/{}".format(host_id), config, timeout)
             else:
                 raise InvalidParameterException(
-                    "Host ID not found for instance '{}'").format(object_name)
+                    "Host ID not found for instance '{}'".format(object_name))
 
             return patch_resp
 
