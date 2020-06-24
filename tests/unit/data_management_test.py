@@ -8887,7 +8887,7 @@ def test_get_sla_objects_invalid_object_type(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The get_sla_object() object_type argument must be one of the following: ['vmware', 'hyper-v']."
+    assert error_message == "The get_sla_object() object_type argument must be one of the following: valid_object_type = ['vmware', 'hyper-v', 'mssql_db', 'ec2_instance', 'oracle_db', 'vcd', 'managed_volume', 'ahv', 'nas_share', 'linux_and_unix_host', 'windows_host']."
 
 
 def test_get_sla_objects_not_protecting_objects(rubrik, mocker):
