@@ -1314,7 +1314,7 @@ class Data_Management(Api):
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
 
-        valid_object_type = ['vmware', 'hyper-v']
+        valid_object_type = ['vmware', 'hyper-v', 'mssql_db']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -1322,6 +1322,9 @@ class Data_Management(Api):
 
         sla_id = self.object_id(sla, "sla", timeout=timeout)
         vm_name_id = {}
+        # Used to determine how the data should be processed. The default value
+        # here is rest. Otherwise, it will be set to gql
+        api_call_type = "rest"
         if object_type == 'vmware':
 
             all_vms_in_sla = self.get(
@@ -1330,9 +1333,8 @@ class Data_Management(Api):
                     sla_id),
                 timeout=timeout)
 
-            for vm in all_vms_in_sla["data"]:
-                vm_name_id[vm["name"]] = vm["id"]
         elif object_type == 'hyper-v':
+            api_call_type = "gql"
             operation_name = "SlaDomainHypervVm"
 
             query = """
@@ -1354,6 +1356,17 @@ class Data_Management(Api):
                 query, operation_name, variables, timeout=timeout)
 
             for vm in all_vms_in_sla["hypervVmConnection"]["nodes"]:
+                vm_name_id[vm["name"]] = vm["id"]
+
+        elif object_type == "mssql_db":
+            all_vms_in_sla = self.get(
+                "v1",
+                "/mssql/db?effective_sla_domain_id={}&is_relic=false".format(
+                    sla_id),
+                timeout=timeout)
+
+        if api_call_type == "rest":
+            for vm in all_vms_in_sla["data"]:
                 vm_name_id[vm["name"]] = vm["id"]
 
         if bool(vm_name_id) is False:
