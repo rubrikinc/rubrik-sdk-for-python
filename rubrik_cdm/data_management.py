@@ -806,7 +806,6 @@ class Data_Management(Api):
                 raise InvalidParameterException(
                     "Database ID not found for instance '{}'".format(object_name))
 
-
             return patch_resp
 
         elif object_type == 'oracle_host':
@@ -1305,7 +1304,7 @@ class Data_Management(Api):
         """Retrieve the name and ID of a specific object type.
         Arguments:
             sla {str} -- The name of the SLA Domain you wish to search.
-            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware})
+            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware, hyper-v})
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {15})
         Returns:
@@ -1315,15 +1314,15 @@ class Data_Management(Api):
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
 
-        valid_object_type = ['vmware']
+        valid_object_type = ['vmware', 'hyper-v']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
                 "The get_sla_object() object_type argument must be one of the following: {}.".format(valid_object_type))
 
+        sla_id = self.object_id(sla, "sla", timeout=timeout)
+        vm_name_id = {}
         if object_type == 'vmware':
-
-            sla_id = self.object_id(sla, "sla", timeout=timeout)
 
             all_vms_in_sla = self.get(
                 "v1",
@@ -1331,16 +1330,38 @@ class Data_Management(Api):
                     sla_id),
                 timeout=timeout)
 
-            vm_name_id = {}
             for vm in all_vms_in_sla["data"]:
                 vm_name_id[vm["name"]] = vm["id"]
+        elif object_type == 'hyper-v':
+            operation_name = "SlaDomainHypervVm"
 
-            if bool(vm_name_id) is False:
-                raise InvalidParameterException(
-                    "The SLA '{}' is currently not protecting any {} objects.".format(
-                        sla, object_type))
+            query = """
+            SlaDomainHypervVm($effectiveSlaDomainId: String) {
+                hypervVmConnection(effectiveSlaDomainId: $effectiveSlaDomainId) {
+                    nodes {
+                        id
+                        name
+                    }
+                 }
+                }
+            """
 
-            return vm_name_id
+            variables = {
+                "effectiveSlaDomainId": sla_id
+            }
+
+            all_vms_in_sla = self.query(
+                query, operation_name, variables, timeout=timeout)
+
+            for vm in all_vms_in_sla["hypervVmConnection"]["nodes"]:
+                vm_name_id[vm["name"]] = vm["id"]
+
+        if bool(vm_name_id) is False:
+            raise InvalidParameterException(
+                "The SLA '{}' is currently not protecting any {} objects.".format(
+                    sla, object_type))
+
+        return vm_name_id
 
     def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, timeout=15):  # pylint: ignore
         """Create a new SLA Domain.
