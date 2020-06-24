@@ -1304,7 +1304,7 @@ class Data_Management(Api):
         """Retrieve the name and ID of a specific object type.
         Arguments:
             sla {str} -- The name of the SLA Domain you wish to search.
-            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware, hyper-v})
+            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware, hyper-v, mssql_db, ec2_instance})
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {15})
         Returns:
@@ -1314,7 +1314,7 @@ class Data_Management(Api):
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
 
-        valid_object_type = ['vmware', 'hyper-v', 'mssql_db']
+        valid_object_type = ['vmware', 'hyper-v', 'mssql_db', 'ec2_instance']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -1362,6 +1362,13 @@ class Data_Management(Api):
             all_vms_in_sla = self.get(
                 "v1",
                 "/mssql/db?effective_sla_domain_id={}&is_relic=false".format(
+                    sla_id),
+                timeout=timeout)
+
+        elif object_type == "ec2_instance":
+            all_vms_in_sla = self.get(
+                "internal",
+                "/aws/ec2_instance?effective_sla_domain_id={}&is_relic=false".format(
                     sla_id),
                 timeout=timeout)
 
