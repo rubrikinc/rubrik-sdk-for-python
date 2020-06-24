@@ -1304,7 +1304,7 @@ class Data_Management(Api):
         """Retrieve the name and ID of a specific object type.
         Arguments:
             sla {str} -- The name of the SLA Domain you wish to search.
-            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware, hyper-v, mssql_db, ec2_instance, oracle_db})
+            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware, hyper-v, mssql_db, ec2_instance, oracle_db, vcd, managed_volume, ahv, nas_share, linux_and_unix_host, windows_host})
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {15})
         Returns:
@@ -1316,7 +1316,7 @@ class Data_Management(Api):
         # valid_object_type = ['vmware', 'physical_host',
         #                      'ahv', 'mssql_db', 'oracle_db', 'share']
         valid_object_type = ['vmware', 'hyper-v',
-                             'mssql_db', 'ec2_instance', 'oracle_db', 'vcd', 'managed_volume', 'ahv', 'nas_shares']
+                             'mssql_db', 'ec2_instance', 'oracle_db', 'vcd', 'managed_volume', 'ahv', 'nas_share', 'linux_and_unix_host', 'windows_host']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -1325,7 +1325,7 @@ class Data_Management(Api):
         sla_id = self.object_id(sla, "sla", timeout=timeout)
         vm_name_id = {}
 
-        if object_type == "nas_shares":
+        if object_type == "nas_share":
             # The REST API does not have an easy way to filter by SLA so we will use the GQL call
             operation_name = "NasAssignedSLA"
 
@@ -1349,6 +1349,39 @@ class Data_Management(Api):
 
             for vm in all_vms_in_sla["hypervVmConnection"]["nodes"]:
                 vm_name_id[vm["name"]] = vm["id"]
+
+        elif object_type == "linux_and_unix_host" or object_type == "windows_host":
+            # The REST API does not have an easy way to filter by SLA so we will use the GQL call
+            operation_name = "PhysicalHostSLA"
+
+            query = """
+             PhysicalHostSLA($effectiveSlaDomainId: String, $operatingSystemType: String, $status: String) {
+                hostConnection(effectiveSlaDomainId: $effectiveSlaDomainId, operatingSystemType: $operatingSystemType,  status: $status) {
+                    nodes {
+                    id
+                    hostname
+                    }
+                }
+                }
+            """
+
+            if object_type == "linux_and_unix_host":
+                operatingSystemType = "UnixLike"
+            else:
+                operatingSystemType = "Windows"
+
+            variables = {
+                "status": "Connected",
+                "effectiveSlaDomainId": sla_id,
+                "operatingSystemType": operatingSystemType,
+
+            }
+
+            all_vms_in_sla = self.query(query, operation_name, variables)
+
+            for vm in all_vms_in_sla["hostConnection"]["nodes"]:
+                vm_name_id[vm["hostname"]] = vm["id"]
+
         else:
 
             api_call = {
