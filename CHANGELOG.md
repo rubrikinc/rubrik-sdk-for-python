@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## Fixed
+
+- When calling create_sla() an error will not longer be thrown for frequencies and retentions that have a default None value provided ([Issue 232](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/232))
+
 ## v2.0.9
 
 ### Added
