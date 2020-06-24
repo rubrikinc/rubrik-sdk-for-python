@@ -1347,8 +1347,8 @@ class Data_Management(Api):
 
             all_vms_in_sla = self.query(query, operation_name, variables)
 
-            for vm in all_vms_in_sla["hypervVmConnection"]["nodes"]:
-                vm_name_id[vm["name"]] = vm["id"]
+            for vm in all_vms_in_sla["nasShareConnection"]["nodes"]:
+                vm_name_id[vm["hostname"]] = vm["id"]
 
         elif object_type == "linux_and_unix_host" or object_type == "windows_host":
             # The REST API does not have an easy way to filter by SLA so we will use the GQL call
