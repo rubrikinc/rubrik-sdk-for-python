@@ -806,7 +806,6 @@ class Data_Management(Api):
                 raise InvalidParameterException(
                     "Database ID not found for instance '{}'".format(object_name))
 
-
             return patch_resp
 
         elif object_type == 'oracle_host':
@@ -1551,7 +1550,7 @@ class Data_Management(Api):
                     name)
             else:
                 raise InvalidParameterException(
-                    "The Rubrik cluster already has an SLA Domain named '{}'.".format(name))
+                    "The Rubrik cluster already has an SLA Domain named '{}' whose configuration does not match the values provided.".format(name))
 
         self.log("create_sla: Creating the new SLA")
         if v2_sla is True:
