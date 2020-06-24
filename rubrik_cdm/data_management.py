@@ -52,7 +52,8 @@ class Data_Management(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        valid_object_type = ['vmware', 'physical_host', 'ahv', 'mssql_db', 'oracle_db', 'share']
+        valid_object_type = ['vmware', 'physical_host',
+                             'ahv', 'mssql_db', 'oracle_db', 'share']
         valid_host_os_type = ['Linux', 'Windows']
 
         if object_type not in valid_object_type:
@@ -65,31 +66,37 @@ class Data_Management(Api):
                     valid_host_os_type))
 
         if object_type == 'vmware':
-            self.log("on_demand_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(
+                object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
             if sla_name == 'current':
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the vSphere VM '{}'.".format(object_name))
 
-                vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+                vm_summary = self.get(
+                    'v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
                 sla_id = vm_summary['effectiveSlaDomainId']
 
             elif sla_name != 'current':
-                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
 
-            self.log("on_demand_snapshot: Initiating snapshot for the vSphere VM '{}'.".format(object_name))
-            api_request = self.post('v1', '/vmware/vm/{}/snapshot'.format(vm_id), config, timeout)
+            self.log("on_demand_snapshot: Initiating snapshot for the vSphere VM '{}'.".format(
+                object_name))
+            api_request = self.post(
+                'v1', '/vmware/vm/{}/snapshot'.format(vm_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
         elif object_type == 'ahv':
 
-            self.log("on_demand_snapshot: Searching the Rubrik cluster for the AHV VM '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the AHV VM '{}'.".format(
+                object_name))
 
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
@@ -97,18 +104,22 @@ class Data_Management(Api):
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the AHV VM '{}'.".format(object_name))
 
-                vm_summary = self.get('internal', '/nutanix/vm/{}'.format(vm_id), timeout)
+                vm_summary = self.get(
+                    'internal', '/nutanix/vm/{}'.format(vm_id), timeout)
                 sla_id = vm_summary['effectiveSlaDomainId']
 
             elif sla_name != 'current':
-                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
 
-            self.log("on_demand_snapshot: Initiating snapshot for the AHV VM '{}'.".format(object_name))
-            api_request = self.post('internal', '/nutanix/vm/{}/snapshot'.format(vm_id), config, timeout)
+            self.log("on_demand_snapshot: Initiating snapshot for the AHV VM '{}'.".format(
+                object_name))
+            api_request = self.post(
+                'internal', '/nutanix/vm/{}/snapshot'.format(vm_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -117,7 +128,8 @@ class Data_Management(Api):
             self.log(
                 "on_demand_snapshot: Searching the Rubrik cluster for the MS SQL '{}'.".format(object_name))
 
-            mssql_host = self.object_id(sql_host, 'physical_host', timeout=timeout)
+            mssql_host = self.object_id(
+                sql_host, 'physical_host', timeout=timeout)
 
             mssql_instance = self.get(
                 'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
@@ -126,7 +138,8 @@ class Data_Management(Api):
                 if instance['name'] == sql_instance:
                     sql_db_id = instance['id']
 
-            mssql_db = self.get('v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_db_id), timeout)
+            mssql_db = self.get(
+                'v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_db_id), timeout)
 
             for db in mssql_db['data']:
                 if db['name'] == sql_db:
@@ -136,18 +149,22 @@ class Data_Management(Api):
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the MS SQL '{}'.".format(object_name))
 
-                mssql_summary = self.get('v1', '/mssql/db/{}'.format(mssql_id), timeout)
+                mssql_summary = self.get(
+                    'v1', '/mssql/db/{}'.format(mssql_id), timeout)
                 sla_id = mssql_summary['effectiveSlaDomainId']
 
             elif sla_name != 'current':
-                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
 
-            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(object_name))
-            api_request = self.post('v1', '/mssql/db/{}/snapshot'.format(mssql_id), config, timeout)
+            self.log("on_demand_snapshot: Initiating snapshot for the MS SQL '{}'.".format(
+                object_name))
+            api_request = self.post(
+                'v1', '/mssql/db/{}/snapshot'.format(mssql_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -159,13 +176,17 @@ class Data_Management(Api):
                 raise InvalidParameterException(
                     "The on_demand_snapshot() `fileset` argument must be populated when taking a Physical host snapshot.")
 
-            self.log("on_demand_snapshot: Searching the Rubrik cluster for the Physical Host '{}'.".format(object_name))
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the Physical Host '{}'.".format(
+                object_name))
             host_id = self.object_id(object_name, object_type, timeout=timeout)
 
-            self.log("on_demand_snapshot: Searching the Rubrik cluster for the Fileset Template '{}'.".format(fileset))
-            fileset_template_id = self.object_id(fileset, 'fileset_template', host_os, timeout=timeout)
+            self.log(
+                "on_demand_snapshot: Searching the Rubrik cluster for the Fileset Template '{}'.".format(fileset))
+            fileset_template_id = self.object_id(
+                fileset, 'fileset_template', host_os, timeout=timeout)
 
-            self.log("on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
+            self.log(
+                "on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
             api_endpoint = '/fileset?primary_cluster_id=local&host_id={}&is_relic=false&template_id={}'.format(
                 host_id, fileset_template_id)
             fileset_summary = self.get('v1', api_endpoint, timeout=timeout)
@@ -180,14 +201,17 @@ class Data_Management(Api):
             if sla_name == 'current':
                 sla_id = fileset_summary['data'][0]['effectiveSlaDomainId']
             elif sla_name != 'current':
-                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
 
-            self.log("on_demand_snapshot: Initiating snapshot for the Physical Host '{}'.".format(object_name))
-            api_request = self.post('v1', '/fileset/{}/snapshot'.format(fileset_id), config, timeout)
+            self.log("on_demand_snapshot: Initiating snapshot for the Physical Host '{}'.".format(
+                object_name))
+            api_request = self.post(
+                'v1', '/fileset/{}/snapshot'.format(fileset_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -200,26 +224,31 @@ class Data_Management(Api):
                 "on_demand_snapshot: Searching the Rubrik cluster for the Oracle database '{}' on the host '{}'.".format(
                     object_name,
                     hostname))
-            db_id = self.object_id(object_name, object_type, hostname=hostname, timeout=timeout)
+            db_id = self.object_id(
+                object_name, object_type, hostname=hostname, timeout=timeout)
 
             if sla_name == 'current':
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain assigned to the Oracle database '{}'.".format(
                         object_name))
 
-                oracle_db_summary = self.get('internal', '/oracle/db/{}'.format(db_id), timeout)
+                oracle_db_summary = self.get(
+                    'internal', '/oracle/db/{}'.format(db_id), timeout)
                 sla_id = oracle_db_summary['effectiveSlaDomainId']
 
             elif sla_name != 'current':
-                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
             config['slaId'] = sla_id
             config['forceFullSnapshot'] = force_full
 
-            self.log("on_demand_snapshot: Initiating snapshot for the Oracle database '{}'.".format(object_name))
-            api_request = self.post('internal', '/oracle/db/{}/snapshot'.format(db_id), config, timeout)
+            self.log("on_demand_snapshot: Initiating snapshot for the Oracle database '{}'.".format(
+                object_name))
+            api_request = self.post(
+                'internal', '/oracle/db/{}/snapshot'.format(db_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -234,14 +263,20 @@ class Data_Management(Api):
                 raise InvalidParameterException(
                     "The on_demand_snapshot() `share_type` argument must be populated when taking a NAS Share fileset snapshot.")
 
-            self.log("on_demand_snapshot: Searching the Rubrik cluster for the NAS Host '{}'.".format(hostname))
-            host_id = self.object_id(hostname, 'physical_host', timeout=timeout)
+            self.log(
+                "on_demand_snapshot: Searching the Rubrik cluster for the NAS Host '{}'.".format(hostname))
+            host_id = self.object_id(
+                hostname, 'physical_host', timeout=timeout)
 
-            self.log("on_demand_snapshot: Searching the Rubrik cluster for the NAS share '{}'.".format(object_name))
-            share_id = self.object_id(object_name, 'share', hostname=hostname, share_type=share_type, timeout=timeout)
+            self.log("on_demand_snapshot: Searching the Rubrik cluster for the NAS share '{}'.".format(
+                object_name))
+            share_id = self.object_id(
+                object_name, 'share', hostname=hostname, share_type=share_type, timeout=timeout)
 
-            self.log("on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
-            api_endpoint = '/fileset?share_id={}&host_id={}&is_relic=false&name={}'.format(share_id, host_id, fileset)
+            self.log(
+                "on_demand_snapshot: Searching the Rubrik cluster for the full Fileset.")
+            api_endpoint = '/fileset?share_id={}&host_id={}&is_relic=false&name={}'.format(
+                share_id, host_id, fileset)
             fileset_summary = self.get('v1', api_endpoint, timeout=timeout)
 
             if fileset_summary['total'] == 0:
@@ -254,7 +289,8 @@ class Data_Management(Api):
             if sla_name == 'current':
                 sla_id = fileset_summary['data'][0]['effectiveSlaDomainId']
             elif sla_name != 'current':
-                self.log("on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+                self.log(
+                    "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
                 sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
@@ -263,7 +299,8 @@ class Data_Management(Api):
             self.log(
                 "on_demand_snapshot: Initiating snapshot for the NAS Share '{}' Fileset '{}'.".format(
                     object_name, fileset))
-            api_request = self.post('v1', '/fileset/{}/snapshot'.format(fileset_id), config, timeout)
+            api_request = self.post(
+                'v1', '/fileset/{}/snapshot'.format(fileset_id), config, timeout)
 
             snapshot_status_url = api_request['links'][0]['href']
 
@@ -310,9 +347,11 @@ class Data_Management(Api):
 
         if object_type == 'fileset_template':
             if host_os is None:
-                raise InvalidParameterException("You must provide the Fileset Template OS type.")
+                raise InvalidParameterException(
+                    "You must provide the Fileset Template OS type.")
             elif host_os not in ['Linux', 'Windows']:
-                raise InvalidParameterException("The host_os must be either 'Linux' or 'Windows'.")
+                raise InvalidParameterException(
+                    "The host_os must be either 'Linux' or 'Windows'.")
 
         if object_type == 'sla':
             if object_name.upper() == "FOREVER" or object_name.upper() == "UNPROTECTED":
@@ -340,7 +379,8 @@ class Data_Management(Api):
                     "You must provide the hostname with the NAS share object.")
             else:
                 self.log('Searching the Rubrik cluster for the host ID.')
-                host_id = self.object_id(hostname, 'physical_host', timeout=timeout)
+                host_id = self.object_id(
+                    hostname, 'physical_host', timeout=timeout)
 
         api_call = {
             "vmware": {
@@ -416,7 +456,8 @@ class Data_Management(Api):
                 "api_endpoint": "/host?primary_cluster_id=local&{}={}".format(filter_field_name, object_name)
             }
 
-        self.log("object_id: Getting the object id for the {} object '{}'.".format(object_type, object_name))
+        self.log("object_id: Getting the object id for the {} object '{}'.".format(
+            object_type, object_name))
         api_request = self.get(
             api_call[object_type]["api_version"],
             api_call[object_type]["api_endpoint"],
@@ -498,7 +539,8 @@ class Data_Management(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        valid_object_type = ['vmware', 'mssql_host', 'volume_group', 'fileset', 'ahv', 'oracle_db', 'oracle_host']
+        valid_object_type = ['vmware', 'mssql_host', 'volume_group',
+                             'fileset', 'ahv', 'oracle_db', 'oracle_host']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
@@ -535,10 +577,12 @@ class Data_Management(Api):
                     "When the object_type is 'volumge_group' the 'windows_host' paramater must be populated.")
         else:
             if not isinstance(object_name, (str)):
-                raise InvalidParameterException("The object_name must be a string.")
+                raise InvalidParameterException(
+                    "The object_name must be a string.")
 
         # Determine if 'do not protect' or 'clear' are the SLA Domain Name
-        do_not_protect_regex = re.findall('\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
+        do_not_protect_regex = re.findall(
+            '\\bdo not protect\\b', sla_name, flags=re.IGNORECASE)
         clear_regex = re.findall('\\bclear\\b', sla_name, flags=re.IGNORECASE)
 
         if len(do_not_protect_regex) > 0:
@@ -546,21 +590,26 @@ class Data_Management(Api):
         elif len(clear_regex) > 0:
             sla_id = 'INHERIT'
         else:
-            self.log("assign_sla: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+            self.log(
+                "assign_sla: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
             sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
         if object_type == 'vmware':
-            self.log("assign_sla: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+            self.log("assign_sla: Searching the Rubrik cluster for the vSphere VM '{}'.".format(
+                object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
-            self.log("assign_sla: Determing the SLA Domain currently assigned to the vSphere VM '{}'.".format(object_name))
-            vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+            self.log("assign_sla: Determing the SLA Domain currently assigned to the vSphere VM '{}'.".format(
+                object_name))
+            vm_summary = self.get(
+                'v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
 
             if sla_id == vm_summary['configuredSlaDomainId']:
                 return "No change required. The vSphere VM '{}' is already assigned to the '{}' SLA Domain.".format(
                     object_name, sla_name)
             else:
-                self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+                self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(
+                    object_name, sla_name))
 
                 config = {}
                 config['managedIds'] = [vm_id]
@@ -568,11 +617,15 @@ class Data_Management(Api):
                 return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout)
 
         elif object_type == 'fileset':
-            self.log("assign_sla: Searching the Rubrik cluster for the NAS host '{}'.".format(nas_host))
-            host_id = self.object_id(nas_host, 'physical_host', timeout=timeout)
+            self.log(
+                "assign_sla: Searching the Rubrik cluster for the NAS host '{}'.".format(nas_host))
+            host_id = self.object_id(
+                nas_host, 'physical_host', timeout=timeout)
 
-            self.log("assign_sla: Searching the Rubrik cluster for the share '{}'.".format(share))
-            share_summary = self.get("internal", '/host/share', timeout=timeout)
+            self.log(
+                "assign_sla: Searching the Rubrik cluster for the share '{}'.".format(share))
+            share_summary = self.get(
+                "internal", '/host/share', timeout=timeout)
             share_id = None
             for shares in share_summary['data']:
                 if shares['hostId'] == host_id and shares['exportPoint'] == share:
@@ -582,22 +635,27 @@ class Data_Management(Api):
                     "The share object'{}' does not exist for host '{}'.".format(
                         share, nas_host))
 
-            self.log("assign_sla: Searching the Rubrik cluster for the fileset '{}' template.".format(object_name))
-            fileset_summary = self.get("v1", '/fileset?is_relic=false&name={}'.format(object_name), timeout=timeout)
+            self.log("assign_sla: Searching the Rubrik cluster for the fileset '{}' template.".format(
+                object_name))
+            fileset_summary = self.get(
+                "v1", '/fileset?is_relic=false&name={}'.format(object_name), timeout=timeout)
             template_id = None
             for filesets in fileset_summary['data']:
                 if filesets['hostId'] == host_id and filesets['name'] == object_name:
                     template_id = filesets['templateId']
             if template_id is None:
-                raise InvalidParameterException("The fileset '{}' template does not exist".format(object_name))
+                raise InvalidParameterException(
+                    "The fileset '{}' template does not exist".format(object_name))
 
-            self.log("assign_sla: Creating filesets for a network host. Each fileset is a fileset template applied to a host")
+            self.log(
+                "assign_sla: Creating filesets for a network host. Each fileset is a fileset template applied to a host")
             bulk = [{
                 'isPassthrough': False,
                 'shareId': share_id,
                 'templateId': template_id
             }]
-            fileset_response = self.post("internal", "/fileset/bulk", bulk, timeout)
+            fileset_response = self.post(
+                "internal", "/fileset/bulk", bulk, timeout)
             fileset_id = fileset_response['data'][0]['id']
 
             if sla_id == fileset_summary['data'][0]['configuredSlaDomainId']:
@@ -605,7 +663,8 @@ class Data_Management(Api):
                     object_name, sla_name)
 
             else:
-                self.log("assign_sla: Assigning the fileset '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+                self.log("assign_sla: Assigning the fileset '{}' to the '{}' SLA Domain.".format(
+                    object_name, sla_name))
 
                 config = {}
                 config['managedIds'] = [fileset_id]
@@ -613,17 +672,21 @@ class Data_Management(Api):
                 return self.post("internal", "/sla_domain/{}/assign".format(sla_id), config, timeout=180)
 
         elif object_type == 'ahv':
-            self.log("assign_sla: Searching the Rubrik cluster for the AHV VM '{}'.".format(object_name))
+            self.log("assign_sla: Searching the Rubrik cluster for the AHV VM '{}'.".format(
+                object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
-            self.log("assign_sla: Determing the SLA Domain currently assigned to the AHV VM '{}'.".format(object_name))
-            vm_summary = self.get('internal', '/nutanix/vm/{}'.format(vm_id), timeout=timeout)
+            self.log("assign_sla: Determing the SLA Domain currently assigned to the AHV VM '{}'.".format(
+                object_name))
+            vm_summary = self.get(
+                'internal', '/nutanix/vm/{}'.format(vm_id), timeout=timeout)
 
             if sla_id == vm_summary['configuredSlaDomainId']:
                 return "No change required. The AHV VM '{}' is already assigned to the '{}' SLA Domain.".format(
                     object_name, sla_name)
             else:
-                self.log("assign_sla: Assigning the AHV VM '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+                self.log("assign_sla: Assigning the AHV VM '{}' to the '{}' SLA Domain.".format(
+                    object_name, sla_name))
 
                 config = {}
                 config['managedIds'] = [vm_id]
@@ -653,8 +716,10 @@ class Data_Management(Api):
                     host_id = rubrik_host['id']
 
             if(host_id):
-                self.log("assign_sla: Searching the Rubrik cluster for the MSSQL Instance '{}'.".format(object_name))
-                mssql_instances = self.get('v1', '/mssql/instance?root_id={}'.format(host_id), timeout=timeout)
+                self.log("assign_sla: Searching the Rubrik cluster for the MSSQL Instance '{}'.".format(
+                    object_name))
+                mssql_instances = self.get(
+                    'v1', '/mssql/instance?root_id={}'.format(host_id), timeout=timeout)
 
                 for mssql_instance in mssql_instances['data']:
                     mssql_id = mssql_instance['id']
@@ -663,7 +728,8 @@ class Data_Management(Api):
                     self.log(
                         "assign_sla: Determing the SLA Domain currently assigned to the MSSQL Instance '{}'.".format(mssql_instance_name))
 
-                    mssql_summary = self.get('v1', '/mssql/instance/{}'.format(mssql_id), timeout=timeout)
+                    mssql_summary = self.get(
+                        'v1', '/mssql/instance/{}'.format(mssql_id), timeout=timeout)
 
                     if (sla_id == mssql_summary['configuredSlaDomainId'] and log_backup_frequency_in_seconds == mssql_summary['logBackupFrequencyInSeconds'] and
                             log_retention_hours == mssql_summary['logRetentionHours'] and copy_only == mssql_summary['copyOnly']):
@@ -686,7 +752,8 @@ class Data_Management(Api):
 
                         config['configuredSlaDomainId'] = sla_id
 
-                        patch_resp = self.patch("v1", "/mssql/instance/{}".format(mssql_id), config, timeout)
+                        patch_resp = self.patch(
+                            "v1", "/mssql/instance/{}".format(mssql_id), config, timeout)
                         db_sla_lst.append(patch_resp)
             else:
                 raise InvalidParameterException(
@@ -698,8 +765,10 @@ class Data_Management(Api):
 
             oracle_db_id = ''
 
-            self.log('Searching the Rubrik cluster for the current Oracle databases.')
-            oracle_db_id = self.object_id(object_name, object_type, hostname=hostname)
+            self.log(
+                'Searching the Rubrik cluster for the current Oracle databases.')
+            oracle_db_id = self.object_id(
+                object_name, object_type, hostname=hostname)
 
             if(oracle_db_id):
                 self.log(
@@ -713,8 +782,8 @@ class Data_Management(Api):
                 if (sla_id == oracle_summary['configuredSlaDomainId'] and log_backup_frequency_in_minutes == oracle_summary['logBackupFrequencyInMinutes'] and
                         log_retention_hours == oracle_summary['logRetentionHours'] and num_channels == oracle_summary['numChannels']):
                     return "No change required. The Oracle Database '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
-                            " log_backup_frequency_in_minutes: {}, log_retention_hours: {} and num_channels: {}.".format(
-                                object_name, sla_name, log_backup_frequency_in_minutes, log_retention_hours, num_channels)
+                        " log_backup_frequency_in_minutes: {}, log_retention_hours: {} and num_channels: {}.".format(
+                            object_name, sla_name, log_backup_frequency_in_minutes, log_retention_hours, num_channels)
 
                 else:
                     self.log(
@@ -731,10 +800,12 @@ class Data_Management(Api):
 
                     config['configuredSlaDomainId'] = sla_id
 
-                    patch_resp = self.patch("internal", "/oracle/db/{}".format(oracle_db_id), config, timeout)
+                    patch_resp = self.patch(
+                        "internal", "/oracle/db/{}".format(oracle_db_id), config, timeout)
             else:
                 raise InvalidParameterException(
                     "Database ID not found for instance '{}'".format(object_name))
+
 
             return patch_resp
 
@@ -757,8 +828,8 @@ class Data_Management(Api):
                 if (sla_id == oracle_summary['configuredSlaDomainId'] and log_backup_frequency_in_minutes == oracle_summary['logBackupFrequencyInMinutes'] and
                         log_retention_hours == oracle_summary['logRetentionHours'] and num_channels == oracle_summary['numChannels']):
                     return "No change required. The Oracle Host '{}' is already assigned to the '{}' SLA Domain with the following log settings:" \
-                            " log_backup_frequency_in_minutes: {}, log_retention_hours: {} and num_channels: {}.".format(
-                                object_name, sla_name, log_backup_frequency_in_minutes, log_retention_hours, num_channels)
+                        " log_backup_frequency_in_minutes: {}, log_retention_hours: {} and num_channels: {}.".format(
+                            object_name, sla_name, log_backup_frequency_in_minutes, log_retention_hours, num_channels)
 
                 else:
                     self.log(
@@ -775,7 +846,8 @@ class Data_Management(Api):
 
                     config['configuredSlaDomainId'] = sla_id
 
-                    patch_resp = self.patch("internal", "/oracle/host/{}".format(host_id), config, timeout)
+                    patch_resp = self.patch(
+                        "internal", "/oracle/host/{}".format(host_id), config, timeout)
             else:
                 raise InvalidParameterException(
                     "Host ID not found for instance '{}'".format(object_name))
@@ -784,11 +856,15 @@ class Data_Management(Api):
 
         elif object_type == "volume_group":
 
-            volume_group_id = self.object_id(windows_host, "volume_group", timeout=timeout)
-            physical_host_id = self.object_id(windows_host, "physical_host", host_os="windows", timeout=timeout)
+            volume_group_id = self.object_id(
+                windows_host, "volume_group", timeout=timeout)
+            physical_host_id = self.object_id(
+                windows_host, "physical_host", host_os="windows", timeout=timeout)
 
-            self.log("assign_sla: Getting a list of all volumes on the '{}' Windows host.".format(windows_host))
-            host_volumes = self.get("internal", "/host/{}/volume".format(physical_host_id), timeout=timeout)
+            self.log("assign_sla: Getting a list of all volumes on the '{}' Windows host.".format(
+                windows_host))
+            host_volumes = self.get(
+                "internal", "/host/{}/volume".format(physical_host_id), timeout=timeout)
 
             # If the object_name (volumes to assign to the SLA) is a string, create a list for processing
             if not isinstance(object_name, list):
@@ -811,8 +887,10 @@ class Data_Management(Api):
                     raise InvalidParameterException(
                         "The Windows Host '{}' does not have a '{}' volume.".format(windows_host, v))
 
-            self.log("assign_sla: Getting details of the current volume group on the Windows host.")
-            volume_group_details = self.get("internal", "/volume_group/{}".format(volume_group_id), timeout=timeout)
+            self.log(
+                "assign_sla: Getting details of the current volume group on the Windows host.")
+            volume_group_details = self.get(
+                "internal", "/volume_group/{}".format(volume_group_id), timeout=timeout)
 
             # Create a config of the current volume sla settings
             current_volumes_included_in_snapshot = []
@@ -836,7 +914,8 @@ class Data_Management(Api):
                 return "No change required. The {} volume_group is already assigned to the {} SLA.".format(
                     object_name, sla_name)
             else:
-                self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(object_name, sla_name))
+                self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(
+                    object_name, sla_name))
                 return self.patch("internal", "/volume_group/{}".format(volume_group_id), config, timeout=timeout)
 
     def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):  # pylint: ignore
@@ -857,24 +936,30 @@ class Data_Management(Api):
         self.function_name = inspect.currentframe().f_code.co_name
 
         if isinstance(remove_network_devices, bool) is False:
-            raise InvalidTypeException("The 'remove_network_devices' argument must be True or False.")
+            raise InvalidTypeException(
+                "The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
-            raise InvalidTypeException("The 'power_on' argument must be True or False.")
+            raise InvalidTypeException(
+                "The 'power_on' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
             raise InvalidParameterException(
                 "The date and time arguments most both be 'latest' or a specific date and time.")
 
-        self.log("vsphere_live_mount: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        self.log(
+            "vsphere_live_mount: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
-        self.log("vsphere_live_mount: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
-        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+        self.log(
+            "vsphere_live_mount: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
+        vm_summary = self.get(
+            'v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
 
         if date == 'latest' and time == 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
             snapshot_id = vm_summary['snapshots'][number_of_snapshots - 1]['id']
         else:
-            self.log("vsphere_live_mount: Converting the provided date/time into UTC.")
+            self.log(
+                "vsphere_live_mount: Converting the provided date/time into UTC.")
             snapshot_date_time = self._date_time_conversion(date, time)
 
             current_snapshots = {}
@@ -932,37 +1017,47 @@ class Data_Management(Api):
         self.function_name = inspect.currentframe().f_code.co_name
 
         if isinstance(remove_network_devices, bool) is False:
-            raise InvalidTypeException("The 'remove_network_devices' argument must be True or False.")
+            raise InvalidTypeException(
+                "The 'remove_network_devices' argument must be True or False.")
         elif isinstance(power_on, bool) is False:
-            raise InvalidTypeException("The 'power_on' argument must be True or False.")
+            raise InvalidTypeException(
+                "The 'power_on' argument must be True or False.")
         elif isinstance(disable_network, bool) is False:
-            raise InvalidTypeException("The 'disable_network' argument must be True or False.")
+            raise InvalidTypeException(
+                "The 'disable_network' argument must be True or False.")
         elif isinstance(keep_mac_addresses, bool) is False:
-            raise InvalidTypeException("The 'keep_mac_addresses' argument must be True or False.")
+            raise InvalidTypeException(
+                "The 'keep_mac_addresses' argument must be True or False.")
         elif isinstance(preserve_moid, bool) is False:
-            raise InvalidTypeException("The 'preserve_moid' argument must be True or False.")
+            raise InvalidTypeException(
+                "The 'preserve_moid' argument must be True or False.")
         elif date != 'latest' and time == 'latest' or date == 'latest' and time != 'latest':
             raise InvalidParameterException(
                 "The date and time arguments most both be 'latest' or a specific date and time.")
 
-        self.log("vsphere_instant_recovery: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        self.log(
+            "vsphere_instant_recovery: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
-        self.log("vsphere_instant_recovery: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
-        vm_summary = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+        self.log(
+            "vsphere_instant_recovery: Getting a list of all Snapshots for vSphere VM '{}'.".format(vm_name))
+        vm_summary = self.get(
+            'v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
 
         if date == 'latest' and time == 'latest':
             number_of_snapshots = len(vm_summary['snapshots'])
             snapshot_id = vm_summary['snapshots'][number_of_snapshots - 1]['id']
         else:
-            self.log("vsphere_instant_recovery: Converting the provided date/time into UTC.")
+            self.log(
+                "vsphere_instant_recovery: Converting the provided date/time into UTC.")
             snapshot_date_time = self._date_time_conversion(date, time)
 
             current_snapshots = {}
             for snapshot in vm_summary['snapshots']:
                 current_snapshots[snapshot['id']] = snapshot['date']
 
-            self.log("vsphere_instant_recovery: Searching for the provided snapshot.")
+            self.log(
+                "vsphere_instant_recovery: Searching for the provided snapshot.")
             for id, date_time in current_snapshots.items():
                 if snapshot_date_time in date_time:
                     snapshot_id = id
@@ -1029,7 +1124,8 @@ class Data_Management(Api):
         cluster_summary = self.get('v1', '/cluster/me', timeout=timeout)
         cluster_timezone = cluster_summary['timezone']['timezone']
 
-        self.log("_date_time_conversion: Converting the provided time to the 24-hour clock.")
+        self.log(
+            "_date_time_conversion: Converting the provided time to the 24-hour clock.")
         snapshot_time_24_hour_clock = datetime.strftime(snapshot_time, "%H:%M")
 
         self.log("_date_time_conversion: Creating a combined date/time variable.")
@@ -1068,16 +1164,20 @@ class Data_Management(Api):
 
         if object_type == 'vmware':
 
-            self.log("pause_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+            self.log("pause_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(
+                object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
-            self.log("pause_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+            self.log("pause_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(
+                object_name))
+            api_request = self.get(
+                'v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
 
             if api_request['blackoutWindowStatus']['isSnappableBlackoutActive']:
                 return "No change required. The {} VM '{}' is already paused.".format(object_type, object_name)
             else:
-                self.log("pause_snapshots: Pausing Snaphots for the vSphere VM '{}'.".format(object_name))
+                self.log("pause_snapshots: Pausing Snaphots for the vSphere VM '{}'.".format(
+                    object_name))
                 config = {}
                 config['isVmPaused'] = True
 
@@ -1105,17 +1205,21 @@ class Data_Management(Api):
 
         if object_type == 'vmware':
 
-            self.log("resume_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(object_name))
+            self.log("resume_snapshots: Searching the Rubrik cluster for the vSphere VM '{}'.".format(
+                object_name))
             vm_id = self.object_id(object_name, object_type, timeout=timeout)
 
-            self.log("resume_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(object_name))
-            api_request = self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
+            self.log("resume_snapshots: Determing the current pause state of the vSphere VM '{}'.".format(
+                object_name))
+            api_request = self.get(
+                'v1', '/vmware/vm/{}'.format(vm_id), timeout=timeout)
 
             if not api_request['blackoutWindowStatus']['isSnappableBlackoutActive']:
                 return "No change required. The '{}' object '{}' is currently not paused.".format(
                     object_type, object_name)
             else:
-                self.log("resume_snapshots: Resuming Snaphots for the vSphere VM '{}'.".format(object_name))
+                self.log("resume_snapshots: Resuming Snaphots for the vSphere VM '{}'.".format(
+                    object_name))
                 config = {}
                 config['isVmPaused'] = False
 
@@ -1134,14 +1238,19 @@ class Data_Management(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("begin_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
-        managed_volume_id = self.object_id(name, 'managed_volume', timeout=timeout)
+        self.log(
+            "begin_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
+        managed_volume_id = self.object_id(
+            name, 'managed_volume', timeout=timeout)
 
-        self.log("begin_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
-        managed_volume_summary = self.get('internal', '/managed_volume/{}'.format(managed_volume_id), timeout=timeout)
+        self.log(
+            "begin_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
+        managed_volume_summary = self.get(
+            'internal', '/managed_volume/{}'.format(managed_volume_id), timeout=timeout)
 
         if not managed_volume_summary['isWritable']:
-            self.log("begin_managed_volume_snapshot: Setting the Managed Volume '{}' to a writeable state.".format(name))
+            self.log(
+                "begin_managed_volume_snapshot: Setting the Managed Volume '{}' to a writeable state.".format(name))
             return self.post('internal', '/managed_volume/{}/begin_snapshot'.format(managed_volume_id),
                              config={}, timeout=timeout)
         else:
@@ -1161,11 +1270,15 @@ class Data_Management(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
-        managed_volume_id = self.object_id(name, 'managed_volume', timeout=timeout)
+        self.log(
+            "end_managed_volume_snapshot: Searching the Rubrik cluster for the Managed Volume '{}'.".format(name))
+        managed_volume_id = self.object_id(
+            name, 'managed_volume', timeout=timeout)
 
-        self.log("end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
-        managed_volume_summary = self.get("internal", "/managed_volume/{}".format(managed_volume_id), timeout=timeout)
+        self.log(
+            "end_managed_volume_snapshot: Determing the state of the Managed Volume '{}'.".format(name))
+        managed_volume_summary = self.get(
+            "internal", "/managed_volume/{}".format(managed_volume_id), timeout=timeout)
 
         if not managed_volume_summary['isWritable']:
             return "No change required. The Managed Volume 'name' is already assigned in a read only state."
@@ -1178,7 +1291,8 @@ class Data_Management(Api):
                     "The Managed Volume '{}' does not have a SLA assigned currently assigned. You must populate the sla_name argument.".format(name))
             config = {}
         else:
-            self.log("end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
+            self.log(
+                "end_managed_volume_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
             sla_id = self.object_id(sla_name, 'sla', timeout=timeout)
 
             config = {}
@@ -1213,7 +1327,8 @@ class Data_Management(Api):
 
             all_vms_in_sla = self.get(
                 "v1",
-                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(sla_id),
+                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(
+                    sla_id),
                 timeout=timeout)
 
             vm_name_id = {}
@@ -1265,15 +1380,18 @@ class Data_Management(Api):
 
         # Validate all values besides name are ints
         for param in all_params:
-            if not isinstance(param, int):
-                raise InvalidParameterException("All 'frequency' and 'retention' parameters must be integers.")
+            if not isinstance(param, int) and param is not None:
+                raise InvalidParameterException(
+                    "All 'frequency' and 'retention' parameters must be integers.")
 
         if not isinstance(retention_on_brik_in_days, int) and retention_on_brik_in_days is not None:
-            raise InvalidParameterException("The 'retention_on_brik_in_days' parameter must be integer.")
+            raise InvalidParameterException(
+                "The 'retention_on_brik_in_days' parameter must be integer.")
 
         # Make sure at least one frequency and retention is populated
         if all(value is None for value in all_params):
-            raise InvalidParameterException("You must populate at least one frequency and retention.")
+            raise InvalidParameterException(
+                "You must populate at least one frequency and retention.")
 
         # Make sure the "time unit" frequency and retention are used together
         if hourly_frequency is not None and hourly_retention is None or hourly_frequency is None and hourly_retention is not None:
@@ -1309,25 +1427,28 @@ class Data_Management(Api):
         if v2_sla is True:
             # create the config for the v2 API
             config["frequencies"] = {}
+            if hourly_frequency is not None:
+                config["frequencies"]["hourly"] = {}
+                config["frequencies"]["hourly"]["frequency"] = hourly_frequency
+                config["frequencies"]["hourly"]["retention"] = hourly_retention
 
-            config["frequencies"]["hourly"] = {}
-            config["frequencies"]["hourly"]["frequency"] = hourly_frequency
-            config["frequencies"]["hourly"]["retention"] = hourly_retention
+            if daily_frequency is not None:
+                config["frequencies"]["daily"] = {}
+                config["frequencies"]["daily"]["frequency"] = daily_frequency
+                config["frequencies"]["daily"]["retention"] = daily_retention
 
-            config["frequencies"]["daily"] = {}
-            config["frequencies"]["daily"]["frequency"] = daily_frequency
-            config["frequencies"]["daily"]["retention"] = daily_retention
+            if monthly_frequency is not None:
+                config["frequencies"]["monthly"] = {}
+                config["frequencies"]["monthly"]["dayOfMonth"] = "LastDay"
+                config["frequencies"]["monthly"]["frequency"] = monthly_frequency
+                config["frequencies"]["monthly"]["retention"] = monthly_retention
 
-            config["frequencies"]["monthly"] = {}
-            config["frequencies"]["monthly"]["dayOfMonth"] = "LastDay"
-            config["frequencies"]["monthly"]["frequency"] = monthly_frequency
-            config["frequencies"]["monthly"]["retention"] = monthly_retention
-
-            config["frequencies"]["yearly"] = {}
-            config["frequencies"]["yearly"]["yearStartMonth"] = "January"
-            config["frequencies"]["yearly"]["dayOfYear"] = "LastDay"
-            config["frequencies"]["yearly"]["frequency"] = yearly_frequency
-            config["frequencies"]["yearly"]["retention"] = yearly_retention
+            if yearly_frequency is not None:
+                config["frequencies"]["yearly"] = {}
+                config["frequencies"]["yearly"]["yearStartMonth"] = "January"
+                config["frequencies"]["yearly"]["dayOfYear"] = "LastDay"
+                config["frequencies"]["yearly"]["frequency"] = yearly_frequency
+                config["frequencies"]["yearly"]["retention"] = yearly_retention
 
         else:
             # Create the config for v1 endpoint
@@ -1359,7 +1480,8 @@ class Data_Management(Api):
             config["frequencies"] = frequencies
 
         if archive_name is not None:
-            archival_location_id = self.object_id(archive_name, "archival_location", timeout=timeout)
+            archival_location_id = self.object_id(
+                archive_name, "archival_location", timeout=timeout)
 
             # convert retention in days to seconds
             retention_on_brik_in_seconds = retention_on_brik_in_days * 86400
@@ -1376,11 +1498,14 @@ class Data_Management(Api):
             }]
 
         if sla_id is not False:
-            self.log("create_sla: Getting the configuration details for the SLA Domain {} already on the Rubrik cluster.".format(name))
+            self.log(
+                "create_sla: Getting the configuration details for the SLA Domain {} already on the Rubrik cluster.".format(name))
             if v2_sla is True:
-                current_sla_details = self.get("v2", "/sla_domain/{}".format(sla_id), timeout=timeout)
+                current_sla_details = self.get(
+                    "v2", "/sla_domain/{}".format(sla_id), timeout=timeout)
             else:
-                current_sla_details = self.get("v1", "/sla_domain/{}".format(sla_id), timeout=timeout)
+                current_sla_details = self.get(
+                    "v1", "/sla_domain/{}".format(sla_id), timeout=timeout)
 
             keys_to_delete = [
                 "id",
@@ -1425,7 +1550,8 @@ class Data_Management(Api):
                 return "No change required. The {} SLA Domain is already configured with the provided configuration.".format(
                     name)
             else:
-                raise InvalidParameterException("The Rubrik cluster already has an SLA Domain named '{}'.".format(name))
+                raise InvalidParameterException(
+                    "The Rubrik cluster already has an SLA Domain named '{}'.".format(name))
 
         self.log("create_sla: Creating the new SLA")
         if v2_sla is True:
@@ -1506,7 +1632,8 @@ class Data_Management(Api):
 
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
 
-        recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
+        recovery_point = self._validate_sql_recovery_point(
+            mssql_id, date, time)
 
         try:
             if not recovery_point['is_recovery_point']:
@@ -1517,7 +1644,8 @@ class Data_Management(Api):
             pass
         else:
             config = {}
-            config['recoveryPoint'] = {'timestampMs': recovery_point['recovery_timestamp']}
+            config['recoveryPoint'] = {
+                'timestampMs': recovery_point['recovery_timestamp']}
             config['mountedDatabaseName'] = mount_name
 
             self.log(
@@ -1541,13 +1669,18 @@ class Data_Management(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("vsphere_live_unmount: Searching the Rubrik cluster for the Live Mount vSphere VM '{}'.".format(mounted_vm_name))
-        mounted_vm_id = self.object_id(mounted_vm_name, 'vmware', timeout=timeout)
+        self.log("vsphere_live_unmount: Searching the Rubrik cluster for the Live Mount vSphere VM '{}'.".format(
+            mounted_vm_name))
+        mounted_vm_id = self.object_id(
+            mounted_vm_name, 'vmware', timeout=timeout)
 
-        self.log("vsphere_live_unmount: Getting the vSphere VM mount information from the Rubrik cluster.")
-        mount_summary = self.get('v1', '/vmware/vm/snapshot/mount', timeout=timeout)
+        self.log(
+            "vsphere_live_unmount: Getting the vSphere VM mount information from the Rubrik cluster.")
+        mount_summary = self.get(
+            'v1', '/vmware/vm/snapshot/mount', timeout=timeout)
 
-        self.log("vsphere_live_unmount: Getting the mount ID of the vSphere VM '{}'.".format(mounted_vm_name))
+        self.log("vsphere_live_unmount: Getting the mount ID of the vSphere VM '{}'.".format(
+            mounted_vm_name))
         for mountedvm in mount_summary['data']:
             if mountedvm['mountedVmId'] == mounted_vm_id:
                 mount_id = mountedvm['id']
@@ -1582,12 +1715,15 @@ class Data_Management(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        mounted_db_id = self._validate_sql_db(mounted_db_name, sql_instance, sql_host)
+        mounted_db_id = self._validate_sql_db(
+            mounted_db_name, sql_instance, sql_host)
 
-        self.log("sql_live_unmount: Getting the MSSQL mount information from the Rubrik cluster.")
+        self.log(
+            "sql_live_unmount: Getting the MSSQL mount information from the Rubrik cluster.")
         mount_summary = self.get('v1', '/mssql/db/mount', timeout=timeout)
 
-        self.log("sql_live_unmount: Getting the mount ID of the mounted database '{}'.".format(mounted_db_name))
+        self.log("sql_live_unmount: Getting the mount ID of the mounted database '{}'.".format(
+            mounted_db_name))
         for mounteddb in mount_summary['data']:
             if mounteddb['mountedDatabaseId'] == mounted_db_id:
                 mount_id = mounteddb['id']
@@ -1615,10 +1751,12 @@ class Data_Management(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("get_vsphere_live_mount: Searching the Rubrik cluster for the mounted vSphere VM '{}'.".format(vm_name))
+        self.log(
+            "get_vsphere_live_mount: Searching the Rubrik cluster for the mounted vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
-        self.log("get_vsphere_live_mount: Getting Live Mounts of vSphere VM {}.".format(vm_name))
+        self.log(
+            "get_vsphere_live_mount: Getting Live Mounts of vSphere VM {}.".format(vm_name))
         return self.get('v1', '/vmware/vm/snapshot/mount?vm_id={}'.format(vm_id), timeout)
 
     def get_vsphere_live_mount_names(self, vm_name, timeout=15):  # pylint: ignore
@@ -1636,19 +1774,24 @@ class Data_Management(Api):
         self.log("get_vsphere_live_mount_names: Searching the Rubrik cluster for the mounted vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
-        self.log("get_vsphere_live_mount_names: Getting Live Mounts of vSphere VM {}.".format(vm_name))
-        mounted_vm = self.get('v1', '/vmware/vm/snapshot/mount?vm_id={}'.format(vm_id), timeout)
+        self.log(
+            "get_vsphere_live_mount_names: Getting Live Mounts of vSphere VM {}.".format(vm_name))
+        mounted_vm = self.get(
+            'v1', '/vmware/vm/snapshot/mount?vm_id={}'.format(vm_id), timeout)
         mounted_vm_name = []
         for vm in mounted_vm['data']:
             try:
                 vm_moid = vm['mountedVmId']
                 split_moid = vm_moid.split('-')
                 moid = split_moid[-2] + '-' + split_moid[-1]
-                self.log("get_vsphere_live_mount_names: Getting summary of VM with moid '{}'.".format(moid))
-                vm_data = self.get('v1', '/vmware/vm?moid={}'.format(moid), timeout)
+                self.log(
+                    "get_vsphere_live_mount_names: Getting summary of VM with moid '{}'.".format(moid))
+                vm_data = self.get(
+                    'v1', '/vmware/vm?moid={}'.format(moid), timeout)
                 mounted_vm_name.append(vm_data['data'][0]['name'])
             except KeyError:
-                self.log("get_vsphere_live_mount_names: A Live Mount of vSphere VM '{}' is in progress.".format(vm_name))
+                self.log(
+                    "get_vsphere_live_mount_names: A Live Mount of vSphere VM '{}' is in progress.".format(vm_name))
                 continue
         return mounted_vm_name
 
@@ -1666,9 +1809,11 @@ class Data_Management(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        mssql_host_id = self.object_id(sql_host, 'physical_host', timeout=timeout)
+        mssql_host_id = self.object_id(
+            sql_host, 'physical_host', timeout=timeout)
 
-        self.log("_validate_sql_db: Getting the list of instances on host {}.".format(sql_host))
+        self.log(
+            "_validate_sql_db: Getting the list of instances on host {}.".format(sql_host))
         mssql_instance = self.get(
             'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host_id), timeout=timeout)
 
@@ -1686,7 +1831,8 @@ class Data_Management(Api):
                 sql_host))
         mssql_db = self.get(
             'v1',
-            '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_instance_id),
+            '/mssql/db?primary_cluster_id=local&instance_id={}'.format(
+                sql_instance_id),
             timeout=timeout)
 
         for db in mssql_db['data']:
@@ -1714,7 +1860,8 @@ class Data_Management(Api):
 
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
 
-        self.log("get_sql_live_mount: Getting the live mounts for mssql db id'{}'.".format(mssql_id))
+        self.log(
+            "get_sql_live_mount: Getting the live mounts for mssql db id'{}'.".format(mssql_id))
         return self.get('v1', '/mssql/db/mount?source_database_id={}'.format(mssql_id), timeout)
 
     def _validate_sql_recovery_point(self, mssql_id, date, time, timeout=30):  # pylint: ignore
@@ -1734,32 +1881,40 @@ class Data_Management(Api):
 
         is_recovery_point = False
         if date and time == 'latest':
-            latest_data = self.get('v1', '/mssql/db/{}/snapshot'.format(mssql_id), timeout=timeout)
+            latest_data = self.get(
+                'v1', '/mssql/db/{}/snapshot'.format(mssql_id), timeout=timeout)
             try:
                 latest_date_time = latest_data['data'][0]['date']
             except:
                 raise InvalidParameterException(
                     "The database with ID {} does not have any existing snapshots.".format(mssql_id))
             # Parsing latest snapshot time string value to a datetime object as YYYY-MM-DDTHH:MM
-            data_str = datetime.strptime(latest_date_time[:16], '%Y-%m-%dT%H:%M')
+            data_str = datetime.strptime(
+                latest_date_time[:16], '%Y-%m-%dT%H:%M')
             # Create date & time strings from datetime object as MM-DD-YYYY & HH:MM AM/PM
-            date_str, time_str = [data_str.strftime('%m-%d-%Y'), data_str.strftime('%I:%M %p')]
+            date_str, time_str = [data_str.strftime(
+                '%m-%d-%Y'), data_str.strftime('%I:%M %p')]
             # Convert the date & time to cluster timezone, see _date_time_conversion function for details
             recovery_date_time = self._date_time_conversion(date_str, time_str)
             # Parse again to datetime object
-            recovery_date_time = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
+            recovery_date_time = datetime.strptime(
+                recovery_date_time, '%Y-%m-%dT%H:%M')
             # Create recovery timestamp in (ms) as integer from datetime object
             recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
             is_recovery_point = True
         else:
-            self.log("_validate_sql_recovery_point: Getting the recoverable range for db ID:'{}'.".format(mssql_id))
-            range_summary = self.get('v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
+            self.log(
+                "_validate_sql_recovery_point: Getting the recoverable range for db ID:'{}'.".format(mssql_id))
+            range_summary = self.get(
+                'v1', '/mssql/db/{}/recoverable_range'.format(mssql_id), timeout=timeout)
 
-            self.log("_validate_sql_recovery_point: Converting the provided date/time into UTC.")
+            self.log(
+                "_validate_sql_recovery_point: Converting the provided date/time into UTC.")
             # Convert the date & time to cluster timezone, see _date_time_conversion function for details
             recovery_date_time = self._date_time_conversion(date, time)
             # Parse to datetime object
-            recovery_date_time = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M')
+            recovery_date_time = datetime.strptime(
+                recovery_date_time, '%Y-%m-%dT%H:%M')
             # Create recovery timestamp in (ms) as integer from datetime object
             recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
 
@@ -1769,8 +1924,10 @@ class Data_Management(Api):
                 start, end = [datetime.strptime(start_str[:16], '%Y-%m-%dT%H:%M'),
                               datetime.strptime(end_str[:16], '%Y-%m-%dT%H:%M')]
 
-                self.log("_validate_sql_recovery_point: Searching for the provided recovery_point.")
-                is_recovery_point = self._time_in_range(start, end, recovery_date_time)
+                self.log(
+                    "_validate_sql_recovery_point: Searching for the provided recovery_point.")
+                is_recovery_point = self._time_in_range(
+                    start, end, recovery_date_time)
                 if not is_recovery_point:
                     continue
                 else:
@@ -1801,7 +1958,8 @@ class Data_Management(Api):
 
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
 
-        recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
+        recovery_point = self._validate_sql_recovery_point(
+            mssql_id, date, time)
 
         try:
             if recovery_point['is_recovery_point'] == False:
@@ -1812,7 +1970,8 @@ class Data_Management(Api):
             pass
         else:
             config = {}
-            config['recoveryPoint'] = {'timestampMs': recovery_point['recovery_timestamp']}
+            config['recoveryPoint'] = {
+                'timestampMs': recovery_point['recovery_timestamp']}
             config['finish_recovery'] = finish_recovery
             config['max_data_streams'] = max_data_streams
 
@@ -1836,20 +1995,25 @@ class Data_Management(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("vcenter_refresh_vm: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        self.log(
+            "vcenter_refresh_vm: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         data = self.get('v1', '/vmware/vm?name={}'.format(vm_name), timeout)
         if data['data'] == []:
-            raise InvalidParameterException("The vSphere VM '{}' does not exist.".format(vm_name))
+            raise InvalidParameterException(
+                "The vSphere VM '{}' does not exist.".format(vm_name))
         else:
             vcenter_id = data['data'][0]['infraPath'][0]['id']
             vm_id = data['data'][0]['id']
 
-        self.log("vcenter_refresh_vm: Getting the MOID for vSphere VM {}.".format(vm_name))
+        self.log(
+            "vcenter_refresh_vm: Getting the MOID for vSphere VM {}.".format(vm_name))
         split_moid = vm_id.split('-')
         moid = split_moid[-2] + '-' + split_moid[-1]
         config = {'vmMoid': moid}
-        self.log("vcenter_refresh_vm: Refreshing vSphere VM {} metadata.".format(vm_name))
-        self.post('internal', '/vmware/vcenter/{}/refresh_vm'.format(vcenter_id), config, timeout)
+        self.log(
+            "vcenter_refresh_vm: Refreshing vSphere VM {} metadata.".format(vm_name))
+        self.post(
+            'internal', '/vmware/vcenter/{}/refresh_vm'.format(vcenter_id), config, timeout)
 
     def get_vsphere_vm(self, name=None, is_relic=None, effective_sla_domain_id=None, primary_cluster_id=None, limit=None, offset=None, moid=None, sla_assignment=None, guest_os_name=None, sort_by=None, sort_order=None, timeout=15):  # pylint: ignore
         """Get summary of all the VMs. Each keyword argument is a query parameter to filter the VM details returned i.e. you can query for a specific VM name, is_relic, effective_sla_domain etc.
@@ -1884,7 +2048,8 @@ class Data_Management(Api):
                       'guest_os_name': guest_os_name,
                       'sort_by': sort_by,
                       'sort_order': sort_order}
-        parameters = {key: value for key, value in parameters.items() if value is not None}
+        parameters = {key: value for key,
+                      value in parameters.items() if value is not None}
 
         self.log("get_vsphere_vm: checking the provided query parameters.")
         valid_sla_assignment = ['Derived', 'Direct', 'Unassigned']
@@ -1893,7 +2058,8 @@ class Data_Management(Api):
                 raise InvalidParameterException(
                     'The sla_assignment parameter must be one of the following: {}'.format(valid_sla_assignment))
 
-        valid_sort_by = ['effectiveSlaDomainName', 'name', 'moid', 'folderPath', 'infraPath']
+        valid_sort_by = ['effectiveSlaDomainName',
+                         'name', 'moid', 'folderPath', 'infraPath']
         for key, value in parameters.items():
             if key == 'sort_by' and value not in valid_sort_by:
                 raise InvalidParameterException(
@@ -1907,11 +2073,13 @@ class Data_Management(Api):
 
         for key, value in parameters.items():
             if key == 'is_relic' and not isinstance(value, bool):
-                raise InvalidParameterException('The is_relic paremeter must be a boolean: True or False')
+                raise InvalidParameterException(
+                    'The is_relic paremeter must be a boolean: True or False')
 
         for key, value in parameters.items():
             if ((key == 'limit') or (key == 'offset')) and not isinstance(value, int):
-                raise InvalidParameterException('The limit and offset paremeter must be an integer')
+                raise InvalidParameterException(
+                    'The limit and offset paremeter must be an integer')
 
         # String joins by iterating through the key-value pairs in the parameters dictionary and concatenating it into a query
         query = '&'.join(['%s=%s' % kv for kv in parameters.items()])
@@ -1932,7 +2100,8 @@ class Data_Management(Api):
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("get_vsphere_vm_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        self.log(
+            "get_vsphere_vm_snapshot: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
         self.log("get_vsphere_vm_snapshot: Getting summary information for the snapshots of virtual machine {}".format(vm_id))
@@ -1951,10 +2120,12 @@ class Data_Management(Api):
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("get_vsphere_vm_details: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        self.log(
+            "get_vsphere_vm_details: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
-        self.log("get_vsphere_vm_details: Getting details of virtual machine {}".format(vm_id))
+        self.log(
+            "get_vsphere_vm_details: Getting details of virtual machine {}".format(vm_id))
         return self.get('v1', '/vmware/vm/{}'.format(vm_id), timeout)
 
     def get_vsphere_vm_file(self, vm_name, path, timeout=15):  # pylint: ignore
@@ -1971,10 +2142,12 @@ class Data_Management(Api):
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("get_vsphere_vm_file: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
+        self.log(
+            "get_vsphere_vm_file: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         vm_id = self.object_id(vm_name, 'vmware', timeout=timeout)
 
-        self.log("get_vsphere_vm_file: Search for file/path {} in the snapshots of a virtual machine {}".format(path, vm_id))
+        self.log(
+            "get_vsphere_vm_file: Search for file/path {} in the snapshots of a virtual machine {}".format(path, vm_id))
         return self.get('v1', '/vmware/vm/{}/search?path={}'.format(vm_id, path), timeout)
 
     def get_sql_db(self, db_name=None, instance=None, hostname=None, availability_group=None, effective_sla_domain=None, primary_cluster_id='local', sla_assignment=None, limit=None, offset=None, is_relic=None, is_live_mount=None, is_log_shipping_secondary=None, sort_by=None, sort_order=None, timeout=15):  # pylint: ignore
@@ -2003,7 +2176,8 @@ class Data_Management(Api):
             self.function_name = inspect.currentframe().f_code.co_name
 
         if availability_group is not None:
-            self.log("get_sql_db: Searching the Rubrik cluster for the ID of the availability_group {}.".format(availability_group))
+            self.log("get_sql_db: Searching the Rubrik cluster for the ID of the availability_group {}.".format(
+                availability_group))
             ag_summary = self.get(
                 'internal', '/mssql/availability_group', timeout=timeout)
             for ag in ag_summary['data']:
@@ -2013,8 +2187,10 @@ class Data_Management(Api):
             availability_group_id = None
 
         if effective_sla_domain is not None:
-            self.log("get_sql_db: Searching the Rubrik cluster for the ID of the SLA Domain '{}'.".format(effective_sla_domain))
-            effective_sla_domain_id = self.object_id(effective_sla_domain, 'sla', timeout=timeout)
+            self.log("get_sql_db: Searching the Rubrik cluster for the ID of the SLA Domain '{}'.".format(
+                effective_sla_domain))
+            effective_sla_domain_id = self.object_id(
+                effective_sla_domain, 'sla', timeout=timeout)
         else:
             effective_sla_domain_id = None
 
@@ -2030,7 +2206,8 @@ class Data_Management(Api):
                       'is_log_shipping_secondary': is_log_shipping_secondary,
                       'sort_by': sort_by,
                       'sort_order': sort_order}
-        parameters = {key: value for key, value in parameters.items() if value is not None}
+        parameters = {key: value for key,
+                      value in parameters.items() if value is not None}
 
         self.log("get_sql_db: checking the provided query parameters.")
         valid_sla_assignment = ['Derived', 'Direct', 'Unassigned']
@@ -2059,12 +2236,14 @@ class Data_Management(Api):
 
         for key, value in parameters.items():
             if ((key == 'limit') or (key == 'offset')) and not isinstance(value, int):
-                raise InvalidParameterException('The limit and offset paremeter must be an integer')
+                raise InvalidParameterException(
+                    'The limit and offset paremeter must be an integer')
 
         # String joins by iterating through the key-value pairs in the parameters dictionary and concatenating it into a query
         query = '&'.join(['%s=%s' % kv for kv in parameters.items()])
 
-        self.log("get_sql_db: Get summary of all the databases returned by the query.")
+        self.log(
+            "get_sql_db: Get summary of all the databases returned by the query.")
         databases = self.get('v1', '/mssql/db?{}'.format(query), timeout)
 
         result = []
@@ -2085,7 +2264,8 @@ class Data_Management(Api):
             except BaseException:
                 pass
             else:
-                result = [item for item in databases['data'] if replica['instanceName'] == instance]
+                result = [item for item in databases['data']
+                          if replica['instanceName'] == instance]
         elif instance is not None and hostname is not None:
             try:
                 for item in databases['data']:
@@ -2121,8 +2301,10 @@ class Data_Management(Api):
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
 
         recovery_date_time = self._date_time_conversion(date, time)
-        recovery_point = datetime.strptime(recovery_date_time, '%Y-%m-%dT%H:%M').isoformat()
-        valid_recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
+        recovery_point = datetime.strptime(
+            recovery_date_time, '%Y-%m-%dT%H:%M').isoformat()
+        valid_recovery_point = self._validate_sql_recovery_point(
+            mssql_id, date, time)
 
         try:
             if valid_recovery_point['is_recovery_point'] == False:
@@ -2170,11 +2352,14 @@ class Data_Management(Api):
                     "The 'target_data_file_path' and 'target_log_file_path' parameters must be provided if a 'target_file_paths' dictionary list is not provided.")
 
         mssql_id = self._validate_sql_db(db_name, sql_instance, sql_host)
-        recovery_point = self._validate_sql_recovery_point(mssql_id, date, time)
+        recovery_point = self._validate_sql_recovery_point(
+            mssql_id, date, time)
 
-        target_host_id = self.object_id(target_hostname, 'physical_host', timeout=timeout)
+        target_host_id = self.object_id(
+            target_hostname, 'physical_host', timeout=timeout)
 
-        self.log("sql_db_export: Getting the instances on target host {}.".format(target_hostname))
+        self.log("sql_db_export: Getting the instances on target host {}.".format(
+            target_hostname))
         mssql_instance = self.get(
             'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(target_host_id), timeout=timeout)
 
@@ -2195,7 +2380,8 @@ class Data_Management(Api):
             pass
         else:
             config = {}
-            config['recoveryPoint'] = {'timestampMs': recovery_point['recovery_timestamp']}
+            config['recoveryPoint'] = {
+                'timestampMs': recovery_point['recovery_timestamp']}
             config['targetInstanceId'] = target_instance_id
             config['targetDatabaseName'] = target_database_name
             if target_file_paths is not None:
@@ -2224,12 +2410,13 @@ class Data_Management(Api):
         Returns:
             dict -- The full response of `PATCH /internal/vmware/config/set_esx_subnets`.
         """
-        self.log("set_esx_subnets: Getting the existing subnets used to reach the ESXi hosts")
+        self.log(
+            "set_esx_subnets: Getting the existing subnets used to reach the ESXi hosts")
         subnets = (self.get_esxi_subnets())['esxSubnets'].split(',')
         config = {}
         if esx_subnets is None:
             raise InvalidParameterException(
-                    "The 'esx_subnets' parameter must be provided.")
+                "The 'esx_subnets' parameter must be provided.")
         elif isinstance(esx_subnets, list):
             if subnets == esx_subnets:
                 return "No change required. The subnet list provided is the same as the existing values: {}.".format(
@@ -2243,7 +2430,7 @@ class Data_Management(Api):
                 return self.patch('internal', '/vmware/config/set_esx_subnets', config, timeout)
         else:
             raise InvalidParameterException(
-                    "The provided 'esx_subnets' parameter is not a list.")
+                "The provided 'esx_subnets' parameter is not a list.")
 
     def get_esxi_subnets(self, timeout=15):  # pylint: ignore
         """Retrieve the preferred subnets used to reach the ESXi hosts.
@@ -2253,7 +2440,8 @@ class Data_Management(Api):
             dict -- The full response of `GET /internal/vmware/config/esx_subnets`.
         """
 
-        self.log("get_esx_subnets: Retrieving the preferred subnets used to reach the ESXi hosts.")
+        self.log(
+            "get_esx_subnets: Retrieving the preferred subnets used to reach the ESXi hosts.")
 
         return self.get('internal', '/vmware/config/esx_subnets', timeout)
 
@@ -2265,7 +2453,8 @@ class Data_Management(Api):
             dict -- The result of the API call `GET /v1/host`
         """
 
-        self.log('get_all_hosts: Getting information for each host on the Rubrik cluster.')
+        self.log(
+            'get_all_hosts: Getting information for each host on the Rubrik cluster.')
 
         return self.get('v1', '/host', timeout=timeout)
 
