@@ -1318,8 +1318,7 @@ class Data_Management(Api):
 
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
-        # valid_object_type = ['vmware', 'physical_host',
-        #                      'ahv', 'mssql_db', 'oracle_db', 'share']
+
         valid_object_type = ['vmware', 'hyper-v',
                              'mssql_db', 'ec2_instance', 'oracle_db', 'vcd', 'managed_volume', 'ahv', 'nas_share', 'linux_and_unix_host', 'windows_host']
 
