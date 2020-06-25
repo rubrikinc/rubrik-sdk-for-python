@@ -310,7 +310,7 @@ class Data_Management(Api):
         """Get the ID of a Rubrik object by providing its name.
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share, organization})
         Keyword Arguments:
             host_os {str} -- The operating system for the host. (default: {'None'})
             hostname {str} -- The Oracle hostname, Oracle RAC cluster name, or one of the hostnames in the Oracle RAC cluster. Required when the object_type is oracle_db or share. Using the IP is not supported.
@@ -339,7 +339,8 @@ class Data_Management(Api):
             'oracle_host',
             'volume_group',
             'archival_location',
-            'share']
+            'share',
+            'organization']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -442,6 +443,10 @@ class Data_Management(Api):
             "share": {
                 "api_version": "internal",
                 "api_endpoint": "/host/share?share_type={}".format(share_type)
+            },
+            "organization": {
+                "api_version": "internal",
+                "api_endpoint": "/organization?name={}".format(object_name)
             }
         }
 
@@ -805,7 +810,6 @@ class Data_Management(Api):
             else:
                 raise InvalidParameterException(
                     "Database ID not found for instance '{}'".format(object_name))
-
 
             return patch_resp
 
