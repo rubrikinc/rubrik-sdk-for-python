@@ -1309,7 +1309,7 @@ class Data_Management(Api):
         """Retrieve the name and ID of a specific object type.
         Arguments:
             sla {str} -- The name of the SLA Domain you wish to search.
-            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware})
+            object_type {str} -- The object type you wish to search the SLA for. (choices: {vmware, hyper-v, mssql_db, ec2_instance, oracle_db, vcd, managed_volume, ahv, nas_share, linux_and_unix_host, windows_host})
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster. (default: {15})
         Returns:
@@ -1318,33 +1318,129 @@ class Data_Management(Api):
 
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
-
-        valid_object_type = ['vmware']
+        # valid_object_type = ['vmware', 'physical_host',
+        #                      'ahv', 'mssql_db', 'oracle_db', 'share']
+        valid_object_type = ['vmware', 'hyper-v',
+                             'mssql_db', 'ec2_instance', 'oracle_db', 'vcd', 'managed_volume', 'ahv', 'nas_share', 'linux_and_unix_host', 'windows_host']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException(
                 "The get_sla_object() object_type argument must be one of the following: {}.".format(valid_object_type))
 
-        if object_type == 'vmware':
+        sla_id = self.object_id(sla, "sla", timeout=timeout)
+        vm_name_id = {}
 
-            sla_id = self.object_id(sla, "sla", timeout=timeout)
+        if object_type == "nas_share":
+            # The REST API does not have an easy way to filter by SLA so we will use the GQL call
+            operation_name = "NasAssignedSLA"
+
+            query = """
+             NasAssignedSLA($effectiveSlaDomainId: String) {
+                nasShareConnection(effectiveSlaDomainId: $effectiveSlaDomainId) {
+                    nodes {
+                    id
+                    hostname
+
+                    }
+                }
+                }
+            """
+
+            variables = {
+                "effectiveSlaDomainId": sla_id
+            }
+
+            all_vms_in_sla = self.query(query, operation_name, variables)
+
+            for vm in all_vms_in_sla["nasShareConnection"]["nodes"]:
+                vm_name_id[vm["hostname"]] = vm["id"]
+
+        elif object_type == "linux_and_unix_host" or object_type == "windows_host":
+            # The REST API does not have an easy way to filter by SLA so we will use the GQL call
+            operation_name = "PhysicalHostSLA"
+
+            query = """
+             PhysicalHostSLA($effectiveSlaDomainId: String, $operatingSystemType: String, $status: String) {
+                hostConnection(effectiveSlaDomainId: $effectiveSlaDomainId, operatingSystemType: $operatingSystemType,  status: $status) {
+                    nodes {
+                    id
+                    hostname
+                    }
+                }
+                }
+            """
+
+            if object_type == "linux_and_unix_host":
+                operatingSystemType = "UnixLike"
+            else:
+                operatingSystemType = "Windows"
+
+            variables = {
+                "status": "Connected",
+                "effectiveSlaDomainId": sla_id,
+                "operatingSystemType": operatingSystemType,
+
+            }
+
+            all_vms_in_sla = self.query(query, operation_name, variables)
+
+            for vm in all_vms_in_sla["hostConnection"]["nodes"]:
+                vm_name_id[vm["hostname"]] = vm["id"]
+
+        else:
+
+            api_call = {
+                "vmware": {
+                    "api_version": "v1",
+                    "api_endpoint": "/vmware/vm"
+                },
+                "hyper-v": {
+                    "api_version": "internal",
+                    "api_endpoint": "/hyperv/vm"
+                },
+                "mssql_db": {
+                    "api_version": "v1",
+                    "api_endpoint": "/mssql/db"
+                },
+                "ec2_instance": {
+                    "api_version": "internal",
+                    "api_endpoint": "/aws/ec2_instance"
+                },
+                "oracle_db": {
+                    "api_version": "internal",
+                    "api_endpoint": "/oracle/db"
+                },
+                "vcd": {
+                    "api_version": "internal",
+                    "api_endpoint": "/vcd/vapp"
+                },
+                "managed_volume": {
+                    "api_version": "internal",
+                    "api_endpoint": "/managed_volume"
+                },
+                "ahv": {
+                    "api_version": "internal",
+                    "api_endpoint": "/nutanix/vm"
+                },
+
+
+            }
 
             all_vms_in_sla = self.get(
-                "v1",
-                "/vmware/vm?effective_sla_domain_id={}&is_relic=false".format(
-                    sla_id),
+                api_call[object_type]["api_version"],
+                api_call[object_type]["api_endpoint"] +
+                "?effective_sla_domain_id={}&is_relic=false".format(sla_id),
                 timeout=timeout)
 
-            vm_name_id = {}
             for vm in all_vms_in_sla["data"]:
                 vm_name_id[vm["name"]] = vm["id"]
 
-            if bool(vm_name_id) is False:
-                raise InvalidParameterException(
-                    "The SLA '{}' is currently not protecting any {} objects.".format(
-                        sla, object_type))
+        if bool(vm_name_id) is False:
+            raise InvalidParameterException(
+                "The SLA '{}' is currently not protecting any {} objects.".format(
+                    sla, object_type))
 
-            return vm_name_id
+        return vm_name_id
 
     def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, timeout=15):  # pylint: ignore
         """Create a new SLA Domain.
@@ -1555,7 +1651,7 @@ class Data_Management(Api):
                     name)
             else:
                 raise InvalidParameterException(
-                    "The Rubrik cluster already has an SLA Domain named '{}'.".format(name))
+                    "The Rubrik cluster already has an SLA Domain named '{}' whose configuration does not match the values provided.".format(name))
 
         self.log("create_sla: Creating the new SLA")
         if v2_sla is True:

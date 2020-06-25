@@ -14,7 +14,8 @@ def test_on_demand_snapshot_invalid_object_type(rubrik):
 
 def test_on_demand_snapshot_invalid_host_os_type(rubrik):
     with pytest.raises(InvalidParameterException) as error:
-        rubrik.on_demand_snapshot("object_name", "physical_host", host_os="not_a_valid_host_os")
+        rubrik.on_demand_snapshot(
+            "object_name", "physical_host", host_os="not_a_valid_host_os")
 
     error_message = error.value.args[0]
 
@@ -318,10 +319,13 @@ def test_on_demand_snapshot_vmware_current_sla(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vmware_vm_id_snapshot()
 
     assert rubrik.on_demand_snapshot(
@@ -482,10 +486,12 @@ def test_on_demand_snapshot_vmware_specific_sla(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_sla_domain()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vmware_vm_id_snapshot()
 
     assert rubrik.on_demand_snapshot(
@@ -591,10 +597,13 @@ def test_on_demand_snapshot_ahv_current_sla(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_internal_nutanix_vm(), mock_get_internal_nutanix_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_internal_nutanix_vm(), mock_get_internal_nutanix_vm_id()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_nutanix_vm_id_snapshot()
 
     assert rubrik.on_demand_snapshot(
@@ -724,10 +733,13 @@ def test_on_demand_snapshot_ahv_specific_sla(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_internal_nutanix_vm(), mock_get_v1_sla_domain()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_internal_nutanix_vm(), mock_get_v1_sla_domain()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_nutanix_vm_id_snapshot()
 
     assert rubrik.on_demand_snapshot(
@@ -964,17 +976,20 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
             ]
         }
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+    mock_cluster_version = mocker.patch(
+        'rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0"
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.side_effect = [
         mock_get_v1_host(),
         mock_get_v1_mssql_instance(),
         mock_get_v1_mysql_db(),
         mock_get_v1_mysql_db_id()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_mysql_db_snapshot()
 
     assert rubrik.on_demand_snapshot("object_name", "mssql_db", sql_host="sql_host", sql_instance="sql_instance", sql_db="sql_db") == \
@@ -1272,10 +1287,12 @@ def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
             "total": 1
         }
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+    mock_cluster_version = mocker.patch(
+        'rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0"
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.side_effect = [
         mock_get_v1_host(),
         mock_get_v1_mssql_instance(),
@@ -1283,7 +1300,8 @@ def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
         mock_get_v1_sla_domain(),
         mock_get_v1_sla_domain()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_mysql_db_snapshot()
 
     assert rubrik.on_demand_snapshot("object_name", "mssql_db", "Gold", sql_host="sql_host", sql_instance="sql_instance", sql_db="sql_db") == \
@@ -1301,7 +1319,8 @@ def test_on_demand_snapshot_physical_host_host_os_not_populated(rubrik, mocker):
 
 def test_on_demand_snapshot_physical_host_fileset_not_populated(rubrik, mocker):
     with pytest.raises(InvalidParameterException) as error:
-        rubrik.on_demand_snapshot("object_name", "physical_host", host_os="Linux")
+        rubrik.on_demand_snapshot(
+            "object_name", "physical_host", host_os="Linux")
 
     error_message = error.value.args[0]
 
@@ -1415,17 +1434,20 @@ def test_on_demand_snapshot_physical_host_invalid_fileset(rubrik, mocker):
             "total": 0
         }
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+    mock_cluster_version = mocker.patch(
+        'rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0"
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.side_effect = [
         mock_get_v1_host(),
         mock_get_v1_fileset_template(),
         mock_get_v1_fileset()]
 
     with pytest.raises(InvalidParameterException) as error:
-        rubrik.on_demand_snapshot("object_name", "physical_host", host_os="Linux", fileset="fileset")
+        rubrik.on_demand_snapshot(
+            "object_name", "physical_host", host_os="Linux", fileset="fileset")
 
     error_message = error.value.args[0]
 
@@ -1558,16 +1580,19 @@ def test_on_demand_snapshot_physical_host_current_sla(rubrik, mocker):
             ]
         }
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+    mock_cluster_version = mocker.patch(
+        'rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0"
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.side_effect = [
         mock_get_v1_host(),
         mock_get_v1_fileset_template(),
         mock_get_v1_fileset()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_fileset_id_snapshot()
 
     assert rubrik.on_demand_snapshot("object_name", "physical_host", host_os="Linux", fileset="fileset") == \
@@ -1700,16 +1725,19 @@ def test_on_demand_snapshot_physical_host_specific_sla(rubrik, mocker):
             ]
         }
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+    mock_cluster_version = mocker.patch(
+        'rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0"
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.side_effect = [
         mock_get_v1_host(),
         mock_get_v1_fileset_template(),
         mock_get_v1_fileset()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_fileset_id_snapshot()
 
     assert rubrik.on_demand_snapshot("object_name", "physical_host", host_os="Linux", fileset="fileset") == \
@@ -1736,7 +1764,8 @@ def test_object_id_invalid_fileset_template(rubrik):
 
 def test_object_id_invalid_fileset_template_type(rubrik):
     with pytest.raises(InvalidParameterException) as error:
-        rubrik.object_id("object_name", "fileset_template", host_os="not_a_valid_host_os")
+        rubrik.object_id("object_name", "fileset_template",
+                         host_os="not_a_valid_host_os")
 
     error_message = error.value.args[0]
 
@@ -1812,7 +1841,8 @@ def test_object_id_not_found(rubrik, mocker):
             "total": 0
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_vmware_vm()
 
     with pytest.raises(InvalidParameterException) as error:
@@ -1886,7 +1916,8 @@ def test_object_id_not_in_object_ids_list(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_vmware_vm()
 
     with pytest.raises(InvalidParameterException) as error:
@@ -2013,7 +2044,8 @@ def test_object_id_multiple_objects_found(rubrik, mocker):
             "total": 2
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_vmware_vm()
 
     with pytest.raises(InvalidParameterException) as error:
@@ -2087,7 +2119,8 @@ def test_object_id_vmware(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_vmware_vm()
 
     assert rubrik.object_id("string", "vmware") == "string_id"
@@ -2166,7 +2199,8 @@ def test_object_id_sla(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_sla_domain()
 
     assert rubrik.object_id("string", "sla") == "string_id"
@@ -2206,7 +2240,8 @@ def test_object_id_vmware_host(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_vmware_host()
 
     assert rubrik.object_id("string", "vmware_host") == "string_id"
@@ -2249,10 +2284,12 @@ def test_object_id_fileset_template(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_fileset_template()
 
-    assert rubrik.object_id("string", "fileset_template", host_os="Linux") == "string_id"
+    assert rubrik.object_id("string", "fileset_template",
+                            host_os="Linux") == "string_id"
 
 
 def test_object_id_managed_volume(rubrik, mocker):
@@ -2331,7 +2368,8 @@ def test_object_id_managed_volume(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_managed_volume()
 
     assert rubrik.object_id("string", "managed_volume") == "string_id"
@@ -2369,7 +2407,8 @@ def test_object_id_ahv(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_nutanix_vm()
 
     assert rubrik.object_id("string", "ahv") == "string_id"
@@ -2443,7 +2482,8 @@ def test_object_id_mssql_db(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_mssql_db()
 
     assert rubrik.object_id("string", "mssql_db") == "string_id"
@@ -2484,7 +2524,8 @@ def test_object_id_mssql_instance(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_mssql_instance()
 
     assert rubrik.object_id("string", "mssql_instance") == "string_id"
@@ -2506,7 +2547,8 @@ def test_object_id_aws_native(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_internal_aws_account()
 
     assert rubrik.object_id("string", "aws_native") == "string_id"
@@ -2534,7 +2576,8 @@ def test_object_id_vcenter(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_vmware_vcenter()
 
     assert rubrik.object_id("string", "vcenter") == "string_id"
@@ -2570,10 +2613,12 @@ def test_object_id_physical_host_cdm_4_x(rubrik, mocker):
             "total": 1
         }
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+    mock_cluster_version = mocker.patch(
+        'rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "4.0"
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_host()
 
     assert rubrik.object_id("string", "physical_host") == "string_id"
@@ -2610,10 +2655,12 @@ def test_object_id_physical_host_cdm_5_x(rubrik, mocker):
             "total": 1
         }
 
-    mock_cluster_version = mocker.patch('rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+    mock_cluster_version = mocker.patch(
+        'rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
     mock_cluster_version.return_value = "5.0"
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_host()
 
     assert rubrik.object_id("string", "physical_host") == "string_id"
@@ -2977,8 +3024,10 @@ def test_assign_sla_idempotence_specific_sla(rubrik, mocker):
             "isAgentRegistered": True
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_sla_domain(), mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_sla_domain(
+    ), mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
     assert rubrik.assign_sla("object_name", "Gold", "vmware") == \
         "No change required. The vSphere VM 'object_name' is already assigned to the 'Gold' SLA Domain."
 
@@ -3261,8 +3310,10 @@ def test_assign_sla_idempotence_do_not_protect_sla(rubrik, mocker):
             "isAgentRegistered": True
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
     assert rubrik.assign_sla("object_name", "do not protect", "vmware") == \
         "No change required. The vSphere VM 'object_name' is already assigned to the 'do not protect' SLA Domain."
 
@@ -3545,8 +3596,10 @@ def test_assign_sla_idempotence_clear_sla(rubrik, mocker):
             "isAgentRegistered": True
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
     assert rubrik.assign_sla("object_name", "clear", "vmware") == \
         "No change required. The vSphere VM 'object_name' is already assigned to the 'clear' SLA Domain."
 
@@ -3903,18 +3956,23 @@ def test_assign_sla(rubrik, mocker):
     def mock_post_internal_sla_domain_id_assign():
         return {"status_code": "204"}
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_sla_domain(), mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_sla_domain(
+    ), mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_sla_domain_id_assign()
 
-    assert rubrik.assign_sla("object_name", "Gold", "vmware") == mock_post_internal_sla_domain_id_assign()
+    assert rubrik.assign_sla(
+        "object_name", "Gold", "vmware") == mock_post_internal_sla_domain_id_assign()
 
 
 def test_vsphere_live_mount_invalid_remove_network_devices(rubrik):
     with pytest.raises(InvalidTypeException) as error:
-        rubrik.vsphere_live_mount("vm_name", remove_network_devices="not_a_valid_remove_network_devices")
+        rubrik.vsphere_live_mount(
+            "vm_name", remove_network_devices="not_a_valid_remove_network_devices")
 
     error_message = error.value.args[0]
 
@@ -3923,7 +3981,8 @@ def test_vsphere_live_mount_invalid_remove_network_devices(rubrik):
 
 def test_vsphere_live_mount_invalid_power_on(rubrik):
     with pytest.raises(InvalidTypeException) as error:
-        rubrik.vsphere_live_mount("vm_name", power_on="not_a_valid_remove_network_devices")
+        rubrik.vsphere_live_mount(
+            "vm_name", power_on="not_a_valid_remove_network_devices")
 
     error_message = error.value.args[0]
 
@@ -4245,13 +4304,17 @@ def test_vsphere_live_mount_latest(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vmware_vm_snapshot_id_mount()
 
-    assert rubrik.vsphere_live_mount("vm_name") == mock_post_v1_vmware_vm_snapshot_id_mount()
+    assert rubrik.vsphere_live_mount(
+        "vm_name") == mock_post_v1_vmware_vm_snapshot_id_mount()
 
 
 def test_vsphere_live_mount_specific_date_time(rubrik, mocker):
@@ -4551,13 +4614,17 @@ def test_vsphere_live_mount_specific_date_time(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    mock__date_time_conversion = mocker.patch('rubrik_cdm.Connect._date_time_conversion', autospec=True, spec_set=True)
+    mock__date_time_conversion = mocker.patch(
+        'rubrik_cdm.Connect._date_time_conversion', autospec=True, spec_set=True)
     mock__date_time_conversion.return_value = "2014-01-15T09:30"
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vmware_vm_snapshot_id_mount()
 
     assert rubrik.vsphere_live_mount(
@@ -4895,13 +4962,17 @@ def test_vsphere_live_mount_specific_host(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id(), mock_get_v1_vmware_host()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_vmware_vm(
+    ), mock_get_v1_vmware_vm_id(), mock_get_v1_vmware_host()]
 
-    mock__date_time_conversion = mocker.patch('rubrik_cdm.Connect._date_time_conversion', autospec=True, spec_set=True)
+    mock__date_time_conversion = mocker.patch(
+        'rubrik_cdm.Connect._date_time_conversion', autospec=True, spec_set=True)
     mock__date_time_conversion.return_value = "2014-01-15T09:30"
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vmware_vm_snapshot_id_mount()
 
     assert rubrik.vsphere_live_mount("vm_name", date="1-15-2014", time="1:30 AM",
@@ -4910,7 +4981,8 @@ def test_vsphere_live_mount_specific_host(rubrik, mocker):
 
 def test_vsphere_instant_recovery_invalid_remove_network_devices(rubrik):
     with pytest.raises(InvalidTypeException) as error:
-        rubrik.vsphere_instant_recovery("vm_name", remove_network_devices="not_a_valid_remove_network_devices")
+        rubrik.vsphere_instant_recovery(
+            "vm_name", remove_network_devices="not_a_valid_remove_network_devices")
 
     error_message = error.value.args[0]
 
@@ -4919,7 +4991,8 @@ def test_vsphere_instant_recovery_invalid_remove_network_devices(rubrik):
 
 def test_vsphere_instant_recovery_invalid_power_on(rubrik):
     with pytest.raises(InvalidTypeException) as error:
-        rubrik.vsphere_instant_recovery("vm_name", power_on="not_a_valid_remove_network_devices")
+        rubrik.vsphere_instant_recovery(
+            "vm_name", power_on="not_a_valid_remove_network_devices")
 
     error_message = error.value.args[0]
 
@@ -4928,7 +5001,8 @@ def test_vsphere_instant_recovery_invalid_power_on(rubrik):
 
 def test_vsphere_instant_recovery_invalid_disable_network(rubrik):
     with pytest.raises(InvalidTypeException) as error:
-        rubrik.vsphere_instant_recovery("vm_name", disable_network="not_a_valid_disable_network")
+        rubrik.vsphere_instant_recovery(
+            "vm_name", disable_network="not_a_valid_disable_network")
 
     error_message = error.value.args[0]
 
@@ -4937,7 +5011,8 @@ def test_vsphere_instant_recovery_invalid_disable_network(rubrik):
 
 def test_vsphere_instant_recovery_invalid_keep_mac_addresses(rubrik):
     with pytest.raises(InvalidTypeException) as error:
-        rubrik.vsphere_instant_recovery("vm_name", keep_mac_addresses="not_a_valid_keep_mac_addresses")
+        rubrik.vsphere_instant_recovery(
+            "vm_name", keep_mac_addresses="not_a_valid_keep_mac_addresses")
 
     error_message = error.value.args[0]
 
@@ -4946,7 +5021,8 @@ def test_vsphere_instant_recovery_invalid_keep_mac_addresses(rubrik):
 
 def test_vsphere_instant_recovery_invalid_preserve_moid(rubrik):
     with pytest.raises(InvalidTypeException) as error:
-        rubrik.vsphere_instant_recovery("vm_name", preserve_moid="not_a_valid_preserve_moid")
+        rubrik.vsphere_instant_recovery(
+            "vm_name", preserve_moid="not_a_valid_preserve_moid")
 
     error_message = error.value.args[0]
 
@@ -5268,13 +5344,17 @@ def test_vsphere_instant_recovery_latest(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vmware_vm_snapshot_id_instant_recover()
 
-    assert rubrik.vsphere_live_mount("vm_name") == mock_post_v1_vmware_vm_snapshot_id_instant_recover()
+    assert rubrik.vsphere_live_mount(
+        "vm_name") == mock_post_v1_vmware_vm_snapshot_id_instant_recover()
 
 
 def test_vsphere_instant_recovery_specific_date_time(rubrik, mocker):
@@ -5574,13 +5654,17 @@ def test_vsphere_instant_recovery_specific_date_time(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    mock__date_time_conversion = mocker.patch('rubrik_cdm.Connect._date_time_conversion', autospec=True, spec_set=True)
+    mock__date_time_conversion = mocker.patch(
+        'rubrik_cdm.Connect._date_time_conversion', autospec=True, spec_set=True)
     mock__date_time_conversion.return_value = "2014-01-15T09:30"
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vmware_vm_snapshot_id_instant_recover()
 
     assert rubrik.vsphere_live_mount(
@@ -5918,13 +6002,17 @@ def test_vsphere_instant_recovery_specific_host(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id(), mock_get_v1_vmware_host()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [mock_get_v1_vmware_vm(
+    ), mock_get_v1_vmware_vm_id(), mock_get_v1_vmware_host()]
 
-    mock__date_time_conversion = mocker.patch('rubrik_cdm.Connect._date_time_conversion', autospec=True, spec_set=True)
+    mock__date_time_conversion = mocker.patch(
+        'rubrik_cdm.Connect._date_time_conversion', autospec=True, spec_set=True)
     mock__date_time_conversion.return_value = "2014-01-15T09:30"
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vmware_vm_snapshot_id_instant_recover()
 
     assert rubrik.vsphere_live_mount("vm_name", date="1-15-2014", time="1:30 AM",
@@ -5949,10 +6037,12 @@ def test__date_time_conversion(rubrik, mocker):
             "latestEulaVersion": "string"
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.return_value = mock_get_v1_cluster_me()
 
-    assert rubrik._date_time_conversion("1-15-2014", "1:30 AM") == "2014-01-15T09:30"
+    assert rubrik._date_time_conversion(
+        "1-15-2014", "1:30 AM") == "2014-01-15T09:30"
 
 
 def test_pause_snapshots_invalid_object_type(rubrik):
@@ -6242,8 +6332,10 @@ def test_pause_snapshots_idempotence(rubrik, mocker):
             "isAgentRegistered": True
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
     assert rubrik.pause_snapshots("object_name",
                                   "vmware") == "No change required. The vmware VM 'object_name' is already paused."
@@ -6743,13 +6835,17 @@ def test_pause_snapshots(rubrik, mocker):
             "isAgentRegistered": True
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    mock_patch = mocker.patch('rubrik_cdm.Connect.patch', autospec=True, spec_set=True)
+    mock_patch = mocker.patch(
+        'rubrik_cdm.Connect.patch', autospec=True, spec_set=True)
     mock_patch.return_value = mock_patch_v1_vmware_vm_id()
 
-    assert rubrik.pause_snapshots("object_name", "vmware") == mock_patch_v1_vmware_vm_id()
+    assert rubrik.pause_snapshots(
+        "object_name", "vmware") == mock_patch_v1_vmware_vm_id()
 
 
 def test_resume_snapshots_invalid_object_type(rubrik):
@@ -7039,8 +7135,10 @@ def test_resume_snapshots_idempotence(rubrik, mocker):
             "isAgentRegistered": True
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
     assert rubrik.resume_snapshots(
         "object_name",
@@ -7540,13 +7638,17 @@ def test_resume_snapshots(rubrik, mocker):
             "isAgentRegistered": True
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    mock_patch = mocker.patch('rubrik_cdm.Connect.patch', autospec=True, spec_set=True)
+    mock_patch = mocker.patch(
+        'rubrik_cdm.Connect.patch', autospec=True, spec_set=True)
     mock_patch.return_value = mock_patch_v1_vmware_vm_id()
 
-    assert rubrik.resume_snapshots("object_name", "vmware") == mock_patch_v1_vmware_vm_id()
+    assert rubrik.resume_snapshots(
+        "object_name", "vmware") == mock_patch_v1_vmware_vm_id()
 
 
 def test_begin_managed_volume_snapshot_idempotence(rubrik, mocker):
@@ -7693,8 +7795,10 @@ def test_begin_managed_volume_snapshot_idempotence(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
 
     assert rubrik.begin_managed_volume_snapshot(
         "name") == "No change required. The Managed Volume 'name' is already assigned in a writeable state."
@@ -7850,13 +7954,17 @@ def test_begin_managed_volume_snapshot(rubrik, mocker):
             "ownerId": "string"
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_managed_volume_id_begin_snapshot()
 
-    assert rubrik.begin_managed_volume_snapshot("name") == mock_post_internal_managed_volume_id_begin_snapshot()
+    assert rubrik.begin_managed_volume_snapshot(
+        "name") == mock_post_internal_managed_volume_id_begin_snapshot()
 
 
 def test_end_managed_volume_snapshot_idempotence(rubrik, mocker):
@@ -8003,8 +8111,10 @@ def test_end_managed_volume_snapshot_idempotence(rubrik, mocker):
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
 
     assert rubrik.end_managed_volume_snapshot(
         "name") == "No change required. The Managed Volume 'name' is already assigned in a read only state."
@@ -8154,8 +8264,10 @@ def test_end_managed_volume_snapshot_invalid_current_sla_unassigned(rubrik, mock
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
 
     with pytest.raises(InvalidParameterException) as error:
         rubrik.end_managed_volume_snapshot("name")
@@ -8309,8 +8421,10 @@ def test_end_managed_volume_snapshot_invalid_current_sla_unprotected(rubrik, moc
             ]
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
 
     with pytest.raises(InvalidParameterException) as error:
         rubrik.end_managed_volume_snapshot("name")
@@ -8494,13 +8608,17 @@ def test_end_managed_volume_snapshot_current_sla(rubrik, mocker):
             }
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_internal_managed_volume(), mock_get_internal_managed_volume_id()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_managed_volume_id_begin_snapshot()
 
-    assert rubrik.end_managed_volume_snapshot("name") == mock_post_internal_managed_volume_id_begin_snapshot()
+    assert rubrik.end_managed_volume_snapshot(
+        "name") == mock_post_internal_managed_volume_id_begin_snapshot()
 
 
 def test_end_managed_volume_snapshot_specific_sla(rubrik, mocker):
@@ -8748,16 +8866,19 @@ def test_end_managed_volume_snapshot_specific_sla(rubrik, mocker):
             }
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.side_effect = [
         mock_get_internal_managed_volume(),
         mock_get_internal_managed_volume_id(),
         mock_get_v1_sla_domain()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_managed_volume_id_begin_snapshot()
 
-    assert rubrik.end_managed_volume_snapshot("name", "Gold") == mock_post_internal_managed_volume_id_begin_snapshot()
+    assert rubrik.end_managed_volume_snapshot(
+        "name", "Gold") == mock_post_internal_managed_volume_id_begin_snapshot()
 
 
 def test_get_sla_objects_invalid_object_type(rubrik):
@@ -8766,7 +8887,7 @@ def test_get_sla_objects_invalid_object_type(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The get_sla_object() object_type argument must be one of the following: ['vmware']."
+    assert error_message == "The get_sla_object() object_type argument must be one of the following: ['vmware', 'hyper-v', 'mssql_db', 'ec2_instance', 'oracle_db', 'vcd', 'managed_volume', 'ahv', 'nas_share', 'linux_and_unix_host', 'windows_host']."
 
 
 def test_get_sla_objects_not_protecting_objects(rubrik, mocker):
@@ -8849,7 +8970,8 @@ def test_get_sla_objects_not_protecting_objects(rubrik, mocker):
             "total": 0
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_v1_sla_domain(), mock_get_v1_vmware_vm()]
 
     with pytest.raises(InvalidParameterException) as error:
@@ -8994,10 +9116,13 @@ def test_get_sla_objects(rubrik, mocker):
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_v1_sla_domain(), mock_get_v1_vmware_vm()]
 
-    assert rubrik.get_sla_objects("Gold", "vmware") == {'object_name': 'sla_id'}
+    assert rubrik.get_sla_objects("Gold", "vmware") == {
+        'object_name': 'sla_id'}
+
 
 def test_get_all_hosts_invalid_parameter(rubrik):
     with pytest.raises(TypeError) as error:
@@ -9007,6 +9132,7 @@ def test_get_all_hosts_invalid_parameter(rubrik):
 
     assert error_message == "get_all_hosts() got an unexpected keyword argument 'param'"
 
+
 def test_get_all_hosts_return_object(rubrik, mocker):
 
     def mock_get_v1_host():
@@ -9014,36 +9140,38 @@ def test_get_all_hosts_return_object(rubrik, mocker):
             "hasMore": True,
             "data": [
                 {
-                "id": "string",
-                "name": "all_hosts_return_value",
-                "hostname": "string",
-                "alias": "string",
-                "primaryClusterId": "string",
-                "operatingSystem": "string",
-                "operatingSystemType": "string",
-                "status": "string",
-                "nasBaseConfig": {
-                    "vendorType": "string",
-                    "apiUsername": "string",
-                    "apiCertificate": "string",
-                    "apiHostname": "string",
-                    "apiEndpoint": "string",
-                    "zoneName": "string",
-                    "isSnapdiffEnabled": True
-                },
-                "mssqlCbtEnabled": "Enabled",
-                "mssqlCbtEffectiveStatus": "On",
-                "organizationId": "string",
-                "organizationName": "string"
+                    "id": "string",
+                    "name": "all_hosts_return_value",
+                    "hostname": "string",
+                    "alias": "string",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string",
+                        "isSnapdiffEnabled": True
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
                 }
             ],
             "total": 1
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_v1_host()]
 
     assert (rubrik.get_all_hosts())['data'] == mock_get_v1_host()['data']
+
 
 def test_register_vm_invalid_parameter(rubrik):
     with pytest.raises(TypeError) as error:
@@ -9052,6 +9180,7 @@ def test_register_vm_invalid_parameter(rubrik):
     error_message = error.value.args[0]
 
     assert error_message == "register_vm() got an unexpected keyword argument 'param'"
+
 
 def test_register_vm_already_registered(rubrik, mocker):
 
@@ -9331,10 +9460,13 @@ def test_register_vm_already_registered(rubrik, mocker):
             "isAgentRegistered": True
         }
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    assert rubrik.register_vm(name='object_name') == "No change required. The VM object_name is already registered."
+    assert rubrik.register_vm(
+        name='object_name') == "No change required. The VM object_name is already registered."
 
 
 def test_register_vm_already_registered(rubrik, mocker):
@@ -9618,10 +9750,13 @@ def test_register_vm_already_registered(rubrik, mocker):
     def mock_post_v1_vm_register_agent():
         return {"status_code": "204"}
 
-    mock_get = mocker.patch('rubrik_cdm.Connect.get', autospec=True, spec_set=True)
-    mock_get.side_effect = [mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.side_effect = [
+        mock_get_v1_vmware_vm(), mock_get_v1_vmware_vm_id()]
 
-    mock_post = mocker.patch('rubrik_cdm.Connect.post', autospec=True, spec_set=True)
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vm_register_agent()
 
     #assert rubrik.register_vm(name='object_name') == '{''status_code'': ''204''}'
