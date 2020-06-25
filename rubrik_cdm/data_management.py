@@ -310,7 +310,7 @@ class Data_Management(Api):
         """Get the ID of a Rubrik object by providing its name.
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share, organization})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share, organization, organization_role_id, organization_admin_role})
         Keyword Arguments:
             host_os {str} -- The operating system for the host. (default: {'None'})
             hostname {str} -- The Oracle hostname, Oracle RAC cluster name, or one of the hostnames in the Oracle RAC cluster. Required when the object_type is oracle_db or share. Using the IP is not supported.
@@ -340,7 +340,9 @@ class Data_Management(Api):
             'volume_group',
             'archival_location',
             'share',
-            'organization']
+            'organization',
+            'organization_role_id',
+            'organization_admin_role']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -447,7 +449,12 @@ class Data_Management(Api):
             "organization": {
                 "api_version": "internal",
                 "api_endpoint": "/organization?name={}".format(object_name)
-            }
+            },
+            "organization_role_id": {
+                "api_version": "internal",
+                "api_endpoint": "/organization?name={}".format(object_name)
+            },
+
         }
 
         if object_type == 'physical_host':
@@ -461,57 +468,81 @@ class Data_Management(Api):
                 "api_endpoint": "/host?primary_cluster_id=local&{}={}".format(filter_field_name, object_name)
             }
 
+        # When looking up the org_admin_role the user should provide the org name
+        # as the object_name. We then use that to look up the id for the org and
+        # then set that as the "object_type" for the full org_admin_role query
+        if object_type == "organization_admin_role":
+            self.log(
+                "object_id: Getting the ID for the {} organization.".format(object_name))
+            org_role_id = self.object_id(
+                object_name, "organization_role_id", timeout=timeout)
+
+            api_call["organization_admin_role"] = {
+                "api_version": "internal",
+                "api_endpoint": "/role/{}/authorization".format(org_role_id)
+            }
+
         self.log("object_id: Getting the object id for the {} object '{}'.".format(
             object_type, object_name))
+
         api_request = self.get(
             api_call[object_type]["api_version"],
             api_call[object_type]["api_endpoint"],
             timeout=timeout)
 
-        if api_request['total'] == 0:
-            raise InvalidParameterException("The {} object '{}' was not found on the Rubrik cluster.".format(
-                object_type, object_name))
-        elif api_request['total'] > 0:
-            object_ids = []
-            # Define the "object name" to search for
-            if object_type == 'physical_host':
-                name_value = filter_field_name
-            elif object_type == "volume_group":
-                name_value = "hostname"
-            elif object_type == 'share':
-                name_value = "exportPoint"
-            else:
-                name_value = 'name'
+        object_ids = []
 
-            for item in api_request['data']:
-                if object_type == 'oracle_db':
-                    if 'standaloneHostName' in item.keys():
-                        if hostname == item['standaloneHostName'].split('.')[0]:
+        if object_type == "organization_admin_role":
+            object_ids.append(api_request["roleId"])
+        else:
+
+            if api_request['total'] == 0:
+                raise InvalidParameterException("The {} object '{}' was not found on the Rubrik cluster.".format(
+                    object_type, object_name))
+            elif api_request['total'] > 0:
+                # Define the "object name" to search for
+                if object_type == 'physical_host':
+                    name_value = filter_field_name
+                elif object_type == "volume_group":
+                    name_value = "hostname"
+                elif object_type == 'share':
+                    name_value = "exportPoint"
+                else:
+                    name_value = 'name'
+
+                for item in api_request['data']:
+                    if object_type == 'oracle_db':
+                        if 'standaloneHostName' in item.keys():
+                            if hostname == item['standaloneHostName'].split('.')[0]:
+                                object_ids.append(item['id'])
+                                break
+                        elif 'racName' in item.keys():
+                            if hostname == item['racName']:
+                                object_ids.append(item['id'])
+                                break
+                            if any(instance['hostName'] == hostname for instance in item['instances']):
+                                object_ids.append(item['id'])
+                                break
+                    elif object_type == 'share' and item[name_value] == object_name:
+                        if item['hostId'] == host_id:
                             object_ids.append(item['id'])
-                            break
-                    elif 'racName' in item.keys():
-                        if hostname == item['racName']:
-                            object_ids.append(item['id'])
-                            break
-                        if any(instance['hostName'] == hostname for instance in item['instances']):
-                            object_ids.append(item['id'])
-                            break
-                elif object_type == 'share' and item[name_value] == object_name:
-                    if item['hostId'] == host_id:
+                    elif object_type == "organization_role_id" and item[name_value].lower():
+                        object_ids.append(item['roleId'])
+
+                    elif item[name_value].lower() == object_name.lower():
                         object_ids.append(item['id'])
-                elif item[name_value].lower() == object_name.lower():
-                    object_ids.append(item['id'])
-            if len(object_ids) > 1:
-                raise InvalidParameterException(
-                    "Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(object_type, object_name))
-            elif len(object_ids) == 0:
-                raise InvalidParameterException(
-                    "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
-            else:
-                return object_ids[0]
 
+        if len(object_ids) > 1:
+            raise InvalidParameterException(
+                "Multiple {} objects named '{}' were found on the Rubrik cluster. Unable to return a specific object id.".format(object_type, object_name))
+        elif len(object_ids) == 0:
             raise InvalidParameterException(
                 "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
+        else:
+            return object_ids[0]
+
+        raise InvalidParameterException(
+            "The {} object '{}' was not found on the Rubrik cluster.".format(object_type, object_name))
 
     def assign_sla(self, object_name, sla_name, object_type, log_backup_frequency_in_seconds=None, log_retention_hours=None, copy_only=None, windows_host=None, nas_host=None, share=None, log_backup_frequency_in_minutes=None, num_channels=4, hostname=None, timeout=30):  # pytest: ignore
         """Assign a Rubrik object to an SLA Domain.

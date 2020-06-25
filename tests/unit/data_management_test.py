@@ -1750,7 +1750,7 @@ def test_object_id_invalid_object_type(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The object_id() object_type argument must be one of the following: ['vmware', 'sla', 'vmware_host', 'physical_host', 'fileset_template', 'managed_volume', 'mssql_db', 'mssql_instance', 'vcenter', 'ahv', 'aws_native', 'oracle_db', 'oracle_host', 'volume_group', 'archival_location', 'share', 'organization']."
+    assert error_message == "The object_id() object_type argument must be one of the following: ['vmware', 'sla', 'vmware_host', 'physical_host', 'fileset_template', 'managed_volume', 'mssql_db', 'mssql_instance', 'vcenter', 'ahv', 'aws_native', 'oracle_db', 'oracle_host', 'volume_group', 'archival_location', 'share', 'organization', `organization`, `organization_role_id`, `organization_admin_role`]."
 
 
 def test_object_id_invalid_fileset_template(rubrik):
