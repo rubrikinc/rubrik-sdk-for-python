@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - **Security** in case of vulnerabilities.
 
 ## Unreleased
+## Added
+
+- `get_sla_objects()` now also supports the following object types: hyper-v, mssql_db, ec2_instance, oracle_db, vcd, managed_volume, ahv, nas_share, linux_and_unix_host, windows_host ([Issue 226](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/226))
 
 ## Changed
 
