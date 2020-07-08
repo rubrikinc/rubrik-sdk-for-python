@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Added
 
 - `get_sla_objects()` now also supports the following object types: hyper-v, mssql_db, ec2_instance, oracle_db, vcd, managed_volume, ahv, nas_share, linux_and_unix_host, windows_host ([Issue 226](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/226))
-- `object_id()` now supports the `organization`, `organization_role_id`, and `organization_admin_role` `object_type`
+- `object_id()` now supports the `organization`, `organization_role_id`, `organization_admin_role`, and `mssql_availability_group` `object_type`
 
 ## Changed
 
@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Fixed
 
 - When calling create_sla() an error will not longer be thrown for frequencies and retentions that have a default None value provided ([Issue 232](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/232))
+- The `object_id()` function now returns the correct the MSSQL DB and MSSQL Instance. When the object_type is `mssql_instance` the `mssql_host` keyword argument is now required. When the `object_type` is `mssql_db`, both the `mssql_instance` the `mssql_host` keyword arguments are required. 
 
 ## v2.0.9
 

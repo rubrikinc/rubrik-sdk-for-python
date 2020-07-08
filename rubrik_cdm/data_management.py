@@ -310,7 +310,7 @@ class Data_Management(Api):
         """Get the ID of a Rubrik object by providing its name.
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mssql_db, mssql_instance, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share, organization, organization_role_id, organization_admin_role})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mssql_db, mssql_instance, mssql_availability_group, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share, organization, organization_role_id, organization_admin_role})
         Keyword Arguments:
             host_os {str} -- The operating system for the host. Required when object_type is 'fileset_template'. (default: {None}) (choices: {Windows, Linux})
             hostname {str} -- The Oracle hostname, Oracle RAC cluster name, or one of the hostnames in the Oracle RAC cluster. Required when the object_type is oracle_db or share. Using the IP is not supported.
@@ -334,6 +334,7 @@ class Data_Management(Api):
             'managed_volume',
             'mssql_db',
             'mssql_instance',
+            'mssql_availability_group',
             'vcenter',
             'ahv',
             'aws_native',
@@ -448,6 +449,10 @@ class Data_Management(Api):
                 "api_version": "internal",
                 "api_endpoint": "/organization?name={}".format(object_name)
             },
+            "mssql_availability_group": {
+                "api_version": "v1",
+                "api_endpoint": "/mssql/hierarchy/root/children?has_instances=false&is_clustered=false&is_live_mount=false&limit=51&object_type=MssqlAvailabilityGroup&offset=0&primary_cluster_id=local&snappable_status=Protectable&name={}".format(object_name)
+            }
 
         }
 
