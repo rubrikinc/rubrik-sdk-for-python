@@ -306,15 +306,17 @@ class Data_Management(Api):
 
         return (api_request, snapshot_status_url)
 
-    def object_id(self, object_name, object_type, host_os=None, hostname=None, share_type=None, timeout=15):
+    def object_id(self, object_name, object_type, host_os=None, hostname=None, share_type=None, mssql_host=None, mssql_instance=None, timeout=15):
         """Get the ID of a Rubrik object by providing its name.
         Arguments:
             object_name {str} -- The name of the Rubrik object whose ID you wish to lookup.
-            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mysql_db, mysql_instance, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share, organization, organization_role_id, organization_admin_role})
+            object_type {str} -- The object type you wish to look up. (choices: {vmware, sla, vmware_host, physical_host, fileset_template, managed_volume, mssql_db, mssql_instance, vcenter, ahv, aws_native, oracle_db, oracle_host, volume_group, archival_location, share, organization, organization_role_id, organization_admin_role})
         Keyword Arguments:
-            host_os {str} -- The operating system for the host. (default: {'None'})
+            host_os {str} -- The operating system for the host. Required when object_type is 'fileset_template'. (default: {None}) (choices: {Windows, Linux})
             hostname {str} -- The Oracle hostname, Oracle RAC cluster name, or one of the hostnames in the Oracle RAC cluster. Required when the object_type is oracle_db or share. Using the IP is not supported.
             share_type {str} -- The type of NAS share i.e. NFS or SMB
+            mssql_host {str} -- The name of a MSSQL Host. Required when the object_type is mssql_db or mssql_instance.
+            mssql_instance {str} -- The name of a MSSQL database instance. Required when the object_type is mssql_db.
             timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {15})
         Returns:
             str -- The ID of the provided Rubrik object.
@@ -410,14 +412,6 @@ class Data_Management(Api):
                 "api_version": "internal",
                 "api_endpoint": "/nutanix/vm?primary_cluster_id=local&is_relic=false&name={}".format(object_name)
             },
-            "mssql_db": {
-                "api_version": "v1",
-                "api_endpoint": "/mssql/db?primary_cluster_id=local&is_relic=false&instance_id={}".format(object_name)
-            },
-            "mssql_instance": {
-                "api_version": "v1",
-                "api_endpoint": "/mssql/instance?primary_cluster_id=local&root_id={}".format(object_name)
-            },
             "aws_native": {
                 "api_version": "internal",
                 "api_endpoint": "/aws/account?name={}".format(object_name)
@@ -466,6 +460,31 @@ class Data_Management(Api):
             api_call["physical_host"] = {
                 "api_version": "v1",
                 "api_endpoint": "/host?primary_cluster_id=local&{}={}".format(filter_field_name, object_name)
+            }
+
+        if object_type == 'mssql_instance':
+            if mssql_host is None:
+                raise InvalidParameterException(
+                    "You must provide a mssql_host when the object_type is mssql_instance.")
+            # root_id is host_id in SQL speak
+            root_id = self.object_id(mssql_host, 'physical_host')
+
+            api_call["mssql_instance"] = {
+                "api_version": "v1",
+                "api_endpoint": "/mssql/instance?primary_cluster_id=local&root_id={}".format(root_id)
+            }
+
+        if object_type == 'mssql_db':
+            if mssql_instance is None or mssql_host is None:
+                raise InvalidParameterException(
+                    "You must provide a mssql_host and mssql_instance when the object_type is mssql_db.")
+
+            instance_id = self.object_id(
+                mssql_instance, "mssql_instance", mssql_host=mssql_host)
+
+            api_call["mssql_db"] = {
+                "api_version": "v1",
+                "api_endpoint": "/mssql/db?primary_cluster_id=local&is_relic=false&name={}&instance_id={}".format(object_name, instance_id)
             }
 
         # When looking up the org_admin_role the user should provide the org name
