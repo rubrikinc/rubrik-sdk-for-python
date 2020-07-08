@@ -51,7 +51,8 @@ class Cluster(Api):
             raise InvalidParameterException(
                 'The configure_cluster_location() function requires the location to be specified as string.')
 
-        self.log("configure_cluster_location: Determing the current cluster location.")
+        self.log(
+            "configure_cluster_location: Determing the current cluster location.")
 
         cluster_summary = self.get("v1", "/cluster/me", timeout=timeout)
 
@@ -63,7 +64,8 @@ class Cluster(Api):
         config["geolocation"] = {}
         config["geolocation"]["address"] = location
 
-        self.log("configure_cluster_location: Configuring the Rubrik cluster location.")
+        self.log(
+            "configure_cluster_location: Configuring the Rubrik cluster location.")
 
         return self.patch("v1", "/cluster/me", config, timeout)
 
@@ -95,7 +97,8 @@ class Cluster(Api):
         if ca_certificate is not None:
             config["caCerts"] = ca_certificate
 
-        self.log("configure_replication: Adding cluster '{}' as private network replication target.".format(target_ip))
+        self.log(
+            "configure_replication: Adding cluster '{}' as private network replication target.".format(target_ip))
 
         return self.post("internal", "/replication/target", config, timeout)
 
@@ -152,7 +155,8 @@ class Cluster(Api):
         if ca_certificate is not None:
             config["caCerts"] = ca_certificate
 
-        self.log("configure_replication: Adding cluster behind '{}' as NAT replication target.".format(tgt_gateway))
+        self.log("configure_replication: Adding cluster behind '{}' as NAT replication target.".format(
+            tgt_gateway))
 
         return self.post("internal", "/replication/target", config, timeout)
 
@@ -169,7 +173,8 @@ class Cluster(Api):
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log('cluster_version: Getting the software version of the Rubrik cluster.')
+        self.log(
+            'cluster_version: Getting the software version of the Rubrik cluster.')
 
         return self.get('v1', '/cluster/me/version', timeout=timeout)['version']
 
@@ -315,8 +320,10 @@ class Cluster(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("add_vcenter: Searching the Rubrik cluster for the vCenter '{}'.".format(vcenter_ip))
-        current_vcenter = self.get("v1", "/vmware/vcenter?primary_cluster_id=local", timeout=timeout)
+        self.log("add_vcenter: Searching the Rubrik cluster for the vCenter '{}'.".format(
+            vcenter_ip))
+        current_vcenter = self.get(
+            "v1", "/vmware/vcenter?primary_cluster_id=local", timeout=timeout)
 
         for vcenter in current_vcenter["data"]:
             if vcenter["hostname"] == vcenter_ip:
@@ -334,7 +341,8 @@ class Cluster(Api):
         if ca_certificate is not None:
             config["caCerts"] = ca_certificate
 
-        self.log("add_vcenter: Adding vCenter '{}' to the Rubrik cluster.".format(vcenter_ip))
+        self.log(
+            "add_vcenter: Adding vCenter '{}' to the Rubrik cluster.".format(vcenter_ip))
         add_vcenter = self.post("v1", "/vmware/vcenter", config, timeout)
 
         return add_vcenter, add_vcenter['links'][0]['href']
@@ -425,10 +433,12 @@ class Cluster(Api):
         self.function_name = inspect.currentframe().f_code.co_name
 
         if isinstance(ntp_server, list) is False:
-            raise InvalidTypeException("The 'ntp_server' argument must be a list object.")
+            raise InvalidTypeException(
+                "The 'ntp_server' argument must be a list object.")
 
         self.log("cluster_ntp: Determing the current cluster NTP settings")
-        cluster_ntp = self.get("internal", "/cluster/me/ntp_server", timeout=timeout)
+        cluster_ntp = self.get(
+            "internal", "/cluster/me/ntp_server", timeout=timeout)
 
         cdm_v5_check = self.minimum_installed_cdm_version("5.0")
 
@@ -443,7 +453,8 @@ class Cluster(Api):
             return "No change required. The NTP server(s) {} has already been added to the Rubrik cluster.".format(
                 ntp_server)
 
-        self.log("cluster_ntp: Adding the NTP server(s) '{}' to the Rubrik cluster.".format(ntp_server))
+        self.log("cluster_ntp: Adding the NTP server(s) '{}' to the Rubrik cluster.".format(
+            ntp_server))
 
         if cdm_v5_check is True:
             config = []
@@ -544,7 +555,8 @@ class Cluster(Api):
                 "The interfaces argument must be either a list of IPs or a dictionary with node_name:ip as the key, value pairs.")
 
         self.log("cluster_vlan: Getting the current VLAN configurations.")
-        current_vlans = self.get("internal", "/cluster/me/vlan", timeout=timeout)
+        current_vlans = self.get(
+            "internal", "/cluster/me/vlan", timeout=timeout)
         if current_vlans["total"] != 0:
             current_vlans = current_vlans["data"][0]
 
@@ -579,10 +591,13 @@ class Cluster(Api):
         self.function_name = inspect.currentframe().f_code.co_name
 
         if isinstance(server_ip, list) is False:
-            raise InvalidTypeException("The 'server_ip' argument must be a list")
+            raise InvalidTypeException(
+                "The 'server_ip' argument must be a list")
 
-        self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
-        current_dns_servers = self.get("internal", "/cluster/me/dns_nameserver", timeout=timeout)
+        self.log(
+            "cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
+        current_dns_servers = self.get(
+            "internal", "/cluster/me/dns_nameserver", timeout=timeout)
 
         if sorted(current_dns_servers) == sorted(server_ip):
             return "No change required. The Rubrik cluster is already configured with the provided DNS servers."
@@ -605,16 +620,19 @@ class Cluster(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("configure_login_banner: Retrieving the current login banner of the Rubrik cluster.")
-        current_login_banner = self.get("internal", "/cluster/me/login_banner", timeout=timeout)
-        
+        self.log(
+            "configure_login_banner: Retrieving the current login banner of the Rubrik cluster.")
+        current_login_banner = self.get(
+            "internal", "/cluster/me/login_banner", timeout=timeout)
+
         config = {}
         config["loginBanner"] = banner
 
         if config == current_login_banner:
             return "No change required. The Rubrik cluster is already configured with the login banner text '`banner`'."
 
-        self.log("configure_login_banner: Setting the login banner of the Rubrik cluster.")
+        self.log(
+            "configure_login_banner: Setting the login banner of the Rubrik cluster.")
         return self.put("internal", "/cluster/me/login_banner", config, timeout)
 
     def configure_search_domain(self, search_domain, timeout=15):
@@ -634,10 +652,13 @@ class Cluster(Api):
         self.function_name = inspect.currentframe().f_code.co_name
 
         if isinstance(search_domain, list) is False:
-            raise InvalidTypeException("The 'server_ip' argument must be a list")
+            raise InvalidTypeException(
+                "The 'server_ip' argument must be a list")
 
-        self.log("cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
-        current_dns_search_domains = self.get("internal", "/cluster/me/dns_search_domain", timeout=timeout)
+        self.log(
+            "cluster_dns_servers: Generating a list of DNS servers configured on the Rubrik cluster.")
+        current_dns_search_domains = self.get(
+            "internal", "/cluster/me/dns_search_domain", timeout=timeout)
 
         if sorted(current_dns_search_domains) == sorted(search_domain):
             return "No change required. The Rubrik cluster is already configured with the provided DNS Search Domains."
@@ -672,8 +693,10 @@ class Cluster(Api):
             raise InvalidParameterException("cluster_smtp_settings() encryption argument must be one of the following: {}.".format(
                 valid_encryption))
 
-        self.log("cluster_smtp_settings: Determing the current SMTP settings on the Rubrik cluster.")
-        current_smtp_settings = self.get("internal", "/smtp_instance", timeout=timeout)
+        self.log(
+            "cluster_smtp_settings: Determing the current SMTP settings on the Rubrik cluster.")
+        current_smtp_settings = self.get(
+            "internal", "/smtp_instance", timeout=timeout)
 
         config = {}
         config["smtpHostname"] = hostname
@@ -716,11 +739,13 @@ class Cluster(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("refresh_vcenter: Searching the Rubrik cluster for the provided vCenter Server.")
+        self.log(
+            "refresh_vcenter: Searching the Rubrik cluster for the provided vCenter Server.")
         vcenter_id = self.object_id(vcenter_ip, "vcenter", timeout=timeout)
 
         self.log("refresh_vcenter: Refresh vCenter.")
-        api_request = self.post("v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
+        api_request = self.post(
+            "v1", "/vmware/vcenter/{}/refresh".format(vcenter_id), timeout)
 
         if wait_for_completion:
             return self.job_status(api_request["links"][0]["href"])
@@ -763,7 +788,8 @@ class Cluster(Api):
         config["password"] = password
 
         self.log("update_proxy: Getting the current proxy configuration")
-        current_proxy_settings = self.get("internal", "/node_management/proxy_config", timeout=timeout)
+        current_proxy_settings = self.get(
+            "internal", "/node_management/proxy_config", timeout=timeout)
 
         if current_proxy_settings["host"] == host and current_proxy_settings["port"] == port and current_proxy_settings["username"] == username:
             return "No change required. The proxy '{}' has already been added to the Rubrik cluster.".format(host)
@@ -783,8 +809,10 @@ class Cluster(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        current_proxy_settings = self.get("internal", "/node_management/proxy_config", timeout=timeout)
-        self.log("delete_proxy: Current proxy configuration {}".format(current_proxy_settings))
+        current_proxy_settings = self.get(
+            "internal", "/node_management/proxy_config", timeout=timeout)
+        self.log("delete_proxy: Current proxy configuration {}".format(
+            current_proxy_settings))
 
         if current_proxy_settings["host"] == "":
             return "No change required. The proxy configuration is already cleared out."
@@ -814,7 +842,8 @@ class Cluster(Api):
         self.function_name = inspect.currentframe().f_code.co_name
 
         self.log("create_user: Searching for the current users on the Rubrik cluster")
-        current_users = self.get("internal", "/user?username={}".format(username), timeout=timeout)
+        current_users = self.get(
+            "internal", "/user?username={}".format(username), timeout=timeout)
         if len(current_users) > 0:
             return "No change required. The user '{}' already exists on the Rubrik cluster.".format(username)
 
@@ -852,13 +881,16 @@ class Cluster(Api):
         if self.minimum_installed_cdm_version(5.0) is False:
             raise CDMVersionException(5.0)
 
-        self.log("read_only_authorization: Searching for the current users on the Rubrik cluster")
-        current_users = self.get("internal", "/user?username={}".format(username), timeout=timeout)
+        self.log(
+            "read_only_authorization: Searching for the current users on the Rubrik cluster")
+        current_users = self.get(
+            "internal", "/user?username={}".format(username), timeout=timeout)
         if len(current_users) < 1:
             raise InvalidParameterException(
                 "The user '{}' does not exsit on the Rubrik cluster.".format(username))
 
-        self.log("read_only_authorization: Checking the current authorizations for user '{}'".format(username))
+        self.log(
+            "read_only_authorization: Checking the current authorizations for user '{}'".format(username))
         current_authorizations = self.get(
             "internal", "/authorization/role/read_only_admin?principals={}".format(current_users[0]["id"]), timeout=timeout)
 
@@ -873,7 +905,8 @@ class Cluster(Api):
         config["privileges"] = {}
         config["privileges"]["basic"] = ["Global:::All"]
 
-        self.log("read_only_authorization: Granting read-only privilages to user '{}'.".format(username))
+        self.log(
+            "read_only_authorization: Granting read-only privilages to user '{}'.".format(username))
         return self.post("internal", "/authorization/role/read_only_admin", config, timeout)
 
     def add_guest_credential(self, username, password, domain=None, timeout=15):
@@ -899,7 +932,8 @@ class Cluster(Api):
         config["domain"] = domain
 
         self.log("add_guest_credential: Getting the current guest credentials.")
-        current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
+        current_guest_credentials = self.get(
+            "internal", "/vmware/guest_credential", timeout=timeout)
 
         for guest_credential in current_guest_credentials["data"]:
             if guest_credential.get("domain"):
@@ -931,8 +965,10 @@ class Cluster(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        current_guest_credentials = self.get("internal", "/vmware/guest_credential", timeout=timeout)
-        self.log("delete_guest_credential: Current guest credentials {}".format(current_guest_credentials))
+        current_guest_credentials = self.get(
+            "internal", "/vmware/guest_credential", timeout=timeout)
+        self.log("delete_guest_credential: Current guest credentials {}".format(
+            current_guest_credentials))
 
         delete_guest_credential = ""
 
@@ -940,7 +976,8 @@ class Cluster(Api):
             if domain is None:
                 if guest_credential["username"] == username:
                     delete_guest_credential = guest_credential["id"]
-                    self.log("guest_credentials: Deleting guest OS credentials '{}' to the Rubrik cluster.".format(username))
+                    self.log(
+                        "guest_credentials: Deleting guest OS credentials '{}' to the Rubrik cluster.".format(username))
                     return self.delete(
                         "internal", "/vmware/guest_credential/{}".format(delete_guest_credential), timeout)
             elif guest_credential.get("domain"):
@@ -969,7 +1006,8 @@ class Cluster(Api):
 
         self.function_name = inspect.currentframe().f_code.co_name
 
-        self.log("cluster_node_id - Getting all the node ids from the from the cluster.")
+        self.log(
+            "cluster_node_id - Getting all the node ids from the from the cluster.")
         node_id_list = []
 
         api_request = self.get('internal', '/node', timeout)
@@ -993,9 +1031,11 @@ class Cluster(Api):
         self.function_name = inspect.currentframe().f_code.co_name
 
         if not isinstance(enabled, bool):
-            raise InvalidParameterException("The enabled parameter must be True or False.")
+            raise InvalidParameterException(
+                "The enabled parameter must be True or False.")
 
-        self.log("cluster_support_tunnel - Determining status of Cluster Support Tunnel.")
+        self.log(
+            "cluster_support_tunnel - Determining status of Cluster Support Tunnel.")
         check_tunnel = self.get('internal', '/node/me/support_tunnel', timeout)
 
         if enabled is True:
@@ -1006,7 +1046,8 @@ class Cluster(Api):
                 config['isTunnelEnabled'] = True
                 config['inactivityTimeoutInSeconds'] = 0
 
-                self.log("cluster_support_tunnel - Enabling Cluster Support Tunnel.")
+                self.log(
+                    "cluster_support_tunnel - Enabling Cluster Support Tunnel.")
                 return self.patch('internal', '/node/me/support_tunnel', config, timeout)
 
             else:
@@ -1041,7 +1082,8 @@ class Cluster(Api):
 
         self.log("Appending list of floating IPs with {}".format(floating_ips))
         if isinstance(floating_ips, list) is False:
-            raise InvalidParameterException("The 'floating_ips' argument must be a list")
+            raise InvalidParameterException(
+                "The 'floating_ips' argument must be a list")
 
         config = self.get('internal', '/node_management/cluster_ip')
         if set(config).intersection(floating_ips):
@@ -1068,7 +1110,8 @@ class Cluster(Api):
 
         self.log("Removing list of floating IPs with {}".format(floating_ips))
         if isinstance(floating_ips, list) is False:
-            raise InvalidParameterException("The 'floating_ips' argument must be a list")
+            raise InvalidParameterException(
+                "The 'floating_ips' argument must be a list")
 
         config = self.get('internal', '/node_management/cluster_ip')
         if set(config).intersection(floating_ips):
@@ -1103,5 +1146,76 @@ class Cluster(Api):
             dict -- The full API response for `GET /v1/vmware/vcenter`.
         """
 
-        self.log('get_all_vcenters: Getting information for each vCenter connected  to the Rubrik cluster.')
+        self.log(
+            'get_all_vcenters: Getting information for each vCenter connected  to the Rubrik cluster.')
         return self.get('v1', '/vmware/vcenter', timeout=timeout)
+
+    def add_organization_protectable_object_sql_server_host(self, organization_name, mssql_host, timeout=15):
+
+        organization_id = self.object_id(organization_name, "organization")
+
+        org_admin_id = self.object_id(
+            organization_name, "organization_admin_role")
+
+        self.log("add_organization_protectable_object_sql_server: Gathering the current MSSQL objects protected by the {} organization.".format(
+            organization_name))
+        current_mssql_protected_objects = self.get(
+            "internal", "/organization/{}/mssql".format(organization_id))
+
+        objects_to_protect = []
+
+        sql_host_id = self.object_id(
+            mssql_host, "physical_host", timeout=timeout)
+
+        for protected_object in current_mssql_protected_objects["data"]:
+            if protected_object["managedId"] == sql_host_id:
+                return "No change required. The MSSQL host {} is already assigned to the {} organization.".format(mssql_host, organization_name)
+
+        objects_to_protect.append(sql_host_id)
+
+        config = {
+            "authorizationSpecifications": [
+                {
+                    "privilege": "ManageRestoreSource",
+                    "resources": objects_to_protect
+                }
+            ],
+            "roleTemplate": "Organization"
+        }
+
+        return self.post("internal", "/role/{}/authorization".format(org_admin_id), config)
+
+    def add_organization_protectable_object_sql_server_db(self, organization_name, mssql_db, mssql_host, mssql_instance, timeout=15):
+
+        organization_id = self.object_id(organization_name, "organization")
+
+        org_admin_id = self.object_id(
+            organization_name, "organization_admin_role")
+
+        self.log("add_organization_protectable_object_sql_server: Gathering the current MSSQL objects protected by the {} organization.".format(
+            organization_name))
+        current_mssql_protected_objects = self.get(
+            "internal", "/organization/{}/mssql".format(organization_id))
+
+        objects_to_protect = []
+
+        db_id = self.object_id(
+            mssql_db, "mssql_db", mssql_instance=mssql_instance, mssql_host=mssql_host)
+
+        for protected_object in current_mssql_protected_objects["data"]:
+            if protected_object["managedId"] == db_id:
+                return "No change required. The MSSQL DB {} is already assigned to the {} organization.".format(mssql_db, organization_name)
+
+        objects_to_protect.append(db_id)
+
+        config = {
+            "authorizationSpecifications": [
+                {
+                    "privilege": "ManageRestoreSource",
+                    "resources": objects_to_protect
+                }
+            ],
+            "roleTemplate": "Organization"
+        }
+
+        return self.post("internal", "/role/{}/authorization".format(org_admin_id), config)
