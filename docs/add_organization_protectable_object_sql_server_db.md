@@ -11,9 +11,9 @@ def add_organization_protectable_object_sql_server_db(self, organization_name, m
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | organization_name  | str | The name of the organization you wish to add the protectable object to. |  |
-| mssql_db  | str |  -- |  |
-| mssql_instance  | str |  -- |  |
-| mssql_host  | str | The name of the MSSQL Database to add to the organization as a protectable object. |  |
+| mssql_db  | str | The name of the MSSQL DB to add to the organization as a protectable object. |  |
+| mssql_instance  | str | The name of the MSSQL Instance where the DB lives. |  |
+| mssql_host  | str | The name of the MSSQL Host where the DB lives. |  |
 
 ## Keyword Arguments
 
