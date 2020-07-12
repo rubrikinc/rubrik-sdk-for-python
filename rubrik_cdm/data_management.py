@@ -382,7 +382,11 @@ class Data_Management(Api):
         if object_type == 'share':
             if hostname is None:
                 raise InvalidParameterException(
-                    "You must provide the hostname with the NAS share object.")
+                    "You must provide the 'hostname' with the NAS share object.")
+
+            if share_type is None:
+                raise InvalidParameterException(
+                    "You must provide the 'share_type' with the NAS share object.")
             else:
                 self.log('Searching the Rubrik cluster for the host ID.')
                 host_id = self.object_id(
