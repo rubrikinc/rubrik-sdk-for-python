@@ -24,7 +24,6 @@ This module contains the Rubrik SDK Data_Management class.
 """
 
 from .api import Api
-from .exceptions import CDMVersionException, InvalidParameterException, InvalidTypeException, APICallException
 import inspect
 
 
