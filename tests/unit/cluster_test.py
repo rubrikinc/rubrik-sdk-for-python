@@ -1261,13 +1261,3 @@ def test_get_all_vcenters_return_object(rubrik, mocker):
 
     assert (rubrik.get_all_vcenters())[
         'data'] == mock_get_v1_vmware_vcenter()['data']
-
-
-def test_add_organization_protectable_object_sql_server_invalid_sql_db(rubrik, mocker):
-    with pytest.raises(InvalidParameterException) as error:
-        rubrik.add_organization_protectable_object_sql_server(
-            "org_demo", "sql_host_name", sql_db="sql_db_name")
-
-    error_message = error.value.args[0]
-
-    assert error_message == 'The add_organization_protectable_object_sql_server() function requires the both the "sql_host" and "sql_instance" parameters when the "sql_db" parameter is populated.'
