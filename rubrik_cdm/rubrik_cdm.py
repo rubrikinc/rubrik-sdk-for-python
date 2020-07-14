@@ -184,7 +184,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud, Organization):
             raise InvalidParameterException(
                 "You must provide either a username and password or API Token for authentication.")
 
-        self.sdk_version = "2.0.9"
+        self.sdk_version = "2.0.10"
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
@@ -399,7 +399,7 @@ class Bootstrap(Api):
             raise RubrikException(
                 "Error: Could not resolve address for cluster, or invalid IP/address supplied")
 
-        self.sdk_version = "2.0.9"
+        self.sdk_version = "2.0.10"
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""

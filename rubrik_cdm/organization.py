@@ -86,9 +86,9 @@ class Organization(Api):
 
         Arguments:
             organization_name {str} -- The name of the organization you wish to add the protectable object to.
-            mssql_db {str} -- 
-            mssql_instance {str} --
-            mssql_host {str} -- The name of the MSSQL Database to add to the organization as a protectable object.
+            mssql_db {str} -- The name of the MSSQL DB to add to the organization as a protectable object.
+            mssql_instance {str} -- The name of the MSSQL instance where the MSSQL DB lives.
+            mssql_host {str} -- The name of the MSSQL host where the MSSQL DB lives.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
