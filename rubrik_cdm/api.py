@@ -72,7 +72,7 @@ class Api():
             if call_type == 'GET':
                 request_url = "https://{}/api/{}{}".format(self.node_ip, api_version, api_endpoint)
                 if params is not None:
-                    request_url = request_url + "?" + '&'.join("{}={}".format(key, quote(val))
+                    request_url = request_url + "?" + '&'.join("{}={}".format(key, quote(str(val)))
                                                                for (key, val) in params.items())
                 self.log('GET {}'.format(request_url))
                 api_request = requests.get(

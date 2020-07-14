@@ -37,10 +37,11 @@ from .cluster import Cluster
 from .data_management import Data_Management
 from .physical import Physical
 from .cloud import Cloud
+from .organization import Organization
 from .exceptions import InvalidParameterException, RubrikException, APICallException, InvalidTypeException
 
 
-class Connect(Cluster, Data_Management, Physical, Cloud):
+class Connect(Cluster, Data_Management, Physical, Cloud, Organization):
     """This class acts as the base class for the Rubrik SDK and serves as the main interaction point
     for its end users. It also contains various helper functions used throughout the SDK.
 
@@ -183,7 +184,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud):
             raise InvalidParameterException(
                 "You must provide either a username and password or API Token for authentication.")
 
-        self.sdk_version = "2.0.9"
+        self.sdk_version = "2.0.10"
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
@@ -398,7 +399,7 @@ class Bootstrap(Api):
             raise RubrikException(
                 "Error: Could not resolve address for cluster, or invalid IP/address supplied")
 
-        self.sdk_version = "2.0.9"
+        self.sdk_version = "2.0.10"
         self.python_version = sys.version.split("(")[0].strip()
         # function_name will be populated in each function
         self.function_name = ""
