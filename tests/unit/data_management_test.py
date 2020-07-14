@@ -1750,7 +1750,7 @@ def test_object_id_invalid_object_type(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The object_id() object_type argument must be one of the following: ['vmware', 'sla', 'vmware_host', 'physical_host', 'fileset_template', 'managed_volume', 'mssql_db', 'mssql_instance', 'vcenter', 'ahv', 'aws_native', 'oracle_db', 'oracle_host', 'volume_group', 'archival_location', 'share', 'organization']."
+    assert error_message == "The object_id() object_type argument must be one of the following: ['vmware', 'sla', 'vmware_host', 'physical_host', 'fileset_template', 'managed_volume', 'mssql_db', 'mssql_instance', 'mssql_availability_group', 'vcenter', 'ahv', 'aws_native', 'oracle_db', 'oracle_host', 'volume_group', 'archival_location', 'share', 'organization', 'organization_role_id', 'organization_admin_role']."
 
 
 def test_object_id_invalid_fileset_template(rubrik):
@@ -2416,6 +2416,66 @@ def test_object_id_ahv(rubrik, mocker):
 
 def test_object_id_mssql_db(rubrik, mocker):
 
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "demo-sql-host",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 1
+        }
+
+    def mock_get_v1_mssql_instance():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "logBackupFrequencyInSeconds": 0,
+                    "logRetentionHours": 0,
+                    "copyOnly": True,
+                    "id": "string",
+                    "internalTimestamp": 0,
+                    "name": "demo-sql-instance",
+                    "primaryClusterId": "string",
+                    "rootProperties": {
+                        "rootType": "Host",
+                        "rootId": "string",
+                        "rootName": "string"
+                    },
+                    "clusterInstanceAddress": "string",
+                    "protectionDate": "2020-07-12",
+                    "version": "string",
+                    "configuredSlaDomainId": "string",
+                    "configuredSlaDomainType": "string",
+                    "configuredSlaDomainName": "string",
+                    "isRetentionLocked": True,
+                    "unprotectableReasons": [
+                        "string"
+                    ]
+                }
+            ],
+            "total": 1
+        }
+
     def mock_get_v1_mssql_db():
         return {
             "hasMore": True,
@@ -2482,14 +2542,50 @@ def test_object_id_mssql_db(rubrik, mocker):
             "total": 1
         }
 
+    mock_cluster_version = mocker.patch(
+        'rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+
+    mock_cluster_version.return_value = "5.0"
+
     mock_get = mocker.patch('rubrik_cdm.Connect.get',
                             autospec=True, spec_set=True)
-    mock_get.return_value = mock_get_v1_mssql_db()
 
-    assert rubrik.object_id("string", "mssql_db") == "string_id"
+    mock_get.side_effect = [
+        mock_get_v1_host(), mock_get_v1_mssql_instance(), mock_get_v1_mssql_db()]
+
+    assert rubrik.object_id("string", "mssql_db", mssql_host="demo-sql-host",
+                            mssql_instance="demo-sql-instance") == "string_id"
 
 
 def test_object_id_mssql_instance(rubrik, mocker):
+
+    def mock_get_v1_host():
+        return {
+            "hasMore": True,
+            "data": [
+                {
+                    "id": "string_id",
+                    "name": "demo-sql-host",
+                    "primaryClusterId": "string",
+                    "operatingSystem": "string",
+                    "operatingSystemType": "string",
+                    "status": "string",
+                    "nasBaseConfig": {
+                        "vendorType": "string",
+                        "apiUsername": "string",
+                        "apiCertificate": "string",
+                        "apiHostname": "string",
+                        "apiEndpoint": "string",
+                        "zoneName": "string"
+                    },
+                    "mssqlCbtEnabled": "Enabled",
+                    "mssqlCbtEffectiveStatus": "On",
+                    "organizationId": "string",
+                    "organizationName": "string"
+                }
+            ],
+            "total": 1
+        }
 
     def mock_get_v1_mssql_instance():
         return {
@@ -2524,11 +2620,18 @@ def test_object_id_mssql_instance(rubrik, mocker):
             "total": 1
         }
 
+    mock_cluster_version = mocker.patch(
+        'rubrik_cdm.Connect.cluster_version', autospec=True, spec_set=True)
+
+    mock_cluster_version.return_value = "5.0"
     mock_get = mocker.patch('rubrik_cdm.Connect.get',
                             autospec=True, spec_set=True)
-    mock_get.return_value = mock_get_v1_mssql_instance()
 
-    assert rubrik.object_id("string", "mssql_instance") == "string_id"
+    mock_get.side_effect = [
+        mock_get_v1_host(), mock_get_v1_mssql_instance()]
+
+    assert rubrik.object_id("string", "mssql_instance",
+                            mssql_host="demo-sql-host") == "string_id"
 
 
 def test_object_id_aws_native(rubrik, mocker):
@@ -9759,5 +9862,5 @@ def test_register_vm_already_registered(rubrik, mocker):
                              autospec=True, spec_set=True)
     mock_post.return_value = mock_post_v1_vm_register_agent()
 
-    #assert rubrik.register_vm(name='object_name') == '{''status_code'': ''204''}'
+    # assert rubrik.register_vm(name='object_name') == '{''status_code'': ''204''}'
     assert rubrik.register_vm(name='object_name') == {"status_code": "204"}
