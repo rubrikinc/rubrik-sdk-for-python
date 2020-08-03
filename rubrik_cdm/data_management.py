@@ -1663,7 +1663,7 @@ class Data_Management(Api):
                     "retention": yearly_retention
                 })
             config["frequencies"] = frequencies
-            if starttime_hour is not None:
+          #  if starttime_hour is not None:
                 
 
         if archive_name is not None:
