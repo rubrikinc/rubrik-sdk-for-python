@@ -14,6 +14,9 @@ yearly_retention = 5
 archive_name = "AWS-S3-Bucket"
 retention_on_brik_in_days = 15
 instant_archive = True
+starttime_hour = 0
+starttime_min = 19
+duration_hours = 12
 
 
 create_sla = rubrik.create_sla(
@@ -28,7 +31,10 @@ create_sla = rubrik.create_sla(
     yearly_retention,
     archive_name,
     retention_on_brik_in_days,
-    instant_archive
+    instant_archive,
+    starttime_hour,
+    starttime_min,
+    duration_hours
 )
 
 print(create_sla)

@@ -1516,11 +1516,24 @@ class Data_Management(Api):
             archive_name {str} -- The optional archive location you wish to configure on the SLA Domain. When populated, you must also provide a `retention_on_brik_in_days`. (default: {None})
             retention_on_brik_in_days {int} -- The number of days you wish to keep the backups on the Rubrik cluster. When populated, you must also provide a `archive_name`. (default: {None})
             instant_archive= {bool} -- Flag that determines whether or not to enable instant archive. Set to true to enable. (default: {False})
+            starttime_hour {int} -- Start time hour used to specify the starting hour of allowed backup window. (default: {None})
+            starttime_min {int} -- Start time min used to specify the starting minute of allowed backup window. When populated, you must also provide a `starttime_min`. (default: {None})
+            duration_hours {int} -- Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`. (default: {None})
         Returns:
             str -- No change required. The 'name' SLA Domain is already configured with the provided configuration.
             dict -- The full API response for `POST /v1/sla_domain`.
             dict -- The full API response for `POST /v2/sla_domain`.
         """
+
+    #     "allowedBackupWindows": [
+    #   {
+    #   "startTimeAttributes": {
+    #       "minutes": 0,
+    #       "hour": 21
+    #   },
+    #       "durationInHours": 8
+    #   }
+    #   ],
 
         self.function_name = inspect.currentframe().f_code.co_name
 
@@ -1534,7 +1547,10 @@ class Data_Management(Api):
             monthly_frequency,
             monthly_retention,
             yearly_frequency,
-            yearly_retention]
+            yearly_retention,
+            starttime_hour,
+            starttime_min,
+            duration_hours]
 
         # Validate all values besides name are ints
         for param in all_params:
@@ -1571,6 +1587,10 @@ class Data_Management(Api):
         if archive_name is not None and retention_on_brik_in_days is None or archive_name is None and retention_on_brik_in_days is not None:
             raise InvalidParameterException(
                 "The 'archive_name' and 'retention_on_brik_in_days' parameters must be populated together.")
+        
+        if starttime_hour is not None and starttime_min is None or duration_hours is None:
+            raise InvalidParameterException(
+                "The 'starttime_hour', 'starttime_min' and 'duration_hours' must be populated together.")
 
         try:
             # object_id() will set sla_already_present to something besides False if the SLA is already on the cluter
@@ -1607,6 +1627,13 @@ class Data_Management(Api):
                 config["frequencies"]["yearly"]["dayOfYear"] = "LastDay"
                 config["frequencies"]["yearly"]["frequency"] = yearly_frequency
                 config["frequencies"]["yearly"]["retention"] = yearly_retention
+            config["allowedBackupWindows"] = []
+            if starttime_hour is not None:
+                backupWindow["startTimeAttributes"] = {}
+                backupWindow["startTimeAttributes"]["minutes"] = starttime_min
+                backupWindow["startTimeAttributes"]["hour"] = starttime_hour
+                backupWindow["durationInHours"] = duration_hours
+                config["allowedBackupWindows"].append(backupWindow)
 
         else:
             # Create the config for v1 endpoint
@@ -1636,6 +1663,8 @@ class Data_Management(Api):
                     "retention": yearly_retention
                 })
             config["frequencies"] = frequencies
+            if starttime_hour is not None:
+                
 
         if archive_name is not None:
             archival_location_id = self.object_id(

@@ -3706,7 +3706,6 @@ def test_assign_sla_idempotence_clear_sla(rubrik, mocker):
     assert rubrik.assign_sla("object_name", "clear", "vmware") == \
         "No change required. The vSphere VM 'object_name' is already assigned to the 'clear' SLA Domain."
 
-
 def test_assign_sla(rubrik, mocker):
 
     def mock_get_v1_sla_domain():
@@ -4071,6 +4070,11 @@ def test_assign_sla(rubrik, mocker):
     assert rubrik.assign_sla(
         "object_name", "Gold", "vmware") == mock_post_internal_sla_domain_id_assign()
 
+def test_create_sla(rubrik, mocker):
+    def mock_get_v2_sla_domain():
+        return {
+            
+        }
 
 def test_vsphere_live_mount_invalid_remove_network_devices(rubrik):
     with pytest.raises(InvalidTypeException) as error:
