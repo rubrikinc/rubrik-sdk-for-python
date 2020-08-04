@@ -4072,9 +4072,115 @@ def test_assign_sla(rubrik, mocker):
 
 def test_create_sla(rubrik, mocker):
     def mock_get_v2_sla_domain():
+        return []
+
+    def mock_post_create_sla():
         return {
-            
+            "id": "string",
+            "primaryClusterId": "string",
+            "name": "PythonSDK",
+            "frequencies": {
+                "hourly": {
+                    "frequency": 1,
+                    "retention": 24
+                },
+                "daily": {
+                    "frequency": 1,
+                    "retention": 30
+                },
+                "monthly": {
+                    "dayOfMonth": "LastDay",
+                    "retention": 12,
+                    "frequency": 1
+                },
+                "yearly": {
+                    "yearStartMonth": "January",
+                    "dayOfYear": "LastDay",
+                    "retention": 5,
+                    "frequency": 1
+                }
+            },
+            "allowedBackupWindows": [
+                {
+                    "startTimeAttributes": {
+                        "minutes": 19,
+                        "hour": 0
+                    },
+                    "durationInHours": 12
+                }
+            ],
+            "firstFullAllowedBackupWindows": [],
+            "maxLocalRetentionLimit": 157680000,
+            "archivalSpecs": [
+                {
+                    "locationId": "string",
+                    "locationName": "AWS-S3-Bucket",
+                    "archivalThreshold": 1
+                }
+            ],
+            "replicationSpecs": [],
+            "numDbs": 0,
+            "numOracleDbs": 0,
+            "numFilesets": 0,
+            "numHypervVms": 0,
+            "numNutanixVms": 0,
+            "numManagedVolumes": 0,
+            "numStorageArrayVolumeGroups": 0,
+            "numWindowsVolumeGroups": 0,
+            "numLinuxHosts": 0,
+            "numShares": 0,
+            "numWindowsHosts": 0,
+            "numVms": 0,
+            "numEc2Instances": 0,
+            "numVcdVapps": 0,
+            "numProtectedObjects": 0,
+            "isDefault": false,
+            "uiColor": "string",
+            "showAdvancedUi": false,
+            "advancedUiConfig": []
         }
+
+    mock_get = mocker.patch('rubrik_cdm.Connect.get',
+                            autospec=True, spec_set=True)
+    mock_get.return_value = mock_get_internal_user()
+
+    mock_post = mocker.patch('rubrik_cdm.Connect.post',
+                             autospec=True, spec_set=True)
+    mock_post.return_value = mock_post_internal_user()
+
+    sla_name = "PythonSDK"
+    hourly_frequency = 1
+    hourly_retention = 24
+    daily_frequency = 1
+    daily_retention = 30
+    monthly_frequency = 1
+    monthly_retention = 12
+    yearly_frequency = 1
+    yearly_retention = 5
+    archive_name = "AWS-S3-Bucket"
+    retention_on_brik_in_days = 15
+    instant_archive = True
+    starttime_hour = 0
+    starttime_min = 19
+    duration_hours = 12
+
+    assert rubrik.create_sla(
+        sla_name,
+        hourly_frequency,
+        hourly_retention,
+        daily_frequency,
+        daily_retention,
+        monthly_frequency,
+        monthly_retention,
+        yearly_frequency,
+        yearly_retention,
+        archive_name,
+        retention_on_brik_in_days,
+        instant_archive,
+        starttime_hour,
+        starttime_min,
+        duration_hours
+    ) == mock_post_create_sla()
 
 def test_vsphere_live_mount_invalid_remove_network_devices(rubrik):
     with pytest.raises(InvalidTypeException) as error:
