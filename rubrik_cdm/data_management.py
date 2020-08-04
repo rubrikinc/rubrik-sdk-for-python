@@ -1537,10 +1537,7 @@ class Data_Management(Api):
             monthly_frequency,
             monthly_retention,
             yearly_frequency,
-            yearly_retention,
-            starttime_hour,
-            starttime_min,
-            duration_hours]
+            yearly_retention]
 
         # Validate all values besides name are ints
         for param in all_params:
