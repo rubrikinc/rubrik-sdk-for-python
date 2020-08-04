@@ -4142,11 +4142,11 @@ def test_create_sla(rubrik, mocker):
 
     mock_get = mocker.patch('rubrik_cdm.Connect.get',
                             autospec=True, spec_set=True)
-    mock_get.return_value = mock_get_internal_user()
+    mock_get.return_value = mock_get_v2_sla_domain()
 
     mock_post = mocker.patch('rubrik_cdm.Connect.post',
                              autospec=True, spec_set=True)
-    mock_post.return_value = mock_post_internal_user()
+    mock_post.return_value = mock_post_create_sla()
 
     sla_name = "PythonSDK"
     hourly_frequency = 1
