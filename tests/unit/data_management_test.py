@@ -4165,22 +4165,7 @@ def test_create_sla(rubrik, mocker):
     duration_hours = 12
 
     assert rubrik.create_sla(
-        sla_name,
-        hourly_frequency,
-        hourly_retention,
-        daily_frequency,
-        daily_retention,
-        monthly_frequency,
-        monthly_retention,
-        yearly_frequency,
-        yearly_retention,
-        archive_name,
-        retention_on_brik_in_days,
-        instant_archive,
-        starttime_hour,
-        starttime_min,
-        duration_hours
-    ) == mock_post_create_sla()
+        sla_name, hourly_frequency, hourly_retention, daily_frequency, daily_retention, monthly_frequency, monthly_retention, yearly_frequency, yearly_retention, archive_name, retention_on_brik_in_days, instant_archive, starttime_hour, starttime_min, duration_hours) == mock_post_create_sla()
 
 def test_vsphere_live_mount_invalid_remove_network_devices(rubrik):
     with pytest.raises(InvalidTypeException) as error:
