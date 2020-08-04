@@ -1525,16 +1525,6 @@ class Data_Management(Api):
             dict -- The full API response for `POST /v2/sla_domain`.
         """
 
-    #     "allowedBackupWindows": [
-    #   {
-    #   "startTimeAttributes": {
-    #       "minutes": 0,
-    #       "hour": 21
-    #   },
-    #       "durationInHours": 8
-    #   }
-    #   ],
-
         self.function_name = inspect.currentframe().f_code.co_name
 
         v2_sla = self.minimum_installed_cdm_version("5.0", timeout=timeout)
