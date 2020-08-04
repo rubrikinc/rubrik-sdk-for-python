@@ -1628,8 +1628,8 @@ class Data_Management(Api):
                 config["frequencies"]["yearly"]["frequency"] = yearly_frequency
                 config["frequencies"]["yearly"]["retention"] = yearly_retention
             config["allowedBackupWindows"] = []
+            backupWindow = {}
             if starttime_hour is not None:
-                backupWindow = {}
                 backupWindow["startTimeAttributes"] = {}
                 backupWindow["startTimeAttributes"]["minutes"] = starttime_min
                 backupWindow["startTimeAttributes"]["hour"] = starttime_hour
