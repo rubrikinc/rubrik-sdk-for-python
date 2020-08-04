@@ -4134,9 +4134,9 @@ def test_create_sla(rubrik, mocker):
             "numEc2Instances": 0,
             "numVcdVapps": 0,
             "numProtectedObjects": 0,
-            "isDefault": false,
+            "isDefault": False,
             "uiColor": "string",
-            "showAdvancedUi": false,
+            "showAdvancedUi": False,
             "advancedUiConfig": []
         }
 
