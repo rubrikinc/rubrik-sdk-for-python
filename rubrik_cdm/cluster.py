@@ -175,7 +175,6 @@ class Cluster(Api):
 
         self.log(
             'cluster_version: Getting the software version of the Rubrik cluster.')
-        print(self.get('v1', '/cluster/me/version', timeout=timeout))
         return self.get('v1', '/cluster/me/version', timeout=timeout)['version']
 
     def minimum_installed_cdm_version(self, cluster_version, timeout=15):
