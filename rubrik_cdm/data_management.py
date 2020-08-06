@@ -1713,6 +1713,9 @@ class Data_Management(Api):
             if archive_name is not None:
                 keys_to_delete.remove("archivalSpecs")
                 current_sla_details["localRetentionLimit"] = archival_threshold
+            
+            if starttime_hour is not None:
+                keys_to_delete.remove("allowedBackupWindows")
 
             for key in keys_to_delete:
 
