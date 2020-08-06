@@ -27,9 +27,9 @@ def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_f
 | archive_name              | str  | The optional archive location you wish to configure on the SLA Domain. When populated, you must also provide a `retention_on_brik_in_days`. |         | None    |
 | retention_on_brik_in_days | int  | The number of days you wish to keep the backups on the Rubrik cluster. When populated, you must also provide a `archive_name`.              |         | None    |
 | instant_archive           | int  | Flag that determines whether or not to enable instant archive. Set to true to enable.                                                       |         | False   |
-| starttime_hour            | int  | Used to specify the starting hour of allowed backup window. When populated, you must also provide `starttime_min` and `duration_hours`.     |         | None    |
-| starttime_min             | int  | Used to specify the starting minute of allowed backup window. When populated, you must also provide a `starttime_hour` and `duration_hours`.|         | None    |
-| duration_hours            | int  | Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`.                            |         | None    |
+| starttime_hour            | int  | (v2 only) Starting hour of allowed backup window. When populated, you must also provide `starttime_min` and `duration_hours`.     |         | None    |
+| starttime_min             | int  | (v2 only) Starting minute of allowed backup window. When populated, you must also provide a `starttime_hour` and `duration_hours`.|         | None    |
+| duration_hours            | int  | (v2 only) Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`.                            |         | None    |
 | timeout                   | str  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.                                |         | 30      |
 
 ## Returns
