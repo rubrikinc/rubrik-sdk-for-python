@@ -539,6 +539,8 @@ class Data_Management(Api):
                     name_value = "hostname"
                 elif object_type == 'share':
                     name_value = "exportPoint"
+                elif object_type == "replication_location":
+                    name_value = "targetClusterName"
                 else:
                     name_value = 'name'
 
@@ -560,6 +562,8 @@ class Data_Management(Api):
                             object_ids.append(item['id'])
                     elif object_type == "organization_role_id" and item[name_value].lower():
                         object_ids.append(item['roleId'])
+                    elif object_type == "replication_location" and item[name_value].lower() == object_name.lower():
+                        object_ids.append(item['targetClusterUuid'])
 
                     elif item[name_value].lower() == object_name.lower():
                         object_ids.append(item['id'])
