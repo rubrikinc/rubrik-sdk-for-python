@@ -345,7 +345,8 @@ class Data_Management(Api):
             'share',
             'organization',
             'organization_role_id',
-            'organization_admin_role']
+            'organization_admin_role',
+            'replication_location']
 
         if object_type not in valid_object_type:
             raise InvalidParameterException("The object_id() object_type argument must be one of the following: {}.".format(
@@ -456,8 +457,11 @@ class Data_Management(Api):
             "mssql_availability_group": {
                 "api_version": "v1",
                 "api_endpoint": "/mssql/hierarchy/root/children?has_instances=false&is_clustered=false&is_live_mount=false&limit=51&object_type=MssqlAvailabilityGroup&offset=0&primary_cluster_id=local&snappable_status=Protectable&name={}".format(object_name)
+            },
+            "replication_location": {
+                "api_version": "internal",
+                "api_endpoint": "/replication/target?name={}".format(object_name)
             }
-
         }
 
         if object_type == 'physical_host':
@@ -1500,7 +1504,7 @@ class Data_Management(Api):
 
         return vm_name_id
 
-    def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, starttime_hour=None, starttime_min=None, duration_hours=None, timeout=15):  # pylint: ignore
+    def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, starttime_hour=None, starttime_min=None, duration_hours=None, replication_target=None, replication_retention_in_days=None, timeout=15):  # pylint: ignore
         """Create a new SLA Domain.
         Arguments:
             name {str} -- The name of the new SLA Domain.
@@ -1519,11 +1523,58 @@ class Data_Management(Api):
             starttime_hour {int} -- (CDM 5.0+) Starting hour of allowed backup window. (default: {None})
             starttime_min {int} -- (CDM 5.0+) Starting minute of allowed backup window. When populated, you must also provide a `starttime_min`. (default: {None})
             duration_hours {int} -- (CDM 5.0+) Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`. (default: {None})
+            replication_target {str} -- (CDM 5.0+) Cluster name of the replication target. When populated, you must also provide `replication_retention_in_days`. (default: {None})
+            replication_retention_in_days {int} -- (CDM 5.0+) Number of days to retain backup on target cluster. When populated, you must also provide `replication_target`. (default: {None})
+
         Returns:
             str -- No change required. The 'name' SLA Domain is already configured with the provided configuration.
             dict -- The full API response for `POST /v1/sla_domain`.
             dict -- The full API response for `POST /v2/sla_domain`.
         """
+
+# {
+#     "name": "Test SLA",
+#     "frequencies": {
+#         "hourly": {
+#             "frequency": 1,
+#             "retention": 720
+#         },
+#         "daily": {
+#             "frequency": 2,
+#             "retention": 40
+#         },
+#         "monthly": {
+#             "frequency": 3,
+#             "retention": 5,
+#             "dayOfMonth": "LastDay"
+#         },
+#         "yearly": {
+#             "frequency": 1,
+#             "retention": 7,
+#             "yearStartMonth": "January",
+#             "dayOfYear": "LastDay"
+#         }
+#     },
+#     "allowedBackupWindows": [
+#         {
+#             "startTimeAttributes": {
+#                 "minutes": 30,
+#                 "hour": 1
+#             },
+#             "durationInHours": 11
+#         }
+#     ],
+#     "firstFullAllowedBackupWindows": [],
+#     "localRetentionLimit": 1209600,
+#     "archivalSpecs": [],
+#     "replicationSpecs": [
+#         {
+#             "locationId": "980ad593-a145-4b97-9b79-50a4387f2860",
+#             "retentionLimit": 220752000
+#         }
+#     ],
+#     "showAdvancedUi": false
+# }
 
         self.function_name = inspect.currentframe().f_code.co_name
 
@@ -1671,6 +1722,17 @@ class Data_Management(Api):
                 "archivalThreshold": archival_threshold
             }]
 
+        if replication_target is not None:
+            replication_target_id = self.object_id(
+                replication_target, "replication_location", timeout=timeout)
+            
+            # convert remote retentin in days to seconds
+            replication_retention_in_seconds = replication_retention_in_days * 86400
+            config["replicationSpecs"] = [{
+                "locationId": replication_target_id,
+                "retentionLimit": replication_retention_in_seconds
+            }]
+
         if sla_id is not False:
             self.log(
                 "create_sla: Getting the configuration details for the SLA Domain {} already on the Rubrik cluster.".format(name))
@@ -1715,6 +1777,9 @@ class Data_Management(Api):
             
             if starttime_hour is not None:
                 keys_to_delete.remove("allowedBackupWindows")
+
+            if replication_target is not None:
+                keys_to_delete.remove("replicationSpecs")
 
             for key in keys_to_delete:
 
