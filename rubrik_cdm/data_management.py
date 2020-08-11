@@ -1516,9 +1516,9 @@ class Data_Management(Api):
             archive_name {str} -- The optional archive location you wish to configure on the SLA Domain. When populated, you must also provide a `retention_on_brik_in_days`. (default: {None})
             retention_on_brik_in_days {int} -- The number of days you wish to keep the backups on the Rubrik cluster. When populated, you must also provide a `archive_name`. (default: {None})
             instant_archive= {bool} -- Flag that determines whether or not to enable instant archive. Set to true to enable. (default: {False})
-            starttime_hour {int} -- (v2 only) Starting hour of allowed backup window. (default: {None})
-            starttime_min {int} -- (v2 only) Starting minute of allowed backup window. When populated, you must also provide a `starttime_min`. (default: {None})
-            duration_hours {int} -- (v2 only) Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`. (default: {None})
+            starttime_hour {int} -- (CDM 5.0+) Starting hour of allowed backup window. (default: {None})
+            starttime_min {int} -- (CDM 5.0+) Starting minute of allowed backup window. When populated, you must also provide a `starttime_min`. (default: {None})
+            duration_hours {int} -- (CDM 5.0+) Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`. (default: {None})
         Returns:
             str -- No change required. The 'name' SLA Domain is already configured with the provided configuration.
             dict -- The full API response for `POST /v1/sla_domain`.
@@ -1614,9 +1614,10 @@ class Data_Management(Api):
                 config["frequencies"]["yearly"]["dayOfYear"] = "LastDay"
                 config["frequencies"]["yearly"]["frequency"] = yearly_frequency
                 config["frequencies"]["yearly"]["retention"] = yearly_retention
-            config["allowedBackupWindows"] = []
-            backupWindow = {}
+
             if starttime_hour is not None:
+                config["allowedBackupWindows"] = []
+                backupWindow = {}
                 backupWindow["startTimeAttributes"] = {}
                 backupWindow["startTimeAttributes"]["minutes"] = starttime_min
                 backupWindow["startTimeAttributes"]["hour"] = starttime_hour
@@ -1651,8 +1652,6 @@ class Data_Management(Api):
                     "retention": yearly_retention
                 })
             config["frequencies"] = frequencies
-          #  if starttime_hour is not None:
-                
 
         if archive_name is not None:
             archival_location_id = self.object_id(
