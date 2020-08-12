@@ -14,23 +14,25 @@ def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_f
 
 ## Keyword Arguments
 
-| Name                      | Type | Description                                                                                                                                 | Choices | Default |
-|---------------------------|------|---------------------------------------------------------------------------------------------------------------------------------------------|---------|---------|
-| hourly_frequency          | int  | Hourly frequency to take backups.                                                                                                           |         | None    |
-| hourly_retention          | int  | Number of hours to retain the hourly backups.                                                                                               |         | None    |
-| daily_frequency           | int  | Daily frequency to take backups.                                                                                                            |         | None    |
-| daily_retention           | int  | Number of hours to retain the daily backups.                                                                                                |         | None    |
-| monthly_frequency         | int  | Monthly frequency to take backups.                                                                                                          |         | None    |
-| monthly_retention         | int  | Number of hours to retain the monthly backups.                                                                                              |         | None    |
-| yearly_frequency          | int  | Yearly frequency to take backups.                                                                                                           |         | None    |
-| yearly_retention          | int  | Number of hours to retain the yearly backups.                                                                                               |         | None    |
-| archive_name              | str  | The optional archive location you wish to configure on the SLA Domain. When populated, you must also provide a `retention_on_brik_in_days`. |         | None    |
-| retention_on_brik_in_days | int  | The number of days you wish to keep the backups on the Rubrik cluster. When populated, you must also provide a `archive_name`.              |         | None    |
-| instant_archive           | int  | Flag that determines whether or not to enable instant archive. Set to true to enable.                                                       |         | False   |
-| starttime_hour            | int  | (CDM 5.0+) Starting hour of allowed backup window. When populated, you must also provide `starttime_min` and `duration_hours`.     |         | None    |
-| starttime_min             | int  | (CDM 5.0+) Starting minute of allowed backup window. When populated, you must also provide a `starttime_hour` and `duration_hours`.|         | None    |
-| duration_hours            | int  | (CDM 5.0+) Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`.                            |         | None    |
-| timeout                   | str  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.                                |         | 30      |
+| Name                          | Type | Description                                                                                                                                 | Choices | Default |
+|-------------------------------|------|---------------------------------------------------------------------------------------------------------------------------------------------|---------|---------|
+| hourly_frequency              | int  | Hourly frequency to take backups.                                                                                                           |         | None    |
+| hourly_retention              | int  | Number of hours to retain the hourly backups.                                                                                               |         | None    |
+| daily_frequency               | int  | Daily frequency to take backups.                                                                                                            |         | None    |
+| daily_retention               | int  | Number of hours to retain the daily backups.                                                                                                |         | None    |
+| monthly_frequency             | int  | Monthly frequency to take backups.                                                                                                          |         | None    |
+| monthly_retention             | int  | Number of hours to retain the monthly backups.                                                                                              |         | None    |
+| yearly_frequency              | int  | Yearly frequency to take backups.                                                                                                           |         | None    |
+| yearly_retention              | int  | Number of hours to retain the yearly backups.                                                                                               |         | None    |
+| archive_name                  | str  | The optional archive location you wish to configure on the SLA Domain. When populated, you must also provide a `retention_on_brik_in_days`. |         | None    |
+| retention_on_brik_in_days     | int  | The number of days you wish to keep the backups on the Rubrik cluster. When populated, you must also provide a `archive_name`.              |         | None    |
+| instant_archive               | int  | Flag that determines whether or not to enable instant archive. Set to true to enable.                                                       |         | False   |
+| starttime_hour                | int  | (CDM 5.0+) Starting hour of allowed backup window. When populated, you must also provide `starttime_min` and `duration_hours`.              |         | None    |
+| starttime_min                 | int  | (CDM 5.0+) Starting minute of allowed backup window. When populated, you must also provide a `starttime_hour` and `duration_hours`.         |         | None    |
+| duration_hours                | int  | (CDM 5.0+) Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`.                 |         | None    |
+| replication_target            | str  | (CDM 5.0+) Name of the replication target cluster. When populated, you must also provide `replication_retention_in_days`.           |         | None    |
+| replication_retention_in_days | int  | (CDM 5.0+) Number of days to retain backup on target cluster. When populated, you must also provide `replication_target`.                   |         | None    |
+| timeout                       | str  | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.                                |         | 30      |
 
 ## Returns
 
@@ -63,7 +65,8 @@ instant_archive = True
 starttime_hour = 0
 starttime_min = 19
 duration_hours = 12
-
+replication_target = "REPLCLUSTER"
+replication_retention_in_days =  30
 
 create_sla = rubrik.create_sla(
     sla_name,
@@ -80,8 +83,11 @@ create_sla = rubrik.create_sla(
     instant_archive,
     starttime_hour,
     starttime_min,
-    duration_hours
+    duration_hours,
+    replication_target,
+    replication_retention_in_days
 )
+
 print(create_sla)
 ```
 

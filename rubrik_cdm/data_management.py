@@ -1527,7 +1527,7 @@ class Data_Management(Api):
             starttime_hour {int} -- (CDM 5.0+) Starting hour of allowed backup window. (default: {None})
             starttime_min {int} -- (CDM 5.0+) Starting minute of allowed backup window. When populated, you must also provide a `starttime_min`. (default: {None})
             duration_hours {int} -- (CDM 5.0+) Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`. (default: {None})
-            replication_target {str} -- (CDM 5.0+) Cluster name of the replication target. When populated, you must also provide `replication_retention_in_days`. (default: {None})
+            replication_target {str} -- (CDM 5.0+) Name of the replication target cluster. When populated, you must also provide `replication_retention_in_days`. (default: {None})
             replication_retention_in_days {int} -- (CDM 5.0+) Number of days to retain backup on target cluster. When populated, you must also provide `replication_target`. (default: {None})
 
         Returns:
@@ -1535,50 +1535,6 @@ class Data_Management(Api):
             dict -- The full API response for `POST /v1/sla_domain`.
             dict -- The full API response for `POST /v2/sla_domain`.
         """
-
-# {
-#     "name": "Test SLA",
-#     "frequencies": {
-#         "hourly": {
-#             "frequency": 1,
-#             "retention": 720
-#         },
-#         "daily": {
-#             "frequency": 2,
-#             "retention": 40
-#         },
-#         "monthly": {
-#             "frequency": 3,
-#             "retention": 5,
-#             "dayOfMonth": "LastDay"
-#         },
-#         "yearly": {
-#             "frequency": 1,
-#             "retention": 7,
-#             "yearStartMonth": "January",
-#             "dayOfYear": "LastDay"
-#         }
-#     },
-#     "allowedBackupWindows": [
-#         {
-#             "startTimeAttributes": {
-#                 "minutes": 30,
-#                 "hour": 1
-#             },
-#             "durationInHours": 11
-#         }
-#     ],
-#     "firstFullAllowedBackupWindows": [],
-#     "localRetentionLimit": 1209600,
-#     "archivalSpecs": [],
-#     "replicationSpecs": [
-#         {
-#             "locationId": "980ad593-a145-4b97-9b79-50a4387f2860",
-#             "retentionLimit": 220752000
-#         }
-#     ],
-#     "showAdvancedUi": false
-# }
 
         self.function_name = inspect.currentframe().f_code.co_name
 
@@ -1629,10 +1585,14 @@ class Data_Management(Api):
         if archive_name is not None and retention_on_brik_in_days is None or archive_name is None and retention_on_brik_in_days is not None:
             raise InvalidParameterException(
                 "The 'archive_name' and 'retention_on_brik_in_days' parameters must be populated together.")
-        
+
         if starttime_hour is not None and starttime_min is None or duration_hours is None:
             raise InvalidParameterException(
                 "The 'starttime_hour', 'starttime_min' and 'duration_hours' must be populated together.")
+
+        if replication_target is not None and replication_retention_in_days is None:
+            raise InvalidParameterException(
+                "The 'replication_target' and 'replication_retention_in_days' parameters must be populated together.")
 
         try:
             # object_id() will set sla_already_present to something besides False if the SLA is already on the cluter
@@ -1730,7 +1690,7 @@ class Data_Management(Api):
             replication_target_id = self.object_id(
                 replication_target, "replication_location", timeout=timeout)
             
-            # convert remote retentin in days to seconds
+            # convert remote retention in days to seconds
             replication_retention_in_seconds = replication_retention_in_days * 86400
             config["replicationSpecs"] = [{
                 "locationId": replication_target_id,
