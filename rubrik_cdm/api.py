@@ -178,7 +178,7 @@ class Api():
         else:
             try:
                 # GQL error messages may not be flag as exceptions so we need to
-                # manually check to determine if the error has occured to
+                # manually check to determine if the error has occurred to
                 # raise an error on the provided message
                 if call_type == "QUERY":
                     try:
@@ -452,7 +452,7 @@ class Api():
                     job_status = api_call['status']
                     time.sleep(10)
                     continue
-                elif job_status in cancelling_status:
+                elif job_status in canceling_status:
                     self.log('Job is being Cancelled {}%\n'.format(api_call['progress']))
                     job_status = api_call['status']
                     time.sleep(10)
