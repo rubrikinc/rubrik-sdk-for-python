@@ -24,11 +24,6 @@ class PolarisException(Exception):
     pass
 
 
-class APICallException(PolarisException):
-    """Exception related to the underlying API call being made to Polaris."""
-    pass
-
-
 class InvalidParameterException(PolarisException):
     """Exception related to the parameters provided in the function. This can be related an issue with the value itself
     or the value provided not being found on your Polaris account."""

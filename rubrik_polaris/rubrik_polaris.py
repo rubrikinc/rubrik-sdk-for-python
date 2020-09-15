@@ -21,7 +21,7 @@
 import logging
 import requests
 
-from .exceptions import InvalidParameterException, PolarisException, APICallException
+from .exceptions import InvalidParameterException
 
 
 class PolarisClient:
