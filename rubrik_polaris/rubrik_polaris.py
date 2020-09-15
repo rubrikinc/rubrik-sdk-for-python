@@ -28,6 +28,9 @@ from .exceptions import InvalidParameterException
 from os import listdir
 from os.path import isfile, join
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+
 
 class PolarisClient:
     
@@ -80,9 +83,12 @@ class PolarisClient:
         self.graphql_mutation = {}
         for f in [f for f in listdir(self.data_path) if isfile(join(self.data_path, f))]:
             if '.graphql' in f and 'query in f':
-                self.graphql_query[f.replace('.graphql', '').replace('query','')] = open("{}{}".format(self.data_path,f), 'r').read()
+                l = open("{}{}".format(self.data_path, f), 'r').readlines()
+                self.graphql_query[f.replace('.graphql', '').replace('query_','')] = " ".join([line.strip() for line in l])
             elif '.graphql' in f and 'mutation in f':
-                self.graphql_mutation[f.replace('.graphql', '').replace('mutation', '')] = open( "{}{}".format(self.data_path, f), 'r').read()
+                l = open("{}{}".format(self.data_path, f), 'r').readlines()
+                self.graphql_mutation[f.replace('.graphql', '').replace('mutation_','')] = " ".join([line.strip() for line in l])
+        pp.pprint(self.graphql_query)
 
 
 
@@ -117,6 +123,13 @@ class PolarisClient:
 
         return api_response
 
+    def get_sla_domains(self):
+        request = self.query(self.graphql_query['sla_domains'])
+        sla_domains = {}
+        pp.pprint(request)
+        for edge in request['data']['globalSlaConnection']['edges']:
+            sla_domains[edge['node']['name']] = edge['node']['id']
+        return sla_domains
 
     def schema(self):
         query = """

@@ -13,3 +13,5 @@ parser.add_argument('--insecure', help='Deactivate SSL Verification', action="st
 args = parser.parse_args()
 
 rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password, root_domain=args.root_domain, insecure=args.insecure)
+
+print(rubrik.get_sla_domains())
