@@ -82,13 +82,12 @@ class PolarisClient:
         self.graphql_query = {}
         self.graphql_mutation = {}
         for f in [f for f in listdir(self.data_path) if isfile(join(self.data_path, f))]:
-            if '.graphql' in f and 'query in f':
+            if '.graphql' in f and 'query' in f:
                 l = open("{}{}".format(self.data_path, f), 'r').readlines()
                 self.graphql_query[f.replace('.graphql', '').replace('query_','')] = " ".join([line.strip() for line in l])
-            elif '.graphql' in f and 'mutation in f':
+            elif '.graphql' in f and 'mutation' in f:
                 l = open("{}{}".format(self.data_path, f), 'r').readlines()
                 self.graphql_mutation[f.replace('.graphql', '').replace('mutation_','')] = " ".join([line.strip() for line in l])
-        pp.pprint(self.graphql_query)
 
 
 
@@ -124,6 +123,7 @@ class PolarisClient:
         return api_response
 
     def get_sla_domains(self):
+        pp.pprint(self.graphql_query['sla_domains'])
         request = self.query(self.graphql_query['sla_domains'])
         sla_domains = {}
         pp.pprint(request)
