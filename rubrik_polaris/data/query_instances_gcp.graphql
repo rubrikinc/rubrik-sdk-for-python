@@ -1,0 +1,58 @@
+query GCPInstancesListQuery($first: Int, $after: String, $sortBy: GcpNativeGCEInstanceSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: GcpNativeGceInstanceFilters) {
+  gceInstancesList: gcpNativeGceInstanceConnection(first: $first, after: $after, sortBy: $sortBy, sortOrder: $sortOrder, gceInstanceFilters: $filters) {
+    edges {
+      node {
+        id
+        nativeId
+        nativeName
+        vpcName
+        networkHostProjectNativeId
+        region
+        zone
+        isRelic
+        machineType
+        effectiveSlaDomain {
+          name
+          ... on ClusterSlaDomain {
+            fid
+            cluster {
+              id
+              name
+              __typename
+            }
+            __typename
+          }
+          ... on GlobalSla {
+            id
+            __typename
+          }
+          __typename
+        }
+        gcpNativeProject {
+          id
+          name
+          nativeId
+          status
+          __typename
+        }
+        slaAssignment
+        authorizedOperations
+        effectiveSlaSourceObject {
+          fid
+          name
+          objectType
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      __typename
+    }
+    __typename
+  }
+}

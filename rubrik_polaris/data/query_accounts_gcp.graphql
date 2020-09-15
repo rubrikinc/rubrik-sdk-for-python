@@ -1,0 +1,13 @@
+query GCPProjectsFilterListQuery($first: Int!, $sortBy: GcpNativeProjectSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: GcpNativeProjectFilters) {
+  projects: gcpNativeProjectConnection(first: $first, sortBy: $sortBy, sortOrder: $sortOrder, projectFilters: $filters) {
+    edges {
+      node {
+        id
+        name
+        nativeId
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }

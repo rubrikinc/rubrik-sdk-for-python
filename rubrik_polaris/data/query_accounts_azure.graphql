@@ -1,0 +1,19 @@
+query AzureSubscriptionFilterQuery($first: Int, $sortBy: AzureNativeSubscriptionSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: AzureNativeSubscriptionFilters) {
+  azureNativeSubscriptionConnection(first: $first, sortBy: $sortBy, sortOrder: $sortOrder, subscriptionFilters: $filters) {
+    edges {
+      node {
+        id
+        displayValue: name
+        __typename
+      }
+      __typename
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      __typename
+    }
+    __typename
+  }
+}

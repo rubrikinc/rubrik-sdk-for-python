@@ -1,0 +1,22 @@
+query SLAListQuery($after: String, $first: Int, $filter: [GlobalSlaFilterInput!], $sortBy: SLAQuerySortByFieldEnum, $sortOrder: SLAQuerySortByOrderEnum) {
+  globalSlaConnection(after: $after, first: $first, filter: $filter, sortBy: $sortBy, sortOrder: $sortOrder) {
+    edges {
+      node {
+        name
+        ... on ClusterSlaDomain {
+          id: fid
+        }
+        ... on GlobalSla {
+          id
+        }
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      __typename
+    }
+    __typename
+  }
+}

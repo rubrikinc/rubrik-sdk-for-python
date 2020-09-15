@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from glob import glob
 
 import setuptools
 
@@ -78,8 +79,12 @@ setuptools.setup(
         'python-dateutil',
         'pytz'
     ],
+    include_package_data=True,
+    data_files = [
+        ('rubrik_polaris/data', glob('rubrik_polaris/data/*'))
+    ],
     tests_require=[
         'pytest'
     ],
-    zip_safe=True,
+    zip_safe=False,
 )

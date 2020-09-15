@@ -1,0 +1,61 @@
+query AzureVMListQuery($first: Int, $after: String, $sortBy: AzureNativeVirtualMachineSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: AzureNativeVirtualMachineFilters) {
+  VMList: azureNativeVirtualMachineConnection(first: $first, after: $after, sortBy: $sortBy, sortOrder: $sortOrder, virtualMachineFilters: $filters) {
+    edges {
+      node {
+        id
+        name
+        resourceGroup {
+          id
+          name
+          subscription {
+            status
+            id
+            name
+            nativeId
+            __typename
+          }
+          __typename
+        }
+        region
+        vnetName
+        subnetName
+        sizeType
+        isRelic
+        effectiveSlaDomain {
+          name
+          ... on ClusterSlaDomain {
+            fid
+            cluster {
+              id
+              name
+              __typename
+            }
+            __typename
+          }
+          ... on GlobalSla {
+            id
+            __typename
+          }
+          __typename
+        }
+        slaAssignment
+        authorizedOperations
+        effectiveSlaSourceObject {
+          fid
+          name
+          objectType
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      __typename
+    }
+    __typename
+  }
+}

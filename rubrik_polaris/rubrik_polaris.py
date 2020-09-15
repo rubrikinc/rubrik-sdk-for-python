@@ -19,10 +19,14 @@
 #  DEALINGS IN THE SOFTWARE.
 
 import logging
+import os
+
 import requests
 import urllib3
 
 from .exceptions import InvalidParameterException
+from os import listdir
+from os.path import isfile, join
 
 
 class PolarisClient:
@@ -68,6 +72,13 @@ class PolarisClient:
             self.baseurl = "https://{}.{}/api/graphql".format(self.domain, self.kwargs['root_domain'])
         else:
             self.baseurl = "https://{}.my.rubrik.com/api/graphql".format(self.domain)
+
+        self.module_path = os.path.dirname(os.path.realpath(__file__))
+        self.data_path = "{}/data/".format(self.module_path)
+        self.graphql_query = {}
+        for f in [f for f in listdir(self.data_path) if isfile(join(self.data_path, f))]:
+            if '.graphql' in f and 'query in f':
+                self.graphql_query[f.replace('.graphql', '').replace('query','')] = open("{}{}".format(self.data_path,f), 'r')
 
 
 

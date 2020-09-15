@@ -1,0 +1,59 @@
+query EC2InstancesListQuery($first: Int, $after: String, $sortBy: AwsNativeEc2InstanceSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: AwsNativeEc2InstanceFilters) {
+  awsNativeEc2InstanceConnection(first: $first, after: $after, sortBy: $sortBy, sortOrder: $sortOrder, ec2InstanceFilters: $filters) {
+    edges {
+      node {
+        id
+        instanceId
+        instanceName
+        vpcName
+        region
+        vpcId
+        isRelic
+        instanceType
+        isExocomputeConfigured
+        isIndexingEnabled
+        isMarketplace
+        effectiveSlaDomain {
+          name
+          ... on ClusterSlaDomain {
+            fid
+            cluster {
+              id
+              name
+              __typename
+            }
+            __typename
+          }
+          ... on GlobalSla {
+            id
+            __typename
+          }
+          __typename
+        }
+        awsNativeAccount {
+          id
+          name
+          status
+          __typename
+        }
+        slaAssignment
+        authorizedOperations
+        effectiveSlaSourceObject {
+          fid
+          name
+          objectType
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      __typename
+    }
+    __typename
+  }
+}
