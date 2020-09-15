@@ -20,13 +20,15 @@
 
 import logging
 import requests
+import urllib3
 
 from .exceptions import InvalidParameterException
 
 
 class PolarisClient:
     
-    def __init__(self, domain, username, password, enable_logging=False, logging_level="debug"):
+    def __init__(self, domain, username, password, enable_logging=False, logging_level="debug", **kwargs):
+
         valid_logging_levels = {
             "debug": logging.DEBUG,
             "critical": logging.CRITICAL,
@@ -48,6 +50,10 @@ class PolarisClient:
 
         self._log("Polaris Domain: {}".format(self.domain))
 
+        self.kwargs = kwargs
+        if 'insecure' in self.kwargs and self.kwargs['insecure']:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
         self.username = username
         self.password = password
         self.access_token = self._get_access_token()
@@ -58,7 +64,10 @@ class PolarisClient:
             'Authorization': 'Bearer ' + self.access_token
         }
 
-        self.baseurl = "https://" + self.domain + ".my.rubrik.com/api/graphql"
+        if 'root_domain' in kwargs and kwargs['root_domain'] is not None:
+            self.baseurl = "https://{}.{}/api/graphql".format(self.domain, self.kwargs['root_domain'])
+        else:
+            self.baseurl = "https://{}.my.rubrik.com/api/graphql".format(self.domain)
 
 
 
@@ -193,12 +202,16 @@ class PolarisClient:
     def _get_access_token(self):
         credentials = '{}:{}'.format(self.username, self.password)
 
-        graphql_service_endpoint = 'https://{}.my.rubrik.com/api/session'.format(self.domain)
+        if 'root_domain' in self.kwargs and self.kwargs['root_domain'] is not None:
+            graphql_service_endpoint = "https://{}.{}/api/session".format(self.domain, self.kwargs['root_domain'])
+        else:
+            graphql_service_endpoint = "https://{}.my.rubrik.com/api/session".format(self.domain)
 
         payload = {
             "username": self.username,
             "password": self.password
         }
+
         headers = {
             'Content-Type': 'application/json;charset=UTF-8',
             'Accept': 'application/json, text/plain'
