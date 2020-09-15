@@ -73,12 +73,16 @@ class PolarisClient:
         else:
             self.baseurl = "https://{}.my.rubrik.com/api/graphql".format(self.domain)
 
+        # Assemble GraphQL query/mutation hash
         self.module_path = os.path.dirname(os.path.realpath(__file__))
         self.data_path = "{}/data/".format(self.module_path)
         self.graphql_query = {}
+        self.graphql_mutation = {}
         for f in [f for f in listdir(self.data_path) if isfile(join(self.data_path, f))]:
             if '.graphql' in f and 'query in f':
-                self.graphql_query[f.replace('.graphql', '').replace('query','')] = open("{}{}".format(self.data_path,f), 'r')
+                self.graphql_query[f.replace('.graphql', '').replace('query','')] = open("{}{}".format(self.data_path,f), 'r').read()
+            elif '.graphql' in f and 'mutation in f':
+                self.graphql_mutation[f.replace('.graphql', '').replace('mutation', '')] = open( "{}{}".format(self.data_path, f), 'r').read()
 
 
 
