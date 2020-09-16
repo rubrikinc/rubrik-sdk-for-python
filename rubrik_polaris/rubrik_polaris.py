@@ -94,7 +94,7 @@ class PolarisClient:
                     self.graphql_query[
                         f.replace(file_suffix, '').replace('{}_'.format(file_query_prefix), '')] = """{}""".format(l)
                 elif f.startswith(file_mutation_prefix):
-                    l = open("{}{}".format(self.data_path, f), 'r').readlines()
+                    l = open("{}{}".format(self.data_path, f), 'r').read()
                     self.graphql_mutation[
                         f.replace(file_suffix, '').replace('{}_'.format(file_mutation_prefix), '')] = """{}""".format(l)
 
