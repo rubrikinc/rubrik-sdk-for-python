@@ -41,9 +41,10 @@ data_subnet_mask = None
 dns = ['10.10.10.2']
 encryption = False
 
-setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, mgmt_gateway,mgmt_subnet_mask,node_config, None,
-                                        ipmi_gateway, ipmi_subnet_mask,None,ipmi_config,
-                                        data_gateway,data_subnet_mask,data_vlan,None,
+setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask,
+                                        node_config, None,
+                                        ipmi_gateway, ipmi_subnet_mask, None, ipmi_config,
+                                        data_gateway, data_subnet_mask, data_vlan, None,
                                         encryption, None, dns)
 
 #                                        
@@ -68,8 +69,8 @@ admin_password = 'SafePassword!'
 mgmt_gateway = '10.10.10.1'
 mgmt_subnet_mask = '255.255.255.0'
 
-setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask, 
-										node_config, enable_encryption=False)
+setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask,
+                                        node_config, enable_encryption=False)
 
 #
 # Cloud Cluster Bootstrap
@@ -95,6 +96,7 @@ admin_password = 'SafePassword!'
 mgmt_gateway = '10.10.60.1'
 mgmt_subnet_mask = '255.255.255.0'
 
-setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask, node_config, enable_encryption=False)
+setup_cluster = bootstrap.setup_cluster(cluster_name, admin_email, admin_password, mgmt_gateway, mgmt_subnet_mask,
+                                        node_config, enable_encryption=False)
 
 print(setup_cluster)

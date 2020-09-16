@@ -1,13 +1,15 @@
-query GCPProjectsFilterListQuery($first: Int!, $sortBy: GcpNativeProjectSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: GcpNativeProjectFilters) {
-  projects: gcpNativeProjectConnection(first: $first, sortBy: $sortBy, sortOrder: $sortOrder, projectFilters: $filters) {
-    edges {
-      node {
-        id
-        name
-        nativeId
-        __typename
-      }
-      __typename
+query FilterQuery($nameFilter: GcpNativeProjectNameOrNumberSubstringFilter) {
+    gcpNativeProjectConnection(projectFilters: {nameOrNumberSubstringFilter: $nameFilter}){
+        edges {
+            node {
+                id:id
+                name: name
+                sla_assignment: slaAssignment
+                configured_sla_domain_name: configuredSlaDomain{name}
+                configured_sla_domain_id: configuredSlaDomain{id}
+                effective_sla_domain_name: effectiveSlaDomain{name}
+                effective_sla_domain_id: effectiveSlaDomain{id}
+            }
+        }
     }
-    __typename
-  }
+}

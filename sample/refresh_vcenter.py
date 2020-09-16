@@ -1,4 +1,5 @@
 import rubrik_cdm
+
 rubrik = rubrik_cdm.Connect()
 
 vcenter_hostname = "python.demo.lab"

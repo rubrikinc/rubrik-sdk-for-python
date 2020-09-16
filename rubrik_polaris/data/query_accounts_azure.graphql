@@ -1,19 +1,15 @@
-query AzureSubscriptionFilterQuery($first: Int, $sortBy: AzureNativeSubscriptionSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: AzureNativeSubscriptionFilters) {
-  azureNativeSubscriptionConnection(first: $first, sortBy: $sortBy, sortOrder: $sortOrder, subscriptionFilters: $filters) {
-    edges {
-      node {
-        id
-        displayValue: name
-        __typename
-      }
-      __typename
+query FilterQuery($first: Int, $filters: AzureNativeSubscriptionFilters) {
+    azureNativeSubscriptionConnection(first: $first, subscriptionFilters: $filters) {
+        edges {
+            node {
+                id:id
+                name: name
+                sla_assignment: slaAssignment
+                configured_sla_domain_name: configuredSlaDomain{name}
+                configured_sla_domain_id: configuredSlaDomain{id}
+                effective_sla_domain_name: effectiveSlaDomain{name}
+                effective_sla_domain_id: effectiveSlaDomain{id}
+            }
+        }
     }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-      __typename
-    }
-    __typename
-  }
 }

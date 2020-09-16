@@ -196,5 +196,3 @@ rubrik = rubrik_cdm.Connect()
 ahv_vm_name = "ahv_demo-vm1"
 
 ahv_vm_id = rubrik.object_id(ahv_vm_name, "ahv")
-
- 

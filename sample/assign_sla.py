@@ -10,7 +10,6 @@ object_type = "vmware"
 
 assign_sla = rubrik.assign_sla(vm_name, sla_name, object_type)
 
-
 # MSSQL
 
 
@@ -32,7 +31,6 @@ assignsla = rubrik.assign_sla(
     logRetentionHours,
     copyOnly)
 
-
 # Oracle Database
 
 
@@ -50,14 +48,13 @@ log_retention_hours = 720
 num_channels = 4
 
 assignsla = rubrik.assign_sla(
-    object_name, 
-    sla_name, 
-    object_type, 
-    log_backup_frequency_in_minutes=log_backup_frequency_in_minutes, 
-    log_retention_hours=log_retention_hours, 
+    object_name,
+    sla_name,
+    object_type,
+    log_backup_frequency_in_minutes=log_backup_frequency_in_minutes,
+    log_retention_hours=log_retention_hours,
     num_channels=num_channels,
     hostname=hostname)
-
 
 # Oracle Host
 
@@ -75,13 +72,12 @@ log_retention_hours = 720
 num_channels = 4
 
 assignsla = rubrik.assign_sla(
-    object_name, 
-    sla_name, 
-    object_type, 
-    log_backup_frequency_in_minutes=log_backup_frequency_in_minutes, 
-    log_retention_hours=log_retention_hours, 
+    object_name,
+    sla_name,
+    object_type,
+    log_backup_frequency_in_minutes=log_backup_frequency_in_minutes,
+    log_retention_hours=log_retention_hours,
     num_channels=num_channels)
-
 
 # Volume Group
 
@@ -95,7 +91,6 @@ windows_host = "windows2016.rubrik.com"
 sla_name = "Gold"
 
 assign_sla = rubrik.assign_sla(object_name, sla_name, "volume_group", windows_host=windows_host)
-
 
 # Fileset
 

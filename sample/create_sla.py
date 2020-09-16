@@ -18,7 +18,6 @@ starttime_hour = 0
 starttime_min = 19
 duration_hours = 12
 
-
 create_sla = rubrik.create_sla(
     sla_name,
     hourly_frequency,

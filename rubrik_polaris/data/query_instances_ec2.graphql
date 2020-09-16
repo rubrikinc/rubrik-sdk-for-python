@@ -1,5 +1,5 @@
-query EC2InstancesListQuery($first: Int, $after: String, $sortBy: AwsNativeEc2InstanceSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: AwsNativeEc2InstanceFilters) {
-  awsNativeEc2InstanceConnection(first: $first, after: $after, sortBy: $sortBy, sortOrder: $sortOrder, ec2InstanceFilters: $filters) {
+query EC2InstancesListQuery($first: Int, $after: String, $filters: AwsNativeEc2InstanceFilters) {
+  awsNativeEc2InstanceConnection(first: $first, after: $after, ec2InstanceFilters: $filters) {
     edges {
       node {
         id
@@ -13,6 +13,10 @@ query EC2InstancesListQuery($first: Int, $after: String, $sortBy: AwsNativeEc2In
         isExocomputeConfigured
         isIndexingEnabled
         isMarketplace
+        tags {
+            key
+            value
+        }
         effectiveSlaDomain {
           name
           ... on ClusterSlaDomain {

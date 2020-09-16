@@ -20,6 +20,7 @@
 
 import logging
 import os
+import re
 
 import requests
 import urllib3
@@ -31,6 +32,8 @@ from os.path import isfile, join
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
+
+
 
 
 class PolarisClient:
@@ -79,24 +82,27 @@ class PolarisClient:
         else:
             self.baseurl = "https://{}.my.rubrik.com/api/graphql".format(self.domain)
 
-        # Assemble GraphQL query/mutation hash
+        # Assemble GraphQL query/mutation hash and name map
         self.module_path = os.path.dirname(os.path.realpath(__file__))
         self.data_path = "{}/data/".format(self.module_path)
         self.graphql_query = {}
         self.graphql_mutation = {}
+        self.graphql_file_type_map = {}
         file_query_prefix = 'query'
         file_suffix = '.graphql'
         file_mutation_prefix = 'mutation'
         for f in [f for f in listdir(self.data_path) if isfile(join(self.data_path, f))]:
+            _query_name = None
             if f.endswith(file_suffix):
                 if f.startswith(file_query_prefix):
-                    l = open("{}{}".format(self.data_path, f), 'r').read()
-                    self.graphql_query[
-                        f.replace(file_suffix, '').replace('{}_'.format(file_query_prefix), '')] = """{}""".format(l)
+                    _query_name = f.replace(file_suffix, '').replace('{}_'.format(file_query_prefix), '')
+                    graphql_file = open("{}{}".format(self.data_path, f), 'r').read()
+                    self.graphql_query[_query_name] = """{}""".format(graphql_file)
                 elif f.startswith(file_mutation_prefix):
-                    l = open("{}{}".format(self.data_path, f), 'r').read()
-                    self.graphql_mutation[
-                        f.replace(file_suffix, '').replace('{}_'.format(file_mutation_prefix), '')] = """{}""".format(l)
+                    _query_name = f.replace(file_suffix, '').replace('{}_'.format(file_mutation_prefix), '')
+                    graphql_file = open("{}{}".format(self.data_path, f), 'r').read()
+                    self.graphql_mutation[_query_name] = """{}""".format(graphql_file)
+                self.graphql_file_type_map[_query_name] = self._get_query_name(graphql_file)
 
     def query(self, operation_name=None, query=None, variables=None, timeout=15):
         self._log('POST {}'.format(self.baseurl))
@@ -131,113 +137,121 @@ class PolarisClient:
 
     def get_sla_domains(self):
         """Retrieves dictionary of SLA Domain Names and Identifiers
-
-        Returns:
-        Dict: {sla_domain_name = sla_domain_id, ...}
-
        """
-        request = self.query(None, self.graphql_query['sla_domains'], None)
-        sla_domains = {}
-        for edge in request['data']['globalSlaConnection']['edges']:
-            sla_domains[edge['node']['name']] = edge['node']['id']
-        return sla_domains
+        query_name = "sla_domains"
+        request = self.query(None, self.graphql_query[query_name], None)
+        return self._dump_nodes(request, query_name)
 
-    def get_accounts_aws(self):
+    def get_accounts_aws(self, filter=""):
+        """Retrieves AWS account information from Polaris
+
+        Arguments:
+            filter {str} -- Search string to filter results
+        """
+        query_name = "accounts_aws"
         variables = \
             {
                 "awsCloudAccountsArg": {
                     "feature": "CLOUD_NATIVE_PROTECTION",
-                    "columnSearchFilter": "",
+                    "columnSearchFilter": filter,
                     "statusFilters": []
                 }
             }
-        request = self.query(None, self.graphql_query['accounts_aws'], variables)
-        return request['data']
+        request = self.query(None, self.graphql_query[query_name], variables)
+        return self._dump_nodes(request, query_name)
 
 
-    def get_accounts_gcp(self):
+    def get_accounts_gcp(self, filter=""):
+        """Retrieves GCP account information from Polaris
+
+        Arguments:
+            filter {str} -- Search string to filter results
+        """
+        query_name = "accounts_gcp"
         variables = \
             {
-                "first": 1000,
-                "sortBy": "NAME",
-                "sortOrder": "ASC"
+                "projectSearchText": filter
             }
-        request = self.query(None, self.graphql_query['accounts_accounts'], variables)
-        return request['data']
+        request = self.query(None, self.graphql_query[query_name], variables)
+        return self._dump_nodes(request, query_name)
 
-    def get_accounts_azure(self):
+
+    def get_accounts_azure(self, filter=""):
+        """Retrieves Azure account information from Polaris
+
+        Arguments:
+            filter {str} -- Search string to filter results
+        """
+        query_name = "accounts_azure"
         variables = \
             {
-                "first": 20,
-                "sortBy": "NAME",
-                "sortOrder": "ASC",
                 "filters": {
                     "nameSubstringFilter": {
-                        "nameSubstring": ""
+                        "nameSubstring": filter
                     }
                 }
             }
-        request = self.query(None, self.graphql_query['accounts_azure'], variables)
-        return request['data']
+        request = self.query(None, self.graphql_query[query_name], variables)
+        return self._dump_nodes(request, query_name)
 
 
     def get_instances_ec2(self):
-        request = self.query(None, self.graphql_query['instances_ec2'], None)
-        return request['data']
+        query_name = "instances_ec2"
+        request = self.query(None, self.graphql_query[query_name], None)
+        return self._dump_nodes(request, query_name)
 
 
     def get_instances_azure(self):
-        request = self.query(None, self.graphql_query['instances_azure'], None)
-        return request['data']
+        query_name = "instances_azure"
+        request = self.query(None, self.graphql_query[query_name], None)
+        return self._dump_nodes(request, query_name)
 
 
     def get_instances_gcp(self):
-        request = self.query(None, self.graphql_query['instances_gcp'], None)
-        return request['data']
+        query_name = "instances_gcp"
+        request = self.query(None, self.graphql_query[query_name], None)
+        return self._dump_nodes(request, query_name)
 
 
     def schema(self):
         query = """
-        fragment FullType on __Type {
-            kind
-            name
-            fields(includeDeprecated: true) {
+            fragment FullType on __Type {
+                kind
                 name
-                args {
+                fields(includeDeprecated: true) {
+                    name
+                    args {
+                        ...InputValue
+                    }
+                    type {
+                        ...TypeRef
+                    }
+                    isDeprecated
+                    deprecationReason
+                }
+                inputFields {
                     ...InputValue
                 }
+                interfaces {
+                    ...TypeRef
+                }
+                enumValues(includeDeprecated: true) {
+                    name
+                    isDeprecated
+                    deprecationReason
+                }
+                possibleTypes {
+                    ...TypeRef
+                }
+            }
+            fragment InputValue on __InputValue {
+                name
                 type {
                     ...TypeRef
                 }
-                isDeprecated
-                deprecationReason
+                defaultValue
             }
-            inputFields {
-                ...InputValue
-            }
-            interfaces {
-                ...TypeRef
-            }
-            enumValues(includeDeprecated: true) {
-                name
-                isDeprecated
-                deprecationReason
-            }
-            possibleTypes {
-                ...TypeRef
-            }
-        }
-        fragment InputValue on __InputValue {
-            name
-            type {
-                ...TypeRef
-            }
-            defaultValue
-        }
-        fragment TypeRef on __Type {
-            kind
-            name
-            ofType {
+            fragment TypeRef on __Type {
                 kind
                 name
                 ofType {
@@ -258,6 +272,10 @@ class PolarisClient:
                                     ofType {
                                         kind
                                         name
+                                        ofType {
+                                            kind
+                                            name
+                                        }
                                     }
                                 }
                             }
@@ -265,31 +283,44 @@ class PolarisClient:
                     }
                 }
             }
-        }
-        query IntrospectionQuery {
-            __schema {
-                queryType {
-                    name
-                }
-                mutationType {
-                    name
-                }
-                types {
-                    ...FullType
-                }
-                directives {
-                    name
-                    locations
-                    args {
-                        ...InputValue
+            query IntrospectionQuery {
+                __schema {
+                    queryType {
+                        name
+                    }
+                    mutationType {
+                        name
+                    }
+                    types {
+                        ...FullType
+                    }
+                    directives {
+                        name
+                        locations
+                        args {
+                            ...InputValue
+                        }
                     }
                 }
             }
-        }
-        """
+            """
         return self.query(query=query)
 
+
     # Private
+
+    def _get_query_name(self, i):
+        o = re.findall(r'(\S+) ?\(.*\)', i)
+        return o
+
+
+    def _dump_nodes(self, request, query_name):
+        o = []
+        for query_returned in request['data']:
+            if query_returned in self.graphql_file_type_map[query_name]:
+                for node_returned in request['data'][query_returned]['edges']:
+                    o.append(node_returned['node'])
+        return o
 
     def _get_access_token(self):
         credentials = '{}:{}'.format(self.username, self.password)
@@ -311,6 +342,7 @@ class PolarisClient:
         request = requests.post(graphql_service_endpoint, json=payload, headers=headers, verify=False)
 
         return request.json()['access_token']
+
 
     def _log(self, log_message):
         """Create properly formatted debug log messages.

@@ -1,24 +1,15 @@
-query CloudAccountsNativeProtectionListQuery($awsCloudAccountsArg: AwsCloudAccountsInput!) {
-  awsCloudAccounts(awsCloudAccountsArg: $awsCloudAccountsArg) {
-    awsCloudAccounts {
-      awsCloudAccount {
-        id
-        nativeId
-        accountName
-        cloudType
-        seamlessFlowEnabled
-        __typename
-      }
-      featureDetails {
-        feature
-        roleArn
-        stackArn
-        status
-        awsRegions
-        __typename
-      }
-      __typename
+query FilterQuery($awsNativeProtectionFeature: AwsNativeProtectionFeatureEnum = EC2){
+    awsNativeAccountConnection(awsNativeProtectionFeature: $awsNativeProtectionFeature){
+        edges {
+            node {
+                id:id
+                name: name
+                sla_assignment: slaAssignment
+                configured_sla_domain_name: configuredSlaDomain{name}
+                configured_sla_domain_id: configuredSlaDomain{id}
+                effective_sla_domain_name: effectiveSlaDomain{name}
+                effective_sla_domain_id: effectiveSlaDomain{id}
+            }
+        }
     }
-    __typename
-  }
 }

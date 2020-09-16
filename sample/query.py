@@ -14,7 +14,6 @@ query = """
 
 cluster_details = rubrik.query(query)
 
-
 ### All parameters used
 
 import rubrik_cdm
