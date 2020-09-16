@@ -3,9 +3,6 @@ query SLAListQuery($after: String, $first: Int, $filter: [GlobalSlaFilterInput!]
     edges {
       node {
         name
-        ... on ClusterSlaDomain {
-          id: fid
-        }
         ... on GlobalSla {
           id
         }
