@@ -29,11 +29,12 @@ from os import listdir
 from os.path import isfile, join
 
 import pprint
+
 pp = pprint.PrettyPrinter(indent=4)
 
 
 class PolarisClient:
-    
+
     def __init__(self, domain, username, password, enable_logging=False, logging_level="debug", **kwargs):
 
         valid_logging_levels = {
@@ -46,7 +47,9 @@ class PolarisClient:
 
         if logging_level not in valid_logging_levels:
             raise InvalidParameterException(
-                "'{}' is not a valid logging_level. Valid choices are 'debug', 'critical', 'error', 'warning', or 'info'.".format(logging_level))
+                "'{}' is not a valid logging_level. Valid choices are 'debug', 'critical', 'error', 'warning', "
+                "or 'info'.".format(
+                    logging_level))
 
         # Enable logging for the SDK
         self.logging_level = logging_level
@@ -66,7 +69,7 @@ class PolarisClient:
         self.access_token = self._get_access_token()
 
         self.headers = {
-            'Content-Type': 'application/json', 
+            'Content-Type': 'application/json',
             'Accept': 'application/json',
             'Authorization': 'Bearer ' + self.access_token
         }
@@ -81,24 +84,29 @@ class PolarisClient:
         self.data_path = "{}/data/".format(self.module_path)
         self.graphql_query = {}
         self.graphql_mutation = {}
+        file_query_prefix = 'query'
+        file_suffix = '.graphql'
+        file_mutation_prefix = 'mutation'
         for f in [f for f in listdir(self.data_path) if isfile(join(self.data_path, f))]:
-            if '.graphql' in f and 'query' in f:
-                l = open("{}{}".format(self.data_path, f), 'r').readlines()
-                self.graphql_query[f.replace('.graphql', '').replace('query_','')] = " ".join([line.strip() for line in l])
-            elif '.graphql' in f and 'mutation' in f:
-                l = open("{}{}".format(self.data_path, f), 'r').readlines()
-                self.graphql_mutation[f.replace('.graphql', '').replace('mutation_','')] = " ".join([line.strip() for line in l])
-
-
+            if f.endswith(file_suffix):
+                if f.startswith(file_query_prefix):
+                    l = open("{}{}".format(self.data_path, f), 'r').read()
+                    self.graphql_query[
+                        f.replace(file_suffix, '').replace('{}_'.format(file_query_prefix), '')] = """{}""".format(l)
+                elif f.startswith(file_mutation_prefix):
+                    l = open("{}{}".format(self.data_path, f), 'r').readlines()
+                    self.graphql_mutation[
+                        f.replace(file_mutation_prefix, '').replace('{}_'.format(file_mutation_prefix), '')] = " ".join(
+                        [line.strip() for line in l])
 
     def query(self, operation_name=None, query=None, variables=None, timeout=15):
         self._log('POST {}'.format(self.baseurl))
-        
+
         if operation_name is not None:
             self._log('Operation Name: {}'.format(operation_name))
-        
+
         self._log('Query: {}'.format(query))
-        
+
         if variables is not None:
             self._log('Variables: {}'.format(variables))
 
@@ -123,8 +131,8 @@ class PolarisClient:
         return api_response
 
     def get_sla_domains(self):
-        pp.pprint(self.graphql_query['sla_domains'])
-        request = self.query(self.graphql_query['sla_domains'])
+        print(self.graphql_query['sla_domains'])
+        request = self.query('sla_domains',self.graphql_query['sla_domains'])
         sla_domains = {}
         pp.pprint(request)
         for edge in request['data']['globalSlaConnection']['edges']:
@@ -224,8 +232,7 @@ class PolarisClient:
         """
         return self.query(query=query)
 
-
-    # Private 
+    # Private
 
     def _get_access_token(self):
         credentials = '{}:{}'.format(self.username, self.password)
@@ -247,7 +254,6 @@ class PolarisClient:
         request = requests.post(graphql_service_endpoint, json=payload, headers=headers, verify=False)
 
         return request.json()['access_token']
-
 
     def _log(self, log_message):
         """Create properly formatted debug log messages.
