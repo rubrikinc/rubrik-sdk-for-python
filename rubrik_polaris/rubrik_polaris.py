@@ -130,10 +130,8 @@ class PolarisClient:
         return api_response
 
     def get_sla_domains(self):
-        print(self.graphql_query['sla_domains'])
-        request = self.query('sla_domains',self.graphql_query['sla_domains'])
+        request = self.query(None, self.graphql_query['sla_domains'], None)
         sla_domains = {}
-        pp.pprint(request)
         for edge in request['data']['globalSlaConnection']['edges']:
             sla_domains[edge['node']['name']] = edge['node']['id']
         return sla_domains
