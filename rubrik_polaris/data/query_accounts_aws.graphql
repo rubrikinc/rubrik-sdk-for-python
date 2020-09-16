@@ -1,5 +1,5 @@
-query FilterQuery($awsNativeProtectionFeature: AwsNativeProtectionFeatureEnum = EC2){
-    awsNativeAccountConnection(awsNativeProtectionFeature: $awsNativeProtectionFeature){
+query FilterQuery($first: Int, $awsNativeProtectionFeature: AwsNativeProtectionFeatureEnum!) {
+    awsNativeAccountConnection(first: $first, awsNativeProtectionFeature: $awsNativeProtectionFeature) {
         edges {
             node {
                 id:id

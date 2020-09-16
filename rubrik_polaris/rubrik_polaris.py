@@ -135,6 +135,7 @@ class PolarisClient:
 
         return api_response
 
+
     def get_sla_domains(self):
         """Retrieves dictionary of SLA Domain Names and Identifiers
        """
@@ -142,20 +143,14 @@ class PolarisClient:
         request = self.query(None, self.graphql_query[query_name], None)
         return self._dump_nodes(request, query_name)
 
+
     def get_accounts_aws(self, filter=""):
         """Retrieves AWS account information from Polaris
-
-        Arguments:
-            filter {str} -- Search string to filter results
         """
         query_name = "accounts_aws"
         variables = \
             {
-                "awsCloudAccountsArg": {
-                    "feature": "CLOUD_NATIVE_PROTECTION",
-                    "columnSearchFilter": filter,
-                    "statusFilters": []
-                }
+                "awsNativeProtectionFeature": "EC2"
             }
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
