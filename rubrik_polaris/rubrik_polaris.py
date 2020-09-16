@@ -142,6 +142,60 @@ class PolarisClient:
             sla_domains[edge['node']['name']] = edge['node']['id']
         return sla_domains
 
+    def get_accounts_aws(self):
+        variables = \
+            {
+                "awsCloudAccountsArg": {
+                    "feature": "CLOUD_NATIVE_PROTECTION",
+                    "columnSearchFilter": "",
+                    "statusFilters": []
+                }
+            }
+        request = self.query(None, self.graphql_query['accounts_aws'], variables)
+        return request['data']
+
+
+    def get_accounts_gcp(self):
+        variables = \
+            {
+                "first": 1000,
+                "sortBy": "NAME",
+                "sortOrder": "ASC"
+            }
+        request = self.query(None, self.graphql_query['accounts_accounts'], variables)
+        return request['data']
+
+    def get_accounts_azure(self):
+        variables = \
+            {
+                "first": 20,
+                "sortBy": "NAME",
+                "sortOrder": "ASC",
+                "filters": {
+                    "nameSubstringFilter": {
+                        "nameSubstring": ""
+                    }
+                }
+            }
+        request = self.query(None, self.graphql_query['accounts_azure'], variables)
+        return request['data']
+
+
+    def get_instances_ec2(self):
+        request = self.query(None, self.graphql_query['instances_ec2'], None)
+        return request['data']
+
+
+    def get_instances_azure(self):
+        request = self.query(None, self.graphql_query['instances_azure'], None)
+        return request['data']
+
+
+    def get_instances_gcp(self):
+        request = self.query(None, self.graphql_query['instances_gcp'], None)
+        return request['data']
+
+
     def schema(self):
         query = """
         fragment FullType on __Type {

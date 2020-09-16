@@ -17,3 +17,5 @@ args = parser.parse_args()
 rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password, root_domain=args.root_domain, insecure=args.insecure)
 
 pp.pprint(rubrik.get_sla_domains())
+pp.pprint(rubrik.get_accounts_aws())
+
