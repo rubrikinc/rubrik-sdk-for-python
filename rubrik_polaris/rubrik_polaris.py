@@ -130,6 +130,12 @@ class PolarisClient:
         return api_response
 
     def get_sla_domains(self):
+        """Retrieves dictionary of SLA Domain Names and Identifiers
+
+        Returns:
+        Dict: {sla_domain_name = sla_domain_id, ...}
+
+       """
         request = self.query(None, self.graphql_query['sla_domains'], None)
         sla_domains = {}
         for edge in request['data']['globalSlaConnection']['edges']:
