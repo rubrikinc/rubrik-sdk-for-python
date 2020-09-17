@@ -233,7 +233,7 @@ class PolarisClient:
             c = 0
             if 'tags' in kwargs:
                 t = t + len(kwargs['tags']) - 1
-                c = t
+            c = t
             for key in kwargs:
                 if key is 'tags' and 'tags' in instance:
                     for instance_tag in instance['tags']:
