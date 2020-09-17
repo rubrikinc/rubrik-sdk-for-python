@@ -213,10 +213,32 @@ class PolarisClient:
         return request
 
 
-    def get_object_ids_ec2_by_region(self, regions):
+    def get_object_ids_ec2(self, match_all = True, **kwargs):
+        """Retrieves all EC2 objects that match query
+
+        Arguments:
+            match_all bool -- Set to false to match ANY defined criteria
+            kwargs -- Any top level object from the get_instances_ec2 call
+        """
         o = []
         for instance in self.get_instances_ec2():
-            if instance['region'] in regions:
+            t = len(kwargs)
+            c = 0
+            if 'tags' in kwargs:
+                t = t + len(kwargs['tags']) - 1
+                c = t
+            for key in kwargs:
+                if key is 'tags' and 'tags' in instance:
+                    for instance_tag in instance['tags']:
+                        if instance_tag['key'] in kwargs['tags'] and instance_tag['value'] == kwargs['tags'][
+                                                                                              instance_tag['key']]:
+                            c -= 1
+                elif key in instance and instance[key] ==  kwargs[key]:
+                    c -= 1
+            if match_all and bool(c) is False:
+                print("Adding instance")
+                o.append(instance['id'])
+            elif not match_all and c < t and bool(c) is True :
                 o.append(instance['id'])
         return o
 
