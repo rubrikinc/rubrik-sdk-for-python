@@ -25,7 +25,7 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(jobs)
 
 # pp.pprint(rubrik.get_sla_domains())
-# pp.pprint(rubrik.get_sla_domains("Bronze")[0]['id'])
+# pp.pprint(rubrik.get_sla_domains("Bronze"))
 # pp.pprint(rubrik.get_accounts_aws("gurling"))
 # pp.pprint(rubrik.get_accounts_gcp("Trinity-FDSE"))
 # pp.pprint(rubrik.get_accounts_azure("RubrikRangers"))
