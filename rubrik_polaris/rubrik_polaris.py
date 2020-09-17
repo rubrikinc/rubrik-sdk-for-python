@@ -138,18 +138,27 @@ class PolarisClient:
 
 
 
-    def get_sla_domains(self, filter = ""):
-        """Retrieves dictionary of SLA Domain Names and Identifiers
+    def get_sla_domains(self, sla_domain_name = ""):
+        """Retrieves dictionary of SLA Domain Names and Identifiers,
+           or the ID of a single SLA Domain
+
+        Arguments:
+            sla_domain_name {str} -- Rubrik SLA Domain Name
+
        """
         query_name = "sla_domains"
         variables = {
             "filter": {
                 "field": "NAME",
-                "text" : filter
+                "text" : sla_domain_name
             }
         }
         request = self.query(None, self.graphql_query[query_name], variables)
-        return self._dump_nodes(request, query_name)
+        request_nodes = self._dump_nodes(request, query_name)
+        if sla_domain_name and len(request_nodes) == 1:
+            return request_nodes[0]['id']
+        else:
+            return request_nodes
 
     def get_accounts_aws(self, filter=""):
         """Retrieves AWS account information from Polaris
