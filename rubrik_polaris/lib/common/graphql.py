@@ -33,8 +33,11 @@ def _get_query_names_from_graphql_query(self, _graphql_query_text):
 
 def _dump_nodes(self, request, query_name):
     o = []
+    detail_list = ["assignSla", "takeOnDemandSnapshot", "awsNativeProtectionAccountAdd"]
     for query_returned in request['data']:
-        if query_returned in self.graphql_file_type_map[query_name]:
+        if query_returned in detail_list and query_returned in self.graphql_file_type_map[query_name]:
+            return request['data'][query_returned]
+        elif query_returned in self.graphql_file_type_map[query_name]:
             for node_returned in request['data'][query_returned]['edges']:
                 o.append(node_returned['node'])
     return o

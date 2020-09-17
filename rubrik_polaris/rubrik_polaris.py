@@ -31,6 +31,7 @@ class PolarisClient:
     from .lib.common.polaris import get_sla_domains, submit_on_demand, submit_assign_sla
     from .lib.compute import get_instances_azure, get_instances_ec2, get_instances_gce
     from .lib.accounts import get_accounts_aws, get_accounts_azure, get_accounts_gcp
+    from .lib.accounts import add_account_aws
     from .lib.compute import get_object_ids_azure, get_object_ids_ec2, get_object_ids_gce
 
     def __init__(self, domain, username, password, enable_logging=False, logging_level="debug", **kwargs):

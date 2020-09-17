@@ -1,5 +1,5 @@
 """ Collection of lib methods that interact with Polaris primitives"""
-
+from .graphql import _dump_nodes
 def get_sla_domains(self, sla_domain_name=""):
     """Retrieves dictionary of SLA Domain Names and Identifiers,
        or the ID of a single SLA Domain
@@ -39,7 +39,7 @@ def submit_on_demand(self, object_ids, sla_id):
         "slaId": sla_id
     }
     request = self.query(None, self.graphql_mutation[mutation_name], variables)
-    return request
+    return  _dump_nodes(self, request, mutation_name)
 
 def submit_assign_sla(self, object_ids, sla_id):
     """Submits a Rubrik SLA change for objects
@@ -54,6 +54,7 @@ def submit_assign_sla(self, object_ids, sla_id):
             "slaId": sla_id
         }
     request = self.query(None, self.graphql_mutation[mutation_name], variables)
-    return request
+    return  _dump_nodes(self, request, mutation_name)
+
 
 

@@ -1,8 +1,5 @@
 """ Collection of functions that manipulate compute components"""
 
-def __init__():
-    None
-
 def get_object_ids_ec2(self, match_all=True, **kwargs):
     """Retrieves all EC2 objects that match query
 
