@@ -136,12 +136,14 @@ class PolarisClient:
 
         return api_response
 
+
     def get_sla_domains(self):
         """Retrieves dictionary of SLA Domain Names and Identifiers
        """
         query_name = "sla_domains"
         request = self.query(None, self.graphql_query[query_name], None)
         return self._dump_nodes(request, query_name)
+
 
     def get_accounts_aws(self, filter=""):
         """Retrieves AWS account information from Polaris
@@ -152,6 +154,7 @@ class PolarisClient:
         }
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
+
 
     def get_accounts_gcp(self, filter=""):
         """Retrieves GCP account information from Polaris
@@ -166,6 +169,7 @@ class PolarisClient:
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
 
+
     def get_accounts_azure(self, filter=""):
         """Retrieves Azure account information from Polaris
 
@@ -178,6 +182,19 @@ class PolarisClient:
         }
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
+
+    def submit_ondemand_ec2(self, instance_uuids):
+        """Submits EC2 On Demand Snapshot
+
+        Arguments:
+            instance_ids {array of strings} -- Array of Rubrik Instance IDs
+        """
+        mutation_name = "ondemand_ec2"
+        variables = {
+            "instanceIds": instance_uuids
+        }
+        request = self.query(None, self.graphql_mutation[mutation_name], variables)
+        return request
 
     def get_instances_ec2(self):
         query_name = "instances_ec2"
