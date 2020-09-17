@@ -22,12 +22,9 @@ import logging
 import os
 import re
 
-import requests
 import urllib3
 
 from .exceptions import InvalidParameterException
-from os import listdir
-from os.path import isfile, join
 
 import pprint
 
@@ -38,7 +35,9 @@ class PolarisClient():
     from .common.connection import query, get_access_token as _get_access_token
 
     def __init__(self, domain, username, password, enable_logging=False, logging_level="debug", **kwargs):
+        from .common.graphql import build_graphql_maps
 
+        # Enable logging for the SDK
         valid_logging_levels = {
             "debug": logging.DEBUG,
             "critical": logging.CRITICAL,
@@ -46,63 +45,44 @@ class PolarisClient():
             "warning": logging.WARNING,
             "info": logging.INFO,
         }
-
         if logging_level not in valid_logging_levels:
             raise InvalidParameterException(
                 "'{}' is not a valid logging_level. Valid choices are 'debug', 'critical', 'error', 'warning', "
                 "or 'info'.".format(
                     logging_level))
-
-        # Enable logging for the SDK
         self.logging_level = logging_level
         if enable_logging:
             logging.getLogger().setLevel(valid_logging_levels[self.logging_level])
 
+        # Set base variables
+        self.kwargs = kwargs
         self.domain = domain
-
+        self.username = username
+        self.password = password
+        self.module_path = os.path.dirname(os.path.realpath(__file__))
+        self.data_path = "{}/data/".format(self.module_path)
         self._log("Polaris Domain: {}".format(self.domain))
 
-        self.kwargs = kwargs
+        # Switch off SSL checks if needed
         if 'insecure' in self.kwargs and self.kwargs['insecure']:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-        self.username = username
-        self.password = password
-        self.access_token = self._get_access_token()
+        # Adjust Polaris domain if a custom root is defined
+        if 'root_domain' in kwargs and kwargs['root_domain'] is not None:
+            self.baseurl = "https://{}.{}/api/graphql".format(self.domain, self.kwargs['root_domain'])
+        else:
+            self.baseurl = "https://{}.my.rubrik.com/api/graphql".format(self.domain)
 
+        # Get Auth Token and assemble header
+        self.access_token = self._get_access_token()
         self.headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'Authorization': 'Bearer ' + self.access_token
         }
 
-        if 'root_domain' in kwargs and kwargs['root_domain'] is not None:
-            self.baseurl = "https://{}.{}/api/graphql".format(self.domain, self.kwargs['root_domain'])
-        else:
-            self.baseurl = "https://{}.my.rubrik.com/api/graphql".format(self.domain)
-
-        # Assemble GraphQL query/mutation hash and name map
-        self.module_path = os.path.dirname(os.path.realpath(__file__))
-        self.data_path = "{}/data/".format(self.module_path)
-        self.graphql_query = {}
-        self.graphql_mutation = {}
-        self.graphql_file_type_map = {}
-        file_query_prefix = 'query'
-        file_suffix = '.graphql'
-        file_mutation_prefix = 'mutation'
-        for f in [f for f in listdir(self.data_path) if isfile(join(self.data_path, f))]:
-            _query_name = None
-            if f.endswith(file_suffix):
-                if f.startswith(file_query_prefix):
-                    _query_name = f.replace(file_suffix, '').replace('{}_'.format(file_query_prefix), '')
-                    graphql_file = open("{}{}".format(self.data_path, f), 'r').read()
-                    self.graphql_query[_query_name] = """{}""".format(graphql_file)
-                elif f.startswith(file_mutation_prefix):
-                    _query_name = f.replace(file_suffix, '').replace('{}_'.format(file_mutation_prefix), '')
-                    graphql_file = open("{}{}".format(self.data_path, f), 'r').read()
-                    self.graphql_mutation[_query_name] = """{}""".format(graphql_file)
-                self.graphql_file_type_map[_query_name] = self._get_query_names_from_graphql_query(graphql_file)
-
+        # Get graphql content
+        (self.graphql_query, self.graphql_mutation, self.graphql_file_type_map) = build_graphql_maps(self)
 
     def get_sla_domains(self, sla_domain_name = ""):
         """Retrieves dictionary of SLA Domain Names and Identifiers,

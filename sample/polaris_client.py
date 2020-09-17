@@ -18,12 +18,6 @@ args = parser.parse_args()
 rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password, root_domain=args.root_domain,
                                       insecure=args.insecure)
 
-# Current example of ODS on arbitrary lists of EC2 instances
-# sla_id = rubrik.get_sla_domains("Bronze")
-# object_ids = rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"}, region = "US_WEST_2")
-# jobs = rubrik.submit_on_demand(object_ids, sla_id)
-# pp.pprint(jobs)
-#
 # pp.pprint(rubrik.get_sla_domains())
 # pp.pprint(rubrik.get_sla_domains("Bronze"))
 # pp.pprint(rubrik.get_accounts_aws("gurling"))
@@ -39,5 +33,11 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(rubrik.submit_assign_sla( ["c0eb8a99-be0b-4122-a71e-4337fecddfb6"], "00000000-0000-0000-0000-000000000000" ))
 # pp.pprint(rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"}))
 # pp.pprint(rubrik.get_object_ids_azure(region = "EastUS2"))
-pp.pprint(rubrik.get_object_ids_gce(region = "us-west1"))
+# pp.pprint(rubrik.get_object_ids_gce(region = "us-west1"))
+
+# Current example of ODS on arbitrary lists of EC2 instances
+sla_id = rubrik.get_sla_domains("Bronze")
+object_ids = rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"}, region = "US_WEST_2")
+jobs = rubrik.submit_on_demand(object_ids, sla_id)
+pp.pprint(jobs)
 
