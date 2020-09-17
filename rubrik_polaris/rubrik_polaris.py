@@ -183,15 +183,32 @@ class PolarisClient:
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
 
-    def submit_ondemand_ec2(self, instance_uuids):
-        """Submits EC2 On Demand Snapshot
+    def submit_on_demand(self, object_ids, sla_id):
+        """Submits On Demand Snapshot
 
         Arguments:
-            instance_ids {array of strings} -- Array of Rubrik Instance IDs
+            object_ids [string] -- Array of Rubrik Object IDs
+            sla_id string -- Rubrik SLA Domain ID
         """
-        mutation_name = "ondemand_ec2"
+        mutation_name = "on_demand"
         variables = {
-            "instanceIds": instance_uuids
+            "objectIds": object_ids,
+            "slaId": sla_id
+        }
+        request = self.query(None, self.graphql_mutation[mutation_name], variables)
+        return request
+
+    def submit_assign_sla(self, object_ids, sla_id):
+        """Submits a Rubrik SLA change for objects
+
+        Arguments:
+            object_ids [string] -- Array of Rubrik Object IDs
+            sla_id string -- Rubrik SLA Domain ID
+        """
+        mutation_name = "assign_sla"
+        variables = {
+            "objectIds": object_ids,
+            "slaId": sla_id
         }
         request = self.query(None, self.graphql_mutation[mutation_name], variables)
         return request
@@ -206,8 +223,8 @@ class PolarisClient:
         request = self.query(None, self.graphql_query[query_name], None)
         return self._dump_nodes(request, query_name)
 
-    def get_instances_gcp(self):
-        query_name = "instances_gcp"
+    def get_instances_gce(self):
+        query_name = "instances_gce"
         request = self.query(None, self.graphql_query[query_name], None)
         return self._dump_nodes(request, query_name)
 
