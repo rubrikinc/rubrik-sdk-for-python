@@ -23,7 +23,7 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # object_ids = rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"}, region = "US_WEST_2")
 # jobs = rubrik.submit_on_demand(object_ids, sla_id)
 # pp.pprint(jobs)
-
+#
 # pp.pprint(rubrik.get_sla_domains())
 # pp.pprint(rubrik.get_sla_domains("Bronze"))
 # pp.pprint(rubrik.get_accounts_aws("gurling"))

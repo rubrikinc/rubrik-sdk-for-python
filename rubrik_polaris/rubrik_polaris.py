@@ -34,7 +34,8 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 
-class PolarisClient:
+class PolarisClient():
+    from .common.connection import query, get_access_token as _get_access_token
 
     def __init__(self, domain, username, password, enable_logging=False, logging_level="debug", **kwargs):
 
@@ -102,41 +103,6 @@ class PolarisClient:
                     self.graphql_mutation[_query_name] = """{}""".format(graphql_file)
                 self.graphql_file_type_map[_query_name] = self._get_query_names_from_graphql_query(graphql_file)
 
-    def query(self, operation_name=None, query=None, variables=None, timeout=15):
-        self._log('POST {}'.format(self.baseurl))
-
-        if operation_name is not None:
-            self._log('Operation Name: {}'.format(operation_name))
-
-        self._log('Query: {}'.format(query))
-
-        if variables is not None:
-            self._log('Variables: {}'.format(variables))
-
-        api_request = requests.post(
-            self.baseurl,
-            verify=False,
-            headers=self.headers,
-            json={
-                "operationName": operation_name,
-                "variables": variables,
-                "query": "{}".format(query)
-            },
-            timeout=timeout
-        )
-
-        self._log(str(api_request) + "\n")
-        try:
-            api_response = api_request.json()
-        except BaseException:
-            api_request.raise_for_status()
-
-        if 'code' in api_response and 'message' in api_response and api_response['code'] >= 400:
-            print(api_response['message'])
-
-        return api_response
-
-
 
     def get_sla_domains(self, sla_domain_name = ""):
         """Retrieves dictionary of SLA Domain Names and Identifiers,
@@ -170,7 +136,6 @@ class PolarisClient:
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
 
-
     def get_accounts_gcp(self, filter=""):
         """Retrieves GCP account information from Polaris
 
@@ -183,7 +148,6 @@ class PolarisClient:
         }
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
-
 
     def get_accounts_azure(self, filter=""):
         """Retrieves Azure account information from Polaris
@@ -227,7 +191,6 @@ class PolarisClient:
         }
         request = self.query(None, self.graphql_mutation[mutation_name], variables)
         return request
-
 
     def get_object_ids_ec2(self, match_all = True, **kwargs):
         """Retrieves all EC2 objects that match query
@@ -295,8 +258,6 @@ class PolarisClient:
             elif not match_all and c < t and bool(c) is True :
                 o.append(instance['id'])
         return o
-
-
 
     def get_instances_ec2(self):
         query_name = "instances_ec2"
@@ -420,26 +381,7 @@ class PolarisClient:
                     o.append(node_returned['node'])
         return o
 
-    def _get_access_token(self):
-        credentials = '{}:{}'.format(self.username, self.password)
 
-        if 'root_domain' in self.kwargs and self.kwargs['root_domain'] is not None:
-            graphql_service_endpoint = "https://{}.{}/api/session".format(self.domain, self.kwargs['root_domain'])
-        else:
-            graphql_service_endpoint = "https://{}.my.rubrik.com/api/session".format(self.domain)
-
-        payload = {
-            "username": self.username,
-            "password": self.password
-        }
-
-        headers = {
-            'Content-Type': 'application/json;charset=UTF-8',
-            'Accept': 'application/json, text/plain'
-        }
-        request = requests.post(graphql_service_endpoint, json=payload, headers=headers, verify=False)
-
-        return request.json()['access_token']
 
     def _log(self, log_message):
         """Create properly formatted debug log messages.
