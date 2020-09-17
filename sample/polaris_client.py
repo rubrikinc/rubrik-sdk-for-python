@@ -29,4 +29,5 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(rubrik.get_instances_gcp())
 # pp.pprint(rubrik.get_instances_azure())
 # pp.pprint(rubrik.submit_on_demand( ["c0eb8a99-be0b-4122-a71e-4337fecddfb6"], "00000000-0000-0000-0000-000000000002" ))
-pp.pprint(rubrik.submit_assign_sla( ["c0eb8a99-be0b-4122-a71e-4337fecddfb6"], "00000000-0000-0000-0000-000000000000" ))
+# pp.pprint(rubrik.submit_assign_sla( ["c0eb8a99-be0b-4122-a71e-4337fecddfb6"], "00000000-0000-0000-0000-000000000000" ))
+pp.pprint(rubrik.get_object_ids_ec2_by_region(["US_WEST_2"]))

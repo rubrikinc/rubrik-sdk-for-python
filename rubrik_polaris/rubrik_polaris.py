@@ -144,7 +144,6 @@ class PolarisClient:
         request = self.query(None, self.graphql_query[query_name], None)
         return self._dump_nodes(request, query_name)
 
-
     def get_accounts_aws(self, filter=""):
         """Retrieves AWS account information from Polaris
         """
@@ -212,6 +211,15 @@ class PolarisClient:
         }
         request = self.query(None, self.graphql_mutation[mutation_name], variables)
         return request
+
+
+    def get_object_ids_ec2_by_region(self, regions):
+        o = []
+        for instance in self.get_instances_ec2():
+            if instance['region'] in regions:
+                o.append(instance['id'])
+        return o
+
 
     def get_instances_ec2(self):
         query_name = "instances_ec2"
