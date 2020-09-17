@@ -131,6 +131,9 @@ class PolarisClient:
         except BaseException:
             api_request.raise_for_status()
 
+        if 'code' in api_response and 'message' in api_response and api_response['code'] >= 400:
+            print(api_response['message'])
+
         return api_response
 
     def get_sla_domains(self):
@@ -170,8 +173,6 @@ class PolarisClient:
             }
         }
         request = self.query(None, self.graphql_query[query_name], variables)
-        if 'code' in request and request['code'] >= 400:
-            print(request['message'])
         return self._dump_nodes(request, query_name)
 
     def get_accounts_azure(self, filter=""):
