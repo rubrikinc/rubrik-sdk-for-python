@@ -1,5 +1,5 @@
-query FilterQuery($first: Int, $filters: AzureNativeSubscriptionFilters) {
-    azureNativeSubscriptionConnection(first: $first, subscriptionFilters: $filters) {
+query FilterQuery($filter: String = "" ) {
+    azureNativeSubscriptionConnection(subscriptionFilters:{nameSubstringFilter: {nameSubstring: $filter}}) {
         edges {
             node {
                 id:id

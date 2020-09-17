@@ -1,5 +1,5 @@
-query FilterQuery($filters: GcpNativeProjectFilters) {
-    gcpNativeProjectConnection(projectFilters: $filters){
+query FilterQuery($filter: String = "") {
+    gcpNativeProjectConnection(projectFilters: {nameOrNumberSubstringFilter: {nameOrNumberSubstring: $filter}}){
         edges {
             node {
                 id:id

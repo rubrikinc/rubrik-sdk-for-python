@@ -148,12 +148,7 @@ class PolarisClient:
         """
         query_name = "accounts_aws"
         variables = {
-            "awsNativeProtectionFeature": "EC2",
-            "filters": {
-                "nameSubstringFilter": {
-                    "nameSubstring": filter
-                }
-            }
+            "filter": filter
         }
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
@@ -166,11 +161,7 @@ class PolarisClient:
         """
         query_name = "accounts_gcp"
         variables = {
-            "filters": {
-                "nameOrNumberSubstringFilter": {
-                        "nameOrNumberSubstring": filter
-                }
-            }
+            "filter": filter
         }
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
@@ -183,11 +174,7 @@ class PolarisClient:
         """
         query_name = "accounts_azure"
         variables = {
-            "filters": {
-                "nameSubstringFilter": {
-                    "nameSubstring": filter
-                }
-            }
+            "filter": filter
         }
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
