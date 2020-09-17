@@ -144,15 +144,14 @@ class PolarisClient:
         """Retrieves AWS account information from Polaris
         """
         query_name = "accounts_aws"
-        variables = \
-            {
-                "awsNativeProtectionFeature": "EC2",
-                "filters": {
-                    "nameSubstringFilter": {
-                        "nameSubstring": filter
-                    }
+        variables = {
+            "awsNativeProtectionFeature": "EC2",
+            "filters": {
+                "nameSubstringFilter": {
+                    "nameSubstring": filter
                 }
             }
+        }
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
 
@@ -163,15 +162,13 @@ class PolarisClient:
             filter {str} -- Search string to filter results
         """
         query_name = "accounts_gcp"
-        variables = \
-            {
-                "filters": {
-                    "nameOrNumberSubstringFilter":
-                        {
-                            "nameOrNumberSubstring": filter
-                    }
+        variables = {
+            "filters": {
+                "nameOrNumberSubstringFilter": {
+                        "nameOrNumberSubstring": filter
                 }
             }
+        }
         request = self.query(None, self.graphql_query[query_name], variables)
         if 'code' in request and request['code'] >= 400:
             print(request['message'])
@@ -184,14 +181,13 @@ class PolarisClient:
             filter {str} -- Search string to filter results
         """
         query_name = "accounts_azure"
-        variables = \
-            {
-                "filters": {
-                    "nameSubstringFilter": {
-                        "nameSubstring": filter
-                    }
+        variables = {
+            "filters": {
+                "nameSubstringFilter": {
+                    "nameSubstring": filter
                 }
             }
+        }
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
 
