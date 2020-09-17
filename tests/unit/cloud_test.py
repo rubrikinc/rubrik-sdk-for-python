@@ -115,7 +115,7 @@ def test_aws_s3_cloudout_idempotence(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -154,7 +154,7 @@ def test_aws_s3_cloudout_archive_name_already_exsits(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -204,7 +204,7 @@ def test_aws_s3_cloudout(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -261,7 +261,7 @@ def test_update_aws_s3_cloudout_current_archive_name_not_found(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -304,7 +304,7 @@ def test_update_aws_s3_cloudout(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -351,7 +351,7 @@ def test_aws_s3_cloudon_idempotence(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -389,7 +389,7 @@ def test_aws_s3_cloudon_archive_name_not_found(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -425,7 +425,7 @@ def test_aws_s3_cloudon_update_enable_consolidation(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -465,7 +465,7 @@ def test_aws_s3_cloudon(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -529,7 +529,7 @@ def test_azure_cloudout_idempotence(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -560,7 +560,7 @@ def test_azure_cloudout_invalid_archive_name(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -595,7 +595,7 @@ def test_azure_cloudout(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -654,7 +654,7 @@ def test_azure_cloudon_idempotence(rubrik, mocker):
     def mock_get_internal_archive_object_store():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "polarisManagedId": "string",
@@ -741,7 +741,7 @@ def test_update_aws_native_account(rubrik, mocker):
     def mock_get_internal_aws_account_name():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "name": "aws_account_name",
@@ -944,7 +944,7 @@ def test_add_aws_native_account_invalid_aws_account_name(rubrik, mocker):
     def mock_get_internal_aws_account_name():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "name": "aws_account_name",
@@ -982,7 +982,7 @@ def test_add_aws_native_account_idempotence(rubrik, mocker):
     def mock_get_internal_aws_account_name():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "name": "string",
@@ -1039,7 +1039,7 @@ def test_add_aws_native_account(rubrik, mocker):
     def mock_get_internal_aws_account_name():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "id": "string",
                     "name": "string",

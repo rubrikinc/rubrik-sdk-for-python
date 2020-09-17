@@ -134,14 +134,14 @@ class Data_Management(Api):
             mssql_instance = self.get(
                 'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host), timeout)
 
-            for instance in mssql_instance['data']:
+            for instance in mssql_instance['graphql']:
                 if instance['name'] == sql_instance:
                     sql_db_id = instance['id']
 
             mssql_db = self.get(
                 'v1', '/mssql/db?primary_cluster_id=local&instance_id={}'.format(sql_db_id), timeout)
 
-            for db in mssql_db['data']:
+            for db in mssql_db['graphql']:
                 if db['name'] == sql_db:
                     mssql_id = db['id']
 
@@ -196,10 +196,10 @@ class Data_Management(Api):
                     "The Physical Host '{}' is not assigned to the '{}' Fileset.".format(
                         object_name, fileset))
 
-            fileset_id = fileset_summary['data'][0]['id']
+            fileset_id = fileset_summary['graphql'][0]['id']
 
             if sla_name == 'current':
-                sla_id = fileset_summary['data'][0]['effectiveSlaDomainId']
+                sla_id = fileset_summary['graphql'][0]['effectiveSlaDomainId']
             elif sla_name != 'current':
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
@@ -284,10 +284,10 @@ class Data_Management(Api):
                     "The NAS Share '{}' is not assigned to the '{}' Fileset.".format(
                         object_name, fileset))
 
-            fileset_id = fileset_summary['data'][0]['id']
+            fileset_id = fileset_summary['graphql'][0]['id']
 
             if sla_name == 'current':
-                sla_id = fileset_summary['data'][0]['effectiveSlaDomainId']
+                sla_id = fileset_summary['graphql'][0]['effectiveSlaDomainId']
             elif sla_name != 'current':
                 self.log(
                     "on_demand_snapshot: Searching the Rubrik cluster for the SLA Domain '{}'.".format(sla_name))
@@ -538,7 +538,7 @@ class Data_Management(Api):
                 else:
                     name_value = 'name'
 
-                for item in api_request['data']:
+                for item in api_request['graphql']:
                     if object_type == 'oracle_db':
                         if 'standaloneHostName' in item.keys():
                             if hostname == item['standaloneHostName'].split('.')[0]:
@@ -691,7 +691,7 @@ class Data_Management(Api):
             share_summary = self.get(
                 "internal", '/host/share', timeout=timeout)
             share_id = None
-            for shares in share_summary['data']:
+            for shares in share_summary['graphql']:
                 if shares['hostId'] == host_id and shares['exportPoint'] == share:
                     share_id = shares['id']
             if share_id is None:
@@ -704,7 +704,7 @@ class Data_Management(Api):
             fileset_summary = self.get(
                 "v1", '/fileset?is_relic=false&name={}'.format(object_name), timeout=timeout)
             template_id = None
-            for filesets in fileset_summary['data']:
+            for filesets in fileset_summary['graphql']:
                 if filesets['hostId'] == host_id and filesets['name'] == object_name:
                     template_id = filesets['templateId']
             if template_id is None:
@@ -720,9 +720,9 @@ class Data_Management(Api):
             }]
             fileset_response = self.post(
                 "internal", "/fileset/bulk", bulk, timeout)
-            fileset_id = fileset_response['data'][0]['id']
+            fileset_id = fileset_response['graphql'][0]['id']
 
-            if sla_id == fileset_summary['data'][0]['configuredSlaDomainId']:
+            if sla_id == fileset_summary['graphql'][0]['configuredSlaDomainId']:
                 return "No change required. The NAS fileset '{}' is already assigned to the '{}' SLA Domain.".format(
                     object_name, sla_name)
 
@@ -775,7 +775,7 @@ class Data_Management(Api):
             else:
                 current_hosts_name = "hostname"
 
-            for rubrik_host in current_hosts['data']:
+            for rubrik_host in current_hosts['graphql']:
                 if rubrik_host[current_hosts_name] == object_name:
                     host_id = rubrik_host['id']
 
@@ -785,7 +785,7 @@ class Data_Management(Api):
                 mssql_instances = self.get(
                     'v1', '/mssql/instance?root_id={}'.format(host_id), timeout=timeout)
 
-                for mssql_instance in mssql_instances['data']:
+                for mssql_instance in mssql_instances['graphql']:
                     mssql_id = mssql_instance['id']
                     mssql_instance_name = mssql_instance['name']
 
@@ -937,7 +937,7 @@ class Data_Management(Api):
 
             # Create a mapping of the volumes on the windows host and their ids
             currnt_volumes = {}
-            for volume in host_volumes["data"]:
+            for volume in host_volumes["graphql"]:
                 for v in volume["mountPoints"]:
                     if v in volumes_to_assign:
                         currnt_volumes[v] = volume["id"]
@@ -1490,7 +1490,7 @@ class Data_Management(Api):
                 "?effective_sla_domain_id={}&is_relic=false".format(sla_id),
                 timeout=timeout)
 
-            for vm in all_vms_in_sla["data"]:
+            for vm in all_vms_in_sla["graphql"]:
                 vm_name_id[vm["name"]] = vm["id"]
 
         if bool(vm_name_id) is False:
@@ -1858,7 +1858,7 @@ class Data_Management(Api):
 
         self.log("vsphere_live_unmount: Getting the mount ID of the vSphere VM '{}'.".format(
             mounted_vm_name))
-        for mountedvm in mount_summary['data']:
+        for mountedvm in mount_summary['graphql']:
             if mountedvm['mountedVmId'] == mounted_vm_id:
                 mount_id = mountedvm['id']
                 break
@@ -1884,7 +1884,7 @@ class Data_Management(Api):
         Keyword Arguments:
             sql_instance {str} -- The name of the MSSQL instance managing the Live Mounted database to be unmounted.
             sql_host {str} -- The name of the MSSQL host running the Live Mounted database to be unmounted.
-            force {bool} -- Remove all data within the Rubrik cluster related to the Live Mount, even if the SQL Server database cannot be contacted. (default: {False})
+            force {bool} -- Remove all graphql within the Rubrik cluster related to the Live Mount, even if the SQL Server database cannot be contacted. (default: {False})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             dict -- The full response of `DELETE /mssql/db/mount/{id}?force={bool}`.
@@ -1901,7 +1901,7 @@ class Data_Management(Api):
 
         self.log("sql_live_unmount: Getting the mount ID of the mounted database '{}'.".format(
             mounted_db_name))
-        for mounteddb in mount_summary['data']:
+        for mounteddb in mount_summary['graphql']:
             if mounteddb['mountedDatabaseId'] == mounted_db_id:
                 mount_id = mounteddb['id']
 
@@ -1956,7 +1956,7 @@ class Data_Management(Api):
         mounted_vm = self.get(
             'v1', '/vmware/vm/snapshot/mount?vm_id={}'.format(vm_id), timeout)
         mounted_vm_name = []
-        for vm in mounted_vm['data']:
+        for vm in mounted_vm['graphql']:
             try:
                 vm_moid = vm['mountedVmId']
                 split_moid = vm_moid.split('-')
@@ -1965,7 +1965,7 @@ class Data_Management(Api):
                     "get_vsphere_live_mount_names: Getting summary of VM with moid '{}'.".format(moid))
                 vm_data = self.get(
                     'v1', '/vmware/vm?moid={}'.format(moid), timeout)
-                mounted_vm_name.append(vm_data['data'][0]['name'])
+                mounted_vm_name.append(vm_data['graphql'][0]['name'])
             except KeyError:
                 self.log(
                     "get_vsphere_live_mount_names: A Live Mount of vSphere VM '{}' is in progress.".format(vm_name))
@@ -1994,7 +1994,7 @@ class Data_Management(Api):
         mssql_instance = self.get(
             'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(mssql_host_id), timeout=timeout)
 
-        for instance in mssql_instance['data']:
+        for instance in mssql_instance['graphql']:
             if instance['name'] == sql_instance:
                 sql_instance_id = instance['id']
                 break
@@ -2012,7 +2012,7 @@ class Data_Management(Api):
                 sql_instance_id),
             timeout=timeout)
 
-        for db in mssql_db['data']:
+        for db in mssql_db['graphql']:
             if db['name'] == db_name:
                 mssql_id = db['id']
                 break
@@ -2042,7 +2042,7 @@ class Data_Management(Api):
         return self.get('v1', '/mssql/db/mount?source_database_id={}'.format(mssql_id), timeout)
 
     def _validate_sql_recovery_point(self, mssql_id, date, time, timeout=30):  # pylint: ignore
-        """Check whether the data and time provided is a valid recovery point for an MSSQL database
+        """Check whether the graphql and time provided is a valid recovery point for an MSSQL database
         Arguments:
             mssql_id {str} -- The ID of the database.
             date {str} -- The recovery_point date formated as `Month-Day-Year` (ex: 1-15-2014).
@@ -2061,7 +2061,7 @@ class Data_Management(Api):
             latest_data = self.get(
                 'v1', '/mssql/db/{}/snapshot'.format(mssql_id), timeout=timeout)
             try:
-                latest_date_time = latest_data['data'][0]['date']
+                latest_date_time = latest_data['graphql'][0]['date']
             except:
                 raise InvalidParameterException(
                     "The database with ID {} does not have any existing snapshots.".format(mssql_id))
@@ -2095,7 +2095,7 @@ class Data_Management(Api):
             # Create recovery timestamp in (ms) as integer from datetime object
             recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
 
-            for range in range_summary['data']:
+            for range in range_summary['graphql']:
                 start_str, end_str = [range['beginTime'], range['endTime']]
                 # Parsing the range beginTime and endTime values to a datetime object as YYYY-MM-DDTHH:MM
                 start, end = [datetime.strptime(start_str[:16], '%Y-%m-%dT%H:%M'),
@@ -2125,7 +2125,7 @@ class Data_Management(Api):
             sql_instance {str} -- The SQL instance name with the database to instantly recover.
             sql_host {str} -- The SQL Host of the database/instance to instantly recover.
             finish_recovery {bool} -- A Boolean value that determines the recovery option to use during database restore. When this value is 'true', the database is restored using the RECOVERY option and is fully functional at the end of the restore operation. When this value is 'false', the database is restored using the NORECOVERY option and remains in recovering mode at the end of the restore operation.
-            max_data_streams {int} -- Maximum number of parallel data streams that can be used to copy data to the target system.
+            max_data_streams {int} -- Maximum number of parallel graphql streams that can be used to copy graphql to the target system.
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             dict -- The full response of `POST /v1/mssql/db/{id}/restore`.
@@ -2175,12 +2175,12 @@ class Data_Management(Api):
         self.log(
             "vcenter_refresh_vm: Searching the Rubrik cluster for the vSphere VM '{}'.".format(vm_name))
         data = self.get('v1', '/vmware/vm?name={}'.format(vm_name), timeout)
-        if data['data'] == []:
+        if data['graphql'] == []:
             raise InvalidParameterException(
                 "The vSphere VM '{}' does not exist.".format(vm_name))
         else:
-            vcenter_id = data['data'][0]['infraPath'][0]['id']
-            vm_id = data['data'][0]['id']
+            vcenter_id = data['graphql'][0]['infraPath'][0]['id']
+            vm_id = data['graphql'][0]['id']
 
         self.log(
             "vcenter_refresh_vm: Getting the MOID for vSphere VM {}.".format(vm_name))
@@ -2357,7 +2357,7 @@ class Data_Management(Api):
                 availability_group))
             ag_summary = self.get(
                 'internal', '/mssql/availability_group', timeout=timeout)
-            for ag in ag_summary['data']:
+            for ag in ag_summary['graphql']:
                 if availability_group == ag['name']:
                     availability_group_id = ag['id']
         else:
@@ -2426,14 +2426,14 @@ class Data_Management(Api):
         result = []
 
         if instance is None and hostname is None:
-            return databases['data']
+            return databases['graphql']
         elif instance is None and hostname is not None:
-            for item in databases['data']:
+            for item in databases['graphql']:
                 if item['rootProperties']['rootName'] == hostname:
                     result.append(item)
         elif instance is not None and hostname is None:
             try:
-                for item in databases['data']:
+                for item in databases['graphql']:
                     for replica in item['replicas']:
                         if replica['instanceName'] == instance:
                             result.append(item)
@@ -2441,11 +2441,11 @@ class Data_Management(Api):
             except BaseException:
                 pass
             else:
-                result = [item for item in databases['data']
+                result = [item for item in databases['graphql']
                           if replica['instanceName'] == instance]
         elif instance is not None and hostname is not None:
             try:
-                for item in databases['data']:
+                for item in databases['graphql']:
                     for replica in item['replicas']:
                         if item['rootProperties']['rootName'] == hostname and replica['instanceName'] == instance:
                             result.append(item)
@@ -2454,7 +2454,7 @@ class Data_Management(Api):
                 pass
             else:
                 result = [
-                    item for item in databases['data'] if (
+                    item for item in databases['graphql'] if (
                         item['rootProperties']['rootName'] == hostname and replica['instanceName'] == instance)]
         return result
 
@@ -2499,7 +2499,7 @@ class Data_Management(Api):
             return self.get('internal', '/mssql/db/{}/restore_files?time={}'.format(mssql_id, recovery_point), timeout)
 
     def sql_db_export(self, db_name, date, time, sql_instance=None, sql_host=None, target_instance_name=None, target_hostname=None, target_database_name=None, target_data_file_path=None, target_log_file_path=None, target_file_paths=None, finish_recovery=True, max_data_streams=2, allow_overwrite=False, timeout=15):  # pylint: ignore
-        """Export an SQL database from a specified recovery point to a target SQL Instance and Host. Requires database data and log file name directory paths.
+        """Export an SQL database from a specified recovery point to a target SQL Instance and Host. Requires database graphql and log file name directory paths.
         Arguments:
             db_name {str} -- The name of the database to be exported.
             date {str} -- The recovery_point date formated as 'Month-Date-Year' (ex: 8-9-2018).
@@ -2510,11 +2510,11 @@ class Data_Management(Api):
             target_instance_name {str} -- Name of the Microsoft SQL instance for the new database.
             target_hostname {str} -- Name of the Microsoft SQL host for the new database.
             target_database_name {str} -- Name of the new database.
-            target_data_file_path {str} -- The target path to store all data files.
+            target_data_file_path {str} -- The target path to store all graphql files.
             target_log_file_path {str} -- The target path to store all log files.
             target_file_paths {list} -- A list of dictionary objects each with key value pairs: {'logicalName': 'Logical name of the database file', 'exportPath': 'The target path for the database file', 'newLogicalName': 'New logical name for the database file', 'newFilename': 'New filename for the database file'}. One target path for each individual database file. Overrides targetDataFilePath and targetLogFilePath.
             finish_recovery {str} -- A Boolean value that determines the recovery option to use during database restore. When this value is 'true', the database is restored using the RECOVERY option and is fully functional at the end of the restore operation. When this value is 'false', the database is restored using the NORECOVERY option and remains in recovering mode at the end of the restore operation.
-            max_data_streams {str} -- Maximum number of parallel data streams that can be used to copy data to the target system.
+            max_data_streams {str} -- Maximum number of parallel graphql streams that can be used to copy graphql to the target system.
             allow_overwrite {str} -- A Boolean value that determines whether an existing database can be overwritten by a database this is exported from a backup. Set to false to prevent overwrites. This is the default. Set to true to allow overwrites.
             timeout {int} -- The number of seconds to wait to establish a connection with the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
@@ -2540,7 +2540,7 @@ class Data_Management(Api):
         mssql_instance = self.get(
             'v1', '/mssql/instance?primary_cluster_id=local&root_id={}'.format(target_host_id), timeout=timeout)
 
-        for instance in mssql_instance['data']:
+        for instance in mssql_instance['graphql']:
             if instance['name'] == target_instance_name:
                 target_instance_id = instance['id']
                 break

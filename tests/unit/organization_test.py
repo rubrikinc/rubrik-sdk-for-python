@@ -7,7 +7,7 @@ def test_add_organization_protectable_object_sql_host_idempotence(rubrik, mocker
     def mock_get_internal_organization_org_id_mssql():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "managedId": "host_id",
                     "objectType": "string",
@@ -81,7 +81,7 @@ def test_add_organization_protectable_object_sql_host(rubrik, mocker):
     def mock_get_internal_organization_org_id_mssql():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "managedId": "string",
                     "objectType": "string",
@@ -173,7 +173,7 @@ def test_add_organization_protectable_object_sql_server_db_idempotence(rubrik, m
     def mock_get_internal_organization_org_id_mssql():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "managedId": "mssql_db_id",
                     "objectType": "string",
@@ -247,7 +247,7 @@ def test_add_organization_protectable_object_sql_server_db(rubrik, mocker):
     def mock_get_internal_organization_org_id_mssql():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "managedId": "string",
                     "objectType": "string",
@@ -339,7 +339,7 @@ def test_add_organization_protectable_object_sql_availability_group_idempotence(
     def mock_get_internal_organization_org_id_mssql():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "managedId": "ag_id",
                     "objectType": "string",
@@ -413,7 +413,7 @@ def test_add_organization_protectable_object_sql_availability_group(rubrik, mock
     def mock_get_internal_organization_org_id_mssql():
         return {
             "hasMore": True,
-            "data": [
+            "graphql": [
                 {
                     "managedId": "string",
                     "objectType": "string",

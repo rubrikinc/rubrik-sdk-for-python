@@ -50,7 +50,7 @@ class Api():
 
         Keyword Arguments:
             params {dict} -- An optional dict containing variables in a key:value format to send with `GET` & `DELETE` API calls (default: {None})
-            config {dict} -- The specified data to send with 'DELETE', `POST` and `PATCH` API calls. (default: {None})
+            config {dict} -- The specified graphql to send with 'DELETE', `POST` and `PATCH` API calls. (default: {None})
             job_status_url {str} -- The job status URL provided by a previous API call. (default: {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
@@ -144,7 +144,7 @@ class Api():
                             error_message = api_response['message']
                             api_request.raise_for_status()
 
-                        # Check for GQL error message in the data response
+                        # Check for GQL error message in the graphql response
                         if key == "error":
                             error_message = api_response['error']
                             api_request.raise_for_status()
@@ -186,7 +186,7 @@ class Api():
                         raise APICallException(error_message)
                     except NameError:
                         try:
-                            return api_request.json()["data"]
+                            return api_request.json()["graphql"]
                         except BaseException:
                             pass
                 
@@ -233,7 +233,7 @@ class Api():
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
-            config {dict} -- The specified data to send with the API call.
+            config {dict} -- The specified graphql to send with the API call.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
@@ -268,7 +268,7 @@ class Api():
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
         Returns:
-            dict -- The response["data"] body of the API call.
+            dict -- The response["graphql"] body of the API call.
         """
 
         if self.function_name == "":
@@ -293,7 +293,7 @@ class Api():
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
-            config {dict} -- The specified data to send with the API call.
+            config {dict} -- The specified graphql to send with the API call.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
@@ -321,7 +321,7 @@ class Api():
         Arguments:
             api_version {str} -- The version of the Rubrik CDM API to call. (choices: {v1, v2, internal})
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
-            config {dict} -- The specified data to send with the API call.
+            config {dict} -- The specified graphql to send with the API call.
 
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
@@ -352,7 +352,7 @@ class Api():
 
         Keyword Arguments:
             params {dict} -- An optional dict containing variables in a key:value format to send with `GET` & `DELETE` API calls . Mutually exclusive with config (default: {None})
-            config {dict} -- The specified data to send with the API call. Mutually exclusive with params (default: {None})
+            config {dict} -- The specified graphql to send with the API call. Mutually exclusive with params (default: {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
             authentication {bool} -- Flag that specifies whether or not to utilize authentication when making the API call. (default: {True})
 
