@@ -34,8 +34,6 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 
-
-
 class PolarisClient:
 
     def __init__(self, domain, username, password, enable_logging=False, logging_level="debug", **kwargs):
@@ -102,7 +100,7 @@ class PolarisClient:
                     _query_name = f.replace(file_suffix, '').replace('{}_'.format(file_mutation_prefix), '')
                     graphql_file = open("{}{}".format(self.data_path, f), 'r').read()
                     self.graphql_mutation[_query_name] = """{}""".format(graphql_file)
-                self.graphql_file_type_map[_query_name] = self._get_query_name(graphql_file)
+                self.graphql_file_type_map[_query_name] = self._get_query_names_from_graphql_query(graphql_file)
 
     def query(self, operation_name=None, query=None, variables=None, timeout=15):
         self._log('POST {}'.format(self.baseurl))
@@ -135,7 +133,6 @@ class PolarisClient:
 
         return api_response
 
-
     def get_sla_domains(self):
         """Retrieves dictionary of SLA Domain Names and Identifiers
        """
@@ -143,18 +140,21 @@ class PolarisClient:
         request = self.query(None, self.graphql_query[query_name], None)
         return self._dump_nodes(request, query_name)
 
-
     def get_accounts_aws(self, filter=""):
         """Retrieves AWS account information from Polaris
         """
         query_name = "accounts_aws"
         variables = \
             {
-                "awsNativeProtectionFeature": "EC2"
+                "awsNativeProtectionFeature": "EC2",
+                "filters": {
+                    "nameSubstringFilter": {
+                        "nameSubstring": filter
+                    }
+                }
             }
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
-
 
     def get_accounts_gcp(self, filter=""):
         """Retrieves GCP account information from Polaris
@@ -165,11 +165,17 @@ class PolarisClient:
         query_name = "accounts_gcp"
         variables = \
             {
-                "projectSearchText": filter
+                "filters": {
+                    "nameOrNumberSubstringFilter":
+                        {
+                            "nameOrNumberSubstring": filter
+                    }
+                }
             }
         request = self.query(None, self.graphql_query[query_name], variables)
+        if 'code' in request and request['code'] >= 400:
+            print(request['message'])
         return self._dump_nodes(request, query_name)
-
 
     def get_accounts_azure(self, filter=""):
         """Retrieves Azure account information from Polaris
@@ -189,24 +195,20 @@ class PolarisClient:
         request = self.query(None, self.graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
 
-
     def get_instances_ec2(self):
         query_name = "instances_ec2"
         request = self.query(None, self.graphql_query[query_name], None)
         return self._dump_nodes(request, query_name)
-
 
     def get_instances_azure(self):
         query_name = "instances_azure"
         request = self.query(None, self.graphql_query[query_name], None)
         return self._dump_nodes(request, query_name)
 
-
     def get_instances_gcp(self):
         query_name = "instances_gcp"
         request = self.query(None, self.graphql_query[query_name], None)
         return self._dump_nodes(request, query_name)
-
 
     def schema(self):
         query = """
@@ -301,13 +303,11 @@ class PolarisClient:
             """
         return self.query(query=query)
 
-
     # Private
 
-    def _get_query_name(self, i):
-        o = re.findall(r'(\S+) ?\(.*\)', i)
+    def _get_query_names_from_graphql_query(self, _graphql_query_text):
+        o = re.findall(r'(\S+) ?\(.*\)', _graphql_query_text)
         return o
-
 
     def _dump_nodes(self, request, query_name):
         o = []
@@ -337,7 +337,6 @@ class PolarisClient:
         request = requests.post(graphql_service_endpoint, json=payload, headers=headers, verify=False)
 
         return request.json()['access_token']
-
 
     def _log(self, log_message):
         """Create properly formatted debug log messages.
