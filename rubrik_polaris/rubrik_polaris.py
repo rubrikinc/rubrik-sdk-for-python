@@ -243,7 +243,6 @@ class PolarisClient:
                 elif key in instance and instance[key] ==  kwargs[key]:
                     c -= 1
             if match_all and bool(c) is False:
-                print("Adding instance")
                 o.append(instance['id'])
             elif not match_all and c < t and bool(c) is True :
                 o.append(instance['id'])
