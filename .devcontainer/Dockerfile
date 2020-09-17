@@ -13,7 +13,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils 2>&1
 
-# Install git, process tools, lsb-release (common in install instructions for CLIs), and zsh shell
+# Install git, process tools, lsb-release (lib in install instructions for CLIs), and zsh shell
 RUN apt-get -y install git procps lsb-release zsh
 
 # Install any missing dependencies for enhanced language service
