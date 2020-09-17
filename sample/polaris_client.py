@@ -18,6 +18,7 @@ args = parser.parse_args()
 rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password, root_domain=args.root_domain,
                                       insecure=args.insecure)
 
+# Current example of ODS on arbitrary lists of EC2 instances
 sla_id = rubrik.get_sla_domains("Bronze")[0]['id']
 object_ids = rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"}, region = "US_WEST_2")
 pp.pprint(object_ids)
