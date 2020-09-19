@@ -28,6 +28,7 @@ def add_account_aws(self, account_id, account_name, regions):
         print(e)
     else:
         _invoke_aws_stack(self, nodes, account_id)
+        return 1
 
 def _invoke_aws_stack(self, nodes, account_id):
     """Invokes AWS Cloudformation configuration for Account
@@ -66,6 +67,8 @@ def _invoke_aws_stack(self, nodes, account_id):
         waiter.wait(StackName = create_stack['StackId'])
     except botocore.exceptions.WaiterError as e:
         print(e)
+    else:
+        return
 
 def get_accounts_aws(self, filter=""):
     """Retrieves AWS account information from Polaris
@@ -152,7 +155,6 @@ def _disable_account_aws(self, polaris_account_id):
         return self._dump_nodes(request, query_name)
     except Exception as e:
         print(inspect.stack()[3])
-        print(e)
 
 def _invoke_account_delete_aws(self, polaris_account_id):
     """Invokes initiation of Delete AWS Account in Polaris
@@ -201,11 +203,11 @@ def _destroy_aws_stack(self, stack_region, stack_name):
 
     try:
         waiter.wait(StackName = stack_name)
-
     except botocore.exceptions.WaiterError as e:
         print('Failed to delete stack: {}').format(stack_name)
         print('{}'.format(e))
-        exit(1)
+    else:
+        return
 
 def delete_account_aws(self):
     import re
@@ -213,13 +215,12 @@ def delete_account_aws(self):
         aws_account_id = self.get_account_aws_native_id()
         polaris_account_info = self.get_accounts_aws_detail(aws_account_id)['awsCloudAccounts'][0]
         polaris_account_id = polaris_account_info['awsCloudAccount']['id']
-        disable_account = self.disable_account_aws(polaris_account_id)
-        while self.get_task_status(disable_account['taskchainUuid'])['taskchain']['state'] not in ["SUCCEEDED",
-                                                                                                     "FAILED"]:
+        disable_account = self._disable_account_aws(polaris_account_id)
+        while self.get_task_status(disable_account['taskchainUuid']) not in ["SUCCEEDED", "FAILED"]:
             time.sleep(3)
-        if self.get_task_status(disable_account['taskchainUuid'])['taskchain']['state'] == "FAILED":
+        if self.get_task_status(disable_account['taskchainUuid']) == "FAILED":
             raise Exception("Account Disable Failure")
-        self.invoke_account_delete_aws(polaris_account_id)
+        self._invoke_account_delete_aws(polaris_account_id)
         for feature_details in polaris_account_info['featureDetails']:
             if feature_details['feature'] == "CLOUD_NATIVE_PROTECTION":
                 stack_name = None
@@ -227,9 +228,9 @@ def delete_account_aws(self):
                     stack_name = match.group(1)
                 for stack_region in feature_details['awsRegions']:
                     stack_region = (re.sub('_', '-', stack_region)).lower()
-                    self.destroy_aws_stack(stack_region, stack_name)
-        commit_delete = self.commit_account_delete_aws(polaris_account_id)
-
+                    self._destroy_aws_stack(stack_region, stack_name)
+        commit_delete = self._commit_account_delete_aws(polaris_account_id)
+        return 1
     except Exception as e:
         print(inspect.stack())
         print(e)
