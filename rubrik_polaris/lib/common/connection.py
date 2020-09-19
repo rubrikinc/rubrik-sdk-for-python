@@ -1,6 +1,6 @@
 """ Collection of methods that control connection with Polaris """
 
-def query(self, operation_name=None, query=None, variables=None, timeout=15):
+def _query(self, operation_name=None, query=None, variables=None, timeout=15):
     import requests
     try:
         self._log('POST {}'.format(self.baseurl))
@@ -32,7 +32,7 @@ def query(self, operation_name=None, query=None, variables=None, timeout=15):
         print(e)
 
 
-def get_access_token(self):
+def _get_access_token(self):
     import requests
     try:
         if 'root_domain' in self.kwargs and self.kwargs['root_domain'] is not None:

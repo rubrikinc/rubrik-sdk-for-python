@@ -1,8 +1,7 @@
 """ Collection of methods that interace with the raw graphql """
 import inspect
 
-
-def build_graphql_maps(self):
+def _build_graphql_maps(self):
     from os import listdir
     from os.path import isfile, join
     try:

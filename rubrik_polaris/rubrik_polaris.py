@@ -27,19 +27,21 @@ import inspect
 
 
 class PolarisClient:
-    from .lib.common.connection import query, get_access_token as _get_access_token
-    from .lib.common.graphql import _dump_nodes, _get_query_names_from_graphql_query
-    from .lib.common.polaris import get_sla_domains, submit_on_demand, submit_assign_sla
-    from .lib.common.polaris import get_task_status
+    # Public
+    from .lib.common.polaris import get_sla_domains, submit_on_demand, submit_assign_sla, get_task_status
     from .lib.compute import get_instances_azure, get_instances_ec2, get_instances_gce
     from .lib.accounts import get_accounts_aws, get_accounts_azure, get_accounts_gcp, delete_account_aws
-    from .lib.accounts import invoke_account_delete_aws, invoke_aws_stack, commit_account_delete_aws
-    from .lib.accounts import destroy_aws_stack
-    from .lib.accounts import add_account_aws, get_accounts_aws_detail, disable_account_aws, get_account_aws_native_id
+    from .lib.accounts import add_account_aws, get_accounts_aws_detail, get_account_aws_native_id
     from .lib.compute import get_object_ids_azure, get_object_ids_ec2, get_object_ids_gce
 
+    # Private
+    from .lib.common.connection import _query, _get_access_token
+    from .lib.common.graphql import _dump_nodes, _get_query_names_from_graphql_query
+    from .lib.accounts import _invoke_account_delete_aws, _invoke_aws_stack, _commit_account_delete_aws
+    from .lib.accounts import _destroy_aws_stack, _disable_account_aws
+
     def __init__(self, domain, username, password, enable_logging=False, logging_level="debug", **kwargs):
-        from .lib.common.graphql import build_graphql_maps
+        from .lib.common.graphql import _build_graphql_maps
 
         self.pp = pprint.PrettyPrinter(indent=4)
 
@@ -89,7 +91,7 @@ class PolarisClient:
         }
 
         # Get graphql content
-        (self.graphql_query, self.graphql_mutation, self.graphql_file_type_map) = build_graphql_maps(self)
+        (self.graphql_query, self.graphql_mutation, self.graphql_file_type_map) = _build_graphql_maps(self)
 
 
     def schema(self):

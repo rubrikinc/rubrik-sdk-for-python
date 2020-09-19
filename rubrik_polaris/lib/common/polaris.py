@@ -18,7 +18,7 @@ def get_sla_domains(self, sla_domain_name=""):
                 "text": sla_domain_name
             }
         }
-        request = self.query(None, self.graphql_query[query_name], variables)
+        request = self._query(None, self.graphql_query[query_name], variables)
         request_nodes = self._dump_nodes(request, query_name)
         if sla_domain_name and len(request_nodes) == 1:
             return request_nodes[0]['id']
@@ -44,7 +44,7 @@ def submit_on_demand(self, object_ids, sla_id):
             "objectIds": object_ids,
             "slaId": sla_id
         }
-        request = self.query(None, self.graphql_mutation[mutation_name], variables)
+        request = self._query(None, self.graphql_mutation[mutation_name], variables)
         result = _dump_nodes(self, request, mutation_name)
         if not result['errors']:
             return result['taskchainUuids']
@@ -66,7 +66,7 @@ def submit_assign_sla(self, object_ids, sla_id):
                 "objectIds": object_ids,
                 "slaId": sla_id
             }
-        request = self.query(None, self.graphql_mutation[mutation_name], variables)
+        request = self._query(None, self.graphql_mutation[mutation_name], variables)
         return  _dump_nodes(self, request, mutation_name)
     except Exception as e:
         print(e)
@@ -82,7 +82,7 @@ def get_task_status(self, task_chain_id):
         variables = {
             "filter": task_chain_id
         }
-        request = self.query(None, self.graphql_query[query_name], variables)
+        request = self._query(None, self.graphql_query[query_name], variables)
         response = _dump_nodes(self, request, query_name)
         return response['taskchain']['state']
     except Exception as e:

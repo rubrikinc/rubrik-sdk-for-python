@@ -28,8 +28,10 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(rubrik.delete_account_aws())
 
 # Run ODS for machines in a region using Gold retention, monitor to complete via threads
-on_demand_jobs = (rubrik.submit_on_demand(rubrik.get_object_ids_ec2(region = "US_WEST_2"), rubrik.get_sla_domains(
-    "Gold")))
+#on_demand_jobs = (rubrik.submit_on_demand(rubrik.get_object_ids_ec2(region = "US_WEST_2"), rubrik.get_sla_domains(
+# "Gold")))
+#on_demand_jobs=(rubrik.submit_on_demand(rubrik.get_object_ids_azure(region="EastUS2"), rubrik.get_sla_domains("Gold")))
+on_demand_jobs=(rubrik.submit_on_demand(rubrik.get_object_ids_gce(region="us-west1"), rubrik.get_sla_domains("Gold")))
 
 def run_threads(data, thread_count, function):
     thread_pool = ThreadPool(thread_count)
@@ -51,6 +53,8 @@ def run_function(on_demand_job):
     print("{} : {} :{}".format(on_demand_job['taskchainUuid'], status, timer() - start))
 run_threads(on_demand_jobs, len(on_demand_jobs), run_function)
 
+###
+
 # pp.pprint(rubrik.get_accounts_aws_detail("789702809484"))
 # pp.pprint(rubrik.get_sla_domains())
 # pp.pprint(rubrik.get_sla_domains("Bronze"))
@@ -65,7 +69,7 @@ run_threads(on_demand_jobs, len(on_demand_jobs), run_function)
 # pp.pprint(rubrik.get_instances_azure())
 
 
-# pp.pprint(rubrik.submit_assign_sla( ["c0eb8a99-be0b-4122-a71e-4337fecddfb6"], "00000000-0000-0000-0000-000000000001" ))
+# pp.pprint(rubrik.submit_assign_sla( ["c0eb8a99-be0b-4122-a71e-4337fecddfb6"],"00000000-0000-0000-0000-000000000002" ))
 # pp.pprint(rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"}))
 # pp.pprint(rubrik.get_object_ids_azure(region = "EastUS2"))
 # pp.pprint(rubrik.get_object_ids_gce(region = "us-west1"))
