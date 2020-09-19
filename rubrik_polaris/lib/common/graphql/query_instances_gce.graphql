@@ -1,4 +1,4 @@
-query GCPInstancesListQuery($first: Int, $after: String, $sortBy: GcpNativeGCEInstanceSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: GcpNativeGceInstanceFilters) {
+query ($first: Int, $after: String, $sortBy: GcpNativeGCEInstanceSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: GcpNativeGceInstanceFilters) {
   gcpNativeGceInstanceConnection(first: $first, after: $after, sortBy: $sortBy, sortOrder: $sortOrder, gceInstanceFilters: $filters) {
     edges {
       node {

@@ -1,0 +1,7 @@
+mutation ($polaris_account_id: UUID!)
+{
+    awsCloudAccountDeleteInitiate(cloudAccountUuid: $polaris_account_id, awsCloudAccountDeleteInitiateArg: { feature: CLOUD_NATIVE_PROTECTION })
+    {
+        cloudFormationUrl
+    }
+}

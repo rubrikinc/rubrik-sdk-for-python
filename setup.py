@@ -77,7 +77,9 @@ setuptools.setup(
     install_requires=[
         'requests >= 2.18.4, != 2.22.0',
         'python-dateutil',
-        'pytz'
+        'pytz',
+        'boto3',
+        'botocore'
     ],
     include_package_data=True,
     data_files = [

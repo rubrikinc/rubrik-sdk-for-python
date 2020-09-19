@@ -1,15 +1,12 @@
-mutation TakeOnDemandSnapshotMutation($slaId: String!, $objectIds: [UUID!]!) {
+mutation ($slaId: String!, $objectIds: [UUID!]!) {
   takeOnDemandSnapshot(slaId: $slaId, snappableIds: $objectIds) {
     taskchainUuids {
       snappableId
       taskchainUuid
-      __typename
     }
     errors {
       snappableId
       error
-      __typename
     }
-    __typename
   }
 }

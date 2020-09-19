@@ -1,4 +1,4 @@
-query FilterQuery($filter: String = "" ) {
+query ($filter: String = "" ) {
     azureNativeSubscriptionConnection(subscriptionFilters:{nameSubstringFilter: {nameSubstring: $filter}}) {
         edges {
             node {

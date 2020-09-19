@@ -1,0 +1,9 @@
+query ($filter: String!){
+    getKorgTaskchainStatus(taskchainId: $filter){
+        taskchain {
+            id
+            state
+            taskchainUuid
+        }
+    }
+}

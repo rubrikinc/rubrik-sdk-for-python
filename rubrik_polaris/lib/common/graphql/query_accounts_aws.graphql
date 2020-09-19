@@ -1,8 +1,15 @@
-query FilterQuery($awsNativeProtectionFeature: AwsNativeProtectionFeatureEnum = EC2, $filter: String = "" ) {
-    awsNativeAccountConnection(awsNativeProtectionFeature: $awsNativeProtectionFeature, accountFilters: {nameSubstringFilter: {nameSubstring: $filter}}) {
+query ($awsNativeProtectionFeature: AwsNativeProtectionFeatureEnum = EC2, $filter: String = "" ) {
+    awsNativeAccountConnection(awsNativeProtectionFeature: $awsNativeProtectionFeature, accountFilters: {
+        nameSubstringFilter: {
+            nameSubstring: $filter
+        }
+    } )
+    {
         edges {
             node {
                 id:id
+                regions
+                status
                 name: name
                 sla_assignment: slaAssignment
                 configured_sla_domain_name: configuredSlaDomain{name}

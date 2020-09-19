@@ -1,5 +1,5 @@
-query SLAListQuery($after: String, $first: Int, $filter: [GlobalSlaFilterInput!], $sortBy: SLAQuerySortByFieldEnum, $sortOrder: SLAQuerySortByOrderEnum) {
-  globalSlaConnection(after: $after, first: $first, filter: $filter, sortBy: $sortBy, sortOrder: $sortOrder) {
+query ($filter: [GlobalSlaFilterInput!]) {
+  globalSlaConnection(filter: $filter) {
     edges {
       node {
         name

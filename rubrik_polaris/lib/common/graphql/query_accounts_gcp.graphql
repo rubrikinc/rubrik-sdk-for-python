@@ -1,4 +1,4 @@
-query FilterQuery($filter: String = "") {
+query ($filter: String = "") {
     gcpNativeProjectConnection(projectFilters: {nameOrNumberSubstringFilter: {nameOrNumberSubstring: $filter}}){
         edges {
             node {
