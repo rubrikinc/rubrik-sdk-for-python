@@ -28,7 +28,7 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(rubrik.delete_account_aws())
 
 # Run ODS for machines in a region using Gold retention, monitor to complete via threads
-on_demand_job = (rubrik.submit_on_demand(rubrik.get_object_ids_ec2(region = "US_WEST_2"), rubrik.get_sla_domains(
+on_demand_jobs = (rubrik.submit_on_demand(rubrik.get_object_ids_ec2(region = "US_WEST_2"), rubrik.get_sla_domains(
     "Gold")))
 
 def run_threads(data, thread_count, function):
@@ -49,7 +49,7 @@ def run_function(on_demand_job):
         time.sleep(3)
     status = rubrik.get_task_status(on_demand_job['taskchainUuid'])
     print("{} : {} :{}".format(on_demand_job['taskchainUuid'], status, timer() - start))
-run_threads(on_demand_job, len(on_demand_job), run_function)
+run_threads(on_demand_jobs, len(on_demand_jobs), run_function)
 
 # pp.pprint(rubrik.get_accounts_aws_detail("789702809484"))
 # pp.pprint(rubrik.get_sla_domains())
