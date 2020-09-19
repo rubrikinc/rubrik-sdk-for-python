@@ -12,8 +12,6 @@ query ($filter: [GlobalSlaFilterInput!]) {
       endCursor
       hasNextPage
       hasPreviousPage
-      __typename
     }
-    __typename
   }
 }

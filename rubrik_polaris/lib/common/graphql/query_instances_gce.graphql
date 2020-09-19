@@ -18,22 +18,18 @@ query ($first: Int, $after: String, $sortBy: GcpNativeGCEInstanceSortFieldsEnum,
             cluster {
               id
               name
-              __typename
             }
-            __typename
           }
           ... on GlobalSla {
             id
-            __typename
+            name
           }
-          __typename
         }
         gcpNativeProject {
           id
           name
           nativeId
           status
-          __typename
         }
         slaAssignment
         authorizedOperations
@@ -41,18 +37,13 @@ query ($first: Int, $after: String, $sortBy: GcpNativeGCEInstanceSortFieldsEnum,
           fid
           name
           objectType
-          __typename
         }
-        __typename
       }
-      __typename
     }
     pageInfo {
       endCursor
       hasNextPage
       hasPreviousPage
-      __typename
     }
-    __typename
   }
 }

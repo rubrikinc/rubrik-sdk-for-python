@@ -12,9 +12,7 @@ query ($first: Int, $after: String, $sortBy: AzureNativeVirtualMachineSortFields
             id
             name
             nativeId
-            __typename
           }
-          __typename
         }
         region
         vnetName
@@ -28,15 +26,12 @@ query ($first: Int, $after: String, $sortBy: AzureNativeVirtualMachineSortFields
             cluster {
               id
               name
-              __typename
             }
-            __typename
           }
           ... on GlobalSla {
-            id
-            __typename
+              id
+              name
           }
-          __typename
         }
         slaAssignment
         authorizedOperations
@@ -44,18 +39,13 @@ query ($first: Int, $after: String, $sortBy: AzureNativeVirtualMachineSortFields
           fid
           name
           objectType
-          __typename
         }
-        __typename
       }
-      __typename
     }
     pageInfo {
       endCursor
       hasNextPage
       hasPreviousPage
-      __typename
     }
-    __typename
   }
 }
