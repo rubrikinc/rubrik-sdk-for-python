@@ -40,10 +40,10 @@ class PolarisClient:
     from .lib.accounts import _invoke_account_delete_aws, _invoke_aws_stack, _commit_account_delete_aws
     from .lib.accounts import _destroy_aws_stack, _disable_account_aws
 
-    def __init__(self, domain, username, password, enable_logging=False, logging_level="debug", **kwargs):
+    def __init__(self, _domain, _username, _password, enable_logging=False, logging_level="debug", **kwargs):
         from .lib.common.graphql import _build_graphql_maps
 
-        self.pp = pprint.PrettyPrinter(indent=4)
+        self._pp = pprint.PrettyPrinter(indent=4)
 
         # Enable logging for the SDK
         valid_logging_levels = {
@@ -63,129 +63,35 @@ class PolarisClient:
             logging.getLogger().setLevel(valid_logging_levels[self.logging_level])
 
         # Set base variables
-        self.kwargs = kwargs
-        self.domain = domain
-        self.username = username
-        self.password = password
-        self.module_path = os.path.dirname(os.path.realpath(__file__))
-        self.data_path = "{}/graphql/".format(self.module_path)
-        self._log("Polaris Domain: {}".format(self.domain))
+        self._kwargs = kwargs
+        self._domain = _domain
+        self._username = _username
+        self._password = _password
+        self._module_path = os.path.dirname(os.path.realpath(__file__))
+        self._data_path = "{}/graphql/".format(self.module_path)
+        self._log("Polaris Domain: {}".format(self._domain))
 
         # Switch off SSL checks if needed
-        if 'insecure' in self.kwargs and self.kwargs['insecure']:
+        if 'insecure' in self._kwargs and self._kwargs['insecure']:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         # Adjust Polaris domain if a custom root is defined
-        if 'root_domain' in kwargs and kwargs['root_domain'] is not None:
-            self.baseurl = "https://{}.{}/api/graphql".format(self.domain, self.kwargs['root_domain'])
+        if 'root_domain' in self._kwargs and self._kwargs['root_domain'] is not None:
+            self._baseurl = "https://{}.{}/api/graphql".format(self._domain, self._kwargs['root_domain'])
         else:
-            self.baseurl = "https://{}.my.rubrik.com/api/graphql".format(self.domain)
+            self._baseurl = "https://{}.my.rubrik.com/api/graphql".format(self._domain)
 
         # Get Auth Token and assemble header
-        self.access_token = self._get_access_token()
-        del(self.username, self.password)
-        self.headers = {
+        self._access_token = self._get_access_token()
+        del(self._username, self._password)
+        self._headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': 'Bearer ' + self.access_token
+            'Authorization': 'Bearer ' + self._access_token
         }
 
         # Get graphql content
-        (self.graphql_query, self.graphql_mutation, self.graphql_file_type_map) = _build_graphql_maps(self)
-
-
-    def schema(self):
-        query = """
-            fragment FullType on __Type {
-                kind
-                name
-                fields(includeDeprecated: true) {
-                    name
-                    args {
-                        ...InputValue
-                    }
-                    type {
-                        ...TypeRef
-                    }
-                    isDeprecated
-                    deprecationReason
-                }
-                inputFields {
-                    ...InputValue
-                }
-                interfaces {
-                    ...TypeRef
-                }
-                enumValues(includeDeprecated: true) {
-                    name
-                    isDeprecated
-                    deprecationReason
-                }
-                possibleTypes {
-                    ...TypeRef
-                }
-            }
-            fragment InputValue on __InputValue {
-                name
-                type {
-                    ...TypeRef
-                }
-                defaultValue
-            }
-            fragment TypeRef on __Type {
-                kind
-                name
-                ofType {
-                    kind
-                    name
-                    ofType {
-                        kind
-                        name
-                        ofType {
-                            kind
-                            name
-                            ofType {
-                                kind
-                                name
-                                ofType {
-                                    kind
-                                    name
-                                    ofType {
-                                        kind
-                                        name
-                                        ofType {
-                                            kind
-                                            name
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            query IntrospectionQuery {
-                __schema {
-                    queryType {
-                        name
-                    }
-                    mutationType {
-                        name
-                    }
-                    types {
-                        ...FullType
-                    }
-                    directives {
-                        name
-                        locations
-                        args {
-                            ...InputValue
-                        }
-                    }
-                }
-            }
-            """
-        return self.query(query=query)
+        (self._graphql_query, self._graphql_mutation, self._graphql_file_type_map) = _build_graphql_maps(self)
 
     def _log(self, log_message):
         """Create properly formatted debug log messages.
@@ -193,9 +99,7 @@ class PolarisClient:
         Arguments:
             log_message {str} -- The message to pass to the debug log.
         """
-
         log = logging.getLogger(__name__)
-
         set_logging = {
             "debug": log.debug,
             "critical": log.critical,

@@ -11,23 +11,23 @@ def get_sla_domains(self, sla_domain_name=""):
 
    """
     try:
-        query_name = "sla_domains"
-        variables = {
+        _query_name = "sla_domains"
+        _variables = {
             "filter": {
                 "field": "NAME",
                 "text": sla_domain_name
             }
         }
-        request = self._query(None, self.graphql_query[query_name], variables)
-        request_nodes = self._dump_nodes(request, query_name)
-        if sla_domain_name and len(request_nodes) == 1:
-            return request_nodes[0]['id']
-        elif sla_domain_name and len(request_nodes) > 1:
-            for i in request_nodes:
+        _request = self._query(None, self.graphql_query[_query_name], _variables)
+        _request_nodes = self._dump_nodes(_request, _query_name)
+        if sla_domain_name and len(_request_nodes) == 1:
+            return _request_nodes[0]['id']
+        elif sla_domain_name and len(_request_nodes) > 1:
+            for i in _request_nodes:
                 if i['name'] == sla_domain_name:
                     return i['id']
         else:
-            return request_nodes
+            return _request_nodes
     except Exception as e:
         print(e)
 
@@ -39,13 +39,15 @@ def submit_on_demand(self, object_ids, sla_id):
         sla_id string -- Rubrik SLA Domain ID
     """
     try:
-        mutation_name = "on_demand"
-        variables = {
+        _mutation_name = "on_demand"
+        _variables = {
             "objectIds": object_ids,
             "slaId": sla_id
         }
-        request = self._query(None, self.graphql_mutation[mutation_name], variables)
-        result = _dump_nodes(self, request, mutation_name)
+        request = self._query(None, self.graphql_mutation[_mutation_name], _variables)
+        if not request:
+            raise Exception("Problem submitting on denamd snapshot")
+        result = _dump_nodes(self, request, _mutation_name)
         if not result['errors']:
             return result['taskchainUuids']
         else:
@@ -53,7 +55,7 @@ def submit_on_demand(self, object_ids, sla_id):
     except Exception as e:
         print(e)
 
-def submit_assign_sla(self, object_ids, sla_id):
+def submit_assign_sla(self, _object_ids, _sla_id):
     """Submits a Rubrik SLA change for objects
 
         Arguments:
@@ -61,30 +63,30 @@ def submit_assign_sla(self, object_ids, sla_id):
             sla_id string -- Rubrik SLA Domain ID
         """
     try:
-        mutation_name = "assign_sla"
-        variables = {
-                "objectIds": object_ids,
-                "slaId": sla_id
+        _mutation_name = "assign_sla"
+        _variables = {
+                "objectIds": _object_ids,
+                "slaId": _sla_id
             }
-        request = self._query(None, self.graphql_mutation[mutation_name], variables)
-        return  _dump_nodes(self, request, mutation_name)
+        request = self._query(None, self.graphql_mutation[_mutation_name], _variables)
+        return  _dump_nodes(self, request, _mutation_name)
     except Exception as e:
         print(e)
 
-def get_task_status(self, task_chain_id):
+def get_task_status(self, _task_chain_id):
     """Retrieve task status from Polaris
 
         Arguments:
             task_id [uuid] -- Task UUID from request
         """
-    query_name = "taskchain_status"
+    _query_name = "taskchain_status"
     try:
-        variables = {
-            "filter": task_chain_id
+        _variables = {
+            "filter": _task_chain_id
         }
-        request = self._query(None, self.graphql_query[query_name], variables)
-        response = _dump_nodes(self, request, query_name)
-        return response['taskchain']['state']
+        _request = self._query(None, self.graphql_query[_query_name], _variables)
+        _response = _dump_nodes(self, _request, _query_name)
+        return _response['taskchain']['state']
     except Exception as e:
         print(inspect.stack()[3])
         print(e)
