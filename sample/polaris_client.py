@@ -22,35 +22,15 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
                                       insecure=args.insecure)
 
 # Add AWS Acct
-pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
+# pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
 # Remove AWS Acct
-pp.pprint(rubrik.delete_account_aws())
+# pp.pprint(rubrik.delete_account_aws())
 
 # Run ODS for machines in a region using Gold retention, monitor to complete via threads
-#on_demand_jobs=(rubrik.submit_on_demand(rubrik.get_object_ids_gce(region="us-west1"), rubrik.get_sla_domains("Gold"), wait = True))
-
-# def run_threads(data, thread_count, function):
-#     thread_pool = ThreadPool(thread_count)
-#     pool_instance = thread_pool.map_async(function, data, chunksize=1)
-#     while not pool_instance.ready():
-#         time.sleep(3)
-#     thread_pool.close()
-#     thread_pool.join()
-# def run_function(on_demand_job):
-#     start = timer()
-#     last_status = None
-#     while rubrik.get_task_status(on_demand_job['taskchainUuid']) not in ["SUCCEEDED", "FAILED"]:
-#         status = rubrik.get_task_status(on_demand_job['taskchainUuid'])
-#         if status != last_status:
-#             print("{} : {} : {}".format(on_demand_job['taskchainUuid'], status, timer() - start))
-#             last_status = status
-#         time.sleep(3)
-#     status = rubrik.get_task_status(on_demand_job['taskchainUuid'])
-#     print("{} : {} :{}".format(on_demand_job['taskchainUuid'], status, timer() - start))
-# run_threads(on_demand_jobs, len(on_demand_jobs), run_function)
-#
-
-###
+# on_demand_jobs=(rubrik.submit_on_demand(rubrik.get_object_ids_gce(region="us-west1"), rubrik.get_sla_domains(
+# "Gold"), wait = True))
+pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_gce(region="us-west1"), rubrik.get_sla_domains(
+    "Gold"), wait = True))
 
 # pp.pprint(rubrik.get_accounts_aws_detail("789702809484"))
 # pp.pprint(rubrik.get_sla_domains())
