@@ -43,16 +43,15 @@ def submit_on_demand(self, object_ids, sla_id, **kwargs):
             "slaId": sla_id
         }
         _request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
-        if not _request:
-            raise Exception("Problem submitting on denamd snapshot")
         _result = self._dump_nodes(_request, _mutation_name)
-        if not _result['errors']:
-            if 'wait' in kwargs:
-                self._monitor_task(_result['taskchainUuids'])
-            return _result['taskchainUuids']
-        else:
+        _results = []
+        if _result['errors']:
+            for _error_object in _result['errors']:
+                _results.append(_error_object)
+        if 'wait' in kwargs:
+            _results = self._monitor_task(_result['taskchainUuids'])
+        return _results
             #todo: find a better way to report errors per uuid
-            raise Exception(_result['errors'])
     except Exception as e:
         print(e)
 

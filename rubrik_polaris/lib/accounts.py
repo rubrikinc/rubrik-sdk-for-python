@@ -129,19 +129,25 @@ def get_account_aws_native_id(self):
     except Exception as e:
         print(e)
 
-def _disable_account_aws(self, polaris_account_id):
+def _disable_account_aws(self, _polaris_account_id):
     """Disables AWS Account in Polaris
 
     Arguments:
         aws_account_id {str} -- Account ID to disable in Polaris
     """
     try:
-        query_name = "account_disable_aws"
-        variables = {
-            "polaris_account_id": polaris_account_id
+        _query_name = "account_disable_aws"
+        _variables = {
+            "polaris_account_id": _polaris_account_id
         }
-        request = self._query(None, self._graphql_mutation[query_name], variables)
-        return self._dump_nodes(request, query_name)
+        _request = self._query(None, self._graphql_mutation[_query_name], _variables)
+        _monitor = self._monitor_task(self._dump_nodes(_request, _query_name))
+        self._pp.pprint(_monitor)
+        if _monitor['status'] == 'SUCCEEDED':
+            return 1
+        else:
+            raise Exception("Failed to disable account")
+        return _monitor
     except Exception as e:
         print(e)
 
@@ -203,10 +209,6 @@ def delete_account_aws(self):
         polaris_account_info = self.get_accounts_aws_detail(aws_account_id)['awsCloudAccounts'][0]
         polaris_account_id = polaris_account_info['awsCloudAccount']['id']
         disable_account = self._disable_account_aws(polaris_account_id)
-        while self.get_task_status(disable_account['taskchainUuid']) not in ["SUCCEEDED", "FAILED"]:
-            time.sleep(3)
-        if self.get_task_status(disable_account['taskchainUuid']) == "FAILED":
-            raise Exception("Account Disable Failure")
         self._invoke_account_delete_aws(polaris_account_id)
         for feature_details in polaris_account_info['featureDetails']:
             if feature_details['feature'] == "CLOUD_NATIVE_PROTECTION":
