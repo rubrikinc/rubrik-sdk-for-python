@@ -23,6 +23,7 @@ import inspect
 import logging
 import os
 import shutil
+import sys
 
 import jinja2
 import rubrik_cdm
@@ -327,8 +328,10 @@ if __name__ == "__main__":
     try:
         os.mkdir(build_directory)
     except FileExistsError:
-        pass
-
+        # Empty existing directory
+        for f in glob.glob('{}/*'.format(build_directory)):
+            os.remove(f)
+    
     # Copy static markdown files from docs/ to the build directory
     for f in glob.glob(r'docs/*.md'):
         shutil.copy(f, build_directory)
