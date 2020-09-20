@@ -24,15 +24,6 @@ import jinja2
 import rubrik_cdm
 import logging
 
-# Define the logging params
-console_output_handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] -- %(message)s")
-console_output_handler.setFormatter(formatter)
-
-log = logging.getLogger(__name__)
-log.addHandler(console_output_handler)
-# Uncomment to enable debug logging
-# log.setLevel(logging.DEBUG)
 
 def _is_internal_function(name):
     return name.startswith('_')
@@ -169,13 +160,30 @@ def _parse_return_values(docstring):
     for line in docstring:
         line = line.strip().split(' -- ', 1)
         if line[0] is not '':
-            try:
-                return_values.append({'type': line[0], 'description': line[1]})
-            except:
-                log.debug("Found malformed section")
-                return ""
-            else:
-                return return_values
+            description = ""
+            if len(line) > 1:
+                description = line[1]
+            
+            return_values.append({
+                'type': line[0], 
+                'description': description
+            })
+    
+    return return_values
+
+
+def _parse_exceptions(docstring):
+    exceptions = []
+
+    for line in docstring:
+        line = line.strip().split(' -- ', 1)
+        if line[0] is not '':
+            exceptions.append({
+                'type': line[0], 
+                'description': line[1]
+            })
+    
+    return exceptions
 
 
 def parse_docstring(docstring):
@@ -183,20 +191,24 @@ def parse_docstring(docstring):
         'description': [],
         'arguments': [],
         'keyword_arguments': [],
-        'returns': []
+        'returns': [],
+        'exceptions': []
     }
 
     #log.debug('Parsing: {}'.format(docstring))
     current_section = 'description'
     for line in docstring.splitlines():
-        if 'Returns' in line:
+        if 'Returns:' in line:
             current_section = 'returns'
             continue
-        elif 'Arguments' in line and 'Keyword' not in line:
+        elif 'Arguments:' in line and 'Keyword' not in line:
             current_section = 'arguments'
             continue
-        elif 'Keyword Arguments' in line:
+        elif 'Keyword Arguments:' in line:
             current_section = 'keyword_arguments'
+            continue
+        elif 'Exceptions:' in line:
+            current_section = 'exceptions'
             continue
         else:
             if len(line.strip()) > 0:
@@ -206,7 +218,8 @@ def parse_docstring(docstring):
         'description': ' '.join(sections['description']),
         'arguments': _parse_arguments(sections['arguments']),
         'keyword_arguments': _parse_keyword_arguments(sections['keyword_arguments']),
-        'returns': _parse_return_values(sections['returns'])
+        'returns': _parse_return_values(sections['returns']),
+        'exceptions': _parse_exceptions(sections['exceptions'])
     }
 
 
@@ -232,12 +245,12 @@ def generate_function_doc(env, name, obj):
     log.debug('Generating function documentation for {}'.format(name))
     try:
         if not _is_internal_function(name):
-            with open("../sample/{}.py".format(name)) as code:
+            with open("sample/{}.py".format(name)) as code:
                 example_code = code.read()
     except Exception as err:
         log.debug(err)
         log.debug('Skipping code example for {}'.format(name))
-        with open('{}.md'.format(name), 'w') as md:
+        with open('docs/{}.md'.format(name), 'w') as md:
             md.write(template.render(
                 name=name,
                 funcdef=funcdef, 
@@ -245,10 +258,11 @@ def generate_function_doc(env, name, obj):
                 arguments=sections['arguments'],
                 keyword_arguments=sections['keyword_arguments'],
                 returns=sections['returns'],
+                exceptions=sections['exceptions'],
                 example=""
             ))
     else:
-        with open('{}.md'.format(name), 'w') as md:
+        with open('docs/{}.md'.format(name), 'w') as md:
             md.write(template.render(
                 name=name,
                 funcdef=funcdef,
@@ -256,9 +270,10 @@ def generate_function_doc(env, name, obj):
                 arguments=sections['arguments'],
                 keyword_arguments=sections['keyword_arguments'],
                 returns=sections['returns'],
+                exceptions=sections['exceptions'],
                 example=example_code
             ))
-    log.debug('Wrote {}.md'.format(name))
+    log.debug('Wrote docs/{}.md'.format(name))
 
 
 def _sorted(functions):
@@ -272,7 +287,7 @@ def generate_summary_doc(env, functions):
 
     template = env.get_template('SUMMARY.md.j2')
 
-    with open('SUMMARY.md', 'w') as md:
+    with open('docs/SUMMARY.md', 'w') as md:
         md.write(template.render(
             base_functions=_sorted(functions['Api']['public']), 
             bootstrap_functions=_sorted(functions['Bootstrap']['public']),
@@ -286,9 +301,19 @@ def generate_summary_doc(env, functions):
 
 
 if __name__ == "__main__":
+    # Define the logging params
+    console_output_handler = logging.StreamHandler()
+    formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] -- %(message)s")
+    console_output_handler.setFormatter(formatter)
+
+    log = logging.getLogger(__name__)
+    log.addHandler(console_output_handler)
+    # Uncomment to enable debug logging
+    # log.setLevel(logging.DEBUG)
+
     # Create template environment
     env = jinja2.Environment(
-        loader=jinja2.PackageLoader('create_docs', 'templates'),
+        loader=jinja2.PackageLoader('create_docs', 'docs/templates'),
         trim_blocks=True,
         lstrip_blocks=True
     )
