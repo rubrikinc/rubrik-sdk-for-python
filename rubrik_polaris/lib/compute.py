@@ -88,7 +88,6 @@ def get_instances_ec2(self):
     except Exception as e:
         print(e)
 
-
 def get_instances_azure(self):
     ### Retrieve all Azure instances from Polaris ###
     try:

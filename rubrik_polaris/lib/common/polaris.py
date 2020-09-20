@@ -1,6 +1,7 @@
 """ Collection of lib methods that interact with Polaris primitives"""
 import inspect
 from .graphql import _dump_nodes
+from .monitor import _monitor_task
 
 def get_sla_domains(self, _sla_domain_name=""):
     """Retrieves dictionary of SLA Domain Names and Identifiers,
@@ -31,7 +32,7 @@ def get_sla_domains(self, _sla_domain_name=""):
     except Exception as e:
         print(e)
 
-def submit_on_demand(self, object_ids, sla_id):
+def submit_on_demand(self, object_ids, sla_id, **kwargs):
     """Submits On Demand Snapshot
 
     Arguments:
@@ -44,14 +45,17 @@ def submit_on_demand(self, object_ids, sla_id):
             "objectIds": object_ids,
             "slaId": sla_id
         }
-        request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
-        if not request:
+        _request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
+        if not _request:
             raise Exception("Problem submitting on denamd snapshot")
-        result = _dump_nodes(self, request, _mutation_name)
-        if not result['errors']:
-            return result['taskchainUuids']
+        _result = _dump_nodes(self, _request, _mutation_name)
+        if not _result['errors']:
+            if 'wait' in kwargs:
+                self._monitor_task(_result['taskchainUuids'])
+            return _result['taskchainUuids']
         else:
-            raise Exception(result['errors'])
+            #todo: find a better way to report errors per uuid
+            raise Exception(_result['errors'])
     except Exception as e:
         print(e)
 
