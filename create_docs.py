@@ -18,11 +18,14 @@
 #  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #  DEALINGS IN THE SOFTWARE.
 
+import glob
 import inspect
+import logging
+import os
+import shutil
 
 import jinja2
 import rubrik_cdm
-import logging
 
 
 def _is_internal_function(name):
@@ -250,7 +253,7 @@ def generate_function_doc(env, name, obj):
     except Exception as err:
         log.debug(err)
         log.debug('Skipping code example for {}'.format(name))
-        with open('docs/{}.md'.format(name), 'w') as md:
+        with open('{}/{}.md'.format(build_directory, name), 'w') as md:
             md.write(template.render(
                 name=name,
                 funcdef=funcdef, 
@@ -262,7 +265,7 @@ def generate_function_doc(env, name, obj):
                 example=""
             ))
     else:
-        with open('docs/{}.md'.format(name), 'w') as md:
+        with open('{}/{}.md'.format(build_directory, name), 'w') as md:
             md.write(template.render(
                 name=name,
                 funcdef=funcdef,
@@ -273,7 +276,7 @@ def generate_function_doc(env, name, obj):
                 exceptions=sections['exceptions'],
                 example=example_code
             ))
-    log.debug('Wrote docs/{}.md'.format(name))
+    log.debug('Wrote {}/{}.md'.format(build_directory, name))
 
 
 def _sorted(functions):
@@ -287,7 +290,7 @@ def generate_summary_doc(env, functions):
 
     template = env.get_template('SUMMARY.md.j2')
 
-    with open('docs/SUMMARY.md', 'w') as md:
+    with open('{}/SUMMARY.md'.format(build_directory), 'w') as md:
         md.write(template.render(
             base_functions=_sorted(functions['Api']['public']), 
             bootstrap_functions=_sorted(functions['Bootstrap']['public']),
@@ -317,6 +320,18 @@ if __name__ == "__main__":
         trim_blocks=True,
         lstrip_blocks=True
     )
+
+    build_directory = 'docs/_build'
+
+    # Create build directory
+    try:
+        os.mkdir(build_directory)
+    except FileExistsError:
+        pass
+
+    # Copy static markdown files from docs/ to the build directory
+    for f in glob.glob(r'docs/*.md'):
+        shutil.copy(f, build_directory)
 
     # Get all functions defined in the SDK, both public and internal ones
     sdk_functions = get_sdk_functions()
