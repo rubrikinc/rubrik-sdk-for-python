@@ -1,15 +1,5 @@
 """ Collection of functions that manipulate account components """
-
-# Get our account ID from the aws account id (polaris)
-# Disable Account (polaris)
-# Wait until account shows DISABLED (polaris)
-# Something else that says Delete (polaris)
-# Remove Stack (boto)
-# Really delete (polaris)
-import inspect
 import time
-
-
 def add_account_aws(self, account_id, account_name, regions):
     """Adds AWS account to Polaris
     """
@@ -20,7 +10,7 @@ def add_account_aws(self, account_id, account_name, regions):
             "account_name": account_name,
             "regions": regions
         }
-        request = self._query(None, self.graphql_mutation[query_name], variables)
+        request = self._query(None, self._graphql_mutation[query_name], variables)
         nodes = self._dump_nodes(request, query_name)
         if nodes['errorMessage']:
             raise Exception("Account {} already added".format(account_id))
@@ -78,7 +68,7 @@ def get_accounts_aws(self, filter=""):
         variables = {
             "filter": filter
         }
-        request = self._query(None, self.graphql_query[query_name], variables)
+        request = self._query(None, self._graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
     except Exception as e:
         print(e)
@@ -94,7 +84,7 @@ def get_accounts_gcp(self, filter=""):
         variables = {
             "filter": filter
         }
-        request = self._query(None, self.graphql_query[query_name], variables)
+        request = self._query(None, self._graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
     except Exception as e:
         print(e)
@@ -110,7 +100,7 @@ def get_accounts_azure(self, filter=""):
         variables = {
             "filter": filter
         }
-        request = self._query(None, self.graphql_query[query_name], variables)
+        request = self._query(None, self._graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
     except Exception as e:
         print(e)
@@ -126,7 +116,7 @@ def get_accounts_aws_detail(self, filter = ""):
         variables = {
             "filter": filter
         }
-        request = self._query(None, self.graphql_query[query_name], variables)
+        request = self._query(None, self._graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
     except Exception as e:
         print(e)
@@ -137,7 +127,6 @@ def get_account_aws_native_id(self):
         boto_account_id = boto3.client('sts').get_caller_identity().get('Account')
         return boto_account_id
     except Exception as e:
-        print(inspect.stack()[3])
         print(e)
 
 def _disable_account_aws(self, polaris_account_id):
@@ -151,10 +140,10 @@ def _disable_account_aws(self, polaris_account_id):
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(None, self.graphql_mutation[query_name], variables)
+        request = self._query(None, self._graphql_mutation[query_name], variables)
         return self._dump_nodes(request, query_name)
     except Exception as e:
-        print(inspect.stack()[3])
+        print(e)
 
 def _invoke_account_delete_aws(self, polaris_account_id):
     """Invokes initiation of Delete AWS Account in Polaris
@@ -167,10 +156,9 @@ def _invoke_account_delete_aws(self, polaris_account_id):
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(None, self.graphql_mutation[query_name], variables)
+        request = self._query(None, self._graphql_mutation[query_name], variables)
         return self._dump_nodes(request, query_name)
     except Exception as e:
-        print(inspect.stack()[3])
         print(e)
 
 
@@ -185,17 +173,16 @@ def _commit_account_delete_aws(self, polaris_account_id):
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(None, self.graphql_mutation[query_name], variables)
+        request = self._query(None, self._graphql_mutation[query_name], variables)
         return self._dump_nodes(request, query_name)
     except Exception as e:
-        print(inspect.stack()[3])
         print(e)
 
 def _destroy_aws_stack(self, stack_region, stack_name):
     import boto3, botocore
     client = boto3.client('cloudformation', region_name = stack_region)
     try:
-        delete_stack = client.delete_stack(StackName = stack_name)
+        self.delete_stack = client.delete_stack(StackName = stack_name)
     except Exception as e:
         print('Stack deletion failed with error:\n  {}').format(str(e))
 
@@ -232,7 +219,6 @@ def delete_account_aws(self):
         commit_delete = self._commit_account_delete_aws(polaris_account_id)
         return 1
     except Exception as e:
-        print(inspect.stack())
         print(e)
 
 

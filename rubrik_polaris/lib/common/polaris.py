@@ -1,7 +1,4 @@
 """ Collection of lib methods that interact with Polaris primitives"""
-import inspect
-from .graphql import _dump_nodes
-from .monitor import _monitor_task
 
 def get_sla_domains(self, _sla_domain_name=""):
     """Retrieves dictionary of SLA Domain Names and Identifiers,
@@ -48,7 +45,7 @@ def submit_on_demand(self, object_ids, sla_id, **kwargs):
         _request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
         if not _request:
             raise Exception("Problem submitting on denamd snapshot")
-        _result = _dump_nodes(self, _request, _mutation_name)
+        _result = self._dump_nodes(_request, _mutation_name)
         if not _result['errors']:
             if 'wait' in kwargs:
                 self._monitor_task(_result['taskchainUuids'])
@@ -73,7 +70,7 @@ def submit_assign_sla(self, _object_ids, _sla_id):
                 "slaId": _sla_id
             }
         request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
-        return  _dump_nodes(self, request, _mutation_name)
+        return  self._dump_nodes(request, _mutation_name)
     except Exception as e:
         print(e)
 
@@ -89,10 +86,9 @@ def get_task_status(self, _task_chain_id):
             "filter": _task_chain_id
         }
         _request = self._query(None, self._graphql_query[_query_name], _variables)
-        _response = _dump_nodes(self, _request, _query_name)
+        _response = self._dump_nodes(_request, _query_name)
         return _response['taskchain']['state']
     except Exception as e:
-        print(inspect.stack()[3])
         print(e)
 
 

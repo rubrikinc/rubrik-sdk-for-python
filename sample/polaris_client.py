@@ -22,16 +22,12 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
                                       insecure=args.insecure)
 
 # Add AWS Acct
-# pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
+pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
 # Remove AWS Acct
-# pp.pprint(rubrik.delete_account_aws())
+pp.pprint(rubrik.delete_account_aws())
 
 # Run ODS for machines in a region using Gold retention, monitor to complete via threads
-#on_demand_jobs = (rubrik.submit_on_demand(rubrik.get_object_ids_ec2(region = "US_WEST_2"), rubrik.get_sla_domains(
-# "Gold")))
-#on_demand_jobs=(rubrik.submit_on_demand(rubrik.get_object_ids_azure(region="EastUS2"), rubrik.get_sla_domains("Gold")))
-on_demand_jobs=(rubrik.submit_on_demand(rubrik.get_object_ids_gce(region="us-west1"), rubrik.get_sla_domains("Gold"),
-                                        wait = True))
+#on_demand_jobs=(rubrik.submit_on_demand(rubrik.get_object_ids_gce(region="us-west1"), rubrik.get_sla_domains("Gold"), wait = True))
 
 # def run_threads(data, thread_count, function):
 #     thread_pool = ThreadPool(thread_count)

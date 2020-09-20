@@ -23,7 +23,6 @@ import os
 import urllib3
 from .exceptions import InvalidParameterException
 import pprint
-import inspect
 
 
 class PolarisClient:
