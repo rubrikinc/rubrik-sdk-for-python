@@ -67,8 +67,7 @@ class PolarisClient:
         self._domain = _domain
         self._username = _username
         self._password = _password
-        self._module_path = os.path.dirname(os.path.realpath(__file__))
-        self._data_path = "{}/graphql/".format(self.module_path)
+        self._data_path = "{}/graphql/".format(os.path.dirname(os.path.realpath(__file__)))
         self._log("Polaris Domain: {}".format(self._domain))
 
         # Switch off SSL checks if needed

@@ -20,7 +20,6 @@ args = parser.parse_args()
 
 rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password, root_domain=args.root_domain,
                                       insecure=args.insecure)
-rubrik.
 
 # Add AWS Acct
 # pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
@@ -52,7 +51,6 @@ def run_function(on_demand_job):
     print("{} : {} :{}".format(on_demand_job['taskchainUuid'], status, timer() - start))
 run_threads(on_demand_jobs, len(on_demand_jobs), run_function)
 
-rubrik.
 
 ###
 

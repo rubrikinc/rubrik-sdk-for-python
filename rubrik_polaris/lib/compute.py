@@ -83,7 +83,7 @@ def get_instances_ec2(self):
     ### Retrieve all EC2 instances from Polaris ###
     try:
         _query_name = "instances_ec2"
-        _request = self._query(None, self.graphql_query[_query_name], None)
+        _request = self._query(None, self._graphql_query[_query_name], None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
@@ -93,7 +93,7 @@ def get_instances_azure(self):
     ### Retrieve all Azure instances from Polaris ###
     try:
         _query_name = "instances_azure"
-        _request = self._query(None, self.graphql_query[_query_name], None)
+        _request = self._query(None, self._graphql_query[_query_name], None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
@@ -103,7 +103,7 @@ def get_instances_gce(self):
     ### Retrieve all GCE instances from Polaris ###
     try:
         _query_name = "instances_gce"
-        _request = self._query(None, self.graphql_query[_query_name], None)
+        _request = self._query(None, self._graphql_query[_query_name], None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)

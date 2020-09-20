@@ -15,6 +15,7 @@ def _build_graphql_maps(self):
         for _f in [_f for _f in listdir(self._data_path) if isfile(join(self._data_path, _f))]:
             _query_name = None
             if _f.endswith(_file_suffix):
+                _graphql_file = None
                 if _f.startswith(_file_query_prefix):
                     _query_name = _f.replace(_file_suffix, '').replace('{}_'.format(_file_query_prefix), '')
                     _graphql_file = open("{}{}".format(self._data_path, _f), 'r').read()
@@ -29,10 +30,10 @@ def _build_graphql_maps(self):
         print(inspect.stack[3])
         print(e)
 
-def _get_query_names_from_graphql_query(self, graphql_query_text):
+def _get_query_names_from_graphql_query(self, _graphql_query_text):
     try:
         import re
-        _o = re.findall(r' +(\S+) ?\(.*', graphql_query_text)
+        _o = re.findall(r' +(\S+) ?\(.*', _graphql_query_text)
         return _o
     except Exception as e:
         print(inspect.stack[3])
@@ -51,9 +52,9 @@ def _dump_nodes(self, request, query_name):
             "account_delete_initiate_aws",
             "accounts_aws_detail"]
         for _query_returned in request['data']:
-            if query_name in _detail_list and _query_returned in self.graphql_file_type_map[query_name]:
+            if query_name in _detail_list and _query_returned in self._graphql_file_type_map[query_name]:
                 return request['data'][_query_returned]
-            elif _query_returned in self.graphql_file_type_map[query_name]:
+            elif _query_returned in self._graphql_file_type_map[query_name]:
                 for _node_returned in request['data'][_query_returned]['edges']:
                     _o.append(_node_returned['node'])
         return _o

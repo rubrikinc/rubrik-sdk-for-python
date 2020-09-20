@@ -2,7 +2,7 @@
 import inspect
 from .graphql import _dump_nodes
 
-def get_sla_domains(self, sla_domain_name=""):
+def get_sla_domains(self, _sla_domain_name=""):
     """Retrieves dictionary of SLA Domain Names and Identifiers,
        or the ID of a single SLA Domain
 
@@ -15,16 +15,16 @@ def get_sla_domains(self, sla_domain_name=""):
         _variables = {
             "filter": {
                 "field": "NAME",
-                "text": sla_domain_name
+                "text": _sla_domain_name
             }
         }
-        _request = self._query(None, self.graphql_query[_query_name], _variables)
+        _request = self._query(None, self._graphql_query[_query_name], _variables)
         _request_nodes = self._dump_nodes(_request, _query_name)
-        if sla_domain_name and len(_request_nodes) == 1:
+        if _sla_domain_name and len(_request_nodes) == 1:
             return _request_nodes[0]['id']
-        elif sla_domain_name and len(_request_nodes) > 1:
+        elif _sla_domain_name and len(_request_nodes) > 1:
             for i in _request_nodes:
-                if i['name'] == sla_domain_name:
+                if i['name'] == _sla_domain_name:
                     return i['id']
         else:
             return _request_nodes
@@ -44,7 +44,7 @@ def submit_on_demand(self, object_ids, sla_id):
             "objectIds": object_ids,
             "slaId": sla_id
         }
-        request = self._query(None, self.graphql_mutation[_mutation_name], _variables)
+        request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
         if not request:
             raise Exception("Problem submitting on denamd snapshot")
         result = _dump_nodes(self, request, _mutation_name)
@@ -68,7 +68,7 @@ def submit_assign_sla(self, _object_ids, _sla_id):
                 "objectIds": _object_ids,
                 "slaId": _sla_id
             }
-        request = self._query(None, self.graphql_mutation[_mutation_name], _variables)
+        request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
         return  _dump_nodes(self, request, _mutation_name)
     except Exception as e:
         print(e)
@@ -84,7 +84,7 @@ def get_task_status(self, _task_chain_id):
         _variables = {
             "filter": _task_chain_id
         }
-        _request = self._query(None, self.graphql_query[_query_name], _variables)
+        _request = self._query(None, self._graphql_query[_query_name], _variables)
         _response = _dump_nodes(self, _request, _query_name)
         return _response['taskchain']['state']
     except Exception as e:
