@@ -59,7 +59,7 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(rubrik.get_accounts_azure())
 
 ### Query objects, set sla_domain
-#pp.pprint(rubrik.submit_assign_sla( rubrik.get_object_ids_ec2(region = "US_WEST_2"), rubrik.get_sla_domains("Gold")))
+# pp.pprint(rubrik.submit_assign_sla( rubrik.get_object_ids_ec2(region = "US_WEST_2"), rubrik.get_sla_domains("Gold")))
 
 ### Returns all objectIDs matching arbitrary available inputs. ec2 tags have special treatment
 # pp.pprint(rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"}))
