@@ -21,10 +21,10 @@ args = parser.parse_args()
 rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password, root_domain=args.root_domain,
                                       insecure=args.insecure)
 
-### Add AWS Acct
+### Add AWS Acct (local profile must be configured, uses default currently.
 # pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
 
-### Remove AWS Acct
+### Remove AWS Acct (local profile must be configured, uses default currently.
 # pp.pprint(rubrik.delete_account_aws())
 
 ### Run ODS for machines in a region using Gold retention, monitor to complete via threads
@@ -46,11 +46,11 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(rubrik.get_instances_gce())
 # pp.pprint(rubrik.get_instances_azure())
 
-### Return sla domain map, or specified name/id
+### Returns sla domain map, or specified name/id
 # pp.pprint(rubrik.get_sla_domains())
 # pp.pprint(rubrik.get_sla_domains("Bronze"))
 
-### Return specified cloud account details, or all
+### Returns specified cloud account details, or all
 # pp.pprint(rubrik.get_accounts_aws("gurling"))
 # pp.pprint(rubrik.get_accounts_gcp("Trinity-FDSE"))
 # pp.pprint(rubrik.get_accounts_azure("RubrikRangers"))
