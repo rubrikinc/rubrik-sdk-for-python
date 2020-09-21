@@ -8,10 +8,5 @@ query ($filter: [GlobalSlaFilterInput!]) {
         }
       }
     }
-    pageInfo {
-      endCursor
-      hasNextPage
-      hasPreviousPage
-    }
   }
 }

@@ -78,6 +78,7 @@ setuptools.setup(
         'requests >= 2.18.4, != 2.22.0',
         'python-dateutil',
         'pytz',
+        'zulu',
         'boto3',
         'botocore'
     ],

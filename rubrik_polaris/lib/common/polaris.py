@@ -1,4 +1,6 @@
 """ Collection of lib methods that interact with Polaris primitives"""
+from dateutil.tz import tzlocal
+
 
 def get_sla_domains(self, _sla_domain_name=""):
     """Retrieves dictionary of SLA Domain Names and Identifiers,
@@ -90,7 +92,37 @@ def get_task_status(self, _task_chain_id):
     except Exception as e:
         print(e)
 
+def get_snapshots(self, _snappable_id, **kwargs):
+    #todo: find a way to handle date calclulations to find closest snapshot to today - kwargs, amd closest to kwargs
+    from dateutil import tz
+    from dateutil.parser import parse
+    """Retrieve Snapshots for a Snappable from Polaris
 
-
-
+        Arguments:
+            snappable_id [uuid] -- Object UUID
+            recovery_point [string] -- Optional datetime of snapshot to return, or 'latest', or not defined to return all
+        """
+    _query_name = "snappable_snapshots"
+    try:
+        _variables = {
+            "snappable_id": _snappable_id
+        }
+        if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] == 'latest':
+            _variables['first'] = 1
+        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _response = self._dump_nodes(_request, _query_name)
+        snapshot_comparison = {}
+        for snapshot in _response:
+            if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] is not 'latest':
+                parsed_snapshot_date = parse(snapshot['date']).astimezone()
+                parsed_recovery_point = parse(kwargs['recovery_point'])
+                parsed_recovery_point = parsed_recovery_point.replace(tzinfo = tzlocal())
+                snapshot['date_local'] = parsed_snapshot_date.isoformat()
+                if parsed_snapshot_date >= parsed_recovery_point:
+                    snapshot_comparison[abs(parsed_recovery_point - parsed_snapshot_date)] = snapshot
+        if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] is not 'latest':
+            return snapshot_comparison[min(snapshot_comparison)]
+        return _response
+    except Exception as e:
+        print(e)
 

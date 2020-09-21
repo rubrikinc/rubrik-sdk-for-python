@@ -1,5 +1,4 @@
 """ Collection of methods that interace with the raw graphql """
-import inspect
 
 def _build_graphql_maps(self):
     from os import listdir
@@ -27,7 +26,6 @@ def _build_graphql_maps(self):
                 _graphql_file_type_map[_query_name] = self._get_query_names_from_graphql_query(_graphql_file)
         return _graphql_query, _graphql_mutation, _graphql_file_type_map
     except Exception as e:
-        print(inspect.stack[3])
         print(e)
 
 def _get_query_names_from_graphql_query(self, _graphql_query_text):
@@ -36,28 +34,17 @@ def _get_query_names_from_graphql_query(self, _graphql_query_text):
         _o = re.findall(r' +(\S+) ?\(.*', _graphql_query_text)
         return _o
     except Exception as e:
-        print(inspect.stack[3])
         print(e)
 
 def _dump_nodes(self, request, query_name):
     try:
         _o = []
-        _detail_list = [
-            "taskchain_status",
-            "assign_sla",
-            "on_demand",
-            "account_add_aws",
-            "account_delete_commit_aws",
-            "account_disable_aws",
-            "account_delete_initiate_aws",
-            "accounts_aws_detail"]
         for _query_returned in request['data']:
-            if query_name in _detail_list and _query_returned in self._graphql_file_type_map[query_name]:
-                return request['data'][_query_returned]
-            elif _query_returned in self._graphql_file_type_map[query_name]:
+            if 'edges' in request['data'][_query_returned]:
                 for _node_returned in request['data'][_query_returned]['edges']:
                     _o.append(_node_returned['node'])
+            else:
+                return request['data'][_query_returned]
         return _o
     except Exception as e:
-        print(inspect.stack)
         print(e)

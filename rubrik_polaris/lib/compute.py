@@ -79,11 +79,20 @@ def get_object_ids_gce(self, match_all=True, **kwargs):
         print(e)
 
 
-def get_instances_ec2(self):
+def get_instances_ec2(self, object_id = None):
     ### Retrieve all EC2 instances from Polaris ###
+    #todo: make the changes to call specific instances for gce/azure
     try:
-        _query_name = "instances_ec2"
-        _request = self._query(None, self._graphql_query[_query_name], None)
+        _request = None
+        if object_id:
+            _query_name = "instances_ec2_detail"
+            variables = {
+                "object_id": object_id
+            }
+            _request = self._query(None, self._graphql_query[_query_name], variables)
+        else:
+            _query_name = "instances_ec2"
+            _request = self._query(None, self._graphql_query[_query_name], None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
