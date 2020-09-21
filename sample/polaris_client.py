@@ -38,7 +38,7 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 #     pp.pprint(rubrik.get_snapshots(snappable))
 
 ### Search for a set of objects and get their details
-#  for i in rubrik.get_object_ids_ec2(region = 'US_WEST_2'):
+# for i in rubrik.get_object_ids_ec2(region = 'US_WEST_2'):
 #      pp.pprint(rubrik.get_instances_ec2(i))
 
 ### Returns all instances
