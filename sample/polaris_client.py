@@ -34,8 +34,12 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # snappables = rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"})
 # for snappable in snappables:
 #     pp.pprint(rubrik.get_snapshots(snappable, recovery_point='2020-09-19 04:20')) # can include anything up to this. 2020 is ok, 2020-09, 2020-09-19, ...
-#     pp.pprint(rubrik.get_snapshots(snappable, recovery_point='latest'))
+#     snapshot_id = rubrik.get_snapshots(snappable, recovery_point='latest')['id']
 #     pp.pprint(rubrik.get_snapshots(snappable))
+### Submit Restore for above Snapshot (EC2)
+#     result = rubrik.submit_restore_ec2(snapshot_id, wait=True, should_power_on=True, should_restore_tags=True)
+#     pp.pprint(result)
+
 
 ### Search for a set of objects and get their details
 # for i in rubrik.get_object_ids_ec2(region = 'US_WEST_2'):

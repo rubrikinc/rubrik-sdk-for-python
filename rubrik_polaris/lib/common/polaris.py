@@ -93,8 +93,6 @@ def get_task_status(self, _task_chain_id):
         print(e)
 
 def get_snapshots(self, _snappable_id, **kwargs):
-    #todo: find a way to handle date calclulations to find closest snapshot to today - kwargs, amd closest to kwargs
-    from dateutil import tz
     from dateutil.parser import parse
     """Retrieve Snapshots for a Snappable from Polaris
 
@@ -122,7 +120,43 @@ def get_snapshots(self, _snappable_id, **kwargs):
                     snapshot_comparison[abs(parsed_recovery_point - parsed_snapshot_date)] = snapshot
         if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] is not 'latest':
             return snapshot_comparison[min(snapshot_comparison)]
-        return _response
+        if len(_response) == 1:
+            return _response[0]
+        else:
+            return _response
     except Exception as e:
         print(e)
 
+def submit_restore_ec2(self, snapshot_id, **kwargs):
+    """Submits a Restore of an EC2 instance
+
+    Arguments:
+        snapshot_id [string] -- Snapshot ID to be restored
+        should_power_on bool -- Defaults to False
+        should_restore_tags bool -- Defaults to False
+        wait bool -- Return once complete Defaults to False
+    """
+    should_power_on = False
+    if kwargs and 'should_power_on' in kwargs and kwargs['should_power_on']:
+        should_power_on = True
+    should_restore_tags = False
+    if kwargs and 'should_restore_tags' in kwargs and kwargs['should_restore_tags']:
+        should_power_on = True
+    try:
+        _mutation_name = "instances_restore_ec2"
+        _variables = {
+            "snapshot_id": snapshot_id,
+            "should_power_on": kwargs['should_power_on'],
+            "should_restore_tags": kwargs['should_restore_tags']
+        }
+        _request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
+        if 'errors' in _request and _request['errors']:
+            return  {'errors': _request['errors'][0]['message']}
+        _result = self._dump_nodes(_request, _mutation_name)
+        _results = []
+        if 'wait' in kwargs:
+            _results = self._monitor_task(_result)
+        return _results
+            #todo: find a better way to report errors per uuid
+    except Exception as e:
+        print(e)

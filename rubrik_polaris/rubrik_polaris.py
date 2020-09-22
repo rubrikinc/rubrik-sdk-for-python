@@ -28,7 +28,7 @@ import pprint
 class PolarisClient:
     # Public
     from .lib.common.polaris import get_sla_domains, submit_on_demand, submit_assign_sla, get_task_status
-    from .lib.common.polaris import get_snapshots
+    from .lib.common.polaris import get_snapshots, submit_restore_ec2
     from .lib.compute import get_instances_azure, get_instances_ec2, get_instances_gce
     from .lib.accounts import get_accounts_aws, get_accounts_azure, get_accounts_gcp, delete_account_aws
     from .lib.accounts import add_account_aws, get_accounts_aws_detail, get_account_aws_native_id
