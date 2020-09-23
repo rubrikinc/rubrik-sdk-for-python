@@ -5,6 +5,7 @@ def get_object_ids_ec2(self, match_all=True, **kwargs):
 
     Arguments:
         match_all bool -- Set to false to match ANY defined criteria
+        tags {name: value} -- Allows simple qualification of tags
         kwargs -- Any top level object from the get_instances_ec2 call
     """
     try:
@@ -121,8 +122,8 @@ def _submit_instance_restore(self, snapshot_id, **kwargs):
     """Submits a Restore of a compute instance
 
     Arguments:
-        query_name [string] -- Backend query name for operation
-        snapshot_id [string] -- Snapshot ID to be restored
+        query_name string -- Backend query name for operation
+        snapshot_id string -- Snapshot ID to be restored
         should_power_on bool -- Defaults to False
         should_restore_tags bool -- Defaults to False
         wait bool -- Return once complete Defaults to False
@@ -159,7 +160,7 @@ def submit_restore_ec2(self, snapshot_id, **kwargs):
     """Submits a Restore of an EC2 instance
 
     Arguments:
-        snapshot_id [string] -- Snapshot ID to be restored
+        snapshot_id string -- Snapshot ID to be restored
         should_power_on bool -- Defaults to False
         should_restore_tags bool -- Defaults to False
         wait bool -- Return once complete Defaults to False
@@ -170,7 +171,7 @@ def submit_restore_azure(self, snapshot_id, **kwargs):
     """Submits a Restore of an Azure instance
 
     Arguments:
-        snapshot_id [string] -- Snapshot ID to be restored
+        snapshot_id string -- Snapshot ID to be restored
         should_power_on bool -- Defaults to False
         should_restore_tags bool -- Defaults to False
         wait bool -- Return once complete Defaults to False
@@ -181,7 +182,7 @@ def submit_restore_gce(self, snapshot_id, **kwargs):
     """Submits a Restore of a GCE instance
 
     Arguments:
-        snapshot_id [string] -- Snapshot ID to be restored
+        snapshot_id string -- Snapshot ID to be restored
         should_power_on bool -- Defaults to False
         should_restore_tags bool -- Defaults to False
         wait bool -- Return once complete Defaults to False
