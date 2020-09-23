@@ -13,6 +13,6 @@ console_output_handler.setFormatter(formatter)
 log = logging.getLogger(__name__)
 log.addHandler(console_output_handler)
 
-__version__ = "1.0"
-__author__ = "Rubrik Ranger Team"
+__version__ = "2.0.10"
+__author__ = "Rubrik Build"
 __all__ = []
