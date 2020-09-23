@@ -1,4 +1,4 @@
-query ($first: Int, $after: String, $filters: AwsNativeEc2InstanceFilters) {
+query RubrikPolarisSDKRequest($first: Int, $after: String, $filters: AwsNativeEc2InstanceFilters) {
   awsNativeEc2InstanceConnection(first: $first, after: $after, ec2InstanceFilters: $filters) {
     edges {
       node {

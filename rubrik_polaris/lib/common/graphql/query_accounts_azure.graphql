@@ -1,4 +1,4 @@
-query ($filter: String = "" ) {
+query RubrikPolarisSDKRequest($filter: String = "" ) {
     azureNativeSubscriptionConnection(subscriptionFilters:{nameSubstringFilter: {nameSubstring: $filter}}) {
         edges {
             node {

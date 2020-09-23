@@ -1,4 +1,4 @@
-query ($awsNativeProtectionFeature: AwsNativeProtectionFeatureEnum = EC2, $filter: String = "" ) {
+query RubrikPolarisSDKRequest($awsNativeProtectionFeature: AwsNativeProtectionFeatureEnum = EC2, $filter: String = "" ) {
     awsNativeAccountConnection(awsNativeProtectionFeature: $awsNativeProtectionFeature, accountFilters: {
         nameSubstringFilter: {
             nameSubstring: $filter

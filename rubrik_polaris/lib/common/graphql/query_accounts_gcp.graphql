@@ -1,4 +1,4 @@
-query ($filter: String = "") {
+query RubrikPolarisSDKRequest($filter: String = "") {
     gcpNativeProjectConnection(projectFilters: {nameOrNumberSubstringFilter: {nameOrNumberSubstring: $filter}}){
         edges {
             node {

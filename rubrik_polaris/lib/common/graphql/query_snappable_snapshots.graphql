@@ -1,4 +1,4 @@
-query ($first: Int, $snappable_id : String!){
+query RubrikPolarisSDKRequest($first: Int, $snappable_id : String!){
     snapshotOfASnappableConnection
     (
         first: $first

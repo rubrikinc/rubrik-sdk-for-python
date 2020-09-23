@@ -28,7 +28,7 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(rubrik.delete_account_aws())
 
 ### Run ODS for machines in a region using Gold retention, monitor to complete via threads
-# pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_gce(region="us-west1"), rubrik.get_sla_domains("Gold"), wait = True))
+pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_gce(region="us-west1"), rubrik.get_sla_domains("Gold"), wait = True))
 
 ### Get snapshot ids for snappables
 # snappables = rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"})
@@ -39,7 +39,6 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 ### Submit Restore for above Snapshot (EC2)
 #     result = rubrik.submit_restore_ec2(snapshot_id, wait=True, should_power_on=True, should_restore_tags=True)
 #     pp.pprint(result)
-
 
 ### Search for a set of objects and get their details
 # for i in rubrik.get_object_ids_ec2(region = 'US_WEST_2'):

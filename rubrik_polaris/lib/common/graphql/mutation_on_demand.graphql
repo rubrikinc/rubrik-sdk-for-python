@@ -1,4 +1,4 @@
-mutation ($slaId: String!, $objectIds: [UUID!]!) {
+mutation RubrikPolarisSDKRequest($slaId: String!, $objectIds: [UUID!]!) {
   takeOnDemandSnapshot(slaId: $slaId, snappableIds: $objectIds) {
     taskchainUuids {
       snappableId

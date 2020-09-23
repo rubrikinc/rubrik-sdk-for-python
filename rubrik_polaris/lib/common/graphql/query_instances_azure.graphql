@@ -1,4 +1,4 @@
-query ($first: Int, $after: String, $sortBy: AzureNativeVirtualMachineSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: AzureNativeVirtualMachineFilters) {
+query RubrikPolarisSDKRequest($first: Int, $after: String, $sortBy: AzureNativeVirtualMachineSortFieldsEnum, $sortOrder: HierarchySortOrder, $filters: AzureNativeVirtualMachineFilters) {
   azureNativeVirtualMachineConnection(first: $first, after: $after, sortBy: $sortBy, sortOrder: $sortOrder, virtualMachineFilters: $filters) {
     edges {
       node {

@@ -1,4 +1,4 @@
-mutation ($snapshot_id: String!, $should_power_on: Boolean!, $should_restore_tags: Boolean!) {
+mutation RubrikPolarisSDKRequest($snapshot_id: String!, $should_power_on: Boolean!, $should_restore_tags: Boolean!) {
   restoreAwsNativeEc2InstanceSnapshot(snapshotId: $snapshot_id, shouldPowerOn: $should_power_on, shouldRestoreTags: $should_restore_tags) {
     taskchainUuid
   }

@@ -3,6 +3,7 @@
 def _query(self, _operation_name=None, _query=None, _variables=None, timeout=15):
     import requests
     try:
+        _operation_name = "RubrikPolarisSDKRequest"
         self._log('POST {}'.format(self._baseurl))
         if _operation_name is not None:
             self._log('Operation Name: {}'.format(_operation_name))

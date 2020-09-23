@@ -1,4 +1,4 @@
-query EC2InstanceDetailsQuery($object_id: UUID!) {
+query RubrikPolarisSDKRequest($object_id: UUID!) {
   awsNativeEc2Instance(fid: $object_id) {
     id
     instanceId
