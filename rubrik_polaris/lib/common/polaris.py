@@ -44,7 +44,7 @@ def submit_on_demand(self, object_ids, sla_id, **kwargs):
             "objectIds": object_ids,
             "slaId": sla_id
         }
-        _request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
+        _request = self._query(None, self._graphql_query[_mutation_name], _variables)
         _result = self._dump_nodes(_request, _mutation_name)
         _results = []
         if _result['errors']:
@@ -70,7 +70,7 @@ def submit_assign_sla(self, _object_ids, _sla_id):
                 "objectIds": _object_ids,
                 "slaId": _sla_id
             }
-        request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
+        request = self._query(None, self._graphql_query[_mutation_name], _variables)
         return  self._dump_nodes(request, _mutation_name)
     except Exception as e:
         print(e)
@@ -109,6 +109,9 @@ def get_snapshots(self, _snappable_id, **kwargs):
             _variables['first'] = 1
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         _response = self._dump_nodes(_request, _query_name)
+        if not len(_response):
+            raise Exception("No Snapshots found for Snappable : {}".format(_snappable_id))
+
         snapshot_comparison = {}
         for snapshot in _response:
             if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] is not 'latest':
@@ -127,36 +130,3 @@ def get_snapshots(self, _snappable_id, **kwargs):
     except Exception as e:
         print(e)
 
-def submit_restore_ec2(self, snapshot_id, **kwargs):
-    """Submits a Restore of an EC2 instance
-
-    Arguments:
-        snapshot_id [string] -- Snapshot ID to be restored
-        should_power_on bool -- Defaults to False
-        should_restore_tags bool -- Defaults to False
-        wait bool -- Return once complete Defaults to False
-    """
-    should_power_on = False
-    if kwargs and 'should_power_on' in kwargs and kwargs['should_power_on']:
-        should_power_on = True
-    should_restore_tags = False
-    if kwargs and 'should_restore_tags' in kwargs and kwargs['should_restore_tags']:
-        should_power_on = True
-    try:
-        _mutation_name = "instances_restore_ec2"
-        _variables = {
-            "snapshot_id": snapshot_id,
-            "should_power_on": kwargs['should_power_on'],
-            "should_restore_tags": kwargs['should_restore_tags']
-        }
-        _request = self._query(None, self._graphql_mutation[_mutation_name], _variables)
-        if 'errors' in _request and _request['errors']:
-            return  {'errors': _request['errors'][0]['message']}
-        _result = self._dump_nodes(_request, _mutation_name)
-        _results = []
-        if 'wait' in kwargs:
-            _results = self._monitor_task(_result)
-        return _results
-            #todo: find a better way to report errors per uuid
-    except Exception as e:
-        print(e)

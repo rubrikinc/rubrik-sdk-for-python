@@ -1,0 +1,5 @@
+mutation RubrikPolarisSDKRequest($snapshot_id: UUID!, $should_restore_tags: Boolean = true, $should_add_rubrik_labels: Boolean = false, $should_power_on: Boolean = true) {
+  gcpNativeRestoreGceInstance(snapshotId: $snapshot_id, shouldRestoreLabels: $should_restore_tags, shouldAddRubrikLabels: $should_add_rubrik_labels, shouldStartRestoredInstance: $should_power_on) {
+    taskchainUuid
+  }
+}
