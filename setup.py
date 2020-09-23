@@ -17,7 +17,7 @@ Install from pip:
 
 Install from source:
 ```
-$ git clone https://github.com/rubrik-devops/rubrik-sdk-for-python
+$ git clone https://github.com/rubrikinc/rubrik-sdk-for-python
 $ cd rubrik-sdk-for-python
 $ python setup.py install
 ```
@@ -63,7 +63,7 @@ setuptools.setup(
     description="A Python package for interacting with the Rubrik CDM API.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/rubrik-devops/rubrik-sdk-for-python",
+    url="https://github.com/rubrikinc/rubrik-sdk-for-python",
     packages=setuptools.find_packages(exclude=['tests']),
     classifiers=[
         "Intended Audience :: Information Technology",
