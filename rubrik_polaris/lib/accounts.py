@@ -10,7 +10,7 @@ def add_account_aws(self, account_id, account_name, regions):
             "account_name": account_name,
             "regions": regions
         }
-        request = self._query(None, self._graphql_mutation[query_name], variables)
+        request = self._query(None, self._graphql_query[query_name], variables)
         nodes = self._dump_nodes(request, query_name)
         if nodes['errorMessage']:
             raise Exception("Account {} already added".format(account_id))
@@ -140,7 +140,7 @@ def _disable_account_aws(self, _polaris_account_id):
         _variables = {
             "polaris_account_id": _polaris_account_id
         }
-        _request = self._query(None, self._graphql_mutation[_query_name], _variables)
+        _request = self._query(None, self._graphql_query[_query_name], _variables)
         _monitor = self._monitor_task(self._dump_nodes(_request, _query_name))
         self._pp.pprint(_monitor)
         if _monitor['status'] == 'SUCCEEDED':
@@ -162,7 +162,7 @@ def _invoke_account_delete_aws(self, polaris_account_id):
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(None, self._graphql_mutation[query_name], variables)
+        request = self._query(None, self._graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
     except Exception as e:
         print(e)
@@ -179,7 +179,7 @@ def _commit_account_delete_aws(self, polaris_account_id):
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(None, self._graphql_mutation[query_name], variables)
+        request = self._query(None, self._graphql_query[query_name], variables)
         return self._dump_nodes(request, query_name)
     except Exception as e:
         print(e)

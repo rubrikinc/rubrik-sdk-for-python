@@ -6,7 +6,6 @@ def _build_graphql_maps(self):
     try:
         # Assemble GraphQL query/mutation hash and name map
         _graphql_query = {}
-        _graphql_mutation = {}
         _graphql_file_type_map = {}
         _file_query_prefix = 'query'
         _file_suffix = '.graphql'
@@ -22,9 +21,9 @@ def _build_graphql_maps(self):
                 elif _f.startswith(_file_mutation_prefix):
                     _query_name = _f.replace(_file_suffix, '').replace('{}_'.format(_file_mutation_prefix), '')
                     _graphql_file = open("{}{}".format(self._data_path, _f), 'r').read()
-                    _graphql_mutation[_query_name] = """{}""".format(_graphql_file)
+                    _graphql_query[_query_name] = """{}""".format(_graphql_file)
                 _graphql_file_type_map[_query_name] = self._get_query_names_from_graphql_query(_graphql_file)
-        return _graphql_query, _graphql_mutation, _graphql_file_type_map
+        return _graphql_query,  _graphql_file_type_map
     except Exception as e:
         print(e)
 
