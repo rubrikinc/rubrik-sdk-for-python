@@ -38,6 +38,17 @@
 {% endfor %}
 {% endif %}
 
+{% if exceptions %}
+## Exceptions
+
+| Type | Message                                                                                       |
+|------|-----------------------------------------------------------------------------------------------|
+{% for e in exceptions %}
+| {{ e.type }} | {{ e.description }} |
+{% endfor %}
+{% endif %}
+
+
 {% if example -%}
 ## Example
 

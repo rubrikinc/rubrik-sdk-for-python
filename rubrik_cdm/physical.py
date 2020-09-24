@@ -42,6 +42,9 @@ class Physical(Api):
         Returns:
             str -- No change required. The host '`hostname`' is already connected to the Rubrik cluster.
             dict -- The full API response for `POST /v1/host`.
+        
+        Exceptions:
+            InvalidParameterException -- The provided hostname list is empty
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
@@ -282,6 +285,9 @@ class Physical(Api):
         Returns:
             str -- No change required. The share with the given hostname and export point has already been added.
             dict -- The full API response for `POST /internal/host/share` with the given share arguments.
+        
+        Exceptions:
+            InvalidParameterException -- The add_nas_share_to_host() share_type argument must be one of the following: ['NFS', 'SMB'].
         """
 
         self.function_name = inspect.currentframe().f_code.co_name

@@ -1519,6 +1519,7 @@ class Data_Management(Api):
             starttime_hour {int} -- (CDM 5.0+) Starting hour of allowed backup window. (default: {None})
             starttime_min {int} -- (CDM 5.0+) Starting minute of allowed backup window. When populated, you must also provide a `starttime_min`. (default: {None})
             duration_hours {int} -- (CDM 5.0+) Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`. (default: {None})
+            timeout {str} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
         Returns:
             str -- No change required. The 'name' SLA Domain is already configured with the provided configuration.
             dict -- The full API response for `POST /v1/sla_domain`.
@@ -2166,8 +2167,6 @@ class Data_Management(Api):
             vm_name {str} -- The name of the vSphere VM.
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
-        Returns:
-            no content.
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
@@ -2624,7 +2623,7 @@ class Data_Management(Api):
 
     def get_all_hosts(self, timeout=15):
         """Retrieve information for each host connected to the Rubrik cluster.
-        Arguments:
+        Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
         Returns:
             dict -- The result of the API call `GET /v1/host`
@@ -2639,7 +2638,6 @@ class Data_Management(Api):
         """Register the Rubrik Backup Service on a vSphere VM.
         Arguments:
             name {str} -- The name of the vSphere VM.
-            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:

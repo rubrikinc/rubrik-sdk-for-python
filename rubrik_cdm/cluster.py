@@ -803,6 +803,7 @@ class Cluster(Api):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
+            str -- No change required. The proxy configuration is already cleared out.
             dict -- The full API response for `DELETE /internal/node_management/proxy_config`
         """
 
@@ -920,7 +921,9 @@ class Cluster(Api):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- The full API response for `POST /v1/vmware/guest_credential`
+            str -- No change required. The account 'username' has already been added to the Rubrik cluster.
+            str -- No change required. The account 'username@domain' has already been added to the Rubrik cluster.
+            dict -- The full API response for `POST /v1/vmware/guest_credential`.
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
@@ -959,6 +962,8 @@ class Cluster(Api):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
+            str -- No change required. The guest credential 'username' does not exist.
+            str -- No change required. The guest credential 'username@domain' does not exist.
             dict -- The full API response for `POST /v1/vmware/guest_credential`
         """
 
@@ -1024,6 +1029,8 @@ class Cluster(Api):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
+            str -- No change required. Support Tunnel is already enabled.
+            str -- No change required. Support Tunnel is already disabled.
             dict -- The full API response from `POST /internal/node/me/support_tunnel`.
         """
 
