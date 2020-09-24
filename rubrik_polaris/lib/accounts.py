@@ -220,6 +220,7 @@ def delete_account_aws(self):
     """Commits  Delete AWS Account in Polaris, relies on local .aws"""
     import re
     try:
+        #todo: Add exception if account does not exist in polaris
         _polaris_account_info = self.get_accounts_aws_detail(self.get_account_aws_native_id())['awsCloudAccounts'][0]
         _polaris_account_id = _polaris_account_info['awsCloudAccount']['id']
         _disable_account = self._disable_account_aws(_polaris_account_id)
