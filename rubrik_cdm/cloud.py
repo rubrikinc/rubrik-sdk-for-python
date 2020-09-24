@@ -396,7 +396,6 @@ class Cloud(Api):
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
-
         Returns:
             str -- No change required. The '`archive_name`' archival location is already configured for CloudOn.
             dict -- The full API response for `PATCH /internal/archive/object_store/{id}`.
@@ -523,10 +522,18 @@ class Cloud(Api):
             regional_bolt_network_configs {list of dicts} -- List of dicts containing per region bolt network configs. (ex. dict format: {"region": "aws-region-name", "vNetId": "aws-vpc-id", "subnetId": "aws-subnet-id", "securityGroupId": "aws-subnet-id"}) (default: {None})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
 
-
         Returns:
             str -- No change required. Cloud native source with access key `aws_access_key` is already configured on the Rubrik cluster.
             dict -- The full API response for `POST /internal/aws/account'`.
+
+        Exceptions:
+            CDMVersionException -- The Rubrik cluster must be running CDM version 4.2 or later.
+            InvalidParameterException -- `aws_region` has not been provided.
+            InvalidParameterException -- `aws_access_key` has not been provided.
+            InvalidParameterException -- `aws_secret_key` has not been provided.
+            InvalidTypeException -- `regional_bolt_network_configs` must be a list if defined.
+            InvalidParameterException -- Each `regional_bolt_network_config` dict must contain the following keys: 'region', 'vNetId', 'subnetId', 'securityGroupId'.
+            InvalidParameterException -- Cloud native source with name '`aws_account_name`' already exists. Please enter a unique `aws_account_name`.
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
