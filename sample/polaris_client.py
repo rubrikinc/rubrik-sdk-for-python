@@ -57,6 +57,7 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(rubrik.get_instances_ec2())
 # pp.pprint(rubrik.get_instances_gce())
 # pp.pprint(rubrik.get_instances_azure())
+pp.pprint(rubrik.get_instances_vsphere())
 
 ### Returns sla domain map, or specified name/id
 # pp.pprint(rubrik.get_sla_domains())

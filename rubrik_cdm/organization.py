@@ -63,7 +63,7 @@ class Organization(Api):
         sql_host_id = self.object_id(
             mssql_host, "physical_host", timeout=timeout)
 
-        for protected_object in current_mssql_protected_objects["graphql"]:
+        for protected_object in current_mssql_protected_objects["data"]:
             if protected_object["managedId"] == sql_host_id:
                 return "No change required. The MSSQL host {} is already assigned to the {} organization.".format(mssql_host, organization_name)
 
@@ -116,7 +116,7 @@ class Organization(Api):
         db_id = self.object_id(
             mssql_db, "mssql_db", mssql_instance=mssql_instance, mssql_host=mssql_host, timeout=timeout)
 
-        for protected_object in current_mssql_protected_objects["graphql"]:
+        for protected_object in current_mssql_protected_objects["data"]:
             if protected_object["managedId"] == db_id:
                 return "No change required. The MSSQL DB {} is already assigned to the {} organization.".format(mssql_db, organization_name)
 
@@ -167,7 +167,7 @@ class Organization(Api):
         ag_id = self.object_id(
             mssql_availability_group, "mssql_availability_group", timeout=timeout)
 
-        for protected_object in current_mssql_protected_objects["graphql"]:
+        for protected_object in current_mssql_protected_objects["data"]:
             if protected_object["managedId"] == ag_id:
                 return "No change required. The MSSQL Availability Group {} is already assigned to the {} organization.".format(mssql_availability_group, organization_name)
 

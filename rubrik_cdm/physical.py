@@ -42,6 +42,9 @@ class Physical(Api):
         Returns:
             str -- No change required. The host '`hostname`' is already connected to the Rubrik cluster.
             dict -- The full API response for `POST /v1/host`.
+        
+        Exceptions:
+            InvalidParameterException -- The provided hostname list is empty
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
@@ -54,7 +57,7 @@ class Physical(Api):
 
         if isinstance(hostname, list):
 
-            for host in current_hosts['graphql']:
+            for host in current_hosts['data']:
                 for single_host in hostname:
                     if host['hostname'] == single_host:
                         hostname.remove(single_host)
@@ -77,7 +80,7 @@ class Physical(Api):
             else:
                 return "No change required. All Hosts have already been added or supplied list was empty."
         else:
-            for host in current_hosts['graphql']:
+            for host in current_hosts['data']:
                 if host['hostname'] == hostname:
                     return "No change required. The host '{}' is already connected to the Rubrik cluster.".format(
                         hostname)
@@ -110,7 +113,7 @@ class Physical(Api):
 
         host_present = False
 
-        for host in current_hosts['graphql']:
+        for host in current_hosts['data']:
             if host['hostname'] == hostname:
                 host_present = True
                 host_id = host['id']
@@ -177,14 +180,14 @@ class Physical(Api):
                 operating_system, name), timeout=timeout)
 
         current_config = {}
-        if current_filesets['graphql']:
-            current_config['name'] = current_filesets['graphql'][0]['name']
-            current_config['includes'] = sorted(current_filesets['graphql'][0]['includes'])
-            current_config['excludes'] = sorted(current_filesets['graphql'][0]['excludes'])
-            current_config['exceptions'] = sorted(current_filesets['graphql'][0]['exceptions'])
-            current_config['allowBackupHiddenFoldersInNetworkMounts'] = current_filesets['graphql'][0]['allowBackupHiddenFoldersInNetworkMounts']
-            current_config['operatingSystemType'] = current_filesets['graphql'][0]['operatingSystemType']
-            current_config['allowBackupNetworkMounts'] = current_filesets['graphql'][0]['allowBackupNetworkMounts']
+        if current_filesets['data']:
+            current_config['name'] = current_filesets['data'][0]['name']
+            current_config['includes'] = sorted(current_filesets['data'][0]['includes'])
+            current_config['excludes'] = sorted(current_filesets['data'][0]['excludes'])
+            current_config['exceptions'] = sorted(current_filesets['data'][0]['exceptions'])
+            current_config['allowBackupHiddenFoldersInNetworkMounts'] = current_filesets['data'][0]['allowBackupHiddenFoldersInNetworkMounts']
+            current_config['operatingSystemType'] = current_filesets['data'][0]['operatingSystemType']
+            current_config['allowBackupNetworkMounts'] = current_filesets['data'][0]['allowBackupNetworkMounts']
 
         if current_config == config:
             return "No change required. The Rubrik cluster already has a {} Fileset named '{}' configured with the provided variables.".format(
@@ -246,13 +249,13 @@ class Physical(Api):
             'v1', '/fileset_template?primary_cluster_id=local&operating_system_type=NONE&name={}'.format(name), timeout=timeout)
 
         current_config = {}
-        if current_filesets['graphql']:
-            current_config['name'] = current_filesets['graphql'][0]['name']
-            current_config['includes'] = sorted(current_filesets['graphql'][0]['includes'])
-            current_config['excludes'] = sorted(current_filesets['graphql'][0]['excludes'])
-            current_config['exceptions'] = sorted(current_filesets['graphql'][0]['exceptions'])
-            current_config['allowBackupHiddenFoldersInNetworkMounts'] = current_filesets['graphql'][0]['allowBackupHiddenFoldersInNetworkMounts']
-            current_config['shareType'] = current_filesets['graphql'][0]['shareType']
+        if current_filesets['data']:
+            current_config['name'] = current_filesets['data'][0]['name']
+            current_config['includes'] = sorted(current_filesets['data'][0]['includes'])
+            current_config['excludes'] = sorted(current_filesets['data'][0]['excludes'])
+            current_config['exceptions'] = sorted(current_filesets['data'][0]['exceptions'])
+            current_config['allowBackupHiddenFoldersInNetworkMounts'] = current_filesets['data'][0]['allowBackupHiddenFoldersInNetworkMounts']
+            current_config['shareType'] = current_filesets['data'][0]['shareType']
 
         if current_config == config:
             return "No change required. The Rubrik cluster already has a NAS Fileset named '{}' configured with the provided variables.".format(
@@ -282,6 +285,9 @@ class Physical(Api):
         Returns:
             str -- No change required. The share with the given hostname and export point has already been added.
             dict -- The full API response for `POST /internal/host/share` with the given share arguments.
+        
+        Exceptions:
+            InvalidParameterException -- The add_nas_share_to_host() share_type argument must be one of the following: ['NFS', 'SMB'].
         """
 
         self.function_name = inspect.currentframe().f_code.co_name
@@ -301,7 +307,7 @@ class Physical(Api):
             'internal', '/host/share?share_type={}&hostid={}'.format(share_type, host_id),
             timeout=timeout)
 
-        matching_current_host_share = [share_properties for share_properties in current_host_shares['graphql']
+        matching_current_host_share = [share_properties for share_properties in current_host_shares['data']
                                        if share_properties['exportPoint'] == export_point]
 
         if len(matching_current_host_share) >= 1:
@@ -383,7 +389,7 @@ class Physical(Api):
                                  timeout=timeout)
 
         if current_hosts['total'] >= 1:
-            for host in current_hosts['graphql']:
+            for host in current_hosts['data']:
                 if host['hostname'] == hostname:
                     host_id = host['id']
                     break
@@ -404,7 +410,7 @@ class Physical(Api):
                 "The Rubrik cluster does not have a {} Fileset named '{}'.".format(
                     operating_system, fileset_name))
         elif current_filesets_templates['total'] > 1:
-            for fileset_template in current_filesets_templates['graphql']:
+            for fileset_template in current_filesets_templates['data']:
                 if fileset_template['name'] == fileset_name:
                     number_of_matches += 1
 
@@ -412,7 +418,7 @@ class Physical(Api):
                 # If there are multiple Filesets with the same name us all of
                 # the possible config values to try and find the correct
                 # Fileset
-                for fileset_template in current_filesets_templates['graphql']:
+                for fileset_template in current_filesets_templates['data']:
                     if fileset_template['name'] == fileset_name \
                             and fileset_template['includes'] == include \
                             and fileset_template['excludes'] == exclude \
@@ -447,7 +453,7 @@ class Physical(Api):
                                     operating_system, fileset_name))
 
         if current_filesets_templates['total'] == 1 or number_of_matches == 1:
-            for fileset_temmplate in current_filesets_templates['graphql']:
+            for fileset_temmplate in current_filesets_templates['data']:
                 if fileset_temmplate['name'] == fileset_name:
                     fileset_template_id = fileset_temmplate['id']
 
@@ -477,7 +483,7 @@ class Physical(Api):
             assign_sla = self.patch('v1', '/fileset/{}'.format(fileset_id), config, timeout)
 
             return (create_fileset, assign_sla)
-        elif current_fileset['total'] == 1 and current_fileset['graphql'][0]['configuredSlaDomainId'] != sla_id:
+        elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] != sla_id:
 
             self.log(
                 "assign_physical_host_fileset: Assigning the '{}' SLA Domain to the '{}' Fileset attached to the {} physical host '{}'.".format(
@@ -485,12 +491,12 @@ class Physical(Api):
                     fileset_name,
                     operating_system,
                     hostname))
-            fileset_id = current_fileset['graphql'][0]['id']
+            fileset_id = current_fileset['data'][0]['id']
             config = {}
             config['configuredSlaDomainId'] = sla_id
             return self.patch('v1', '/fileset/{}'.format(fileset_id), config, timeout)
 
-        elif current_fileset['total'] == 1 and current_fileset['graphql'][0]['configuredSlaDomainId'] == sla_id:
+        elif current_fileset['total'] == 1 and current_fileset['data'][0]['configuredSlaDomainId'] == sla_id:
             return "No change required. The {} Fileset '{}' is already assigned to the SLA Domain '{}' on the physical host '{}'.".format(
                 operating_system, fileset_name, sla_name, hostname)
 

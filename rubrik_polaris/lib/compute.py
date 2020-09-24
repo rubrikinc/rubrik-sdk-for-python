@@ -79,6 +79,29 @@ def get_object_ids_gce(self, match_all=True, **kwargs):
     except Exception as e:
         print(e)
 
+def get_object_ids_vsphere(self, _match_all=True, **kwargs):
+    """Retrieves all vSphere objects that match query
+
+    Arguments:
+        match_all bool -- Set to false to match ANY defined criteria
+        kwargs -- Any top level object from the get_instances_ec2 call
+    """
+    try:
+        _o = []
+        for _instance in self.get_instances_vsphere():
+            _t = len(kwargs)
+            _c = _t
+            for _key in kwargs:
+                if _key in _instance and _instance[_key] == kwargs[_key]:
+                    _c -= 1
+            if _match_all and not bool(_c):
+                _o.append(_instance['id'])
+            elif not _match_all and _c < _t and bool(_c):
+                _o.append(_instance['id'])
+        return _o
+    except Exception as e:
+        print (e)
+
 
 def get_instances_ec2(self, object_id = None):
     ### Retrieve all EC2 instances from Polaris ###
@@ -116,6 +139,17 @@ def get_instances_gce(self):
     except Exception as e:
         print(e)
 
+def get_instances_vsphere(self):
+    ### Retrieve all vSphere instances from Polaris ###
+    try:
+        _query_name = "instances_vsphere"
+        _variables = {
+            "filter": [
+        ]}
+        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        return self._dump_nodes(_request, _query_name)
+    except Exception as e:
+        print(e)
 
 def _submit_instance_restore(self, snapshot_id, **kwargs):
     """Submits a Restore of a compute instance
