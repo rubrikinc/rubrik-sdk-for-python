@@ -30,7 +30,7 @@ def _invoke_aws_stack(self, _nodes, _account_id):
 
     Arguments:
         nodes {dict} -- nodes from add_account_aws
-        account_it {str} -- account_id from add_acount_aws
+        account_id {str} -- account_id from add_acount_aws
     """
     import boto3 as boto3
     import botocore
