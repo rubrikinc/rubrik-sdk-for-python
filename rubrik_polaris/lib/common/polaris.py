@@ -111,7 +111,6 @@ def get_snapshots(self, _snappable_id, **kwargs):
         _response = self._dump_nodes(_request, _query_name)
         if not len(_response):
             raise Exception("No Snapshots found for Snappable : {}".format(_snappable_id))
-
         snapshot_comparison = {}
         for snapshot in _response:
             if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] is not 'latest':

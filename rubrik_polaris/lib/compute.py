@@ -82,7 +82,6 @@ def get_object_ids_gce(self, match_all=True, **kwargs):
 
 def get_instances_ec2(self, object_id = None):
     ### Retrieve all EC2 instances from Polaris ###
-    #todo: make the changes to call specific instances for gce/azure
     try:
         _request = None
         if object_id:
