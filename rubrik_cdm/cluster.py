@@ -212,7 +212,7 @@ class Cluster(Api):
 
         node_ip_list = []
 
-        for node in api_request['graphql']:
+        for node in api_request['data']:
             node_ip_list.append(node["ipAddress"])
 
         return node_ip_list
@@ -234,7 +234,7 @@ class Cluster(Api):
 
         node_ip_name = []
 
-        for node in api_request['graphql']:
+        for node in api_request['data']:
             node_ip_name.append(node["id"])
 
         return node_ip_name
@@ -283,7 +283,7 @@ class Cluster(Api):
         user_authorization = self.get(
             'internal', '/authorization/role/end_user?principals={}'.format(user_id), timeout=timeout)
 
-        authorized_objects = user_authorization['graphql'][0]['privileges']['restore']
+        authorized_objects = user_authorization['data'][0]['privileges']['restore']
 
         if vm_id in authorized_objects:
             return 'No change required. The End User "{}" is already authorized to interact with the "{}" VM.'.format(
@@ -324,7 +324,7 @@ class Cluster(Api):
         current_vcenter = self.get(
             "v1", "/vmware/vcenter?primary_cluster_id=local", timeout=timeout)
 
-        for vcenter in current_vcenter["graphql"]:
+        for vcenter in current_vcenter["data"]:
             if vcenter["hostname"] == vcenter_ip:
                 return "No change required. The vCenter '{}' has already been added to the Rubrik cluster.".format(
                     vcenter_ip)
@@ -443,10 +443,10 @@ class Cluster(Api):
 
         if cdm_v5_check is True:
             current_ntp_servers = []
-            for ntp in cluster_ntp["graphql"]:
+            for ntp in cluster_ntp["data"]:
                 current_ntp_servers.append(ntp["server"])
         else:
-            current_ntp_servers = cluster_ntp["graphql"]
+            current_ntp_servers = cluster_ntp["data"]
 
         if sorted(current_ntp_servers) == sorted(ntp_server):
             return "No change required. The NTP server(s) {} has already been added to the Rubrik cluster.".format(
@@ -501,7 +501,7 @@ class Cluster(Api):
 
         if syslog["total"] != 0:
 
-            current_syslog_config = syslog["graphql"][0]
+            current_syslog_config = syslog["data"][0]
             # remove the id key from the syslog config for comparison
             del current_syslog_config["id"]
 
@@ -557,7 +557,7 @@ class Cluster(Api):
         current_vlans = self.get(
             "internal", "/cluster/me/vlan", timeout=timeout)
         if current_vlans["total"] != 0:
-            current_vlans = current_vlans["graphql"][0]
+            current_vlans = current_vlans["data"][0]
 
         interface_node_ip = [{'node': key, 'ip': val}
                              for key, val in node_ip_combined.items()]
@@ -709,7 +709,7 @@ class Cluster(Api):
             self.log("cluster_smtp_settings: Configuring the SMTP settings.")
             return self.post("internal", "/smtp_instance", config, timeout)
         else:
-            current_smtp_settings = current_smtp_settings["graphql"][0]
+            current_smtp_settings = current_smtp_settings["data"][0]
             # Save the SMTP ID in case of PATCH and then delete for comparison
             smtp_id = current_smtp_settings["id"]
             del current_smtp_settings["id"]
@@ -895,7 +895,7 @@ class Cluster(Api):
             "internal", "/authorization/role/read_only_admin?principals={}".format(current_users[0]["id"]), timeout=timeout)
 
         try:
-            if current_authorizations["graphql"][0]["privileges"]["basic"][0] == "Global:::All":
+            if current_authorizations["data"][0]["privileges"]["basic"][0] == "Global:::All":
                 return "No change required. The user '{}' already has read-only permissions.".format(username)
         except BaseException:
             pass
@@ -937,7 +937,7 @@ class Cluster(Api):
         current_guest_credentials = self.get(
             "internal", "/vmware/guest_credential", timeout=timeout)
 
-        for guest_credential in current_guest_credentials["graphql"]:
+        for guest_credential in current_guest_credentials["data"]:
             if guest_credential.get("domain"):
                 if guest_credential["username"] == username and guest_credential["domain"] == domain:
                     return "No change required. The account '{}@{}' has already been added to the Rubrik cluster.".format(
@@ -976,7 +976,7 @@ class Cluster(Api):
 
         delete_guest_credential = ""
 
-        for guest_credential in current_guest_credentials["graphql"]:
+        for guest_credential in current_guest_credentials["data"]:
             if domain is None:
                 if guest_credential["username"] == username:
                     delete_guest_credential = guest_credential["id"]
@@ -1016,7 +1016,7 @@ class Cluster(Api):
 
         api_request = self.get('internal', '/node', timeout)
 
-        for node in api_request['graphql']:
+        for node in api_request['data']:
             node_id_list.append(node["id"])
 
         return node_id_list

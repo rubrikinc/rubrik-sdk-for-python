@@ -1,0 +1,128 @@
+query RubrikPolarisSDKRequest($object_id: UUID!) {
+  vSphereDetailData: vSphereVmNew(fid: $object_id) {
+    id
+    authorizedOperations
+    name
+    isRelic
+    effectiveSlaDomain {
+      ...EffectiveSLADomainFragment
+    }
+    effectiveSlaSourceObject {
+      fid
+      name
+      objectType
+    }
+    pendingSla {
+      id
+      name
+    }
+    protectionDate
+    reportSnappable {
+      id
+      logicalBytes
+      physicalBytes
+      archiveStorage
+    }
+    cluster {
+      id
+      name
+      status
+      version
+    }
+    primaryClusterLocation {
+      id
+      name
+    }
+    arrayIntegrationEnabled
+    snapshotConsistencyMandate
+    agentStatus {
+      agentStatus
+    }
+    preBackupScript {
+      scriptPath
+      failureHandling
+      timeoutMs
+    }
+    postBackupScript {
+      scriptPath
+      failureHandling
+      timeoutMs
+    }
+    postSnapScript {
+      scriptPath
+      failureHandling
+      timeoutMs
+    }
+    logicalPath {
+      fid
+      objectType
+      name
+    }
+    physicalPath {
+      fid
+      objectType
+      name
+    }
+    vsphereTagPath {
+      fid
+      objectType
+      name
+    }
+    oldestSnapshot {
+      id
+      date
+      isIndexed
+    }
+    totalSnapshots: snapshotConnection {
+      count
+    }
+    replicatedObjects {
+      id
+      primaryClusterLocation {
+        id
+      }
+      cluster {
+        name
+        id
+      }
+    }
+    newestArchivedSnapshot {
+      id
+      date
+      isIndexed
+      archivalLocations {
+        id
+        name
+      }
+    }
+    newestReplicatedSnapshot {
+      id
+      date
+      isIndexed
+      replicationLocations {
+        id
+        name
+      }
+    }
+    newestSnapshot {
+      id
+      date
+      isIndexed
+    }
+    onDemandSnapshotCount
+    vmwareToolsInstalled
+    cdmLink
+  }
+}
+
+fragment EffectiveSLADomainFragment on SlaDomain {
+  id
+  name
+  ... on ClusterSlaDomain {
+    fid
+    cluster {
+      id
+      name
+    }
+  }
+}

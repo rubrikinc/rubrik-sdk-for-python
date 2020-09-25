@@ -1,0 +1,5 @@
+mutation RubrikPolarisSDKRequest($snapshot_id: UUID!, $should_power_on: Boolean = true, $should_restore_tags: Boolean = true) {
+  restoreAzureNativeVirtualMachine(snapshotId: $snapshot_id, shouldPowerOn: $should_power_on, shouldRestoreTags: $should_restore_tags) {
+    taskchainUuid
+  }
+}

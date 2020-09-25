@@ -1,6 +1,6 @@
 """ Collection of methods that control connection with Polaris """
 
-def _query(self, _operation_name=None, _query=None, _variables=None, timeout=15):
+def _query(self, _operation_name=None, _query=None, _variables=None, _timeout=60):
     import requests
     try:
         _operation_name = "RubrikPolarisSDKRequest"
@@ -19,7 +19,7 @@ def _query(self, _operation_name=None, _query=None, _variables=None, timeout=15)
                 "variables": _variables,
                 "query": "{}".format(_query)
             },
-            timeout=timeout
+            timeout=_timeout
         )
         self._log(str(_api_request) + "\n")
         try:

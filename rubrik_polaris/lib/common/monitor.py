@@ -4,6 +4,7 @@ import time
 from timeit import default_timer as timer
 from multiprocessing.pool import ThreadPool
 
+# Threader setup
 def _monitor_threader(self, _tasks, _thread_count, _monitor_job):
     if not isinstance(_tasks, list):
         _tasks = [_tasks]
@@ -21,6 +22,7 @@ def _monitor_threader(self, _tasks, _thread_count, _monitor_job):
     except Exception as e:
         print(e)
 
+# Worker thread
 def _monitor_job(_in):
     self, _task = _in
     try:
@@ -40,6 +42,7 @@ def _monitor_job(_in):
         print(e)
         return 0
 
+# Start threader
 def _monitor_task(self, _tasks):
     _outcome = (_monitor_threader(self, _tasks, len(_tasks), _monitor_job))
     if len(_outcome) > 1:
