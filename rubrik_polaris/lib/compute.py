@@ -79,7 +79,7 @@ def get_object_ids_gce(self, match_all=True, **kwargs):
     except Exception as e:
         print(e)
 
-def get_object_ids_vsphere(self, _match_all=True, **kwargs):
+def _get_object_ids_vsphere(self, _match_all=True, **kwargs):
     """Retrieves all vSphere objects that match query
 
     Arguments:
@@ -139,7 +139,7 @@ def get_instances_gce(self):
     except Exception as e:
         print(e)
 
-def get_instances_vsphere(self):
+def _get_instances_vsphere(self):
     ### Retrieve all vSphere instances from Polaris ###
     try:
         _query_name = "instances_vsphere"
@@ -147,6 +147,7 @@ def get_instances_vsphere(self):
             "filter": [
         ]}
         _request = self._query(None, self._graphql_query[_query_name], _variables)
+        self._pp.pprint(_request)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)

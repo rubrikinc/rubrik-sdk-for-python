@@ -228,7 +228,7 @@ def delete_account_aws(self):
         for _feature_details in _polaris_account_info['featureDetails']:
             if _feature_details['feature'] == "CLOUD_NATIVE_PROTECTION":
                 _stack_name = None
-                if match := re.search(r'\/(.*)\/', _feature_details['stackArn']):
+                if match := re.search(r'\/(.*)\/', _feature_details['stackArn']): # Here is the :=
                     _stack_name = match.group(1)
                 for _stack_region in _feature_details['awsRegions']:
                     _stack_region = (re.sub('_', '-', _stack_region)).lower()
@@ -237,5 +237,9 @@ def delete_account_aws(self):
         return 1
     except Exception as e:
         print(e)
+
+def _update_account_aws(self):
+    _polaris_account_info = self.get_accounts_aws_detail(self.get_account_aws_native_id())['awsCloudAccounts'][0]
+    self._pp.pprint(_polaris_account_info)
 
 

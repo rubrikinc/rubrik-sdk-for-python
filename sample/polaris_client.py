@@ -5,7 +5,6 @@ from timeit import default_timer as timer
 import rubrik_polaris
 import argparse
 import pprint
-from multiprocessing.pool import ThreadPool
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -21,7 +20,7 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
                                       insecure=args.insecure)
 
 ### Add AWS Acct (local profile must be configured, uses default currently.
-# pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
+pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
 
 ### Remove AWS Acct (local profile must be configured, uses default currently.
 # pp.pprint(rubrik.delete_account_aws())
@@ -38,10 +37,12 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # snappables = rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"})
 # snappables = rubrik.get_object_ids_azure(name = "tpm1-lin1")
 # snappables = rubrik.get_object_ids_gce(nativeName = "ubuntu-fdse-shared-1")
+# snappables = ['af7e69b7-b836-4ab5-9a6c-66a23ff94de8']
 # for snappable in snappables:
 #     snapshot_id = (rubrik.get_snapshots(snappable, recovery_point='2020-09-19 04:20')) # can include anything up to this. 2020 is ok, 2020-09, 2020-09-19, ...
-#     snapshot_id = rubrik.get_snapshots(snappable, recovery_point='latest')['id']
+#     snapshot_id = rubrik.get_snapshots(snappable, recovery_point='latest')
 #     pp.pprint(rubrik.get_snapshots(snappable)) # Get all snapshots
+#     pp.pprint(snapshot_id)
 
 ### Submit Restore for above Snapshot (EC2)
 #     result = rubrik.submit_restore_ec2(snapshot_id, wait=True, should_power_on=True, should_restore_tags=True)
@@ -57,7 +58,6 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(rubrik.get_instances_ec2())
 # pp.pprint(rubrik.get_instances_gce())
 # pp.pprint(rubrik.get_instances_azure())
-pp.pprint(rubrik.get_instances_vsphere())
 
 ### Returns sla domain map, or specified name/id
 # pp.pprint(rubrik.get_sla_domains())
@@ -65,11 +65,13 @@ pp.pprint(rubrik.get_instances_vsphere())
 
 ### Returns specified cloud account details, or all
 # pp.pprint(rubrik.get_accounts_aws("gurling"))
+# pp.pprint(rubrik.get_accounts_aws_detail("d01bd273-ccce-496b-aac1-d7ba9a0b7074"))
 # pp.pprint(rubrik.get_accounts_gcp("Trinity-FDSE"))
 # pp.pprint(rubrik.get_accounts_azure("RubrikRangers"))
 # pp.pprint(rubrik.get_accounts_aws())
 # pp.pprint(rubrik.get_accounts_gcp())
 # pp.pprint(rubrik.get_accounts_azure())
+# pp.pprint(rubrik.update_account_aws())
 
 ### Query objects, set sla_domain
 # pp.pprint(rubrik.submit_assign_sla( rubrik.get_object_ids_ec2(region = "US_WEST_2"), rubrik.get_sla_domains("Gold")))
