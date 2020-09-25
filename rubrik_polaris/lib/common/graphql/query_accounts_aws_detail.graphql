@@ -12,6 +12,7 @@ query RubrikPolarisSDKRequest($filter: String = "")
             {
                 id
                 nativeId
+                message
                 accountName
             }
             featureDetails

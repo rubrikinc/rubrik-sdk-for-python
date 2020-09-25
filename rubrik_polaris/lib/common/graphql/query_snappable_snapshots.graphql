@@ -8,8 +8,10 @@ query RubrikPolarisSDKRequest($first: Int, $snappable_id : String!){
         edges {
             node {
                 id
+                expirationDate
                 date
                 isOnDemandSnapshot
+                snappableId
             }
         }
     }
