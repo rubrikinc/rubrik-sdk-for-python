@@ -35,8 +35,8 @@ def submit_on_demand(self, object_ids, sla_id, **kwargs):
     """Submits On Demand Snapshot
 
     Arguments:
-        object_ids [string] -- Array of Rubrik Object IDs
-        sla_id string -- Rubrik SLA Domain ID
+        object_ids {[string]} -- Array of Rubrik Object IDs
+        sla_id {string} -- Rubrik SLA Domain ID
     """
     try:
         _mutation_name = "on_demand"
@@ -61,8 +61,8 @@ def submit_assign_sla(self, _object_ids, _sla_id):
     """Submits a Rubrik SLA change for objects
 
         Arguments:
-            object_ids [string] -- Array of Rubrik Object IDs
-            sla_id string -- Rubrik SLA Domain ID
+            object_ids {[string]} -- Array of Rubrik Object IDs
+            sla_id {string} -- Rubrik SLA Domain ID
         """
     try:
         _mutation_name = "assign_sla"
@@ -79,7 +79,7 @@ def get_task_status(self, _task_chain_id):
     """Retrieve task status from Polaris
 
         Arguments:
-            task_id [uuid] -- Task UUID from request
+            task_id {[uuid]} -- Task UUID from request
         """
     _query_name = "taskchain_status"
     try:
@@ -97,8 +97,8 @@ def get_snapshots(self, _snappable_id, **kwargs):
     """Retrieve Snapshots for a Snappable from Polaris
 
         Arguments:
-            snappable_id [uuid] -- Object UUID
-            recovery_point [string] -- Optional datetime of snapshot to return, or 'latest', or not defined to return all
+            snappable_id {[uuid]} -- Object UUID
+            recovery_point {[string]} -- Optional datetime of snapshot to return, or 'latest', or not defined to return all
         """
     _query_name = "snappable_snapshots"
     try:
@@ -113,14 +113,14 @@ def get_snapshots(self, _snappable_id, **kwargs):
             raise Exception("No Snapshots found for Snappable : {}".format(_snappable_id))
         snapshot_comparison = {}
         for snapshot in _response:
-            if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] is not 'latest':
+            if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] != 'latest':
                 parsed_snapshot_date = parse(snapshot['date']).astimezone()
                 parsed_recovery_point = parse(kwargs['recovery_point'])
                 parsed_recovery_point = parsed_recovery_point.replace(tzinfo = tzlocal())
                 snapshot['date_local'] = parsed_snapshot_date.isoformat()
                 if parsed_snapshot_date >= parsed_recovery_point:
                     snapshot_comparison[abs(parsed_recovery_point - parsed_snapshot_date)] = snapshot
-        if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] is not 'latest':
+        if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] != 'latest':
             return snapshot_comparison[min(snapshot_comparison)]
         if len(_response) == 1:
             return _response[0]
