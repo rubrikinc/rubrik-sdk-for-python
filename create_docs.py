@@ -276,12 +276,13 @@ def generate_function_doc(env, name, obj):
     example_code = None
     template = env.get_template('function.md.j2')
 
-    dest_dir = '{}/{}'.format(BUILD_DIR, obj.__module__.split('.')[0])
+    module_name = obj.__module__.split('.')[0]
+    dest_dir = '{}/{}'.format(BUILD_DIR, module_name)
 
     log.debug('Generating function documentation for {}'.format(name))
     try:
         if not _is_internal_function(name):
-            with open("sample/{}.py".format(name)) as code:
+            with open("sample/{}/{}.py".format(module_name, name)) as code:
                 example_code = code.read()
     except Exception as err:
         log.debug(err)
