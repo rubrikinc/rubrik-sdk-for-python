@@ -17,4 +17,3 @@ Exception related to the parameters provided in the function. This can be relate
 ## TypeException
 
 Exception related to the wrong Python type being provided in the function parameters.
-
