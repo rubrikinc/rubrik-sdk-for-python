@@ -3,16 +3,21 @@
 Retrieves deployment details for AWS from Polaris
 
 ```py
-def get_accounts_aws_detail(self, _filter = ""):
+def get_accounts_aws_detail(self, filter=""):
 ```
 
 ## Arguments
 
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| filter  | str | Search aws native account ID to filter results |  |
+| filter  | str | Search AWS native account ID to filter results |  |
 
 
+## Returns
+
+| Type | Return Value                                                                                  |
+|------|-----------------------------------------------------------------------------------------------|
+| list | List of AWS account details |
 
 
 

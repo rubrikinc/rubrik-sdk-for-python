@@ -9,8 +9,6 @@ aws_account_id = '789702809484'
 
 
 client = PolarisClient(domain, username, password, insecure=True)
-client.add_account_aws(aws_account_id, 'my-aws-account', ['us-east-1'])
-
 
 snappables = client.get_object_ids_ec2(tags = {"Environment": "staging"})
 for snappable in snappables:

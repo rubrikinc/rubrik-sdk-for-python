@@ -3,18 +3,23 @@
 Adds AWS account to Polaris
 
 ```py
-def add_account_aws(self, _account_id, _account_name, _regions):
+def add_account_aws(self, account_id, account_name, regions):
 ```
 
 ## Arguments
 
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| _account_id  | string | AWS account id to add |  |
-| _account_name  | str | Friendly name for account in Polaris |  |
-| _regions  | list | List of AWS regions to configure |  |
+| account_id  | str | AWS account id to add |  |
+| account_name  | str | Friendly name for account in Polaris |  |
+| regions  | list | List of AWS regions to configure |  |
 
 
+## Returns
+
+| Type | Return Value                                                                                  |
+|------|-----------------------------------------------------------------------------------------------|
+| int | 1 if the account was added successfully |
 
 
 
