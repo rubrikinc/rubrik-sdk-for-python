@@ -32,6 +32,7 @@ Before you begin to use the Rubrik Python SDK, you should first setup your authe
 * `rubrik_polaris_password`
 
 | Note: The `rubrik_cdm_username` and `rubrik_cdm_password` must be supplied together and may not be provided if the `rubrik_cdm_token` variable is present|
+| --- |
 
 ## Getting Started
 
