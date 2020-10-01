@@ -258,12 +258,6 @@ def parse_docstring(docstring):
 
 
 def generate_function_doc(env, name, obj):
-    skip = ['setup_cluster']
-    # Don't generate docs for functions with custom documentation
-    if name in skip:
-        log.debug('Skipping function documentation for {}'.format(name))
-        return
-
     sections = parse_docstring(obj.__doc__)
 
     # Grab the function definition, removing whitepsace and any pylint directives
@@ -382,9 +376,9 @@ if __name__ == "__main__":
             except OSError:
                 os.remove(filepath)
 
-    # Copy static markdown files to the build directory
-    shutil.copytree(STATIC_DIR, BUILD_DIR, dirs_exist_ok=True)
-
+    os.mkdir('{}/rubrik_cdm'.format(BUILD_DIR))
+    os.mkdir('{}/rubrik_polaris'.format(BUILD_DIR))
+    
     # Get all functions defined in the SDK, both public and internal ones
     sdk_functions = get_sdk_functions()
 
@@ -395,3 +389,6 @@ if __name__ == "__main__":
     
     # Generate the summary (side navigation) file
     generate_summary_doc(env, sdk_functions)
+
+    # Copy static markdown files to the build directory
+    shutil.copytree(STATIC_DIR, BUILD_DIR, dirs_exist_ok=True)
