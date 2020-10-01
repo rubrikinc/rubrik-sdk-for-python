@@ -10,10 +10,15 @@ def submit_on_demand(self, object_ids, sla_id, **kwargs):
 
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| object_ids  | [string] | Array of Rubrik Object IDs |  |
-| sla_id  | string | Rubrik SLA Domain ID |  |
+| object_ids  | [str] | Array of Rubrik Object IDs |  |
+| sla_id  | str | Rubrik SLA Domain ID |  |
 
 
+## Returns
+
+| Type | Return Value                                                                                  |
+|------|-----------------------------------------------------------------------------------------------|
+| list | List of errors if any occured |
 
 
 

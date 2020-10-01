@@ -2,29 +2,31 @@
 from dateutil.tz import tzlocal
 
 
-def get_sla_domains(self, _sla_domain_name=""):
-    """Retrieves dictionary of SLA Domain Names and Identifiers,
-       or the ID of a single SLA Domain
+def get_sla_domains(self, sla_domain_name=""):
+    """Retrieves dictionary of SLA Domain Names and Identifiers, or the ID of a single SLA Domain
 
     Arguments:
-        sla_domain_name {str} -- Rubrik SLA Domain Name
+        sla_domain_name {str} -- Rubrik SLA Domain name
 
-   """
+    Returns:
+        str -- ID for the given SLA Domain name as given by `sla_domain_name`
+        dict -- If a `sla_domain_name` is not given or not found, the complete set of SLA domains will be returned
+    """
     try:
         _query_name = "sla_domains"
         _variables = {
             "filter": {
                 "field": "NAME",
-                "text": _sla_domain_name
+                "text": sla_domain_name
             }
         }
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         _request_nodes = self._dump_nodes(_request, _query_name)
-        if _sla_domain_name and len(_request_nodes) == 1:
+        if sla_domain_name and len(_request_nodes) == 1:
             return _request_nodes[0]['id']
-        elif _sla_domain_name and len(_request_nodes) > 1:
+        elif sla_domain_name and len(_request_nodes) > 1:
             for i in _request_nodes:
-                if i['name'] == _sla_domain_name:
+                if i['name'] == sla_domain_name:
                     return i['id']
         else:
             return _request_nodes
@@ -35,8 +37,11 @@ def submit_on_demand(self, object_ids, sla_id, **kwargs):
     """Submits On Demand Snapshot
 
     Arguments:
-        object_ids {[string]} -- Array of Rubrik Object IDs
-        sla_id {string} -- Rubrik SLA Domain ID
+        object_ids {[str]} -- Array of Rubrik Object IDs
+        sla_id {str} -- Rubrik SLA Domain ID
+
+    Returns:
+        list -- List of errors if any occured
     """
     try:
         _mutation_name = "on_demand"
@@ -57,34 +62,40 @@ def submit_on_demand(self, object_ids, sla_id, **kwargs):
     except Exception as e:
         print(e)
 
-def submit_assign_sla(self, _object_ids, _sla_id):
+def submit_assign_sla(self, object_ids, sla_id):
     """Submits a Rubrik SLA change for objects
 
-        Arguments:
-            object_ids {[string]} -- Array of Rubrik Object IDs
-            sla_id {string} -- Rubrik SLA Domain ID
-        """
+    Arguments:
+        object_ids {[str]} -- Array of Rubrik Object IDs
+        sla_id {str} -- Rubrik SLA Domain ID
+    
+    Returns:
+        list -- List of objects assigned the SLA
+    """
     try:
         _mutation_name = "assign_sla"
         _variables = {
-                "objectIds": _object_ids,
-                "slaId": _sla_id
+                "objectIds": object_ids,
+                "slaId": sla_id
             }
         request = self._query(None, self._graphql_query[_mutation_name], _variables)
         return  self._dump_nodes(request, _mutation_name)
     except Exception as e:
         print(e)
 
-def get_task_status(self, _task_chain_id):
+def get_task_status(self, task_chain_id):
     """Retrieve task status from Polaris
 
-        Arguments:
-            task_id {[uuid]} -- Task UUID from request
-        """
+    Arguments:
+        task_chain_id {str} -- Task Chain UUID from request
+
+    Returns:
+        str -- Task state
+    """
     _query_name = "taskchain_status"
     try:
         _variables = {
-            "filter": _task_chain_id
+            "filter": task_chain_id
         }
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         _response = self._dump_nodes(_request, _query_name)
@@ -92,25 +103,29 @@ def get_task_status(self, _task_chain_id):
     except Exception as e:
         print(e)
 
-def get_snapshots(self, _snappable_id, **kwargs):
-    from dateutil.parser import parse
+def get_snapshots(self, snappable_id, **kwargs):
     """Retrieve Snapshots for a Snappable from Polaris
 
-        Arguments:
-            snappable_id {[uuid]} -- Object UUID
-            recovery_point {[string]} -- Optional datetime of snapshot to return, or 'latest', or not defined to return all
-        """
+    Arguments:
+        snappable_id {str} -- Object UUID
+        recovery_point {str} -- Optional datetime of snapshot to return, or 'latest', or not defined to return all
+        
+    Returns:
+        dict -- A dictionary of snapshots or a single snapshot if 'latest' was passed as `recovery_point`
+    """
+    from dateutil.parser import parse
+
     _query_name = "snappable_snapshots"
     try:
         _variables = {
-            "snappable_id": _snappable_id
+            "snappable_id": snappable_id
         }
         if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] == 'latest':
             _variables['first'] = 1
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         _response = self._dump_nodes(_request, _query_name)
         if not len(_response):
-            raise Exception("No Snapshots found for Snappable : {}".format(_snappable_id))
+            raise Exception("No Snapshots found for Snappable : {}".format(snappable_id))
         snapshot_comparison = {}
         for snapshot in _response:
             if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] != 'latest':
