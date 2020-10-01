@@ -1,9 +1,5 @@
 # Quick Start Guide: Rubrik SDK for Python
 
-## Introduction to the Rubrik SDK for Python
-
-Rubrik’s API first architecture enables organizations to embrace and integrate Rubrik functionality into their existing automation processes. While Rubrik APIs can be consumed natively, companies are at various stages in their automation journey with different levels of automation knowledge on staff. The Rubrik Software Development Kit (SDK) for Python extends upon Python’s easy to understand programming language, transforming Rubrik functionality into easy to consume functions. This eliminates the need to understand how to consume raw Rubrik APIs with Python and extends upon one of Rubrik’s main design centers - simplicity.
-
 ## Authentication Mechanisms
 
 The Rubrik SDK for Python provides two mechanisms for supplying credentials to the `rubrik_cdm.Connect()` function. Credentials may be accessed through the use of environment variables or manually passed into the function as parameters.
