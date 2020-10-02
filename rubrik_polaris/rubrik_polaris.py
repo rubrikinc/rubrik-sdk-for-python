@@ -44,7 +44,8 @@ class PolarisClient:
     from .lib.accounts import _invoke_account_delete_aws, _invoke_aws_stack, _commit_account_delete_aws
     from .lib.accounts import _destroy_aws_stack, _disable_account_aws
 
-    def __init__(self, _domain, _username, _password, enable_logging=False, logging_level="debug", **kwargs):
+
+    def __init__(self, _domain=None, _username=None, _password=None, enable_logging=False, logging_level="debug", **kwargs):
         from .lib.common.graphql import _build_graphql_maps
 
         self._pp = pprint.PrettyPrinter(indent=4)
@@ -66,11 +67,16 @@ class PolarisClient:
         if enable_logging:
             logging.getLogger().setLevel(valid_logging_levels[self.logging_level])
 
+        # Set credentials
+        self._domain = self._get_cred('rubrik_polaris_domain', _domain)
+        self._username = self._get_cred('rubrik_polaris_username', _username)
+        self._password = self._get_cred('rubrik_polaris_password', _password)
+
+        if not (self._domain and self._username and self._password):
+            raise Exception('Error: Required credentials are missing! Please pass in username, password and domain, directly or through the OS environment.')
+
         # Set base variables
         self._kwargs = kwargs
-        self._domain = _domain
-        self._username = _username
-        self._password = _password
         self._data_path = "{}/graphql/".format(os.path.dirname(os.path.realpath(__file__)))
         self._log("Polaris Domain: {}".format(self._domain))
 
@@ -112,3 +118,14 @@ class PolarisClient:
 
         }
         set_logging[self.logging_level](log_message)
+
+    def _get_cred(self, env_key, override=None):
+        cred = None
+
+        if env_key in os.environ:
+            cred = os.environ[env_key]
+
+        if override:
+            cred = override
+        
+        return cred

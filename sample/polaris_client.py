@@ -9,9 +9,9 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-p', '--password', dest='password', help="Polaris Password", required=True)
-parser.add_argument('-u', '--username', dest='username', help="Polaris UserName", required=True)
-parser.add_argument('-d', '--domain', dest='domain', help="Polaris Domain", required=True)
+parser.add_argument('-p', '--password', dest='password', help="Polaris Password", default=None)
+parser.add_argument('-u', '--username', dest='username', help="Polaris UserName", default=None)
+parser.add_argument('-d', '--domain', dest='domain', help="Polaris Domain", default=None)
 parser.add_argument('-r', '--root', dest='root_domain', help="Polaris Root Domain", default=None)
 parser.add_argument('--insecure', help='Deactivate SSL Verification', action="store_true")
 
