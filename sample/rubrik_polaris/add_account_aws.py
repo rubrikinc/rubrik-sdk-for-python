@@ -5,7 +5,7 @@ domain = 'my-company'
 username = 'john.doe@example.com'
 password = 's3cr3tP_a55w0R)'
 
-aws_account_id = '789702809484'
+aws_account_id = '339701109484'
 
 
 client = PolarisClient(domain, username, password, insecure=True)
