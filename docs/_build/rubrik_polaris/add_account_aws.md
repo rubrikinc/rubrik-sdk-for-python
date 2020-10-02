@@ -19,7 +19,7 @@ def add_account_aws(self, account_id, account_name, regions):
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
-| int | 1 if the account was added successfully |
+| bool | `True` if the account was added successfully, otherwise `False`. |
 
 
 

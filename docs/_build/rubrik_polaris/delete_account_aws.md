@@ -12,7 +12,7 @@ def delete_account_aws(self):
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
-| int | 1 if the account was deleted successfully |
+| bool | `True` if the account was deleted successfully, otherwise `False`. |
 
 
 

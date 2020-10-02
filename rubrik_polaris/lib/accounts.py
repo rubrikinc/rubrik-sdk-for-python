@@ -9,7 +9,7 @@ def add_account_aws(self, account_id, account_name, regions):
         regions {list} -- List of AWS regions to configure
 
     Returns:
-        int -- 1 if the account was added successfully
+        bool -- `True` if the account was added successfully, otherwise `False`.
     """
     try:
         _query_name = "account_add_aws"
@@ -239,7 +239,7 @@ def delete_account_aws(self):
     """Commits Delete AWS Account in Polaris, relies on local .aws
     
     Returns:
-        int -- 1 if the account was deleted successfully
+        bool -- `True` if the account was deleted successfully, otherwise `False`.
     """
     import re
     try:
