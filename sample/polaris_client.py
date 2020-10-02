@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+import sys
 import time
 from timeit import default_timer as timer
 
@@ -16,8 +17,13 @@ parser.add_argument('-r', '--root', dest='root_domain', help="Polaris Root Domai
 parser.add_argument('--insecure', help='Deactivate SSL Verification', action="store_true")
 
 args = parser.parse_args()
-rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password, root_domain=args.root_domain,
-                                      insecure=args.insecure)
+
+try:
+    rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password, root_domain=args.root_domain,
+                                          insecure=args.insecure)
+except Exception as err:
+    print(err)
+    sys.exit(1)
 
 ### Add AWS Acct (local profile must be configured, uses default currently.
 pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
