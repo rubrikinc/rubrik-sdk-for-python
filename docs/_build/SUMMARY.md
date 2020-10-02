@@ -108,7 +108,7 @@
 
 ## rubrik_polaris
 
-* [Getting Started](rubrik_polaris/getting_started.md)
+* [Getting Started](rubrik_polaris/quick_start.md)
 
 * [Common]()
     * [get_sla_domains](rubrik_polaris/get_sla_domains.md)
