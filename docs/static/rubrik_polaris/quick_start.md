@@ -68,7 +68,7 @@ https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warningsInsecur
 
 This warning may be suppressed utilizing the `urllib3` library and inserting the following code within your script:
 
-```
+```py
 from rubrik_polaris import PolarisClient
 import urllib3
 
