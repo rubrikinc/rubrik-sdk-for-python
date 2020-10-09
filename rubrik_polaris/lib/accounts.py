@@ -253,7 +253,11 @@ def _destroy_aws_stack(self, _stack_region, _stack_name, profile = ''):
         return
 
 def delete_account_aws(self, profiles = [], all = False):
-    """Commits  Delete AWS Account in Polaris, relies on local .aws"""
+    """Commits  Delete AWS Account in Polaris, relies on local .aws
+    Arguments:
+        all {bool} -- If true import all available profiles (Default: False)
+        profiles {list} -- List of explicit profiles to add
+    """
     if all or profiles:
         for profile in self._get_aws_profiles():
             if profile in profiles or all:
