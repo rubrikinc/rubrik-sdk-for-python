@@ -1,13 +1,16 @@
 """ Collection of functions that manipulate account components """
 
+
 def add_account_aws(self, regions = [], all = False, profiles = []):
     """Adds AWS account to Polaris
 
     Arguments:
-        account_name {str} -- Friendly name for account in Polaris
         regions {list} -- List of AWS regions to configure
         all {bool} -- If true import all available profiles (Default: False)
         profiles {list} -- List of explicit profiles to add
+
+    Returns:
+        bool -- `True` if the account was added successfully, otherwise `False`.
     """
     if all or profiles:
         for profile in self._get_aws_profiles():
@@ -42,7 +45,7 @@ def _add_account_aws(self, regions = [], profile = '', auth = {}, _account_id = 
     else:
         if profile:
             _invoke_aws_stack(self, _nodes, _aws_account_id, regions = regions, profile=profile)
-
+            
 def _get_aws_profiles(self):
     import boto3
     return boto3.session.Session().available_profiles
@@ -88,27 +91,33 @@ def _invoke_aws_stack(self, _nodes, _account_id, regions = [], profile = ''):
             print(e)
     return
 
-def get_accounts_aws(self, _filter=""):
+def get_accounts_aws(self, filter=""):
     """Retrieves AWS account information from Polaris
 
     Arguments:
         filter {str} -- Search string to filter results
+
+    Returns:
+        list -- List of AWS accounts in Polaris
     """
     try:
         _query_name = "accounts_aws"
         _variables = {
-            "filter": _filter
+            "filter": filter
         }
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
 
-def get_accounts_gcp(self, _filter=""):
+def get_accounts_gcp(self, filter=""):
     """Retrieves GCP account information from Polaris
 
     Arguments:
         filter {str} -- Search string to filter results
+    
+    Returns:
+        list -- List of GCP accounts in Polaris
     """
     try:
         _query_name = "accounts_gcp"
@@ -120,32 +129,38 @@ def get_accounts_gcp(self, _filter=""):
     except Exception as e:
         print(e)
 
-def get_accounts_azure(self, _filter=""):
+def get_accounts_azure(self, filter=""):
     """Retrieves Azure account information from Polaris
 
     Arguments:
         filter {str} -- Search string to filter results
+
+    Returns:
+        list -- List of Azure accounts in Polaris
     """
     try:
         _query_name = "accounts_azure"
         _variables = {
-            "filter": _filter
+            "filter": filter
         }
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
 
-def get_accounts_aws_detail(self, _filter = ""):
+def get_accounts_aws_detail(self, filter=""):
     """Retrieves deployment details for AWS from Polaris
 
     Arguments:
-        filter {str} -- Search aws native account ID to filter results
+        filter {str} -- Search AWS native account ID to filter results
+
+    Returns:
+        list -- List of AWS account details
     """
     try:
         _query_name = "accounts_aws_detail"
         _variables = {
-            "filter": _filter
+            "filter": filter
         }
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         return self._dump_nodes(_request, _query_name)
@@ -153,7 +168,12 @@ def get_accounts_aws_detail(self, _filter = ""):
         print(e)
 
 def get_account_aws_native_id(self, profile = ''):
-    """Returns AWS Account ID from local config"""
+    """Returns AWS Account ID from local config
+    
+    Returns:
+        str -- AWS Account ID, AWS Account Name (if applicable)
+    """
+    
     import boto3 as boto3
     from botocore.exceptions import ClientError
     try:
@@ -254,6 +274,7 @@ def _destroy_aws_stack(self, _stack_region, _stack_name, profile = ''):
 
 def delete_account_aws(self, profiles = [], all = False):
     """Commits  Delete AWS Account in Polaris, relies on local .aws
+    
     Arguments:
         all {bool} -- If true import all available profiles (Default: False)
         profiles {list} -- List of explicit profiles to add

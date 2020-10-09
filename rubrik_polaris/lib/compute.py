@@ -1,12 +1,15 @@
 """ Collection of functions that manipulate compute components"""
 
 def get_object_ids_ec2(self, match_all=True, **kwargs):
-    """Retrieves all EC2 objects that match query
+    """Retrieves all AWS EC2 object IDs that match query
 
     Arguments:
-        match_all bool -- Set to false to match ANY defined criteria
+        match_all {bool} -- Set to false to match ANY defined criteria
         tags {name: value} -- Allows simple qualification of tags
-        kwargs -- Any top level object from the get_instances_ec2 call
+        kwargs {} -- Any top level object from the get_instances_ec2 call
+
+    Returns:
+        list -- List of all the EC2 object id's 
     """
     try:
         _o = []
@@ -33,11 +36,14 @@ def get_object_ids_ec2(self, match_all=True, **kwargs):
 
 
 def get_object_ids_azure(self, match_all=True, **kwargs):
-    """Retrieves all Azure objects that match query
+    """Retrieves all Azure VM object IDs that match query
 
     Arguments:
-        match_all bool -- Set to false to match ANY defined criteria
-        kwargs -- Any top level object from the get_instances_ec2 call
+        match_all {bool} -- Set to false to match ANY defined criteria
+        kwargs {} -- Any top level object from the get_instances_azure call
+    
+    Returns:
+        list -- List of all the Azure VM object id's 
     """
     try:
         _o = []
@@ -57,11 +63,14 @@ def get_object_ids_azure(self, match_all=True, **kwargs):
 
 
 def get_object_ids_gce(self, match_all=True, **kwargs):
-    """Retrieves all Azure objects that match query
+    """Retrieves all GCE object IDs that match query
 
     Arguments:
-        match_all bool -- Set to false to match ANY defined criteria
-        kwargs -- Any top level object from the get_instances_ec2 call
+        match_all {bool} -- Set to `False` to match ANY defined criteria
+        kwargs {} -- Any top level object from the get_instances_gce call
+    
+    Returns:
+        list -- List of all the GCE object id's 
     """
     try:
         _o = []
@@ -83,8 +92,8 @@ def _get_object_ids_vsphere(self, _match_all=True, **kwargs):
     """Retrieves all vSphere objects that match query
 
     Arguments:
-        match_all bool -- Set to false to match ANY defined criteria
-        kwargs -- Any top level object from the get_instances_ec2 call
+        match_all {bool} -- Set to false to match ANY defined criteria
+        kwargs {} -- Any top level object from the get_instances_ec2 call
     """
     try:
         _o = []
@@ -103,8 +112,15 @@ def _get_object_ids_vsphere(self, _match_all=True, **kwargs):
         print (e)
 
 
-def get_instances_ec2(self, object_id = None):
-    ### Retrieve all EC2 instances from Polaris ###
+def get_instances_ec2(self, object_id=None):
+    """Retrieve all AWS EC2 instances from Polaris
+    
+    Arguments:
+        object_id {str} -- A specific Object ID to retrieve
+
+    Returns:
+        list -- List of all the AWS EC2 instances or the specific instance if the `object_id` is passed.
+    """
     try:
         _request = None
         if object_id:
@@ -121,7 +137,11 @@ def get_instances_ec2(self, object_id = None):
         print(e)
 
 def get_instances_azure(self):
-    ### Retrieve all Azure instances from Polaris ###
+    """Retrieve all Azure instances from Polaris
+    
+    Returns:
+        list -- List of all Azure VM instances
+    """
     try:
         _query_name = "instances_azure"
         _request = self._query(None, self._graphql_query[_query_name], None)
@@ -131,7 +151,11 @@ def get_instances_azure(self):
 
 
 def get_instances_gce(self):
-    ### Retrieve all GCE instances from Polaris ###
+    """Retrieve all GCE instances from Polaris
+        
+    Returns:
+        list -- List of all GCE instances
+    """
     try:
         _query_name = "instances_gce"
         _request = self._query(None, self._graphql_query[_query_name], None)
@@ -140,7 +164,7 @@ def get_instances_gce(self):
         print(e)
 
 def _get_instances_vsphere(self):
-    ### Retrieve all vSphere instances from Polaris ###
+    """ Retrieve all vSphere instances from Polaris """
     try:
         _query_name = "instances_vsphere"
         _variables = {
@@ -156,11 +180,11 @@ def _submit_instance_restore(self, snapshot_id, **kwargs):
     """Submits a Restore of a compute instance
 
     Arguments:
-        query_name string -- Backend query name for operation
-        snapshot_id string -- Snapshot ID to be restored
-        should_power_on bool -- Defaults to False
-        should_restore_tags bool -- Defaults to False
-        wait bool -- Return once complete Defaults to False
+        query_name {string} -- Backend query name for operation
+        snapshot_id {string} -- Snapshot ID to be restored
+        should_power_on {bool} -- Defaults to False
+        should_restore_tags {bool} -- Defaults to False
+        wait {bool} -- Return once complete Defaults to False
     """
 
     should_power_on = False
@@ -194,21 +218,27 @@ def submit_restore_ec2(self, snapshot_id, **kwargs):
     """Submits a Restore of an EC2 instance
 
     Arguments:
-        snapshot_id string -- Snapshot ID to be restored
-        should_power_on bool -- Defaults to False
-        should_restore_tags bool -- Defaults to False
-        wait bool -- Return once complete Defaults to False
+        snapshot_id {str} -- Snapshot ID to be restored
+        should_power_on {bool} -- Defaults to `False`
+        should_restore_tags {bool} -- Defaults to `False`
+        wait {bool} -- Return once complete Defaults to `False`
+    
+    Returns:
+        list -- List of errors if any occured during the restore
     """
     return self._submit_instance_restore(snapshot_id, mutation = "instances_restore_ec2", **kwargs)
 
 def submit_restore_azure(self, snapshot_id, **kwargs):
-    """Submits a Restore of an Azure instance
+    """Submits a Restore of an Azure VM instance
 
     Arguments:
-        snapshot_id string -- Snapshot ID to be restored
-        should_power_on bool -- Defaults to False
-        should_restore_tags bool -- Defaults to False
-        wait bool -- Return once complete Defaults to False
+        snapshot_id {str} -- Snapshot ID to be restored
+        should_power_on {bool} -- Defaults to `False`
+        should_restore_tags {bool} -- Defaults to `False`
+        wait {bool} -- Return once complete Defaults to `False`
+
+    Returns:
+        list -- List of errors if any occured during the restore
     """
     return self._submit_instance_restore(snapshot_id, mutation = "instances_restore_azure", **kwargs)
 
@@ -216,9 +246,12 @@ def submit_restore_gce(self, snapshot_id, **kwargs):
     """Submits a Restore of a GCE instance
 
     Arguments:
-        snapshot_id string -- Snapshot ID to be restored
-        should_power_on bool -- Defaults to False
-        should_restore_tags bool -- Defaults to False
-        wait bool -- Return once complete Defaults to False
+        snapshot_id {str} -- Snapshot ID to be restored
+        should_power_on {bool} -- Defaults to `False`
+        should_restore_tags {bool} -- Defaults to `False`
+        wait {bool} -- Return once complete Defaults to `False`
+
+    Returns:
+        list -- List of errors if any occured during the restore
     """
     return self._submit_instance_restore(snapshot_id, mutation = "instances_restore_gce", **kwargs)

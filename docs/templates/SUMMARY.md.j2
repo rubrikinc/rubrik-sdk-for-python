@@ -1,55 +1,62 @@
-# Summary
+# Rubrik SDK
 
-### Getting Started
+## rubrik_cdm
 
-* [Quick Start](README.md)
+* [Getting Started](rubrik_cdm/getting_started.md)
 
-### Base API Calls
+* [Base API Calls]()
+    {% for fn in base_functions %}
+    * [{{ fn[0] }}](rubrik_cdm/{{ fn[0] }}.md)
+    {% endfor %}
 
-{% for fn in base_functions %}
-* [{{ fn[0] }}]({{ fn[0] }}.md)
-{% endfor %}
+* [Bootstrap]()
+    {% for fn in bootstrap_functions %}
+    * [{{ fn[0] }}](rubrik_cdm/{{ fn[0] }}.md)
+    {% endfor %}
 
-### Bootstrap Functions
+* [Cluster]()
+    {% for fn in cluster_functions %}
+    * [{{ fn[0] }}](rubrik_cdm/{{ fn[0] }}.md)
+    {% endfor %}
 
-{% for fn in bootstrap_functions %}
-* [{{ fn[0] }}]({{ fn[0] }}.md)
-{% endfor %}
+* [Cloud]()
+    {% for fn in cloud_functions %}
+    * [{{ fn[0] }}](rubrik_cdm/{{ fn[0] }}.md)
+    {% endfor %}
 
-### Cluster Functions
+* [Data Management]()
+    {% for fn in data_management_functions %}
+    * [{{ fn[0] }}](rubrik_cdm/{{ fn[0] }}.md)
+    {% endfor %}
 
-{% for fn in cluster_functions %}
-* [{{ fn[0] }}]({{ fn[0] }}.md)
-{% endfor %}
+* [Physical Host]()
+    {% for fn in physical_functions %}
+    * [{{ fn[0] }}](rubrik_cdm/{{ fn[0] }}.md)
+    {% endfor %}
 
-### Cloud Functions
+* [Helpers]()
+    {% for fn in helper_functions %}
+    * [{{ fn[0] }}](rubrik_cdm/{{ fn[0] }}.md)
+    {% endfor %}
 
-{% for fn in cloud_functions %}
-* [{{ fn[0] }}]({{ fn[0] }}.md)
-{% endfor %}
+* [Exceptions](rubrik_cdm/exceptions.md)
 
-### Data Management Functions
 
-{% for fn in data_management_functions %}
-* [{{ fn[0] }}]({{ fn[0] }}.md)
-{% endfor %}
+## rubrik_polaris
 
-### Physical Host Functions
+* [Getting Started](rubrik_polaris/quick_start.md)
 
-{% for fn in physical_functions %}
-* [{{ fn[0] }}]({{ fn[0] }}.md)
-{% endfor %}
+* [Common]()
+    {% for fn in polaris_common_functions %}
+    * [{{ fn[0] }}](rubrik_polaris/{{ fn[0] }}.md)
+    {% endfor %}
 
-### SDK Helper Functions
+* [Accounts]()
+    {% for fn in polaris_accounts_functions %}
+    * [{{ fn[0] }}](rubrik_polaris/{{ fn[0] }}.md)
+    {% endfor %}
 
-{% for fn in helper_functions %}
-* [{{ fn[0] }}]({{ fn[0] }}.md)
-{% endfor %}
-* [exceptions](exceptions.md)
-
-### Internal Functions
-
-{% for fn in internal_functions %}
-* [{{ fn[0] }}]({{ fn[0] }}.md)
-{% endfor %}
-
+* [Compute]()
+    {% for fn in polaris_compute_functions %}
+    * [{{ fn[0] }}](rubrik_polaris/{{ fn[0] }}.md)
+    {% endfor %}
