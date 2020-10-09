@@ -20,13 +20,16 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
                                       insecure=args.insecure)
 
 ### Add AWS Acct (local profile must be configured, uses default currently.
-pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
+# pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
+# pp.pprint(rubrik.add_account_aws("peterm", ["us-east-1"], profile = "dev"))
+# pp.pprint(rubrik.add_account_aws("peterm", ["us-east-1"], key = "dev", token = "blah"))
+
 
 ### Remove AWS Acct (local profile must be configured, uses default currently.
 # pp.pprint(rubrik.delete_account_aws())
 
 ### Run ODS for machines in a region using Gold retention, monitor to complete via threads
-# pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_gce(region="us-west1"), rubrik.get_sla_domains("Gold"), wait = True))
+pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_azure(region="EastUS2"), rubrik.get_sla_domains("Bronze"), wait = True))
 
 ### Returns all objectIDs matching arbitrary available inputs. ec2 tags have special treatment
 # pp.pprint(rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"}))
@@ -40,6 +43,7 @@ pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
 # snappables = ['af7e69b7-b836-4ab5-9a6c-66a23ff94de8']
 # for snappable in snappables:
 #     snapshot_id = (rubrik.get_snapshots(snappable, recovery_point='2020-09-19 04:20')) # can include anything up to this. 2020 is ok, 2020-09, 2020-09-19, ...
+#     pp.pprint(snappable)
 #     snapshot_id = rubrik.get_snapshots(snappable, recovery_point='latest')
 #     pp.pprint(rubrik.get_snapshots(snappable)) # Get all snapshots
 #     pp.pprint(snapshot_id)

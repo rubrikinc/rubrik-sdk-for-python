@@ -12,6 +12,12 @@ query RubrikPolarisSDKRequest($first: Int, $snappable_id : String!){
                 date
                 isOnDemandSnapshot
                 snappableId
+                ... on PolarisSnapshot{
+                    slaDomain {
+                        name
+                        id
+                    }
+                }
             }
         }
     }

@@ -4,6 +4,9 @@ query RubrikPolarisSDKRequest($filter: String!){
             id
             state
             taskchainUuid
+            ... on Taskchain{
+                progressedAt
+            }
         }
     }
 }
