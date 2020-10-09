@@ -27,6 +27,7 @@ import sys
 
 import jinja2
 import rubrik_cdm
+import rubrik_polaris
 
 
 def _is_internal_function(name):
@@ -41,6 +42,7 @@ def get_sdk_functions():
         rubrik_cdm.data_management.Data_Management, 
         rubrik_cdm.physical.Physical,
         rubrik_cdm.rubrik_cdm.Connect,
+        rubrik_polaris.PolarisClient
     ]
 
     class_functions = {}
@@ -48,12 +50,20 @@ def get_sdk_functions():
     excluded = ['__init__']
 
     for c in classes:
-        functions = inspect.getmembers(c, 
-            lambda o:
-                inspect.isfunction(o) and 
-                o.__name__ not in excluded and 
-                o.__module__ == c.__module__
-        )
+        if c == rubrik_polaris.PolarisClient:
+            functions = inspect.getmembers(c, 
+                lambda o:
+                    inspect.isfunction(o) and 
+                    o.__name__ not in excluded
+            )
+        else:
+            functions = inspect.getmembers(c, 
+                lambda o:
+                    inspect.isfunction(o) and 
+                    o.__name__ not in excluded and 
+                    o.__module__ == c.__module__
+            )
+
         class_functions[c.__name__] = {
             'public': [],
             'private': []
@@ -89,7 +99,7 @@ def _parse_arguments(docstring):
         line = line.replace(' -- ', '').strip().split('}', 1)
         value_type = line[0].split('{', 1)
 
-        if value_type[0] is not '':
+        if value_type[0] != '':
             function_name = value_type[0]
             python_type = value_type[1]
             description = line[1]
@@ -119,7 +129,7 @@ def _parse_keyword_arguments(docstring):
     for line in docstring:
         line = line.replace(' -- ', '').strip().split('}', 1)
         value_type = line[0].split('{', 1)
-        if value_type[0] is not '':
+        if value_type[0] != '':
             name = value_type[0]
             python_type = value_type[1]
             description = line[1]
@@ -163,7 +173,7 @@ def _parse_return_values(docstring):
 
     for line in docstring:
         line = line.strip().split(' -- ', 1)
-        if line[0] is not '':
+        if line[0] != '':
             description = ""
             if len(line) > 1:
                 description = line[1]
@@ -181,7 +191,7 @@ def _parse_exceptions(docstring):
 
     for line in docstring:
         line = line.strip().split(' -- ', 1)
-        if line[0] is not '':
+        if line[0] != '':
             exceptions.append({
                 'type': line[0], 
                 'description': line[1]
@@ -198,6 +208,9 @@ def parse_docstring(docstring):
         'returns': [],
         'exceptions': []
     }
+
+    if not docstring:
+        return sections
 
     #log.debug('Parsing: {}'.format(docstring))
     current_section = 'description'
@@ -218,22 +231,33 @@ def parse_docstring(docstring):
             if len(line.strip()) > 0:
                 sections[current_section].append(line.strip())
 
-    return {
-        'description': ' '.join(sections['description']),
-        'arguments': _parse_arguments(sections['arguments']),
-        'keyword_arguments': _parse_keyword_arguments(sections['keyword_arguments']),
-        'returns': _parse_return_values(sections['returns']),
-        'exceptions': _parse_exceptions(sections['exceptions'])
+    parsed_values = {
+        'description': '',
+        'arguments': [],
+        'keyword_arguments': [],
+        'returns': [],
+        'exceptions': []
     }
+
+    if sections['description'] != []:
+        parsed_values['description'] = ' '.join(sections['description'])
+
+    if sections['arguments'] != []:
+        parsed_values['arguments'] = _parse_arguments(sections['arguments'])
+
+    if sections['keyword_arguments'] != []:
+        parsed_values['keyword_arguments'] = _parse_keyword_arguments(sections['keyword_arguments'])
+
+    if sections['returns'] != []:
+        parsed_values['returns'] = _parse_return_values(sections['returns'])
+
+    if sections['exceptions'] != []:
+        parsed_values['exceptions'] = _parse_exceptions(sections['exceptions'])
+
+    return parsed_values
 
 
 def generate_function_doc(env, name, obj):
-    skip = ['setup_cluster']
-    # Don't generate docs for functions with custom documentation
-    if name in skip:
-        log.debug('Skipping function documentation for {}'.format(name))
-        return
-
     sections = parse_docstring(obj.__doc__)
 
     # Grab the function definition, removing whitepsace and any pylint directives
@@ -246,15 +270,18 @@ def generate_function_doc(env, name, obj):
     example_code = None
     template = env.get_template('function.md.j2')
 
+    module_name = obj.__module__.split('.')[0]
+    dest_dir = '{}/{}'.format(BUILD_DIR, module_name)
+
     log.debug('Generating function documentation for {}'.format(name))
     try:
         if not _is_internal_function(name):
-            with open("sample/{}.py".format(name)) as code:
+            with open("sample/{}/{}.py".format(module_name, name)) as code:
                 example_code = code.read()
     except Exception as err:
         log.debug(err)
         log.debug('Skipping code example for {}'.format(name))
-        with open('{}/{}.md'.format(build_directory, name), 'w') as md:
+        with open('{}/{}.md'.format(dest_dir, name), 'w') as md:
             md.write(template.render(
                 name=name,
                 funcdef=funcdef, 
@@ -266,7 +293,7 @@ def generate_function_doc(env, name, obj):
                 example=""
             ))
     else:
-        with open('{}/{}.md'.format(build_directory, name), 'w') as md:
+        with open('{}/{}.md'.format(dest_dir, name), 'w') as md:
             md.write(template.render(
                 name=name,
                 funcdef=funcdef,
@@ -277,7 +304,19 @@ def generate_function_doc(env, name, obj):
                 exceptions=sections['exceptions'],
                 example=example_code
             ))
-    log.debug('Wrote {}/{}.md'.format(build_directory, name))
+    log.debug('Wrote {}/{}.md'.format(dest_dir, name))
+
+
+def _split_polaris_functions(functions):
+    split_functions = functions
+    for f in functions['PolarisClient']['public']:
+        module_name = f[1].__module__
+        if module_name in split_functions:
+            split_functions[module_name].append(f)
+        else:
+            split_functions[module_name] = [f]
+
+    return split_functions
 
 
 def _sorted(functions):
@@ -285,13 +324,11 @@ def _sorted(functions):
 
 
 def generate_summary_doc(env, functions):
-    all_internal_functions = []
-    for fns in functions.values():
-        all_internal_functions += fns['private']
-
     template = env.get_template('SUMMARY.md.j2')
 
-    with open('{}/SUMMARY.md'.format(build_directory), 'w') as md:
+    functions = _split_polaris_functions(functions)
+
+    with open('{}/SUMMARY.md'.format(BUILD_DIR), 'w') as md:
         md.write(template.render(
             base_functions=_sorted(functions['Api']['public']), 
             bootstrap_functions=_sorted(functions['Bootstrap']['public']),
@@ -300,7 +337,9 @@ def generate_summary_doc(env, functions):
             data_management_functions=_sorted(functions['Data_Management']['public']),
             physical_functions=_sorted(functions['Physical']['public']),
             helper_functions=_sorted(functions['Connect']['public']),
-            internal_functions=_sorted(all_internal_functions)
+            polaris_common_functions=_sorted(functions['rubrik_polaris.lib.common.polaris']),
+            polaris_accounts_functions=_sorted(functions['rubrik_polaris.lib.accounts']),
+            polaris_compute_functions=_sorted(functions['rubrik_polaris.lib.compute'])
         ))
 
 
@@ -322,27 +361,34 @@ if __name__ == "__main__":
         lstrip_blocks=True
     )
 
-    build_directory = 'docs/_build'
+    BUILD_DIR = 'docs/_build'
+    STATIC_DIR = 'docs/static'
 
     # Create build directory
     try:
-        os.mkdir(build_directory)
+        os.mkdir(BUILD_DIR)
     except FileExistsError:
         # Empty existing directory
-        for f in glob.glob('{}/*'.format(build_directory)):
-            os.remove(f)
-    
-    # Copy static markdown files from docs/ to the build directory
-    for f in glob.glob(r'docs/*.md'):
-        shutil.copy(f, build_directory)
+        for filename in os.listdir(BUILD_DIR):
+            filepath = os.path.join(BUILD_DIR, filename)
+            try:
+                shutil.rmtree(filepath)
+            except OSError:
+                os.remove(filepath)
 
+    os.mkdir('{}/rubrik_cdm'.format(BUILD_DIR))
+    os.mkdir('{}/rubrik_polaris'.format(BUILD_DIR))
+    
     # Get all functions defined in the SDK, both public and internal ones
     sdk_functions = get_sdk_functions()
 
     # Generate the function documentation files
     for class_fns in sdk_functions.values():
-        for fn in (class_fns['public'] + class_fns['private']):
+        for fn in class_fns['public']:
             generate_function_doc(env, fn[0], fn[1])
     
     # Generate the summary (side navigation) file
     generate_summary_doc(env, sdk_functions)
+
+    # Copy static markdown files to the build directory
+    shutil.copytree(STATIC_DIR, BUILD_DIR, dirs_exist_ok=True)

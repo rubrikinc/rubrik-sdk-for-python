@@ -1,19 +1,22 @@
 """ Collection of functions that manipulate account components """
 
-def add_account_aws(self, _account_id, _account_name, _regions):
+def add_account_aws(self, account_id, account_name, regions):
     """Adds AWS account to Polaris
 
     Arguments:
-        _account_id {string} -- AWS account id to add
-        _account_name {str} -- Friendly name for account in Polaris
-        _regions {list} -- List of AWS regions to configure
+        account_id {str} -- AWS account id to add
+        account_name {str} -- Friendly name for account in Polaris
+        regions {list} -- List of AWS regions to configure
+
+    Returns:
+        bool -- `True` if the account was added successfully, otherwise `False`.
     """
     try:
         _query_name = "account_add_aws"
         _variables = {
-            "account_id": _account_id,
-            "account_name": _account_name,
-            "regions": _regions
+            "account_id": account_id,
+            "account_name": account_name,
+            "regions": regions
         }
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         _nodes = self._dump_nodes(_request, _query_name)
@@ -22,7 +25,7 @@ def add_account_aws(self, _account_id, _account_name, _regions):
     except Exception as e:
         print(e)
     else:
-        _invoke_aws_stack(self, _nodes, _account_id)
+        _invoke_aws_stack(self, _nodes, account_id)
         return 1
 
 def _invoke_aws_stack(self, _nodes, _account_id):
@@ -65,27 +68,33 @@ def _invoke_aws_stack(self, _nodes, _account_id):
     else:
         return
 
-def get_accounts_aws(self, _filter=""):
+def get_accounts_aws(self, filter=""):
     """Retrieves AWS account information from Polaris
 
     Arguments:
         filter {str} -- Search string to filter results
+
+    Returns:
+        list -- List of AWS accounts in Polaris
     """
     try:
         _query_name = "accounts_aws"
         _variables = {
-            "filter": _filter
+            "filter": filter
         }
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
 
-def get_accounts_gcp(self, _filter=""):
+def get_accounts_gcp(self, filter=""):
     """Retrieves GCP account information from Polaris
 
     Arguments:
         filter {str} -- Search string to filter results
+    
+    Returns:
+        list -- List of GCP accounts in Polaris
     """
     try:
         _query_name = "accounts_gcp"
@@ -97,32 +106,38 @@ def get_accounts_gcp(self, _filter=""):
     except Exception as e:
         print(e)
 
-def get_accounts_azure(self, _filter=""):
+def get_accounts_azure(self, filter=""):
     """Retrieves Azure account information from Polaris
 
     Arguments:
         filter {str} -- Search string to filter results
+
+    Returns:
+        list -- List of Azure accounts in Polaris
     """
     try:
         _query_name = "accounts_azure"
         _variables = {
-            "filter": _filter
+            "filter": filter
         }
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
 
-def get_accounts_aws_detail(self, _filter = ""):
+def get_accounts_aws_detail(self, filter=""):
     """Retrieves deployment details for AWS from Polaris
 
     Arguments:
-        filter {str} -- Search aws native account ID to filter results
+        filter {str} -- Search AWS native account ID to filter results
+
+    Returns:
+        list -- List of AWS account details
     """
     try:
         _query_name = "accounts_aws_detail"
         _variables = {
-            "filter": _filter
+            "filter": filter
         }
         _request = self._query(None, self._graphql_query[_query_name], _variables)
         return self._dump_nodes(_request, _query_name)
@@ -130,7 +145,11 @@ def get_accounts_aws_detail(self, _filter = ""):
         print(e)
 
 def get_account_aws_native_id(self):
-    """Returns AWS Account ID from local config"""
+    """Returns AWS Account ID from local config (.aws)
+    
+    Returns:
+        str -- AWS Account ID
+    """
     import boto3 as boto3
     try:
         _boto_account_id = boto3.client('sts').get_caller_identity().get('Account')
@@ -217,7 +236,11 @@ def _destroy_aws_stack(self, _stack_region, _stack_name):
         return
 
 def delete_account_aws(self):
-    """Commits  Delete AWS Account in Polaris, relies on local .aws"""
+    """Commits Delete AWS Account in Polaris, relies on local .aws
+    
+    Returns:
+        bool -- `True` if the account was deleted successfully, otherwise `False`.
+    """
     import re
     try:
         #todo: Add exception if account does not exist in polaris
