@@ -29,7 +29,7 @@ rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password,
 # pp.pprint(rubrik.delete_account_aws())
 
 ### Run ODS for machines in a region using Gold retention, monitor to complete via threads
-pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_azure(region="EastUS2"), rubrik.get_sla_domains("Bronze"), wait = True))
+# pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_azure(region="EastUS2"), rubrik.get_sla_domains("Bronze"), wait = True))
 
 ### Returns all objectIDs matching arbitrary available inputs. ec2 tags have special treatment
 # pp.pprint(rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"}))
