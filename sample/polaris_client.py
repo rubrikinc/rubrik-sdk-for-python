@@ -19,14 +19,14 @@ args = parser.parse_args()
 rubrik = rubrik_polaris.PolarisClient(args.domain, args.username, args.password, root_domain=args.root_domain,
                                       insecure=args.insecure)
 
-### Add AWS Acct (local profile must be configured, uses default currently.
-# pp.pprint(rubrik.add_account_aws("789702809484", "peterm", ["us-east-1"]))
-# pp.pprint(rubrik.add_account_aws("peterm", ["us-east-1"], profile = "dev"))
-# pp.pprint(rubrik.add_account_aws("peterm", ["us-east-1"], key = "dev", token = "blah"))
+### Add AWS Acct (local profile must be configured, specify list of profiles _or_ set all=True.
+# rubrik.add_account_aws(regions = ["us-east-1"], profiles = ["peterm-profile"])
+# rubrik.add_account_aws(regions = ["us-west-2"], all = True )
 
+### Remove AWS Acct (local profile must be configured, specify list of profiles _or_ set all=True.
+# rubrik.delete_account_aws(profiles = ['peterm-profile'])
+# rubrik.delete_account_aws(all = True )
 
-### Remove AWS Acct (local profile must be configured, uses default currently.
-# pp.pprint(rubrik.delete_account_aws())
 
 ### Run ODS for machines in a region using Gold retention, monitor to complete via threads
 # pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_azure(region="EastUS2"), rubrik.get_sla_domains("Bronze"), wait = True))
