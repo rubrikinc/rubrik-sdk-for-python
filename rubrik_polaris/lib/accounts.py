@@ -16,6 +16,10 @@ def add_account_aws(self, regions = [], all = False, profiles = []):
         for profile in self._get_aws_profiles():
             if profile in profiles or all:
                 self._add_account_aws(profile = profile, regions = regions)
+                #TODO: Should add above into a queque for threaded provisioning
+            else:
+                print("{} : Did not find credentials".format(profile))
+                #TODO: Exception if profile does not exist in .credentials
 
 def _add_account_aws(self, regions = [], profile = '', auth = {}, _account_id = '', _account_name = None):
     if profile:
@@ -24,7 +28,7 @@ def _add_account_aws(self, regions = [], profile = '', auth = {}, _account_id = 
     if _aws_account_id:
         _account_name_list.append(_aws_account_id)
     else:
-        return #TODO: Should raise exception that the account doesn't exist or something like that.
+        return #TODO: Raise error message in return stack (FDSE-848)
     if _aws_account_name:
         _account_name_list.append(_aws_account_name)
     if profile:
