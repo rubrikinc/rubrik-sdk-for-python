@@ -21,10 +21,10 @@ def _add_account_aws(self, regions = [], profile = '', auth = {}, _account_id = 
     if profile:
         _aws_account_id, _aws_account_name = self.get_account_aws_native_id(profile=profile)
     _account_name_list = []
-    if not _aws_account_id:
-        return #TODO: Should raise exception that the account doesn't exist or something like that.
     if _aws_account_id:
         _account_name_list.append(_aws_account_id)
+    else:
+        return #TODO: Should raise exception that the account doesn't exist or something like that.
     if _aws_account_name:
         _account_name_list.append(_aws_account_name)
     if profile:
