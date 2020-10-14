@@ -18,11 +18,11 @@
 #  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #  DEALINGS IN THE SOFTWARE.
 
-import logging
 import os
-import urllib3
-from .exceptions import InvalidParameterException
 import pprint
+import urllib3
+
+from .exceptions import InvalidParameterException
 
 
 class PolarisClient:
@@ -45,27 +45,10 @@ class PolarisClient:
     from .lib.accounts import _destroy_aws_stack, _disable_account_aws, _get_aws_profiles, _add_account_aws, _delete_account_aws
 
 
-    def __init__(self, _domain=None, _username=None, _password=None, enable_logging=False, logging_level="debug", **kwargs):
+    def __init__(self, _domain=None, _username=None, _password=None, **kwargs):
         from .lib.common.graphql import _build_graphql_maps
 
         self._pp = pprint.PrettyPrinter(indent=4)
-
-        # Enable logging for the SDK
-        valid_logging_levels = {
-            "debug": logging.DEBUG,
-            "critical": logging.CRITICAL,
-            "error": logging.ERROR,
-            "warning": logging.WARNING,
-            "info": logging.INFO,
-        }
-        if logging_level not in valid_logging_levels:
-            raise InvalidParameterException(
-                "'{}' is not a valid logging_level. Valid choices are 'debug', 'critical', 'error', 'warning', "
-                "or 'info'.".format(
-                    logging_level))
-        self.logging_level = logging_level
-        if enable_logging:
-            logging.getLogger().setLevel(valid_logging_levels[self.logging_level])
 
         # Set credentials
         self._domain = self._get_cred('rubrik_polaris_domain', _domain)
@@ -102,23 +85,6 @@ class PolarisClient:
         # Get graphql content
         (self._graphql_query, self._graphql_file_type_map) = _build_graphql_maps(self)
 
-    def _log(self, log_message):
-        """Create properly formatted debug log messages.
-
-        Arguments:
-            log_message {str} -- The message to pass to the debug log.
-        """
-        log = logging.getLogger(__name__)
-        set_logging = {
-            "debug": log.debug,
-            "critical": log.critical,
-            "error": log.error,
-            "warning": log.warning,
-            "info": log.info
-
-        }
-        set_logging[self.logging_level](log_message)
-
     def _get_cred(self, env_key, override=None):
         cred = None
 
@@ -127,5 +93,5 @@ class PolarisClient:
 
         if override:
             cred = override
-        
+
         return cred
