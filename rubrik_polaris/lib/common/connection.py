@@ -23,6 +23,7 @@
 
 def _query(self, _operation_name=None, _query=None, _variables=None, _timeout=60):
     import requests
+
     try:
         _operation_name = "RubrikPolarisSDKRequest"
 
@@ -40,11 +41,13 @@ def _query(self, _operation_name=None, _query=None, _variables=None, _timeout=60
 
         try:
             _api_response = _api_request.json()
+            if 'code' in _api_response and 'message' in _api_response and _api_response['code'] >= 400:
+                print(_api_response['message'])
+
+            return _api_response
         except BaseException:
             _api_request.raise_for_status()
-        if 'code' in _api_response and 'message' in _api_response and _api_response['code'] >= 400:
-            print(_api_response['message'])
-        return _api_response
+
     except Exception as e:
         print(e)
 
