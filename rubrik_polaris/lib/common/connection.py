@@ -25,12 +25,7 @@ def _query(self, _operation_name=None, _query=None, _variables=None, _timeout=60
     import requests
     try:
         _operation_name = "RubrikPolarisSDKRequest"
-        self._log('POST {}'.format(self._baseurl))
-        if _operation_name is not None:
-            self._log('Operation Name: {}'.format(_operation_name))
-        self._log('Query: {}'.format(_query))
-        if _variables is not None:
-            self._log('Variables: {}'.format(_variables))
+
         _api_request = requests.post(
             self._baseurl,
             verify=False,
@@ -42,7 +37,7 @@ def _query(self, _operation_name=None, _query=None, _variables=None, _timeout=60
             },
             timeout=_timeout
         )
-        self._log(str(_api_request) + "\n")
+
         try:
             _api_response = _api_request.json()
         except BaseException:

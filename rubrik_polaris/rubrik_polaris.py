@@ -61,7 +61,6 @@ class PolarisClient:
         # Set base variables
         self._kwargs = kwargs
         self._data_path = "{}/graphql/".format(os.path.dirname(os.path.realpath(__file__)))
-        self._log("Polaris Domain: {}".format(self._domain))
 
         # Switch off SSL checks if needed
         if 'insecure' in self._kwargs and self._kwargs['insecure']:
