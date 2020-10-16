@@ -19,54 +19,65 @@
 #  DEALINGS IN THE SOFTWARE.
 
 
-""" Collection of methods that monitor tasks """
+"""
+Collection of methods that monitor tasks
+"""
 
-import time
-from timeit import default_timer as timer
 from multiprocessing.pool import ThreadPool
+from time import sleep
+from timeit import default_timer as timer
+
 
 # Threader setup
-def _monitor_threader(self, _tasks, _thread_count, _monitor_job):
-    if not isinstance(_tasks, list):
-        _tasks = [_tasks]
-    try:
-        _task_list = []
-        for _task in _tasks:
-                _task_list.append((self, _task))
-        _thread_pool = ThreadPool(_thread_count)
-        _pool_instance = _thread_pool.map_async(_monitor_job, _task_list, chunksize=1)
-        while not _pool_instance.ready():
-            time.sleep(3)
-        _thread_pool.close()
-        _thread_pool.join()
-        return _pool_instance.get()
-    except Exception as e:
-        print(e)
+def _monitor_threader(self, tasks, thread_count, monitor_job):
+    if not isinstance(tasks, list):
+        tasks = [tasks]
+
+    task_list = [(self, t) for t in tasks]
+
+    thread_pool = ThreadPool(thread_count)
+
+    pool_instance = thread_pool.map_async(monitor_job, task_list, chunksize=1)
+    while not pool_instance.ready():
+        sleep(3)
+
+    thread_pool.close()
+    thread_pool.join()
+
+    return pool_instance.get()
+
 
 # Worker thread
-def _monitor_job(_in):
-    self, _task = _in
+def _monitor_job(job):
+    from rubrik_polaris.exceptions import RequestException
+
+    self, task = job
     try:
-        _start = timer()
-        _last_status = None
-        while self.get_task_status(_task['taskchainUuid']) not in ["SUCCEEDED", "FAILED"]:
-            _status = self.get_task_status(_task['taskchainUuid'])
-            if _status != _last_status:
-                _last_status = _status
-            time.sleep(3)
-        _status = self.get_task_status(_task['taskchainUuid'])
-        #Todo: Add something to handle failures
-        _task['status'] = _status
-        _task['elapsed'] = timer() - _start
-        return _task
-    except Exception as e:
-        print(e)
-        return 0
+        start = timer()
+        while self.get_task_status(task['taskchainUuid']) not in ["SUCCEEDED", "FAILED"]:
+            _ = self.get_task_status(task['taskchainUuid'])
+            sleep(3)
+        status = self.get_task_status(task['taskchainUuid'])
+
+        # TODO: Add something to handle failures
+
+        task['status'] = status
+        task['elapsed'] = timer() - start
+
+        return task
+
+    except Exception as err:
+        task['status'] = 'FAILED'
+        task['elapsed'] = 0
+
+        return task
+
 
 # Start threader
-def _monitor_task(self, _tasks):
-    _outcome = (_monitor_threader(self, _tasks, len(_tasks), _monitor_job))
-    if len(_outcome) > 1:
-        return _outcome
-    else:
-        return _outcome[0]
+def _monitor_task(self, tasks):
+    outcome = (_monitor_threader(self, tasks, len(tasks), _monitor_job))
+
+    if len(outcome) > 1:
+        return outcome
+
+    return outcome[0]
