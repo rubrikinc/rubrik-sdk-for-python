@@ -86,6 +86,8 @@ class PolarisClient:
         
         except RequestException as err:
             raise
+        except OSError as os_err:
+            raise
         except Exception as e:
             raise
 
