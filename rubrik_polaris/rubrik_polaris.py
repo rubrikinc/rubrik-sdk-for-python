@@ -89,7 +89,8 @@ class PolarisClient:
         except Exception as e:
             raise
 
-    def _get_cred(self, env_key, override=None):
+    @staticmethod
+    def _get_cred(env_key, override=None):
         cred = None
 
         if env_key in os.environ:
