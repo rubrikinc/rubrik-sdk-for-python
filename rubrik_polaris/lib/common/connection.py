@@ -19,53 +19,74 @@
 #  DEALINGS IN THE SOFTWARE.
 
 
-""" Collection of methods that control connection with Polaris """
+""" 
+Collection of methods that control connection with Polaris.
+"""
 
-def _query(self, _operation_name=None, _query=None, _variables=None, _timeout=60):
+
+def _query(self, operation_name=None, query=None, variables=None, timeout=60):
     import requests
+    from rubrik_polaris.exceptions import RequestException
+
+    if not operation_name:
+        operation_name = "RubrikPolarisSDKRequest"
 
     try:
-        _operation_name = "RubrikPolarisSDKRequest"
-
-        _api_request = requests.post(
-            self._baseurl,
+        api_request = requests.post(
+            "{}/graphql".format(self._baseurl),
             verify=False,
             headers=self._headers,
             json={
-                "operationName": _operation_name,
-                "variables": _variables,
-                "query": "{}".format(_query)
+                "operationName": operation_name,
+                "variables": variables,
+                "query": "{}".format(query)
             },
-            timeout=_timeout
+            timeout=timeout
         )
 
-        try:
-            _api_response = _api_request.json()
-            if 'code' in _api_response and 'message' in _api_response and _api_response['code'] >= 400:
-                print(_api_response['message'])
+        api_response = api_request.json()
+        if 'code' in api_response and 'message' in api_response and api_response['code'] >= 400:
+            raise RequestException(api_response['message'])
+        else:
+            api_request.raise_for_status()
 
-            return _api_response
-        except BaseException:
-            _api_request.raise_for_status()
+        return api_response
 
-    except Exception as e:
-        print(e)
+    except requests.exceptions.RequestException as request_err:
+        raise RequestException(request_err)
+    except ValueError as value_err:
+        raise RequestException(value_err)
+    except Exception as err:
+        raise
 
 
 def _get_access_token(self):
     import requests
-    _session_url = self._baseurl.replace('graphql','session')
+    from rubrik_polaris.exceptions import RequestException
+
     try:
-        _payload = {
+        session_url = "{}/session".format(self._baseurl)
+        payload = {
             "username": self._username,
             "password": self._password
         }
-        _headers = {
+        headers = {
             'Content-Type': 'application/json;charset=UTF-8',
             'Accept': 'application/json, text/plain'
         }
-        _request = requests.post(_session_url, json=_payload, headers=_headers, verify=False)
-        del _payload
-        return _request.json()['access_token']
-    except Exception as e:
-        print(e)
+        request = requests.post(session_url, json=payload, headers=headers, verify=False)
+    
+        del payload
+
+        response_json = request.json()
+        if 'access_token' not in response_json:
+            raise RequestException("Authentication failed!")
+
+        return response_json['access_token']
+
+    except requests.exceptions.RequestException as request_err:
+        raise RequestException(request_err)
+    except ValueError as value_err:
+        raise RequestException(value_err)
+    except Exception as err:
+        raise

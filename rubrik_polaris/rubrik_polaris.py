@@ -22,7 +22,7 @@ import os
 import pprint
 import urllib3
 
-from .exceptions import InvalidParameterException
+from .exceptions import RequestException
 
 
 class PolarisClient:
@@ -44,7 +44,6 @@ class PolarisClient:
     from .lib.accounts import _invoke_account_delete_aws, _invoke_aws_stack, _commit_account_delete_aws
     from .lib.accounts import _destroy_aws_stack, _disable_account_aws, _get_aws_profiles, _add_account_aws, _delete_account_aws
 
-
     def __init__(self, _domain=None, _username=None, _password=None, **kwargs):
         from .lib.common.graphql import _build_graphql_maps
 
@@ -56,7 +55,7 @@ class PolarisClient:
         self._password = self._get_cred('rubrik_polaris_password', _password)
 
         if not (self._domain and self._username and self._password):
-            raise Exception('Error: Required credentials are missing! Please pass in username, password and domain, directly or through the OS environment.')
+            raise Exception('Required credentials are missing! Please pass in username, password and domain, directly or through the OS environment.')
 
         # Set base variables
         self._kwargs = kwargs
@@ -68,21 +67,27 @@ class PolarisClient:
 
         # Adjust Polaris domain if a custom root is defined
         if 'root_domain' in self._kwargs and self._kwargs['root_domain'] is not None:
-            self._baseurl = "https://{}.{}/api/graphql".format(self._domain, self._kwargs['root_domain'])
+            self._baseurl = "https://{}.{}/api".format(self._domain, self._kwargs['root_domain'])
         else:
-            self._baseurl = "https://{}.my.rubrik.com/api/graphql".format(self._domain)
+            self._baseurl = "https://{}.my.rubrik.com/api".format(self._domain)
 
-        # Get Auth Token and assemble header
-        self._access_token = self._get_access_token()
-        del(self._username, self._password)
-        self._headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ' + self._access_token
-        }
-
-        # Get graphql content
-        (self._graphql_query, self._graphql_file_type_map) = _build_graphql_maps(self)
+        try:
+            # Get Auth Token and assemble header
+            self._access_token = self._get_access_token()
+            del(self._username, self._password)
+            self._headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Bearer ' + self._access_token
+            }
+            
+            # Get graphql content
+            (self._graphql_query, self._graphql_file_type_map) = _build_graphql_maps(self)
+        
+        except RequestException as err:
+            raise
+        except Exception as e:
+            raise
 
     def _get_cred(self, env_key, override=None):
         cred = None
