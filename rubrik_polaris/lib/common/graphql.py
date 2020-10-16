@@ -65,14 +65,13 @@ def _get_query_names_from_graphql_query(self, graphql_query_text):
 def _dump_nodes(self, request):
     nodes = []
 
-    has_edges = False
-    for query in request['data']:
-        has_edges = has_edges or 'edges' in request['data'][query]
-        if has_edges:
-            for edge in request['data'][query]['edges']:
-                nodes.append(edge['node'])
+    if 'data' in request and len(request['data']) > 0:
+        query_result = list(request['data'].values())[0]
 
-    if not has_edges and 'data' in request and len(request['data']) > 0:
-        return request['data'][0]
+        if 'edges' in query_result:
+            for edge in query_result['edges']:
+                nodes.append(edge['node'])
+        else:
+            return query_result
 
     return nodes
