@@ -294,6 +294,8 @@ def delete_account_aws(self, profiles = [], all = False, aws_access_key_id = Non
     Arguments:
         all {bool} -- If true import all available profiles (Default: False)
         profiles {list} -- List of explicit profiles to add
+        aws_access_key_id {str} -- AWS Access Key ID
+        aws_secret_access_key {str} -- AWS Access Key Secret
     """
     if aws_access_key_id and aws_secret_access_key:
         self._delete_account_aws(aws_id = aws_access_key_id, aws_secret = aws_secret_access_key)
