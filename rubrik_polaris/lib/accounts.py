@@ -21,9 +21,6 @@ def add_account_aws(self, regions = [], all = False, profiles = [], aws_access_k
             if profile in profiles or all:
                 self._add_account_aws(profile = profile, regions = regions)
                 #TODO: Should add above into a queque for threaded provisioning
-            else:
-                print("{} : Did not find credentials".format(profile))
-                #TODO: Exception if profile does not exist in .credentials
 
 def _add_account_aws(self, regions = [], profile = '', aws_id = None, aws_secret = None, _account_id = '', _account_name = None):
     if profile:
@@ -308,11 +305,12 @@ def delete_account_aws(self, profiles = [], all = False, aws_access_key_id = Non
 def _delete_account_aws(self, profile = '', aws_id = None, aws_secret = None):
     import re
     try:
-        _polaris_account_info = None
+        _account_id = None
         if profile:
-            _polaris_account_info = self.get_accounts_aws_detail(self.get_account_aws_native_id(profile = profile)[0])['awsCloudAccounts'][0]
+            _account_id = self.get_account_aws_native_id(profile = profile)[0]
         elif aws_id and aws_secret:
-            _polaris_account_infoe = self.get_acounts_aws_detail(self.get_account_aws_native_id(aws_id=aws_id, aws_secret=aws_secret)[0])['awsCloudAccounts'][0]
+            _account_id = self.get_account_aws_native_id(aws_id=aws_id, aws_secret=aws_secret)[0]
+        _polaris_account_info = self.get_accounts_aws_detail(_account_id)['awsCloudAccounts'][0]
         #todo: Add exception if account does not exist in polaris
         _polaris_account_id = _polaris_account_info['awsCloudAccount']['id']
         _disable_account = self._disable_account_aws(_polaris_account_id)
