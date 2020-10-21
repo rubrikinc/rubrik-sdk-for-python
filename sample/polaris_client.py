@@ -7,7 +7,7 @@ import rubrik_polaris
 import argparse
 import pprint
 
-pp = pprint.PrettyPrinter(indent=4)
+pp = pprint.PrettyPrinter(indent=4, depth=3)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-p', '--password', dest='password', help="Polaris Password", default=None)
@@ -25,6 +25,7 @@ except Exception as err:
     print(err)
     sys.exit(1)
 
+pp.pprint(rubrik.introspect())
 ### Add AWS Acct (local profile must be configured, specify list of profiles _or_ set all=True.
 # rubrik.add_account_aws(regions = ["us-east-1"], profiles = ["peterm-profile"])
 # rubrik.add_account_aws(regions = ["us-east-1"], aws_access_key_id='blah', aws_secret_access_key='blah')

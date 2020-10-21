@@ -40,7 +40,7 @@ class PolarisClient:
     from .lib.common.connection import _query, _get_access_token
     from .lib.compute import _submit_instance_restore
     from .lib.common.monitor import _monitor_job, _monitor_threader, _monitor_task
-    from .lib.common.graphql import _dump_nodes, _get_query_names_from_graphql_query
+    from .lib.common.graphql import _dump_nodes, _get_query_names_from_graphql_query, introspect
     from .lib.accounts import _invoke_account_delete_aws, _invoke_aws_stack, _commit_account_delete_aws
     from .lib.accounts import _destroy_aws_stack, _disable_account_aws, _get_aws_profiles, _add_account_aws, _delete_account_aws
 
@@ -101,6 +101,7 @@ class PolarisClient:
 
         # Get graphql content
         (self._graphql_query, self._graphql_file_type_map) = _build_graphql_maps(self)
+        self._pp.pprint(self._graphql_file_type_map)
 
     def _log(self, log_message):
         """Create properly formatted debug log messages.
