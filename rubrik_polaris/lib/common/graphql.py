@@ -47,3 +47,33 @@ def _dump_nodes(self, request, query_name):
         return _o
     except Exception as e:
         print(e)
+
+def introspect(self):
+    try:
+        _query_name = "introspect"
+        _request = self._query(None, self._graphql_query[_query_name])
+        return _request['data']['__schema']
+    except Exception as e:
+        print(e)
+
+def _find_response_type(self, type):
+    if type['name']:
+        return type['name']
+    if type['ofType']:
+        return _find_response_type(type['oftype'])
+
+def _find_response_kind(self, type):
+    if type['kind'] and type['kind'] != "NON-NULL":
+        return type['kind']
+    if type['ofType']:
+        return _find_response_kind(type['ofType'])
+
+def get_graphql_queries_from_schema(self):
+    schema = (self.introspect())
+    return_set = filter(lambda x: x['name'] == 'Query', schema['types'])
+    return list(return_set)
+
+def get_graphql_mutations_from_schema(self):
+    schema = (self.introspect())
+    return_set = filter(lambda x: x['name'] == 'Mutation', schema['types'])
+    return list(return_set)

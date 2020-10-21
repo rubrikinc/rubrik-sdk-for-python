@@ -1,6 +1,5 @@
 query RubrikPolarisSDKRequest($first: Int, $snappable_id : String!){
-    snapshotOfASnappableConnection
-    (
+    snapshotOfASnappableConnection (
         first: $first
         snappableId: $snappable_id,
         sortOrder: Desc
