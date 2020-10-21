@@ -35,6 +35,7 @@ class PolarisClient:
     from .lib.compute import get_object_ids_azure, get_object_ids_ec2, get_object_ids_gce
     from .lib.compute import get_instances_azure, get_instances_ec2, get_instances_gce
     from .lib.compute import submit_restore_ec2, submit_restore_azure, submit_restore_gce
+    from .lib.storage import get_object_ids_ebs, get_storage_ebs
 
     # Private
     from .lib.common.connection import _query, _get_access_token
