@@ -1,0 +1,58 @@
+query RubrikPolarisSDKRequest($first: Int, $after: String, $filters: AwsNativeEbsVolumeFilters) {
+  ebsVolumesList: awsNativeEbsVolumeConnection(first: $first, after: $after, ebsVolumeFilters: $filters) {
+    edges {
+      node {
+        id
+        volumeId
+        volumeName
+        volumeType
+        region
+        sizeInGBs
+        isRelic
+        isExocomputeConfigured
+        isIndexingEnabled
+        isMarketplace
+        tags {
+          key
+          value
+        }
+        effectiveSlaDomain {
+          name
+          ... on ClusterSlaDomain {
+            fid
+            cluster {
+              id
+              name
+            }
+          }
+          ... on GlobalSla {
+            id
+            name
+          }
+        }
+        awsNativeAccount {
+          id
+          name
+          status
+        }
+        slaAssignment
+        attachedEc2Instances {
+          id
+          instanceName
+          instanceId
+        }
+        authorizedOperations
+        effectiveSlaSourceObject {
+          fid
+          name
+          objectType
+        }
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}
