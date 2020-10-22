@@ -52,12 +52,13 @@ def get_sla_domains(self, sla_domain_name=""):
         raise
 
 
-def submit_on_demand(self, object_ids, sla_id, **kwargs):
+def submit_on_demand(self, object_ids, sla_id, wait=False):
     """Submits On Demand Snapshot
 
     Arguments:
         object_ids {[str]} -- Array of Rubrik Object IDs
         sla_id {str} -- Rubrik SLA Domain ID
+        wait {bool} -- Threaded wait for all processes to complete
 
     Returns:
         list -- List of errors if any occurred
@@ -79,7 +80,7 @@ def submit_on_demand(self, object_ids, sla_id, **kwargs):
             for error_object in result['errors']:
                 results.append(error_object)
 
-        if 'wait' in kwargs:
+        if wait:
             results = self._monitor_task(result['taskchainUuids'])
 
         # TODO: find a better way to report errors per uuid

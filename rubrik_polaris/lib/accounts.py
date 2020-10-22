@@ -22,29 +22,32 @@
 """ Collection of functions that manipulate account components """
 
 
-def add_account_aws(self, regions = [], all = False, profiles = []):
+def add_account_aws(self, regions = [], all = False, profiles = [], aws_access_key_id = None, aws_secret_access_key = None):
     """Adds AWS account to Polaris
 
     Arguments:
         regions {list} -- List of AWS regions to configure
         all {bool} -- If true import all available profiles (Default: False)
         profiles {list} -- List of explicit profiles to add
+        aws_access_key_id {str} -- AWS Access Key ID
+        aws_secret_access_key {str} -- AWS Access Key Secret
 
     Returns:
         bool -- `True` if the account was added successfully, otherwise `False`.
     """
-    if all or profiles:
+    if aws_access_key_id and aws_secret_access_key:
+        self._add_account_aws(regions=regions, aws_id = aws_access_key_id, aws_secret = aws_secret_access_key)
+    elif all or profiles:
         for profile in self._get_aws_profiles():
             if profile in profiles or all:
                 self._add_account_aws(profile = profile, regions = regions)
                 #TODO: Should add above into a queque for threaded provisioning
-            else:
-                print("{} : Did not find credentials".format(profile))
-                #TODO: Exception if profile does not exist in .credentials
 
-def _add_account_aws(self, regions = [], profile = '', auth = {}, _account_id = '', _account_name = None):
+def _add_account_aws(self, regions = [], profile = '', aws_id = None, aws_secret = None, _account_id = '', _account_name = None):
     if profile:
-        _aws_account_id, _aws_account_name = self.get_account_aws_native_id(profile=profile)
+        _aws_account_id, _aws_account_name = self.get_account_aws_native_id(profile = profile)
+    elif aws_id and aws_secret:
+        _aws_account_id, _aws_account_name = self.get_account_aws_native_id(aws_id = aws_id, aws_secret = aws_secret)
     _account_name_list = []
     if _aws_account_id:
         _account_name_list.append(_aws_account_id)
@@ -70,12 +73,14 @@ def _add_account_aws(self, regions = [], profile = '', auth = {}, _account_id = 
     else:
         if profile:
             _invoke_aws_stack(self, _nodes, _aws_account_id, regions = regions, profile=profile)
-            
+        elif aws_id and aws_secret:
+            _invoke_aws_stack(self, _nodes, _aws_account_id, regions = regions, aws_id = aws_id, aws_secret = aws_secret)
+
 def _get_aws_profiles(self):
     import boto3
     return boto3.session.Session().available_profiles
 
-def _invoke_aws_stack(self, _nodes, _account_id, regions = [], profile = ''):
+def _invoke_aws_stack(self, _nodes, _account_id, regions = [], profile = '', aws_id = None, aws_secret = None):
     """Invokes AWS Cloudformation configuration for Account
 
     Arguments:
@@ -86,6 +91,8 @@ def _invoke_aws_stack(self, _nodes, _account_id, regions = [], profile = ''):
     import botocore
     if profile:
         boto3.setup_default_session(profile_name=profile)
+    elif aws_id and aws_secret:
+        boto3.setup_default_session(aws_access_key_id = aws_id, aws_secret_access_key = aws_secret)
     for region in regions:
         _boto_account_id = boto3.client('sts').get_caller_identity().get('Account')
         _client = boto3.client('cloudformation', region_name = region)
@@ -192,7 +199,7 @@ def get_accounts_aws_detail(self, filter=""):
     except Exception as e:
         print(e)
 
-def get_account_aws_native_id(self, profile = ''):
+def get_account_aws_native_id(self, profile = '', aws_id = None, aws_secret = None):
     """Returns AWS Account ID from local config
     
     Returns:
@@ -202,7 +209,10 @@ def get_account_aws_native_id(self, profile = ''):
     import boto3 as boto3
     from botocore.exceptions import ClientError
     try:
-        boto3.setup_default_session(profile_name = profile)
+        if profile:
+            boto3.setup_default_session(profile_name = profile)
+        elif aws_id and aws_secret:
+            boto3.setup_default_session(aws_access_key_id=aws_id, aws_secret_access_key=aws_secret)
         _boto_account_id = boto3.client('sts').get_caller_identity().get('Account')
         _boto_account_name = None
         try:
@@ -271,7 +281,7 @@ def _commit_account_delete_aws(self, _polaris_account_id):
     except Exception as e:
         print(e)
 
-def _destroy_aws_stack(self, _stack_region, _stack_name, profile = ''):
+def _destroy_aws_stack(self, _stack_region, _stack_name, profile = '', aws_id = None, aws_secret = None):
     """Commits  Destroy cloudformation stack (Rubrik)
 
     Arguments:
@@ -281,6 +291,8 @@ def _destroy_aws_stack(self, _stack_region, _stack_name, profile = ''):
     import boto3, botocore
     if profile:
         boto3.setup_default_session(profile_name=profile)
+    elif aws_id and aws_secret:
+        boto3.setup_default_session(aws_access_key_id=aws_id, aws_secret_access_key=aws_secret)
     _client = boto3.client('cloudformation', region_name = _stack_region)
     try:
         self.delete_stack = _client.delete_stack(StackName = _stack_name)
@@ -297,24 +309,31 @@ def _destroy_aws_stack(self, _stack_region, _stack_name, profile = ''):
     else:
         return
 
-def delete_account_aws(self, profiles = [], all = False):
+def delete_account_aws(self, profiles = [], all = False, aws_access_key_id = None, aws_secret_access_key = None):
     """Commits  Delete AWS Account in Polaris, relies on local .aws
     
     Arguments:
         all {bool} -- If true import all available profiles (Default: False)
         profiles {list} -- List of explicit profiles to add
+        aws_access_key_id {str} -- AWS Access Key ID
+        aws_secret_access_key {str} -- AWS Access Key Secret
     """
-    if all or profiles:
+    if aws_access_key_id and aws_secret_access_key:
+        self._delete_account_aws(aws_id = aws_access_key_id, aws_secret = aws_secret_access_key)
+    elif all or profiles:
         for profile in self._get_aws_profiles():
             if profile in profiles or all:
                 self._delete_account_aws(profile = profile)
 
-def _delete_account_aws(self, profile = '', auth = {}):
+def _delete_account_aws(self, profile = '', aws_id = None, aws_secret = None):
     import re
     try:
-        _polaris_account_info = None
+        _account_id = None
         if profile:
-            _polaris_account_info = self.get_accounts_aws_detail(self.get_account_aws_native_id(profile = profile)[0])['awsCloudAccounts'][0]
+            _account_id = self.get_account_aws_native_id(profile = profile)[0]
+        elif aws_id and aws_secret:
+            _account_id = self.get_account_aws_native_id(aws_id=aws_id, aws_secret=aws_secret)[0]
+        _polaris_account_info = self.get_accounts_aws_detail(_account_id)['awsCloudAccounts'][0]
         #todo: Add exception if account does not exist in polaris
         _polaris_account_id = _polaris_account_info['awsCloudAccount']['id']
         _disable_account = self._disable_account_aws(_polaris_account_id)
@@ -326,7 +345,8 @@ def _delete_account_aws(self, profile = '', auth = {}):
                     _stack_name = match.group(1)
                 for _stack_region in _feature_details['awsRegions']:
                     _stack_region = (re.sub('_', '-', _stack_region)).lower()
-                    self._destroy_aws_stack(_stack_region, _stack_name, profile = profile)
+                    #todo: HERE
+                    self._destroy_aws_stack(_stack_region, _stack_name, profile = profile, aws_id = aws_id, aws_secret = aws_secret)
         commit_delete = self._commit_account_delete_aws(_polaris_account_id)
         return
     except Exception as e:
