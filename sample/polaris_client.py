@@ -27,7 +27,8 @@ except Exception as err:
 ### Manipulate AWS EBS Volumes
 # rubrik.get_storage_ebs()
 # rubrik.get_object_ids_ebs(tags = {"Class": "Management"})
-# pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_ebs(volumeId = "vol-077d1df3538afe5dd"), rubrik.get_sla_domains("Bronze"), wait = True))
+# bronze_sla_domain_id = rubrik.get_sla_domains("Bronze")[0]['id']
+# pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_ebs(volumeId = "vol-077d1df3538afe5dd"), bronze_sla_domain_id, wait=True))
 
 
 ### Add AWS Acct (local profile must be configured, specify list of profiles _or_ set all=True.
