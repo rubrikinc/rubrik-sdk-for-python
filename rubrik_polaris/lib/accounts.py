@@ -331,7 +331,7 @@ def _delete_account_aws(self, profile = '', aws_id = None, aws_secret = None):
     except Exception as e:
         print("{}: {}".format("_delete_account_aws", e))
 
-def _update_account_aws(self):
+def update_account_aws(self):
     _polaris_account_info = self.get_accounts_aws_detail(self.get_account_aws_native_id())['awsCloudAccounts'][0]
     self._pp.pprint(_polaris_account_info)
 

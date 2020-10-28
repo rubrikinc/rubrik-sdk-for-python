@@ -92,4 +92,6 @@ except Exception as err:
 ### Query objects, set sla_domain
 # pp.pprint(rubrik.submit_assign_sla( rubrik.get_object_ids_ec2(region = "US_WEST_2"), rubrik.get_sla_domains("Gold")))
 
+# pp.pprint(rubrik.update_account_aws())
+
 
