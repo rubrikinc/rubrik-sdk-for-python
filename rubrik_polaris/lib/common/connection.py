@@ -4,7 +4,7 @@ def _query(self, _query_name=None, _variables=None, _timeout=60):
     import requests
     import re
     try:
-        _operation_name = "PythonSdk" + ''.join(w[:1].upper() + w[1:] for w in _query_name.split('_'))
+        _operation_name = "SdkPython" + ''.join(w[:1].upper() + w[1:] for w in _query_name.split('_'))
         _query = re.sub("RubrikPolarisSDKRequest", _operation_name, self._graphql_query[_query_name])
         self._log('POST {}'.format(self._baseurl))
         if _operation_name is not None:
