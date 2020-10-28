@@ -42,7 +42,7 @@ def get_storage_ebs(self):
         list -- List of all the AWS EBS volumes.
     """
     try:
-        _query_name = "storage_ebs"
+        _query_name = "storage_aws_ebs"
         _request = self._query(_query_name, None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:

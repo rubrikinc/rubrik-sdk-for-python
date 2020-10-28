@@ -124,13 +124,13 @@ def get_instances_ec2(self, object_id=None):
     try:
         _request = None
         if object_id:
-            _query_name = "instances_ec2_detail"
+            _query_name = "instances_aws_ec2_detail"
             variables = {
                 "object_id": object_id
             }
             _request = self._query(_query_name, variables)
         else:
-            _query_name = "instances_ec2"
+            _query_name = "instances_aws_ec2"
             _request = self._query(_query_name, None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
@@ -143,7 +143,7 @@ def get_instances_azure(self):
         list -- List of all Azure VM instances
     """
     try:
-        _query_name = "instances_azure"
+        _query_name = "instances_azure_iaas"
         _request = self._query(_query_name, None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
@@ -157,7 +157,7 @@ def get_instances_gce(self):
         list -- List of all GCE instances
     """
     try:
-        _query_name = "instances_gce"
+        _query_name = "instances_gcp_gce"
         _request = self._query(_query_name, None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
@@ -166,7 +166,7 @@ def get_instances_gce(self):
 def _get_instances_vsphere(self):
     """ Retrieve all vSphere instances from Polaris """
     try:
-        _query_name = "instances_vsphere"
+        _query_name = "instances_vmware_vsphere"
         _variables = {
             "filter": [
         ]}

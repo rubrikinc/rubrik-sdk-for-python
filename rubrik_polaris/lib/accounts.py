@@ -37,7 +37,7 @@ def _add_account_aws(self, regions = [], profile = '', aws_id = None, aws_secret
     if profile:
         _account_name_list.append(profile)
     try:
-        _query_name = "account_add_aws"
+        _query_name = "accounts_aws_add"
         _variables = {
             "account_id": _aws_account_id,
             "account_name": " : ".join(_account_name_list),
@@ -214,7 +214,7 @@ def _disable_account_aws(self, _polaris_account_id):
         _polaris_account_id {str} -- Account ID to disable in Polaris
     """
     try:
-        _query_name = "account_disable_aws"
+        _query_name = "accounts_aws_disable"
         _variables = {
             "polaris_account_id": _polaris_account_id
         }
@@ -235,7 +235,7 @@ def _invoke_account_delete_aws(self, _polaris_account_id):
         polaris_account_id {str} -- Account ID to initiate delete in Polaris
     """
     try:
-        _query_name = "account_delete_initiate_aws"
+        _query_name = "accounts_aws_delete_initiate"
         _variables = {
             "polaris_account_id": _polaris_account_id
         }
@@ -251,7 +251,7 @@ def _commit_account_delete_aws(self, _polaris_account_id):
         polaris_account_id {str} -- Account ID to commit delete in Polaris
     """
     try:
-        _query_name = "account_delete_commit_aws"
+        _query_name = "accounts_aws_delete_commit"
         _variables = {
             "polaris_account_id": _polaris_account_id
         }
