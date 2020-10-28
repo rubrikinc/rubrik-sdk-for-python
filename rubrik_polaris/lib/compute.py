@@ -128,10 +128,10 @@ def get_instances_ec2(self, object_id=None):
             variables = {
                 "object_id": object_id
             }
-            _request = self._query(None, self._graphql_query[_query_name], variables)
+            _request = self._query(_query_name, variables)
         else:
             _query_name = "instances_ec2"
-            _request = self._query(None, self._graphql_query[_query_name], None)
+            _request = self._query(_query_name, None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
@@ -144,7 +144,7 @@ def get_instances_azure(self):
     """
     try:
         _query_name = "instances_azure"
-        _request = self._query(None, self._graphql_query[_query_name], None)
+        _request = self._query(_query_name, None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
@@ -158,7 +158,7 @@ def get_instances_gce(self):
     """
     try:
         _query_name = "instances_gce"
-        _request = self._query(None, self._graphql_query[_query_name], None)
+        _request = self._query(_query_name, None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
@@ -170,7 +170,7 @@ def _get_instances_vsphere(self):
         _variables = {
             "filter": [
         ]}
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         self._pp.pprint(_request)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
@@ -202,7 +202,7 @@ def _submit_instance_restore(self, snapshot_id, **kwargs):
         }
         if _mutation_name not in self._graphql_query:
             raise Exception("Mutation not found : {}".format(_mutation_name))
-        _request = self._query(None, self._graphql_query[_mutation_name], _variables)
+        _request = self._query(_mutation_name, _variables)
         if 'errors' in _request and _request['errors']:
             return  {'errors': _request['errors'][0]['message']}
         _result = self._dump_nodes(_request, _mutation_name)

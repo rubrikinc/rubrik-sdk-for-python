@@ -20,7 +20,7 @@ def get_sla_domains(self, sla_domain_name=""):
                 "text": sla_domain_name
             }
         }
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         _request_nodes = self._dump_nodes(_request, _query_name)
         if sla_domain_name and len(_request_nodes) == 1:
             return _request_nodes[0]['id']
@@ -50,7 +50,7 @@ def submit_on_demand(self, object_ids, sla_id, wait = False):
             "objectIds": object_ids,
             "slaId": sla_id
         }
-        _request = self._query(None, self._graphql_query[_mutation_name], _variables)
+        _request = self._query(_mutation_name, _variables)
         _result = self._dump_nodes(_request, _mutation_name)
         _results = []
         if _result['errors']:
@@ -79,7 +79,7 @@ def submit_assign_sla(self, object_ids, sla_id):
                 "objectIds": object_ids,
                 "slaId": sla_id
             }
-        request = self._query(None, self._graphql_query[_mutation_name], _variables)
+        request = self._query(_mutation_name, _variables)
         return  self._dump_nodes(request, _mutation_name)
     except Exception as e:
         print(e)
@@ -98,7 +98,7 @@ def get_task_status(self, task_chain_id):
         _variables = {
             "filter": task_chain_id
         }
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         _response = self._dump_nodes(_request, _query_name)
         return _response['taskchain']['state']
     except Exception as e:
@@ -123,7 +123,7 @@ def get_snapshots(self, snappable_id, **kwargs):
         }
         if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] == 'latest':
             _variables['first'] = 1
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         _response = self._dump_nodes(_request, _query_name)
         if not len(_response):
             raise Exception("No Snapshots found for Snappable : {}".format(snappable_id))
