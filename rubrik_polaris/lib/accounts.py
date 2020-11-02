@@ -43,7 +43,7 @@ def _add_account_aws(self, regions = [], profile = '', aws_id = None, aws_secret
             "account_name": " : ".join(_account_name_list),
             "regions": regions
         }
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         _nodes = self._dump_nodes(_request, _query_name)
         if _nodes['errorMessage']:
             raise Exception("Account {} already added".format(_aws_account_id))
@@ -116,7 +116,7 @@ def get_accounts_aws(self, filter=""):
         _variables = {
             "filter": filter
         }
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
@@ -135,7 +135,7 @@ def get_accounts_gcp(self, filter=""):
         _variables = {
             "filter": filter
         }
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
@@ -154,7 +154,7 @@ def get_accounts_azure(self, filter=""):
         _variables = {
             "filter": filter
         }
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
@@ -173,7 +173,7 @@ def get_accounts_aws_detail(self, filter=""):
         _variables = {
             "filter": filter
         }
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
@@ -218,7 +218,7 @@ def _disable_account_aws(self, _polaris_account_id):
         _variables = {
             "polaris_account_id": _polaris_account_id
         }
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         _monitor = self._monitor_task(self._dump_nodes(_request, _query_name))
         if _monitor['status'] == 'SUCCEEDED':
             return 1
@@ -239,7 +239,7 @@ def _invoke_account_delete_aws(self, _polaris_account_id):
         _variables = {
             "polaris_account_id": _polaris_account_id
         }
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
@@ -255,7 +255,7 @@ def _commit_account_delete_aws(self, _polaris_account_id):
         _variables = {
             "polaris_account_id": _polaris_account_id
         }
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)

@@ -30,7 +30,6 @@ except Exception as err:
 # rubrik.get_object_ids_ebs(tags = {"Class": "Management"})
 # pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_ebs(volumeId = "vol-077d1df3538afe5dd"), rubrik.get_sla_domains("Bronze"), wait = True))
 
-
 ### Add AWS Acct (local profile must be configured, specify list of profiles _or_ set all=True.
 # rubrik.add_account_aws(regions = ["us-east-1"], profiles = ["peterm-profile"])
 # rubrik.add_account_aws(regions = ["us-east-1"], aws_access_key_id='blah', aws_secret_access_key='blah')
@@ -40,7 +39,6 @@ except Exception as err:
 # rubrik.delete_account_aws(profiles = ['peterm-profile'])
 # rubrik.delete_account_aws(aws_access_key_id='blah', aws_secret_access_key='blah')
 # rubrik.delete_account_aws(all = True )
-
 
 ### Run ODS for machines in a region using Gold retention, monitor to complete via threads
 # pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_azure(region="EastUS2"), rubrik.get_sla_domains("Bronze"), wait = True))

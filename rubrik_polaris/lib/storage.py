@@ -43,7 +43,7 @@ def get_storage_ebs(self):
     """
     try:
         _query_name = "storage_ebs"
-        _request = self._query(None, self._graphql_query[_query_name], None)
+        _request = self._query(_query_name, None)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
