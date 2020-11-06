@@ -109,6 +109,7 @@ def get_object_ids_gce(self, match_all=True, **kwargs):
     except Exception as e:
         print(e)
 
+
 def _get_object_ids_vsphere(self, _match_all=True, **kwargs):
     """Retrieves all vSphere objects that match query
 
@@ -145,17 +146,18 @@ def get_instances_ec2(self, object_id=None):
     try:
         _request = None
         if object_id:
-            _query_name = "instances_ec2_detail"
+            _query_name = "instances_aws_ec2_detail"
             variables = {
                 "object_id": object_id
             }
-            _request = self._query(None, self._graphql_query[_query_name], variables)
+            _request = self._query(_query_name, variables)
         else:
-            _query_name = "instances_ec2"
-            _request = self._query(None, self._graphql_query[_query_name], None)
+            _query_name = "instances_aws_ec2"
+            _request = self._query(_query_name, None)
         return self._dump_nodes(_request)
     except Exception as e:
         print(e)
+
 
 def get_instances_azure(self):
     """Retrieve all Azure instances from Polaris
@@ -164,8 +166,9 @@ def get_instances_azure(self):
         list -- List of all Azure VM instances
     """
     try:
-        _query_name = "instances_azure"
-        _request = self._query(None, self._graphql_query[_query_name], None)
+
+        _query_name = "instances_azure_iaas"
+        _request = self._query(_query_name, None)
         return self._dump_nodes(_request)
     except Exception as e:
         print(e)
@@ -178,24 +181,26 @@ def get_instances_gce(self):
         list -- List of all GCE instances
     """
     try:
-        _query_name = "instances_gce"
-        _request = self._query(None, self._graphql_query[_query_name], None)
+        _query_name = "instances_gcp_gce"
+        _request = self._query(_query_name, None)
         return self._dump_nodes(_request)
     except Exception as e:
         print(e)
 
+
 def _get_instances_vsphere(self):
     """ Retrieve all vSphere instances from Polaris """
     try:
-        _query_name = "instances_vsphere"
+        _query_name = "instances_vmware_vsphere"
         _variables = {
             "filter": [
         ]}
-        _request = self._query(None, self._graphql_query[_query_name], _variables)
+        _request = self._query(_query_name, _variables)
         self._pp.pprint(_request)
         return self._dump_nodes(_request)
     except Exception as e:
         print(e)
+
 
 def _submit_instance_restore(self, snapshot_id, **kwargs):
     """Submits a Restore of a compute instance
@@ -223,7 +228,7 @@ def _submit_instance_restore(self, snapshot_id, **kwargs):
         }
         if _mutation_name not in self._graphql_query:
             raise Exception("Mutation not found : {}".format(_mutation_name))
-        _request = self._query(None, self._graphql_query[_mutation_name], _variables)
+        _request = self._query(_mutation_name, _variables)
         if 'errors' in _request and _request['errors']:
             return  {'errors': _request['errors'][0]['message']}
         _result = self._dump_nodes(_request)
@@ -234,6 +239,7 @@ def _submit_instance_restore(self, snapshot_id, **kwargs):
         #todo: find a better way to report errors per uuid
     except Exception as e:
         print(e)
+
 
 def submit_restore_ec2(self, snapshot_id, **kwargs):
     """Submits a Restore of an EC2 instance
@@ -249,6 +255,7 @@ def submit_restore_ec2(self, snapshot_id, **kwargs):
     """
     return self._submit_instance_restore(snapshot_id, mutation = "instances_restore_ec2", **kwargs)
 
+
 def submit_restore_azure(self, snapshot_id, **kwargs):
     """Submits a Restore of an Azure VM instance
 
@@ -262,6 +269,7 @@ def submit_restore_azure(self, snapshot_id, **kwargs):
         list -- List of errors if any occured during the restore
     """
     return self._submit_instance_restore(snapshot_id, mutation = "instances_restore_azure", **kwargs)
+
 
 def submit_restore_gce(self, snapshot_id, **kwargs):
     """Submits a Restore of a GCE instance

@@ -24,14 +24,15 @@ Collection of methods that control connection with Polaris.
 """
 
 
-def _query(self, operation_name=None, query=None, variables=None, timeout=60):
+def _query(self, query_name=None, variables=None, timeout=60):
     import requests
+    import re
     from rubrik_polaris.exceptions import RequestException
 
-    if not operation_name:
-        operation_name = "RubrikPolarisSDKRequest"
-
     try:
+        operation_name = "SdkPython" + ''.join(w[:1].upper() + w[1:] for w in query_name.split('_'))
+        query = re.sub("RubrikPolarisSDKRequest", operation_name, self._graphql_query[query_name])
+
         api_request = requests.post(
             "{}/graphql".format(self._baseurl),
             verify=False,

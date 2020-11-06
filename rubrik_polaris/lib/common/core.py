@@ -37,7 +37,7 @@ def get_sla_domains(self, sla_domain_name=""):
     from rubrik_polaris.exceptions import RequestException
 
     try:
-        query_name = "sla_domains"
+        query_name = "core_sla_list"
         variables = {
             "filter": {
                 "field": "NAME",
@@ -66,7 +66,7 @@ def submit_on_demand(self, object_ids, sla_id, wait=False):
     from rubrik_polaris.exceptions import RequestException
 
     try:
-        mutation_name = "on_demand"
+        mutation_name = "core_on_demand"
         variables = {
             "objectIds": object_ids,
             "slaId": sla_id
@@ -103,7 +103,7 @@ def submit_assign_sla(self, object_ids, sla_id):
     from rubrik_polaris.exceptions import RequestException
 
     try:
-        mutation_name = "assign_sla"
+        mutation_name = "core_sla_assign"
         variables = {
             "objectIds": object_ids,
             "slaId": sla_id
@@ -126,7 +126,7 @@ def get_task_status(self, task_chain_id):
     from rubrik_polaris.exceptions import RequestException
 
     try:
-        query_name = "taskchain_status"
+        query_name = "core_taskchain_status"
         variables = {
             "filter": task_chain_id
         }
@@ -152,7 +152,7 @@ def get_snapshots(self, snappable_id, **kwargs):
     from dateutil.tz import tzlocal
 
     try:
-        query_name = "snappable_snapshots"
+        query_name = "core_snappable_snapshots"
         variables = {
             "snappable_id": snappable_id
         }

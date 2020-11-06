@@ -67,18 +67,19 @@ def _add_account_aws(self, regions=[], profile='', aws_id=None, aws_secret=None)
         account_name_list.append(profile)
 
     try:
-        query_name = "account_add_aws"
+        query_name = "accounts_aws_add"
         variables = {
             "account_id": aws_account_id,
             "account_name": " : ".join(account_name_list),
             "regions": regions
         }
-        request = self._query(None, self._graphql_query[query_name], variables)
+        request = self._query(query_name, variables)
         nodes = self._dump_nodes(request)
         if nodes['errorMessage']:
             raise Exception("Account {} already added".format(aws_account_id))
     except Exception:
         raise
+
     else:
         if profile:
             _invoke_aws_stack(self, nodes, aws_account_id, regions=regions, profile=profile)
@@ -146,7 +147,7 @@ def get_accounts_aws(self, filter=""):
         variables = {
             "filter": filter
         }
-        request = self._query(None, self._graphql_query[query_name], variables)
+        request = self._query(query_name, variables)
         return self._dump_nodes(request)
     except Exception:
         raise
@@ -166,7 +167,7 @@ def get_accounts_gcp(self, filter=""):
         variables = {
             "filter": filter
         }
-        request = self._query(None, self._graphql_query[query_name], variables)
+        request = self._query(query_name, variables)
         return self._dump_nodes(request)
     except Exception:
         raise
@@ -186,7 +187,7 @@ def get_accounts_azure(self, filter=""):
         variables = {
             "filter": filter
         }
-        request = self._query(None, self._graphql_query[query_name], variables)
+        request = self._query(query_name, variables)
         return self._dump_nodes(request)
     except Exception:
         raise
@@ -206,7 +207,7 @@ def get_accounts_aws_detail(self, filter=""):
         variables = {
             "filter": filter
         }
-        request = self._query(None, self._graphql_query[query_name], variables)
+        request = self._query(query_name, variables)
         return self._dump_nodes(request)
     except Exception:
         raise
@@ -252,11 +253,11 @@ def _disable_account_aws(self, polaris_account_id):
         polaris_account_id {str} -- Account ID to disable in Polaris
     """
     try:
-        query_name = "account_disable_aws"
+        query_name = "accounts_aws_disable"
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(None, self._graphql_query[query_name], variables)
+        request = self._query(query_name, variables)
 
         monitor = self._monitor_task(self._dump_nodes(request))
         if monitor['status'] != 'SUCCEEDED':
@@ -272,11 +273,11 @@ def _invoke_account_delete_aws(self, polaris_account_id):
         polaris_account_id {str} -- Account ID to initiate delete in Polaris
     """
     try:
-        query_name = "account_delete_initiate_aws"
+        query_name = "accounts_aws_delete_initiate"
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(None, self._graphql_query[query_name], variables)
+        request = self._query(query_name, variables)
         return self._dump_nodes(request)
     except Exception:
         raise
@@ -289,11 +290,11 @@ def _commit_account_delete_aws(self, polaris_account_id):
         polaris_account_id {str} -- Account ID to commit delete in Polaris
     """
     try:
-        query_name = "account_delete_commit_aws"
+        query_name = "accounts_aws_delete_commit"
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(None, self._graphql_query[query_name], variables)
+        request = self._query(query_name, variables)
         return self._dump_nodes(request)
     except Exception:
         raise
@@ -377,6 +378,6 @@ def _delete_account_aws(self, profile='', aws_id=None, aws_secret=None):
         raise Exception("{}: {}".format("_delete_account_aws", e))
 
 
-def _update_account_aws(self):
+def update_account_aws(self):
     polaris_account_info = self.get_accounts_aws_detail(self.get_account_aws_native_id())['awsCloudAccounts'][0]
     self._pp.pprint(polaris_account_info)

@@ -30,7 +30,6 @@ except Exception as err:
 # bronze_sla_domain_id = rubrik.get_sla_domains("Bronze")[0]['id']
 # pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_ebs(volumeId = "vol-077d1df3538afe5dd"), bronze_sla_domain_id, wait=True))
 
-
 ### Add AWS Acct (local profile must be configured, specify list of profiles _or_ set all=True.
 # rubrik.add_account_aws(regions = ["us-east-1"], profiles = ["peterm-profile"])
 # rubrik.add_account_aws(regions = ["us-east-1"], aws_access_key_id='blah', aws_secret_access_key='blah')
@@ -94,3 +93,5 @@ except Exception as err:
 ### Query objects, set sla_domain
 # gold_sla_domain_id = rubrik.get_sla_domains("Gold")[0]['id']
 # pp.pprint(rubrik.submit_assign_sla( rubrik.get_object_ids_ec2(region = "US_WEST_2"), gold_sla_domain_id))
+
+# pp.pprint(rubrik.update_account_aws())
