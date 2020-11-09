@@ -46,8 +46,8 @@
 
 * [Getting Started](rubrik_polaris/quick_start.md)
 
-* [Common]()
-    {% for fn in polaris_common_functions %}
+* [Core]()
+    {% for fn in polaris_core_functions %}
     * [{{ fn[0] }}](rubrik_polaris/{{ fn[0] }}.md)
     {% endfor %}
 
@@ -58,5 +58,10 @@
 
 * [Compute]()
     {% for fn in polaris_compute_functions %}
+    * [{{ fn[0] }}](rubrik_polaris/{{ fn[0] }}.md)
+    {% endfor %}
+
+* [Storage]()
+    {% for fn in polaris_storage_functions %}
     * [{{ fn[0] }}](rubrik_polaris/{{ fn[0] }}.md)
     {% endfor %}

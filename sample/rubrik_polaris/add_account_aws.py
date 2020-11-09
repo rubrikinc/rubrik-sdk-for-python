@@ -5,8 +5,8 @@ domain = 'my-company'
 username = 'john.doe@example.com'
 password = 's3cr3tP_a55w0R)'
 
-aws_account_id = '339701109484'
-
 
 client = PolarisClient(domain, username, password, insecure=True)
-client.add_account_aws(aws_account_id, 'my-aws-account', ['us-east-1'])
+success = client.add_account_aws(regions=["us-west-2"], all=True)
+if success:
+    print("AWS Account added successfully!")

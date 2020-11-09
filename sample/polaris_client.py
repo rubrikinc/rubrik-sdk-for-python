@@ -25,7 +25,7 @@ except Exception as err:
     sys.exit(1)
 
 ### Manipulate AWS EBS Volumes
-# rubrik.get_storage_ebs()
+pp.pprint(rubrik.get_storage_ebs())
 # rubrik.get_object_ids_ebs(tags = {"Class": "Management"})
 # bronze_sla_domain_id = rubrik.get_sla_domains("Bronze")[0]['id']
 # pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_ebs(volumeId = "vol-077d1df3538afe5dd"), bronze_sla_domain_id, wait=True))
@@ -73,7 +73,7 @@ except Exception as err:
 
 ### Returns all instances
 # pp.pprint(rubrik.get_instances_ec2())
-# pp.pprint(rubrik.get_instances_gce())
+pp.pprint(rubrik.get_instances_gce())
 # pp.pprint(rubrik.get_instances_azure())
 
 ### Returns sla domain map, or specified name/id
