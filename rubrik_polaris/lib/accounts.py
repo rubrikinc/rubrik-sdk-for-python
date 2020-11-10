@@ -363,7 +363,6 @@ def _update_account_aws_initiate(self, _feature, _polaris_account_id):
         }
         self._pp.pprint(_variables)
         _request = self._query(_query_name, _variables)
-        self._pp.pprint(_request)
         return self._dump_nodes(_request, _query_name)
     except Exception as e:
         print(e)
