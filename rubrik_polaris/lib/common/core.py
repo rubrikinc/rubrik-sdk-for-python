@@ -25,14 +25,14 @@ Collection of methods that interact with Polaris primitives.
 
 
 def get_sla_domains(self, sla_domain_name=""):
-    """Retrieves dictionary of SLA Domain Names and Identifiers, or the ID of a single SLA Domain
+    """Retrieves dictionary of SLA Domain Names and Identifiers.
 
-    Arguments:
-        sla_domain_name {str} -- Rubrik SLA Domain name
+    Keyword Arguments:
+        sla_domain_name {str} -- Rubrik SLA Domain name (default: {''})
 
     Returns:
         str -- ID for the given SLA Domain name as given by `sla_domain_name`
-        dict -- If a `sla_domain_name` is not given or not found, the complete set of SLA domains will be returned
+        dict -- The complete set of SLA domains or a one element dict if a non-empty `sla_domain_name` is given and found.
     """
     from rubrik_polaris.exceptions import RequestException
 
@@ -53,12 +53,14 @@ def get_sla_domains(self, sla_domain_name=""):
 
 
 def submit_on_demand(self, object_ids, sla_id, wait=False):
-    """Submits On Demand Snapshot
+    """Submits On Demand Snapshot request for the given set of object id's and assign the given SLA to the snapshots.
 
     Arguments:
         object_ids {[str]} -- Array of Rubrik Object IDs
         sla_id {str} -- Rubrik SLA Domain ID
-        wait {bool} -- Threaded wait for all processes to complete
+
+    Keyword Arguments:
+        wait {bool} -- Threaded wait for all processes to complete (default: {False})
 
     Returns:
         list -- List of errors if any occurred

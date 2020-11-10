@@ -1,24 +1,24 @@
 # get_sla_domains
 
-Retrieves dictionary of SLA Domain Names and Identifiers, or the ID of a single SLA Domain
+Retrieves dictionary of SLA Domain Names and Identifiers.
 
 ```py
 def get_sla_domains(self, sla_domain_name=""):
 ```
 
-## Arguments
 
-| Name        | Type | Description                                                                 | Choices |
-|-------------|------|-----------------------------------------------------------------------------|---------|
-| sla_domain_name  | str | Rubrik SLA Domain name |  |
+## Keyword Arguments
 
+| Name        | Type | Description                                                                 | Choices | Default |
+|-------------|------|-----------------------------------------------------------------------------|---------|---------|
+| sla_domain_name  | str | Rubrik SLA Domain name  |  |  |
 
 ## Returns
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
 | str | ID for the given SLA Domain name as given by `sla_domain_name` |
-| dict | If a `sla_domain_name` is not given or not found, the complete set of SLA domains will be returned |
+| dict | The complete set of SLA domains or a one element dict if a non-empty `sla_domain_name` is given and found. |
 
 
 

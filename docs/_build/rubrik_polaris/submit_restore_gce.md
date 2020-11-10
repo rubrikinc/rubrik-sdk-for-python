@@ -20,7 +20,7 @@ def submit_restore_gce(self, snapshot_id, **kwargs):
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
-| list | List of errors if any occured during the restore |
+| list | List of errors if any occurred during the restore |
 
 
 

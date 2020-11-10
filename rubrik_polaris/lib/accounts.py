@@ -379,5 +379,7 @@ def _delete_account_aws(self, profile='', aws_id=None, aws_secret=None):
 
 
 def update_account_aws(self):
+    """Update AWS account...
+    """
     polaris_account_info = self.get_accounts_aws_detail(self.get_account_aws_native_id())['awsCloudAccounts'][0]
     self._pp.pprint(polaris_account_info)
