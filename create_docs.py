@@ -337,9 +337,10 @@ def generate_summary_doc(env, functions):
             data_management_functions=_sorted(functions['Data_Management']['public']),
             physical_functions=_sorted(functions['Physical']['public']),
             helper_functions=_sorted(functions['Connect']['public']),
-            polaris_common_functions=_sorted(functions['rubrik_polaris.lib.common.polaris']),
+            polaris_core_functions=_sorted(functions['rubrik_polaris.lib.common.core']),
             polaris_accounts_functions=_sorted(functions['rubrik_polaris.lib.accounts']),
-            polaris_compute_functions=_sorted(functions['rubrik_polaris.lib.compute'])
+            polaris_compute_functions=_sorted(functions['rubrik_polaris.lib.compute']),
+            polaris_storage_functions=_sorted(functions['rubrik_polaris.lib.storage'])
         ))
 
 

@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
-import sys
-import rubrik_polaris
 import argparse
 import pprint
+import sys
+import rubrik_polaris
+
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -23,9 +24,10 @@ except Exception as err:
     sys.exit(1)
 
 ### Manipulate AWS EBS Volumes
-# rubrik.get_storage_ebs()
+# pp.pprint(rubrik.get_storage_ebs())
 # rubrik.get_object_ids_ebs(tags = {"Class": "Management"})
-# pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_ebs(volumeId = "vol-077d1df3538afe5dd"), rubrik.get_sla_domains("Bronze"), wait = True))
+# bronze_sla_domain_id = rubrik.get_sla_domains("Bronze")[0]['id']
+# pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_ebs(volumeId = "vol-077d1df3538afe5dd"), bronze_sla_domain_id, wait=True))
 
 ### Add AWS Acct (local profile must be configured, specify list of profiles _or_ set all=True.
 # rubrik.add_account_aws(regions = ["us-east-1"], profiles = ["peterm-profile"])
@@ -37,8 +39,9 @@ except Exception as err:
 # rubrik.delete_account_aws(aws_access_key_id='blah', aws_secret_access_key='blah')
 # rubrik.delete_account_aws(all = True )
 
-### Run ODS for machines in a region using Gold retention, monitor to complete via threads
-# pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_azure(region="EastUS2"), rubrik.get_sla_domains("Bronze"), wait = True))
+### Run ODS for machines in a region using Bronze retention, monitor to complete via threads
+# bronze_sla_domain_id = rubrik.get_sla_domains("Bronze")[0]['id']
+# pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_azure(region="EastUS2"), bronze_sla_domain_id, wait=True))
 
 ### Returns all objectIDs matching arbitrary available inputs. ec2 tags have special treatment
 # pp.pprint(rubrik.get_object_ids_ec2(tags = {"Name": "gurlingwinjb"}))
@@ -87,8 +90,8 @@ except Exception as err:
 # pp.pprint(rubrik.update_account_aws())
 
 ### Query objects, set sla_domain
-# pp.pprint(rubrik.submit_assign_sla( rubrik.get_object_ids_ec2(region = "US_WEST_2"), rubrik.get_sla_domains("Gold")))
+# gold_sla_domain_id = rubrik.get_sla_domains("Gold")[0]['id']
+# pp.pprint(rubrik.submit_assign_sla( rubrik.get_object_ids_ec2(region = "US_WEST_2"), gold_sla_domain_id))
 
 # pp.pprint(rubrik.update_account_aws(all=True))
-
 
