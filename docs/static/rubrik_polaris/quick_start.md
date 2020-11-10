@@ -77,7 +77,4 @@ urllib3.disable_warnings()
 client = PolarisClient()
 ```
 
-| Note: It is strongly advised that valid certificates are installed and utilized on the Rubrik cluster. For more information see the [Rubrik CDM Security Guide](https://support.rubrik.com/servlet/servlet.FileDownload?file=00P1W00001EQnaYUAT). |
-| --- |
-
 

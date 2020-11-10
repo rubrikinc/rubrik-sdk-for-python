@@ -24,7 +24,6 @@ class PolarisException(Exception):
     pass
 
 
-class InvalidParameterException(PolarisException):
-    """Exception related to the parameters provided in the function. This can be related an issue with the value itself
-    or the value provided not being found on your Polaris account."""
+class RequestException(PolarisException):
+    """Exceptions during requests, e.g. connection, timeout, HTTP errors."""
     pass

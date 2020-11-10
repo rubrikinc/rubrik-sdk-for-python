@@ -1,27 +1,25 @@
-# add_account_aws
+# get_object_ids_ebs
 
-Adds AWS account to Polaris
+Retrieves all AWS EBS object IDs that match query
 
 ```py
-def add_account_aws(self, regions=[], all=False, profiles=[], aws_access_key_id=None, aws_secret_access_key=None):
+def get_object_ids_ebs(self, match_all=True, **kwargs):
 ```
 
 ## Arguments
 
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| regions  | list | List of AWS regions to configure |  |
-| all  | bool | If true import all available profiles (Default: False) |  |
-| profiles  | list | List of explicit profiles to add |  |
-| aws_access_key_id  | str | AWS Access Key ID |  |
-| aws_secret_access_key  | str | AWS Access Key Secret |  |
+| match_all  | bool | Set to False to match ANY defined criteria |  |
+| tags  | name: value | Allows simple qualification of tags |  |
+| kwargs  |  | Any top level object from the get_storage_ebs call |  |
 
 
 ## Returns
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
-| bool | `True` if the account was added successfully, otherwise `False`. |
+| list | List of all the EBS object id's |
 
 
 
@@ -37,8 +35,7 @@ password = 's3cr3tP_a55w0R)'
 
 
 client = PolarisClient(domain, username, password, insecure=True)
-success = client.add_account_aws(regions=["us-west-2"], all=True)
-if success:
-    print("AWS Account added successfully!")
+
+print(client.get_object_ids_ebs(tags = {"Class": "Management"}))
 
 ```

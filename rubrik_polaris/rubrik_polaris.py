@@ -18,11 +18,11 @@
 #  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #  DEALINGS IN THE SOFTWARE.
 
-import logging
 import os
-import urllib3
-from .exceptions import InvalidParameterException
 import pprint
+import urllib3
+
+from .exceptions import RequestException
 
 
 class PolarisClient:
@@ -32,42 +32,24 @@ class PolarisClient:
     from .lib.accounts import get_accounts_azure, get_accounts_gcp
     from .lib.accounts import get_accounts_aws, get_accounts_aws_detail, get_account_aws_native_id
     from .lib.accounts import add_account_aws, delete_account_aws
-    from .lib.compute import get_object_ids_azure, get_object_ids_ec2, get_object_ids_gce
-    from .lib.compute import get_instances_azure, get_instances_ec2, get_instances_gce
-    from .lib.compute import submit_restore_ec2, submit_restore_azure, submit_restore_gce
+    from .lib.compute import get_compute_object_ids_azure, get_compute_object_ids_ec2, get_compute_object_ids_gce
+    from .lib.compute import get_compute_azure, get_compute_ec2, get_compute_gce
+    from .lib.compute import submit_compute_restore_ec2, submit_compute_restore_azure, submit_compute_restore_gce
     from .lib.storage import get_object_ids_ebs, get_storage_ebs
 
     # Private
     from .lib.common.connection import _query, _get_access_token
-    from .lib.compute import _submit_instance_restore
+    from .lib.compute import _submit_compute_restore, _get_compute_object_ids
     from .lib.common.monitor import _monitor_job, _monitor_threader, _monitor_task
     from .lib.common.graphql import _dump_nodes, _get_query_names_from_graphql_query
     from .lib.accounts import _invoke_account_delete_aws, _invoke_aws_stack, _commit_account_delete_aws, _update_account_aws
     from .lib.accounts import _destroy_aws_stack, _disable_account_aws, _get_aws_profiles, _add_account_aws, _delete_account_aws
     from .lib.accounts import _update_account_aws_initiate
 
-
-    def __init__(self, _domain=None, _username=None, _password=None, enable_logging=False, logging_level="debug", **kwargs):
+    def __init__(self, _domain=None, _username=None, _password=None, **kwargs):
         from .lib.common.graphql import _build_graphql_maps
 
         self._pp = pprint.PrettyPrinter(indent=4)
-
-        # Enable logging for the SDK
-        valid_logging_levels = {
-            "debug": logging.DEBUG,
-            "critical": logging.CRITICAL,
-            "error": logging.ERROR,
-            "warning": logging.WARNING,
-            "info": logging.INFO,
-        }
-        if logging_level not in valid_logging_levels:
-            raise InvalidParameterException(
-                "'{}' is not a valid logging_level. Valid choices are 'debug', 'critical', 'error', 'warning', "
-                "or 'info'.".format(
-                    logging_level))
-        self.logging_level = logging_level
-        if enable_logging:
-            logging.getLogger().setLevel(valid_logging_levels[self.logging_level])
 
         # Set credentials
         self._domain = self._get_cred('rubrik_polaris_domain', _domain)
@@ -75,12 +57,11 @@ class PolarisClient:
         self._password = self._get_cred('rubrik_polaris_password', _password)
 
         if not (self._domain and self._username and self._password):
-            raise Exception('Error: Required credentials are missing! Please pass in username, password and domain, directly or through the OS environment.')
+            raise Exception('Required credentials are missing! Please pass in username, password and domain, directly or through the OS environment.')
 
         # Set base variables
         self._kwargs = kwargs
         self._data_path = "{}/graphql/".format(os.path.dirname(os.path.realpath(__file__)))
-        self._log("Polaris Domain: {}".format(self._domain))
 
         # Switch off SSL checks if needed
         if 'insecure' in self._kwargs and self._kwargs['insecure']:
@@ -88,40 +69,32 @@ class PolarisClient:
 
         # Adjust Polaris domain if a custom root is defined
         if 'root_domain' in self._kwargs and self._kwargs['root_domain'] is not None:
-            self._baseurl = "https://{}.{}/api/graphql".format(self._domain, self._kwargs['root_domain'])
+            self._baseurl = "https://{}.{}/api".format(self._domain, self._kwargs['root_domain'])
         else:
-            self._baseurl = "https://{}.my.rubrik.com/api/graphql".format(self._domain)
+            self._baseurl = "https://{}.my.rubrik.com/api".format(self._domain)
 
-        # Get Auth Token and assemble header
-        self._access_token = self._get_access_token()
-        del(self._username, self._password)
-        self._headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ' + self._access_token
-        }
+        try:
+            # Get Auth Token and assemble header
+            self._access_token = self._get_access_token()
+            del(self._username, self._password)
+            self._headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Bearer ' + self._access_token
+            }
+            
+            # Get graphql content
+            (self._graphql_query, self._graphql_file_type_map) = _build_graphql_maps(self)
+        
+        except RequestException as err:
+            raise
+        except OSError as os_err:
+            raise
+        except Exception as e:
+            raise
 
-        # Get graphql content
-        (self._graphql_query, self._graphql_file_type_map) = _build_graphql_maps(self)
-
-    def _log(self, log_message):
-        """Create properly formatted debug log messages.
-
-        Arguments:
-            log_message {str} -- The message to pass to the debug log.
-        """
-        log = logging.getLogger(__name__)
-        set_logging = {
-            "debug": log.debug,
-            "critical": log.critical,
-            "error": log.error,
-            "warning": log.warning,
-            "info": log.info
-
-        }
-        set_logging[self.logging_level](log_message)
-
-    def _get_cred(self, env_key, override=None):
+    @staticmethod
+    def _get_cred(env_key, override=None):
         cred = None
 
         if env_key in os.environ:
@@ -129,5 +102,5 @@ class PolarisClient:
 
         if override:
             cred = override
-        
+
         return cred
