@@ -45,7 +45,7 @@ def submit_on_demand(self, object_ids, sla_id, wait = False):
         list -- List of errors if any occured
     """
     try:
-        _mutation_name = "core_on_demand"
+        _mutation_name = "core_snappable_on_demand"
         _variables = {
             "objectIds": object_ids,
             "slaId": sla_id
