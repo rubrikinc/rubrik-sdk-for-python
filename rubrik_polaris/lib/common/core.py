@@ -46,7 +46,10 @@ def get_sla_domains(self, sla_domain_name=""):
         }
         request = self._query(query_name, variables)
         request_nodes = self._dump_nodes(request)
-
+        if sla_domain_name:
+            for node in request_nodes:
+                if node['name'] == sla_domain_name:
+                    return node
         return request_nodes
     except Exception:
         raise

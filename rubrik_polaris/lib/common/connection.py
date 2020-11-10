@@ -30,7 +30,6 @@ def _query(self, query_name=None, variables=None, timeout=60):
     from rubrik_polaris.exceptions import RequestException
 
     try:
-        print(query_name)
         operation_name = "SdkPython" + ''.join(w[:1].upper() + w[1:] for w in query_name.split('_'))
         query = re.sub("RubrikPolarisSDKRequest", operation_name, self._graphql_query[query_name])
 
