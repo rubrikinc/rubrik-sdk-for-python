@@ -42,7 +42,7 @@ def add_account_aws(self, regions=[], all=False, profiles=[], aws_access_key_id=
     elif all or profiles:
         for profile in self._get_aws_profiles():
             if profile in profiles or (all and profile != 'default'):
-                self._add_account_aws(profile = profile, regions = regions)
+                self._add_account_aws(profile=profile, regions=regions)
                 #TODO: Should add above into a queque for threaded provisioning
 
 
@@ -225,7 +225,7 @@ def get_account_aws_native_id(self, profile='', aws_id=None, aws_secret=None):
 
     try:
         if profile:
-            boto3.setup_default_session(profile_name = profile)
+            boto3.setup_default_session(profile_name=profile)
         elif aws_id and aws_secret:
             boto3.setup_default_session(aws_access_key_id=aws_id, aws_secret_access_key=aws_secret)
         try:
@@ -411,9 +411,9 @@ def _update_account_aws_initiate(self, _feature, _polaris_account_id):
 
 def _update_account_aws(self, profile=None, aws_id=None, aws_secret=None,  _aws_account_id = '', _aws_account_name = None):
     if profile:
-        _aws_account_id, _aws_account_name = self.get_account_aws_native_id(profile = profile)
+        _aws_account_id, _aws_account_name = self.get_account_aws_native_id(profile=profile)
     elif aws_id and aws_secret:
-        _aws_account_id, _aws_account_name = self.get_account_aws_native_id(aws_id = aws_id, aws_secret = aws_secret)
+        _aws_account_id, _aws_account_name = self.get_account_aws_native_id(aws_id=aws_id, aws_secret=aws_secret)
     if _aws_account_id  == '':
         return
     else:
