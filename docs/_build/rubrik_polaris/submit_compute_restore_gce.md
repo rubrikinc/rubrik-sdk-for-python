@@ -1,9 +1,9 @@
-# submit_restore_azure
+# submit_compute_restore_gce
 
-Submits a Restore of an Azure VM instance
+Submits a Restore of a GCE instance
 
 ```py
-def submit_restore_azure(self, snapshot_id, **kwargs):
+def submit_compute_restore_gce(self, snapshot_id, **kwargs):
 ```
 
 ## Arguments

@@ -1,9 +1,9 @@
-# get_instances_gce
+# get_compute_azure
 
-Retrieve all GCE instances from Polaris
+Retrieve all Azure instances from Polaris
 
 ```py
-def get_instances_gce(self):
+def get_compute_azure(self):
 ```
 
 
@@ -12,7 +12,7 @@ def get_instances_gce(self):
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
-| list | List of all GCE instances |
+| list | List of all Azure VM instances |
 
 
 
@@ -30,7 +30,7 @@ password = 's3cr3tP_a55w0R)'
 client = PolarisClient(domain, username, password, insecure=True)
 
 # Search for a set of objects and get their details
-for i in client.get_object_ids_gce():
-    print(client.get_instances_gce(i))
+for i in client.get_compute_object_ids_azure():
+    print(client.get_compute_azure(i))
 
 ```

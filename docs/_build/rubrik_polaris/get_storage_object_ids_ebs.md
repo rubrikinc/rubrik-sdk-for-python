@@ -1,24 +1,25 @@
-# get_object_ids_azure
+# get_storage_object_ids_ebs
 
-Retrieves all Azure VM object IDs that match query
+Retrieves all AWS EBS object IDs that match query
 
 ```py
-def get_object_ids_azure(self, match_all=True, **kwargs):
+def get_storage_object_ids_ebs(self, match_all=True, **kwargs):
 ```
 
 ## Arguments
 
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| match_all  | bool | Set to false to match ANY defined criteria |  |
-| kwargs  |  | Any top level object from the get_instances_azure call |  |
+| match_all  | bool | Set to False to match ANY defined criteria |  |
+| tags  | name: value | Allows simple qualification of tags |  |
+| kwargs  |  | Any top level object from the get_storage_ebs call |  |
 
 
 ## Returns
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
-| list | List of all the Azure VM object id's |
+| list | List of all the EBS object id's |
 
 
 
@@ -35,8 +36,6 @@ password = 's3cr3tP_a55w0R)'
 
 client = PolarisClient(domain, username, password, insecure=True)
 
-# Search for a set of objects and get their details
-for i in client.get_object_ids_azure():
-    print(client.get_instances_azure(i))
+print(client.get_storage_object_ids_ebs(tags = {"Class": "Management"}))
 
 ```
