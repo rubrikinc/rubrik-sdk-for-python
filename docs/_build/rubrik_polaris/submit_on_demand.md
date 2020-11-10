@@ -1,6 +1,6 @@
 # submit_on_demand
 
-Submits On Demand Snapshot
+Submits On Demand Snapshot request for the given set of object id's and assign the given SLA to the snapshots.
 
 ```py
 def submit_on_demand(self, object_ids, sla_id, wait=False):
@@ -12,8 +12,12 @@ def submit_on_demand(self, object_ids, sla_id, wait=False):
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | object_ids  | [str] | Array of Rubrik Object IDs |  |
 | sla_id  | str | Rubrik SLA Domain ID |  |
-| wait  | bool | Threaded wait for all processes to complete |  |
 
+## Keyword Arguments
+
+| Name        | Type | Description                                                                 | Choices | Default |
+|-------------|------|-----------------------------------------------------------------------------|---------|---------|
+| wait  | bool | Threaded wait for all processes to complete  |  | False |
 
 ## Returns
 
