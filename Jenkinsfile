@@ -8,6 +8,11 @@ pipeline {
                 // sh 'python3 ./create_docs.py'
             }
         }
+        stage('Commit Docs') {
+            steps {
+                echo 'Commit Docs'
+            }
+        }
         stage('Function Tests') {
             steps {
                 echo 'Run Tests'
