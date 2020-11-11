@@ -3,11 +3,9 @@ pipeline {
     stages {
         stage('Generate Docs') {
             steps {
-                withEnv(["HOME=${env.WORKSPACE}"]) {
-                    sh 'chmod -R 755 .'
-                    sh 'pip3 install jinja2'
-                    sh 'python3 ./create_docs.py'
-                }
+                sh 'chmod -R 755 .'
+                sh 'sudo pip3 install jinja2'
+                sh 'python3 ./create_docs.py'
             }
         }
     }
