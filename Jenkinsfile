@@ -1,7 +1,5 @@
 pipeline {
     agent any
-    environment {
-    }
     stages {
         stage('Generate Docs') {
             steps {
