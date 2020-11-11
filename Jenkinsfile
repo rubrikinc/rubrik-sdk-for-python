@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Generate Docs') {
             steps {
-                sh 'create_docs.py'
+                sh './create_docs.py'
             }
         }
     }
