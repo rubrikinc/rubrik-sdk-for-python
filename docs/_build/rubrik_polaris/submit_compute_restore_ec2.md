@@ -1,9 +1,9 @@
-# submit_restore_ec2
+# submit_compute_restore_ec2
 
 Submits a Restore of an EC2 instance
 
 ```py
-def submit_restore_ec2(self, snapshot_id, **kwargs):
+def submit_compute_restore_ec2(self, snapshot_id, **kwargs):
 ```
 
 ## Arguments
@@ -20,7 +20,7 @@ def submit_restore_ec2(self, snapshot_id, **kwargs):
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
-| list | List of errors if any occured during the restore |
+| list | List of errors if any occurred during the restore |
 
 
 

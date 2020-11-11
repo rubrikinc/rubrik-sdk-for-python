@@ -8,6 +8,4 @@ password = 's3cr3tP_a55w0R)'
 
 client = PolarisClient(domain, username, password, insecure=True)
 
-# Search for a set of objects and get their details
-for i in client.get_object_ids_ec2(region = 'US_WEST_2'):
-    print(client.get_instances_ec2(i))
+print(client.get_storage_object_ids_ebs(tags = {"Class": "Management"}))

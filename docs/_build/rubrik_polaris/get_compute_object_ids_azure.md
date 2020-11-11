@@ -1,9 +1,9 @@
-# get_object_ids_ec2
+# get_compute_object_ids_azure
 
-Retrieves all AWS EC2 object IDs that match query
+Retrieves all Azure VM object IDs that match query
 
 ```py
-def get_object_ids_ec2(self, match_all=True, **kwargs):
+def get_compute_object_ids_azure(self, match_all=True, **kwargs):
 ```
 
 ## Arguments
@@ -11,15 +11,14 @@ def get_object_ids_ec2(self, match_all=True, **kwargs):
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | match_all  | bool | Set to false to match ANY defined criteria |  |
-| tags  | name: value | Allows simple qualification of tags |  |
-| kwargs  |  | Any top level object from the get_instances_ec2 call |  |
+| kwargs  |  | Any top level object from the get_compute_azure call |  |
 
 
 ## Returns
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
-| list | List of all the EC2 object id's |
+| list | List of all the Azure VM object id's |
 
 
 
@@ -37,7 +36,7 @@ password = 's3cr3tP_a55w0R)'
 client = PolarisClient(domain, username, password, insecure=True)
 
 # Search for a set of objects and get their details
-for i in client.get_object_ids_ec2(region = 'US_WEST_2'):
-    print(client.get_instances_ec2(i))
+for i in client.get_compute_object_ids_azure():
+    print(client.get_compute_azure(i))
 
 ```

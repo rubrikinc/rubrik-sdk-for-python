@@ -3,7 +3,7 @@
 Retrieves deployment details for AWS from Polaris
 
 ```py
-def get_accounts_aws_detail(self, filter=""):
+def get_accounts_aws_detail(self, filter):
 ```
 
 ## Arguments

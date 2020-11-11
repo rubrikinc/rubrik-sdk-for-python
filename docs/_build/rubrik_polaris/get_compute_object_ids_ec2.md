@@ -1,24 +1,25 @@
-# get_object_ids_gce
+# get_compute_object_ids_ec2
 
-Retrieves all GCE object IDs that match query
+Retrieves all AWS EC2 object IDs that match query
 
 ```py
-def get_object_ids_gce(self, match_all=True, **kwargs):
+def get_compute_object_ids_ec2(self, match_all=True, **kwargs):
 ```
 
 ## Arguments
 
 | Name        | Type | Description                                                                 | Choices |
 |-------------|------|-----------------------------------------------------------------------------|---------|
-| match_all  | bool | Set to `False` to match ANY defined criteria |  |
-| kwargs  |  | Any top level object from the get_instances_gce call |  |
+| match_all  | bool | Set to false to match ANY defined criteria |  |
+| tags  | name: value | Allows simple qualification of tags |  |
+| kwargs  |  | Any top level object from the get_compute_ec2 call |  |
 
 
 ## Returns
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
-| list | List of all the GCE object id's |
+| list | List of all the EC2 object id's |
 
 
 
@@ -36,7 +37,7 @@ password = 's3cr3tP_a55w0R)'
 client = PolarisClient(domain, username, password, insecure=True)
 
 # Search for a set of objects and get their details
-for i in client.get_object_ids_gce():
-    print(client.get_instances_gce(i))
+for i in client.get_compute_object_ids_ec2(region = 'US_WEST_2'):
+    print(client.get_compute_ec2(i))
 
 ```

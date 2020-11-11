@@ -7,6 +7,7 @@ password = 's3cr3tP_a55w0R)'
 
 
 client = PolarisClient(domain, username, password, insecure=True)
-success = client.add_account_aws(regions=["us-west-2"], all=True)
-if success:
-    print("AWS Account added successfully!")
+
+# Search for a set of objects and get their details
+for i in client.get_compute_object_ids_ec2(region = 'US_WEST_2'):
+    print(client.get_compute_ec2(i))

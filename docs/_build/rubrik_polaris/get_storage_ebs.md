@@ -1,9 +1,9 @@
-# get_instances_gce
+# get_storage_ebs
 
-Retrieve all GCE instances from Polaris
+Retrieve all AWS EBS volumes from Polaris
 
 ```py
-def get_instances_gce(self):
+def get_storage_ebs(self):
 ```
 
 
@@ -12,7 +12,7 @@ def get_instances_gce(self):
 
 | Type | Return Value                                                                                  |
 |------|-----------------------------------------------------------------------------------------------|
-| list | List of all GCE instances |
+| list | List of all the AWS EBS volumes. |
 
 
 
@@ -29,8 +29,6 @@ password = 's3cr3tP_a55w0R)'
 
 client = PolarisClient(domain, username, password, insecure=True)
 
-# Search for a set of objects and get their details
-for i in client.get_object_ids_gce():
-    print(client.get_instances_gce(i))
+print(client.get_storage_ebs())
 
 ```
