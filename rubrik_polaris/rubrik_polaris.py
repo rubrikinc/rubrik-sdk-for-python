@@ -31,19 +31,20 @@ class PolarisClient:
     from .lib.common.core import get_snapshots
     from .lib.accounts import get_accounts_azure, get_accounts_gcp
     from .lib.accounts import get_accounts_aws, get_accounts_aws_detail, get_account_aws_native_id
-    from .lib.accounts import add_account_aws, delete_account_aws, update_account_aws
-    from .lib.compute import get_object_ids_azure, get_object_ids_ec2, get_object_ids_gce
-    from .lib.compute import get_instances_azure, get_instances_ec2, get_instances_gce
-    from .lib.compute import submit_restore_ec2, submit_restore_azure, submit_restore_gce
-    from .lib.storage import get_object_ids_ebs, get_storage_ebs
+    from .lib.accounts import add_account_aws, delete_account_aws
+    from .lib.compute import get_compute_object_ids_azure, get_compute_object_ids_ec2, get_compute_object_ids_gce
+    from .lib.compute import get_compute_azure, get_compute_ec2, get_compute_gce
+    from .lib.compute import submit_compute_restore_ec2, submit_compute_restore_azure, submit_compute_restore_gce
+    from .lib.storage import get_storage_object_ids_ebs, get_storage_ebs
 
     # Private
     from .lib.common.connection import _query, _get_access_token
-    from .lib.compute import _submit_instance_restore
+    from .lib.compute import _submit_compute_restore, _get_compute_object_ids
     from .lib.common.monitor import _monitor_job, _monitor_threader, _monitor_task
     from .lib.common.graphql import _dump_nodes, _get_query_names_from_graphql_query
-    from .lib.accounts import _invoke_account_delete_aws, _invoke_aws_stack, _commit_account_delete_aws
+    from .lib.accounts import _invoke_account_delete_aws, _invoke_aws_stack, _commit_account_delete_aws, _update_account_aws
     from .lib.accounts import _destroy_aws_stack, _disable_account_aws, _get_aws_profiles, _add_account_aws, _delete_account_aws
+    from .lib.accounts import _update_account_aws_initiate
 
     def __init__(self, _domain=None, _username=None, _password=None, **kwargs):
         from .lib.common.graphql import _build_graphql_maps

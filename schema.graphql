@@ -151,7 +151,7 @@ interface CdmHierarchyObject {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -220,7 +220,7 @@ interface CdmHierarchySnappableNew {
     onDemandSnapshotCount: Int!
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The assignmennt type for this object's SLA"
     slaAssignment: SlaAssignmentTypeEnum!
@@ -301,7 +301,7 @@ interface FilesetTemplateDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -342,7 +342,7 @@ interface FilesetTemplatePhysicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -517,7 +517,7 @@ interface HostShareDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -558,7 +558,253 @@ interface HostSharePhysicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
+    primaryClusterLocation: DataLocation!
+    "The number of objects either replicated by this object or related by replication."
+    replicatedObjectCount: Int!
+    "Objects either replicated by this object or related by replication"
+    replicatedObjects: [CdmHierarchyObject!]!
+    "The assignmennt type for this object's SLA"
+    slaAssignment: SlaAssignmentTypeEnum!
+    "The distribution of the snapshots of the hierarchy object"
+    snapshotDistribution: SnapshotDistribution!
+}
+
+interface HyperVClusterDescendantType {
+    "The authorized operations on the object."
+    authorizedOperations: [OperationEnum!]!
+    "The cluster from which this object originated."
+    cluster: Cluster!
+    "The configured SLA Domain of the hierarchy object."
+    configuredSlaDomain: SlaDomain!
+    "The Effective Retention SLA Domain of the hierarchy object."
+    effectiveRetentionSlaDomain: SlaDomain
+    "The Effective SLA Domain of the hierarchy object."
+    effectiveSlaDomain: SlaDomain!
+    "The path node of the effective SLA source"
+    effectiveSlaSourceObject: PathNode
+    "The fid of the hierarchy object."
+    id: UUID!
+    "A sequential list containing this object's logical ancestors."
+    logicalPath: [PathNode!]!
+    "The name of the hierarchy object."
+    name: String!
+    "The number of snappable descendants of this object"
+    numSnappableDescendants: Int!
+    "The object type of this object."
+    objectType: HierarchyObjectTypeEnum!
+    "Mapping from objectId to object deletion pending status"
+    pendingObjectDeletionStatus: PendingSnapshotsOfObjectDeletion
+    "Non-null when a user has assigned a SLA to this object, and the SLA assignment is in the process of being synced over to CDM"
+    pendingSla: SlaDomain
+    "A sequential list containing this object's physical ancestors."
+    physicalPath: [PathNode!]!
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
+    primaryClusterLocation: DataLocation!
+    "The number of objects either replicated by this object or related by replication."
+    replicatedObjectCount: Int!
+    "Objects either replicated by this object or related by replication"
+    replicatedObjects: [CdmHierarchyObject!]!
+    "The assignmennt type for this object's SLA"
+    slaAssignment: SlaAssignmentTypeEnum!
+    "The distribution of the snapshots of the hierarchy object"
+    snapshotDistribution: SnapshotDistribution!
+}
+
+interface HyperVClusterLogicalChildType {
+    "The authorized operations on the object."
+    authorizedOperations: [OperationEnum!]!
+    "The cluster from which this object originated."
+    cluster: Cluster!
+    "The configured SLA Domain of the hierarchy object."
+    configuredSlaDomain: SlaDomain!
+    "The Effective Retention SLA Domain of the hierarchy object."
+    effectiveRetentionSlaDomain: SlaDomain
+    "The Effective SLA Domain of the hierarchy object."
+    effectiveSlaDomain: SlaDomain!
+    "The path node of the effective SLA source"
+    effectiveSlaSourceObject: PathNode
+    "The fid of the hierarchy object."
+    id: UUID!
+    "A sequential list containing this object's logical ancestors."
+    logicalPath: [PathNode!]!
+    "The name of the hierarchy object."
+    name: String!
+    "The number of snappable descendants of this object"
+    numSnappableDescendants: Int!
+    "The object type of this object."
+    objectType: HierarchyObjectTypeEnum!
+    "Mapping from objectId to object deletion pending status"
+    pendingObjectDeletionStatus: PendingSnapshotsOfObjectDeletion
+    "Non-null when a user has assigned a SLA to this object, and the SLA assignment is in the process of being synced over to CDM"
+    pendingSla: SlaDomain
+    "A sequential list containing this object's physical ancestors."
+    physicalPath: [PathNode!]!
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
+    primaryClusterLocation: DataLocation!
+    "The number of objects either replicated by this object or related by replication."
+    replicatedObjectCount: Int!
+    "Objects either replicated by this object or related by replication"
+    replicatedObjects: [CdmHierarchyObject!]!
+    "The assignmennt type for this object's SLA"
+    slaAssignment: SlaAssignmentTypeEnum!
+    "The distribution of the snapshots of the hierarchy object"
+    snapshotDistribution: SnapshotDistribution!
+}
+
+interface HyperVSCVMMDescendantType {
+    "The authorized operations on the object."
+    authorizedOperations: [OperationEnum!]!
+    "The cluster from which this object originated."
+    cluster: Cluster!
+    "The configured SLA Domain of the hierarchy object."
+    configuredSlaDomain: SlaDomain!
+    "The Effective Retention SLA Domain of the hierarchy object."
+    effectiveRetentionSlaDomain: SlaDomain
+    "The Effective SLA Domain of the hierarchy object."
+    effectiveSlaDomain: SlaDomain!
+    "The path node of the effective SLA source"
+    effectiveSlaSourceObject: PathNode
+    "The fid of the hierarchy object."
+    id: UUID!
+    "A sequential list containing this object's logical ancestors."
+    logicalPath: [PathNode!]!
+    "The name of the hierarchy object."
+    name: String!
+    "The number of snappable descendants of this object"
+    numSnappableDescendants: Int!
+    "The object type of this object."
+    objectType: HierarchyObjectTypeEnum!
+    "Mapping from objectId to object deletion pending status"
+    pendingObjectDeletionStatus: PendingSnapshotsOfObjectDeletion
+    "Non-null when a user has assigned a SLA to this object, and the SLA assignment is in the process of being synced over to CDM"
+    pendingSla: SlaDomain
+    "A sequential list containing this object's physical ancestors."
+    physicalPath: [PathNode!]!
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
+    primaryClusterLocation: DataLocation!
+    "The number of objects either replicated by this object or related by replication."
+    replicatedObjectCount: Int!
+    "Objects either replicated by this object or related by replication"
+    replicatedObjects: [CdmHierarchyObject!]!
+    "The assignmennt type for this object's SLA"
+    slaAssignment: SlaAssignmentTypeEnum!
+    "The distribution of the snapshots of the hierarchy object"
+    snapshotDistribution: SnapshotDistribution!
+}
+
+interface HyperVSCVMMLogicalChildType {
+    "The authorized operations on the object."
+    authorizedOperations: [OperationEnum!]!
+    "The cluster from which this object originated."
+    cluster: Cluster!
+    "The configured SLA Domain of the hierarchy object."
+    configuredSlaDomain: SlaDomain!
+    "The Effective Retention SLA Domain of the hierarchy object."
+    effectiveRetentionSlaDomain: SlaDomain
+    "The Effective SLA Domain of the hierarchy object."
+    effectiveSlaDomain: SlaDomain!
+    "The path node of the effective SLA source"
+    effectiveSlaSourceObject: PathNode
+    "The fid of the hierarchy object."
+    id: UUID!
+    "A sequential list containing this object's logical ancestors."
+    logicalPath: [PathNode!]!
+    "The name of the hierarchy object."
+    name: String!
+    "The number of snappable descendants of this object"
+    numSnappableDescendants: Int!
+    "The object type of this object."
+    objectType: HierarchyObjectTypeEnum!
+    "Mapping from objectId to object deletion pending status"
+    pendingObjectDeletionStatus: PendingSnapshotsOfObjectDeletion
+    "Non-null when a user has assigned a SLA to this object, and the SLA assignment is in the process of being synced over to CDM"
+    pendingSla: SlaDomain
+    "A sequential list containing this object's physical ancestors."
+    physicalPath: [PathNode!]!
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
+    primaryClusterLocation: DataLocation!
+    "The number of objects either replicated by this object or related by replication."
+    replicatedObjectCount: Int!
+    "Objects either replicated by this object or related by replication"
+    replicatedObjects: [CdmHierarchyObject!]!
+    "The assignmennt type for this object's SLA"
+    slaAssignment: SlaAssignmentTypeEnum!
+    "The distribution of the snapshots of the hierarchy object"
+    snapshotDistribution: SnapshotDistribution!
+}
+
+interface HyperVServerDescendantType {
+    "The authorized operations on the object."
+    authorizedOperations: [OperationEnum!]!
+    "The cluster from which this object originated."
+    cluster: Cluster!
+    "The configured SLA Domain of the hierarchy object."
+    configuredSlaDomain: SlaDomain!
+    "The Effective Retention SLA Domain of the hierarchy object."
+    effectiveRetentionSlaDomain: SlaDomain
+    "The Effective SLA Domain of the hierarchy object."
+    effectiveSlaDomain: SlaDomain!
+    "The path node of the effective SLA source"
+    effectiveSlaSourceObject: PathNode
+    "The fid of the hierarchy object."
+    id: UUID!
+    "A sequential list containing this object's logical ancestors."
+    logicalPath: [PathNode!]!
+    "The name of the hierarchy object."
+    name: String!
+    "The number of snappable descendants of this object"
+    numSnappableDescendants: Int!
+    "The object type of this object."
+    objectType: HierarchyObjectTypeEnum!
+    "Mapping from objectId to object deletion pending status"
+    pendingObjectDeletionStatus: PendingSnapshotsOfObjectDeletion
+    "Non-null when a user has assigned a SLA to this object, and the SLA assignment is in the process of being synced over to CDM"
+    pendingSla: SlaDomain
+    "A sequential list containing this object's physical ancestors."
+    physicalPath: [PathNode!]!
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
+    primaryClusterLocation: DataLocation!
+    "The number of objects either replicated by this object or related by replication."
+    replicatedObjectCount: Int!
+    "Objects either replicated by this object or related by replication"
+    replicatedObjects: [CdmHierarchyObject!]!
+    "The assignmennt type for this object's SLA"
+    slaAssignment: SlaAssignmentTypeEnum!
+    "The distribution of the snapshots of the hierarchy object"
+    snapshotDistribution: SnapshotDistribution!
+}
+
+interface HyperVServerLogicalChildType {
+    "The authorized operations on the object."
+    authorizedOperations: [OperationEnum!]!
+    "The cluster from which this object originated."
+    cluster: Cluster!
+    "The configured SLA Domain of the hierarchy object."
+    configuredSlaDomain: SlaDomain!
+    "The Effective Retention SLA Domain of the hierarchy object."
+    effectiveRetentionSlaDomain: SlaDomain
+    "The Effective SLA Domain of the hierarchy object."
+    effectiveSlaDomain: SlaDomain!
+    "The path node of the effective SLA source"
+    effectiveSlaSourceObject: PathNode
+    "The fid of the hierarchy object."
+    id: UUID!
+    "A sequential list containing this object's logical ancestors."
+    logicalPath: [PathNode!]!
+    "The name of the hierarchy object."
+    name: String!
+    "The number of snappable descendants of this object"
+    numSnappableDescendants: Int!
+    "The object type of this object."
+    objectType: HierarchyObjectTypeEnum!
+    "Mapping from objectId to object deletion pending status"
+    pendingObjectDeletionStatus: PendingSnapshotsOfObjectDeletion
+    "Non-null when a user has assigned a SLA to this object, and the SLA assignment is in the process of being synced over to CDM"
+    pendingSla: SlaDomain
+    "A sequential list containing this object's physical ancestors."
+    physicalPath: [PathNode!]!
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -701,7 +947,7 @@ interface PhysicalHostDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -742,7 +988,7 @@ interface PhysicalHostPhysicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -884,7 +1130,7 @@ interface ProtectedObjectSummary {
 
 "A Recovery Spec"
 interface RecoverySpec {
-    "recovery spec version"
+    "the user provided scripts"
     userData: String
     "recovery spec version"
     version: Long!
@@ -931,7 +1177,7 @@ interface SapHanaSystemDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -972,7 +1218,7 @@ interface SapHanaSystemPhysicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1042,7 +1288,7 @@ interface VSphereComputeClusterDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1083,7 +1329,7 @@ interface VSphereComputeClusterPhysicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1124,7 +1370,7 @@ interface VSphereDatacenterDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1165,7 +1411,7 @@ interface VSphereDatacenterLogicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1206,7 +1452,7 @@ interface VSphereDatacenterPhysicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1247,7 +1493,7 @@ interface VSphereFolderDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1288,7 +1534,7 @@ interface VSphereFolderLogicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1329,7 +1575,7 @@ interface VSphereHostDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1370,7 +1616,7 @@ interface VSphereHostPhysicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1411,7 +1657,7 @@ interface VSphereTagCategoryDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1452,7 +1698,7 @@ interface VSphereTagCategoryTagChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1493,7 +1739,7 @@ interface VSphereTagDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1534,7 +1780,7 @@ interface VSphereTagTagChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1575,7 +1821,7 @@ interface VSphereVCenterDescendantType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1616,7 +1862,7 @@ interface VSphereVCenterLogicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1657,7 +1903,7 @@ interface VSphereVCenterPhysicalChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1698,7 +1944,7 @@ interface VSphereVCenterTagChildType {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1743,7 +1989,7 @@ interface VcdOrgDescendant {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -1801,6 +2047,7 @@ type ADObject {
     objectGuid: String!
     objectSid: String!
     paginationId: Int!
+    resolutionType: ResolutionTypeEnum!
 }
 
 type ADObjectConnection {
@@ -1913,9 +2160,9 @@ type ActivitySeriesEdge {
     node: ActivitySeries!
 }
 
-"Activity series graphql with groupby info applied to it."
+"Activity series data with groupby info applied to it."
 type ActivitySeriesGroupBy {
-    "Paginated activity series graphql."
+    "Paginated activity series data."
     activitySeriesConnection(
         after: String,
         before: String,
@@ -1924,12 +2171,12 @@ type ActivitySeriesGroupBy {
         "sort activity series by field"
         sortBy: ActivitySeriesSortByEnum = LastUpdated
     ): ActivitySeriesConnection!
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     activitySeriesGroupBy(
         "group activity series by a field"
         groupBy: ActivitySeriesGroupByEnum!
     ): [ActivitySeriesGroupBy!]!
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: ActivitySeriesGroupByInfo!
 }
 
@@ -2127,9 +2374,9 @@ type AnomalyResultEdge {
     node: AnomalyResult!
 }
 
-"Anomaly result graphql with groupby info applied to it"
+"Anomaly result data with groupby info applied to it"
 type AnomalyResultGroupBy {
-    "Paginated anomaly result graphql"
+    "Paginated anomaly result data"
     anomalyResultConnection(
         after: String,
         before: String,
@@ -2142,7 +2389,7 @@ type AnomalyResultGroupBy {
         "sort order"
         sortOrder: SortOrderEnum
     ): AnomalyResultConnection!
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     anomalyResultGroupBy(
         "group anomaly results by field"
         groupBy: AnomalyResultGroupByEnum!
@@ -3834,14 +4081,14 @@ type BaseSnapshotSummary {
 
     Supported in v5.0+
     v5.0-v5.1:
-    v5.2+: (Deprecated) For a policy based snapshot this parameter contains the ID of the SLA Domain currently assigned to the graphql source of that snapshot. For an on demand snapshot this field corresponds to the SLA Domain that was assigned when the snapshot was taken. A graphql source, and individual snapshots, can be reassigned to a different SLA Domain, or the SLA Domain can be modified. In any of these cases this parameter can contain a stale and incorrect value. To view retention information for this snapshot, use snapshotRetentionInfo instead.
+    v5.2+: (Deprecated) For a policy based snapshot this parameter contains the ID of the SLA Domain currently assigned to the data source of that snapshot. For an on demand snapshot this field corresponds to the SLA Domain that was assigned when the snapshot was taken. A data source, and individual snapshots, can be reassigned to a different SLA Domain, or the SLA Domain can be modified. In any of these cases this parameter can contain a stale and incorrect value. To view retention information for this snapshot, use snapshotRetentionInfo instead.
     """
     slaId: String!
     """
 
     Supported in v5.0+
     v5.0-v5.1:
-    v5.2+: (Deprecated) For a policy based snapshot this parameter contains the name of the SLA Domain currently assigned to the graphql source of that snapshot. For an on demand snapshot this field corresponds to the SLA Domain that was assigned when the snapshot was taken. A graphql source, and individual snapshots, can be reassigned to a different SLA Domain, or the SLA Domain can be modified. In any of these cases this parameter can contain a stale and incorrect value. To view retention information for this snapshot, use snapshotRetentionInfo instead.
+    v5.2+: (Deprecated) For a policy based snapshot this parameter contains the name of the SLA Domain currently assigned to the data source of that snapshot. For an on demand snapshot this field corresponds to the SLA Domain that was assigned when the snapshot was taken. A data source, and individual snapshots, can be reassigned to a different SLA Domain, or the SLA Domain can be modified. In any of these cases this parameter can contain a stale and incorrect value. To view retention information for this snapshot, use snapshotRetentionInfo instead.
     """
     slaName: String!
     """
@@ -3923,14 +4170,14 @@ type BlueprintEdge {
     node: Blueprint!
 }
 
-type BlueprintRecoverableRange {
+type BlueprintRecoveryRange {
     beginTime: DateTime
     endTime: DateTime
 }
 
-type BlueprintRecoverableRanges {
-    blueprintId: String!
-    recoverableRanges: [BlueprintRecoverableRange!]!
+type BlueprintRecoveryRanges {
+    missedRecoverableRanges: [BlueprintRecoveryRange!]!
+    recoverableRanges: [BlueprintRecoveryRange!]!
 }
 
 type BlueprintRecoverySpecReply {
@@ -4191,6 +4438,8 @@ type CdmUpgradeInfo {
     stateMachineStatusAt: DateTime
     "The upgrade event series id"
     upgradeEventSeriesId: String
+    "Recommended upgrade version of cluster"
+    upgradeRecommendationInfo: UpgradeRecommendationInfo
     "Upgrade started time"
     upgradeStartAt: DateTime
     "Version of cluster"
@@ -4256,6 +4505,13 @@ type ChildRecoverySpecMap {
     snappableFid: String!
     "the child snapshot Fid"
     snapshotId: String
+}
+
+type ChildVmRecoveryInfo {
+    missedRecoverableRanges: [VmwareRecoverableRange!]!
+    recoverableRanges: [VmwareRecoverableRange!]!
+    recoveryPoints: VmwareRecoveryPoints!
+    recoveryState: VmwareRecoveryState!
 }
 
 type ClassificationPolicyDetail {
@@ -4494,9 +4750,9 @@ type ClusterEdge {
     node: Cluster!
 }
 
-"Cluster graphql with groupby info applied to it."
+"Cluster data with groupby info applied to it."
 type ClusterGroupBy {
-    "Paginated snappable graphql."
+    "Paginated snappable data."
     clusterConnection(
         after: String,
         before: String,
@@ -4507,7 +4763,7 @@ type ClusterGroupBy {
         "cluster sort order"
         sortOrder: SortOrderEnum = Desc
     ): ClusterConnection!
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     clusterGroupBy(
         after: String,
         before: String,
@@ -4516,7 +4772,7 @@ type ClusterGroupBy {
         groupBy: ClusterGroupByEnum!,
         last: Int
     ): [ClusterGroupBy!]!
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: ClusterGroupByInfo!
 }
 
@@ -4638,6 +4894,14 @@ type Column {
     nullable: Boolean!
     sortable: Boolean!
     type: DataTypeEnum!
+}
+
+type CommonNotificationConfig {
+    hostname: String!
+    networkType: NetworkProtocolTypeEnum!
+    port: Int!
+    securityType: SMTPSecurityTypeEnum!
+    trustedCerts: String!
 }
 
 type ComplianceStatus {
@@ -4825,6 +5089,25 @@ type CreateRdsInstanceSnapshotTaskchainUuid {
     taskchainUuid: String!
 }
 
+"CSR Information"
+type Csr {
+    csrId: Long!
+    hostnames: [String!]!
+    name: String!
+}
+
+type CsrConnection {
+    count: Int!
+    edges: [CsrEdge!]!
+    nodes: [Csr!]!
+    pageInfo: PageInfo!
+}
+
+type CsrEdge {
+    cursor: String!
+    node: Csr!
+}
+
 type CustomAnalyzerMatch {
     endIndex: Int!
     startIndex: Int!
@@ -4836,7 +5119,7 @@ type CustomReport {
     charts: [ReportChartType!]!
     "Time the report was created."
     createdAt: DateTime!
-    "The filters applied to the graphql in the report."
+    "The filters applied to the data in the report."
     filters: CustomReportFilters!
     "The metrics focus of the custom report."
     focus: ReportFocusEnum!
@@ -4885,13 +5168,13 @@ type CustomReportFilters {
     complianceStatus: [ComplianceStatusEnum!]
     failoverStatus: [FailoverStatusEnum!]
     failoverType: FailoverTypeEnum
-    "Anomalous value to filter graphql on."
+    "Anomalous value to filter data on."
     isAnomaly: Boolean
     "List of activity statuses to filter on."
     lastActivityStatus: [ActivityStatusEnum!]
     "List of activity types to filter on."
     lastActivityType: [ActivityTypeEnum!]
-    "List of managed ids to filter graphql on."
+    "List of managed ids to filter data on."
     managedId: [String!]
     "List of snappable types to filter on."
     objectType: [ObjectTypeEnum!]
@@ -4907,7 +5190,7 @@ type CustomReportFilters {
     taskCategory: [String!]
     taskStatus: [String!]
     taskType: [String!]
-    "Start and end time range to filter graphql on."
+    "Start and end time range to filter data on."
     timeRange: GenericTimeRange
     "List of object types to filter on for Audits."
     userAuditObjectType: [UserAuditObjectTypeEnum!]
@@ -4917,11 +5200,11 @@ type CustomReportFilters {
     userAuditType: [UserAuditTypeEnum!]
 }
 
-"CustomReport graphql with groupby info applied to it."
+"CustomReport data with groupby info applied to it."
 type CustomReportGroupBy {
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: CustomReportGroupByInfo!
-    "Paginated snappable graphql."
+    "Paginated snappable data."
     reportConnection(
         after: String,
         before: String,
@@ -4932,7 +5215,7 @@ type CustomReportGroupBy {
         "sort order"
         sortOrder: SortOrderEnum
     ): CustomReportConnection!
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     reportGroupBy(
         after: String,
         before: String,
@@ -4965,7 +5248,7 @@ type DataLocation {
     id: String!
     isActive: Boolean!
     isArchived: Boolean!
-    "the name of the graphql location"
+    "the name of the data location"
     name: String!
     type: LocationTypeEnum!
 }
@@ -5507,9 +5790,9 @@ type FailoverEdge {
     node: Failover!
 }
 
-"Appflows failover jobs graphql with groupby info applied to it."
+"Appflows failover jobs data with groupby info applied to it."
 type FailoverGroupBy {
-    "Paginated appflows failover jobs graphql."
+    "Paginated appflows failover jobs data."
     failoverConnection(
         after: String,
         before: String,
@@ -5524,7 +5807,7 @@ type FailoverGroupBy {
         "group appflows failover jobs by a field"
         groupBy: FailoverGroupByEnum!
     ): [FailoverGroupBy!]!
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: FailoverGroupByInfo!
 }
 
@@ -6089,7 +6372,7 @@ type FilesetTemplate implements CdmHierarchyObject & HierarchyObject {
     physicalPath: [PathNode!]!
     postBackupScript: String!
     preBackupScript: String!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -6846,6 +7129,10 @@ type GetSPExplicitReply {
     spEntityId: String!
 }
 
+type GetSyslogConfigurationReply {
+    conf: [SyslogConfig!]!
+}
+
 "Taskchain status reply"
 type GetTaskchainStatusReply {
     taskchain: Taskchain
@@ -7067,7 +7354,7 @@ type HostDetail {
 
     Supported in v5.0+
     v5.0-v5.2:
-    v5.3: Indicates if compression is enabled while transferring graphql between the host and the Rubrik cluster.
+    v5.3: Indicates if compression is enabled while transferring data between the host and the Rubrik cluster.
     """
     compressionEnabled: Boolean
     hostSummary: HostSummary
@@ -7205,7 +7492,7 @@ type HostShare implements CdmHierarchyObject & HierarchyObject & PhysicalHostDes
     ): HostSharePhysicalChildTypeConnection!
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -7352,6 +7639,285 @@ type HourlySnapshotSchedule {
     basicSchedule: BasicSnapshotSchedule
 }
 
+type HyperVCluster implements CdmHierarchyObject & HierarchyObject & HyperVSCVMMDescendantType & HyperVSCVMMLogicalChildType {
+    "The authorized operations on the object."
+    authorizedOperations: [OperationEnum!]!
+    "The cluster from which this object originated."
+    cluster: Cluster!
+    clusterUuid: UUID!
+    "The configured SLA Domain of the hierarchy object."
+    configuredSlaDomain: SlaDomain!
+    "List of descendants"
+    descendantConnection(
+        after: String,
+        filter: [Filter!],
+        first: Int,
+        "provide optional snappable hierarchy for RBAC and SLA, none value is assumed to be All snappable hierarchy"
+        snappableHierarchy: SnappableLevelHierarchyTypeEnum,
+        sortBy: HierarchySortByField,
+        sortOrder: HierarchySortOrder,
+        typeFilter: [HierarchyObjectTypeEnum!]
+    ): HyperVClusterDescendantTypeConnection!
+    "The Effective Retention SLA Domain of the hierarchy object."
+    effectiveRetentionSlaDomain: SlaDomain
+    "The Effective SLA Domain of the hierarchy object."
+    effectiveSlaDomain: SlaDomain!
+    "The path node of the effective SLA source"
+    effectiveSlaSourceObject: PathNode
+    "The fid of the hierarchy object."
+    id: UUID!
+    "List of logical children"
+    logicalChildConnection(
+        after: String,
+        filter: [Filter!],
+        first: Int,
+        "provide optional snappable hierarchy for RBAC and SLA, none value is assumed to be All snappable hierarchy"
+        snappableHierarchy: SnappableLevelHierarchyTypeEnum,
+        sortBy: HierarchySortByField,
+        sortOrder: HierarchySortOrder,
+        typeFilter: [HierarchyObjectTypeEnum!]
+    ): HyperVClusterLogicalChildTypeConnection!
+    "A sequential list containing this object's logical ancestors."
+    logicalPath: [PathNode!]!
+    "The name of the hierarchy object."
+    name: String!
+    "The number of snappable descendants of this object"
+    numSnappableDescendants: Int!
+    "The object type of this object."
+    objectType: HierarchyObjectTypeEnum!
+    "Mapping from objectId to object deletion pending status"
+    pendingObjectDeletionStatus: PendingSnapshotsOfObjectDeletion
+    "Non-null when a user has assigned a SLA to this object, and the SLA assignment is in the process of being synced over to CDM"
+    pendingSla: SlaDomain
+    "A sequential list containing this object's physical ancestors."
+    physicalPath: [PathNode!]!
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
+    primaryClusterLocation: DataLocation!
+    primaryClusterUuid: UUID!
+    "The number of objects either replicated by this object or related by replication."
+    replicatedObjectCount: Int!
+    "Objects either replicated by this object or related by replication"
+    replicatedObjects: [CdmHierarchyObject!]!
+    "The assignmennt type for this object's SLA"
+    slaAssignment: SlaAssignmentTypeEnum!
+    "The distribution of the snapshots of the hierarchy object"
+    snapshotDistribution: SnapshotDistribution!
+}
+
+type HyperVClusterDescendantTypeConnection {
+    count: Int!
+    edges: [HyperVClusterDescendantTypeEdge!]!
+    nodes: [HyperVClusterDescendantType!]!
+    pageInfo: PageInfo!
+}
+
+type HyperVClusterDescendantTypeEdge {
+    cursor: String!
+    node: HyperVClusterDescendantType!
+}
+
+type HyperVClusterLogicalChildTypeConnection {
+    count: Int!
+    edges: [HyperVClusterLogicalChildTypeEdge!]!
+    nodes: [HyperVClusterLogicalChildType!]!
+    pageInfo: PageInfo!
+}
+
+type HyperVClusterLogicalChildTypeEdge {
+    cursor: String!
+    node: HyperVClusterLogicalChildType!
+}
+
+type HyperVServer implements CdmHierarchyObject & HierarchyObject & HyperVClusterDescendantType & HyperVClusterLogicalChildType & HyperVSCVMMDescendantType & HyperVSCVMMLogicalChildType {
+    "The authorized operations on the object."
+    authorizedOperations: [OperationEnum!]!
+    "The cluster from which this object originated."
+    cluster: Cluster!
+    clusterUuid: UUID!
+    "The configured SLA Domain of the hierarchy object."
+    configuredSlaDomain: SlaDomain!
+    "List of descendants"
+    descendantConnection(
+        after: String,
+        filter: [Filter!],
+        first: Int,
+        "provide optional snappable hierarchy for RBAC and SLA, none value is assumed to be All snappable hierarchy"
+        snappableHierarchy: SnappableLevelHierarchyTypeEnum,
+        sortBy: HierarchySortByField,
+        sortOrder: HierarchySortOrder,
+        typeFilter: [HierarchyObjectTypeEnum!]
+    ): HyperVServerDescendantTypeConnection!
+    "The Effective Retention SLA Domain of the hierarchy object."
+    effectiveRetentionSlaDomain: SlaDomain
+    "The Effective SLA Domain of the hierarchy object."
+    effectiveSlaDomain: SlaDomain!
+    "The path node of the effective SLA source"
+    effectiveSlaSourceObject: PathNode
+    "The fid of the hierarchy object."
+    id: UUID!
+    "List of logical children"
+    logicalChildConnection(
+        after: String,
+        filter: [Filter!],
+        first: Int,
+        "provide optional snappable hierarchy for RBAC and SLA, none value is assumed to be All snappable hierarchy"
+        snappableHierarchy: SnappableLevelHierarchyTypeEnum,
+        sortBy: HierarchySortByField,
+        sortOrder: HierarchySortOrder,
+        typeFilter: [HierarchyObjectTypeEnum!]
+    ): HyperVClusterLogicalChildTypeConnection!
+    "A sequential list containing this object's logical ancestors."
+    logicalPath: [PathNode!]!
+    "The name of the hierarchy object."
+    name: String!
+    "The number of snappable descendants of this object"
+    numSnappableDescendants: Int!
+    "The object type of this object."
+    objectType: HierarchyObjectTypeEnum!
+    "Mapping from objectId to object deletion pending status"
+    pendingObjectDeletionStatus: PendingSnapshotsOfObjectDeletion
+    "Non-null when a user has assigned a SLA to this object, and the SLA assignment is in the process of being synced over to CDM"
+    pendingSla: SlaDomain
+    "A sequential list containing this object's physical ancestors."
+    physicalPath: [PathNode!]!
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
+    primaryClusterLocation: DataLocation!
+    primaryClusterUuid: UUID!
+    "The number of objects either replicated by this object or related by replication."
+    replicatedObjectCount: Int!
+    "Objects either replicated by this object or related by replication"
+    replicatedObjects: [CdmHierarchyObject!]!
+    "The assignmennt type for this object's SLA"
+    slaAssignment: SlaAssignmentTypeEnum!
+    "The distribution of the snapshots of the hierarchy object"
+    snapshotDistribution: SnapshotDistribution!
+}
+
+type HyperVServerDescendantTypeConnection {
+    count: Int!
+    edges: [HyperVServerDescendantTypeEdge!]!
+    nodes: [HyperVServerDescendantType!]!
+    pageInfo: PageInfo!
+}
+
+type HyperVServerDescendantTypeEdge {
+    cursor: String!
+    node: HyperVServerDescendantType!
+}
+
+type HyperVVirtualMachine implements CdmHierarchyObject & CdmHierarchySnappableNew & HierarchyObject & HyperVClusterDescendantType & HyperVSCVMMDescendantType & HyperVServerDescendantType & HyperVServerLogicalChildType {
+    "The authorized operations on the object."
+    authorizedOperations: [OperationEnum!]!
+    cdmId: String!
+    "A link to view the snappable on the CDM cluster. For dev use only."
+    cdmLink: String!
+    "The cluster from which this object originated."
+    cluster: Cluster!
+    clusterUuid: UUID!
+    "The configured SLA Domain of the hierarchy object."
+    configuredSlaDomain: SlaDomain!
+    "The Effective Retention SLA Domain of the hierarchy object."
+    effectiveRetentionSlaDomain: SlaDomain
+    "The Effective SLA Domain of the hierarchy object."
+    effectiveSlaDomain: SlaDomain!
+    "The path node of the effective SLA source"
+    effectiveSlaSourceObject: PathNode
+    "The fid of the hierarchy object."
+    id: UUID!
+    isRelic: Boolean!
+    "A sequential list containing this object's logical ancestors."
+    logicalPath: [PathNode!]!
+    "The list of missed snapshots for this VM"
+    missedSnapshotConnection(
+        after: String,
+        "filter missed snapshots by date"
+        filter: MissedSnapshotFilterInput,
+        first: Int
+    ): MissedSnapshotCommonConnection
+    "The list of missed snapshots for this VM"
+    missedSnapshotGroupByConnection(
+        after: String,
+        before: String,
+        "filter missed snapshots by date"
+        filter: MissedSnapshotFilterInput,
+        first: Int,
+        "group snapshots by field"
+        groupBy: MissedSnapshotGroupByEnum!,
+        last: Int,
+        timezoneOffset: Float = 0.0
+    ): MissedSnapshotGroupByConnection
+    "The name of the hierarchy object."
+    name: String!
+    "the newest snapshot archived to AWS."
+    newestArchivedSnapshot: CdmSnapshot
+    "the newest snapshot replicated to a cluster."
+    newestReplicatedSnapshot: CdmSnapshot
+    "the most recent snapshot of this snappable"
+    newestSnapshot: CdmSnapshot
+    "The number of snappable descendants of this object"
+    numSnappableDescendants: Int!
+    "The object type of this object."
+    objectType: HierarchyObjectTypeEnum!
+    "the oldest snapshot of this snappable"
+    oldestSnapshot: CdmSnapshot
+    "the number of on-demand snapshots"
+    onDemandSnapshotCount: Int!
+    "Mapping from objectId to object deletion pending status"
+    pendingObjectDeletionStatus: PendingSnapshotsOfObjectDeletion
+    "Non-null when a user has assigned a SLA to this object, and the SLA assignment is in the process of being synced over to CDM"
+    pendingSla: SlaDomain
+    "A sequential list containing this object's physical ancestors."
+    physicalPath: [PathNode!]!
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
+    primaryClusterLocation: DataLocation!
+    primaryClusterUuid: UUID!
+    "The number of objects either replicated by this object or related by replication."
+    replicatedObjectCount: Int!
+    "Objects either replicated by this object or related by replication"
+    replicatedObjects: [CdmHierarchyObject!]!
+    "The assignmennt type for this object's SLA"
+    slaAssignment: SlaAssignmentTypeEnum!
+    "The list of snapshots taken for this VM"
+    snapshotConnection(
+        after: String,
+        before: String,
+        "filter snapshot connection"
+        filter: CdmSnapshotFilterInput,
+        first: Int,
+        last: Int,
+        "sort snapshots by field"
+        sortBy: CdmSnapshotSortByEnum = Date,
+        "sort order"
+        sortOrder: SortOrderEnum
+    ): CdmSnapshotConnection
+    "The distribution of the snapshots of the hierarchy object"
+    snapshotDistribution: SnapshotDistribution!
+    "GroupBy connection for this VM's snapshots."
+    snapshotGroupByConnection(
+        after: String,
+        before: String,
+        "filter snapshot connection"
+        filter: CdmSnapshotFilterInput,
+        first: Int,
+        "group snapshots by field"
+        groupBy: CdmSnapshotGroupByEnum!,
+        last: Int,
+        timezoneOffset: Float = 0.0
+    ): cdmSnapshotGroupByConnection
+}
+
+type HyperVVirtualMachineConnection {
+    count: Int!
+    edges: [HyperVVirtualMachineEdge!]!
+    nodes: [HyperVVirtualMachine!]!
+    pageInfo: PageInfo!
+}
+
+type HyperVVirtualMachineEdge {
+    cursor: String!
+    node: HyperVVirtualMachine!
+}
+
 type IdentityProvider {
     entityId: String!
     expirationDate: DateTime
@@ -7375,6 +7941,12 @@ type InfrastructureTable {
     selectedColumns: [InfrastructureTableColumnEnum!]!
     sortBy: ClusterSortByEnum
     sortOrder: SortOrderEnum
+}
+
+type InstalledVersionGroupCount {
+    count: Int!
+    group: String!
+    isUpgradeRecommended: Boolean!
 }
 
 "Interface CIDR Info."
@@ -7687,7 +8259,7 @@ type LinuxFileset implements CdmHierarchyObject & CdmHierarchySnappableNew & Fil
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -7795,11 +8367,11 @@ type MissedSnapshotCommonEdge {
     node: MissedSnapshotCommon!
 }
 
-"Missed Snapshot graphql with groupby info applied to it."
+"Missed Snapshot data with groupby info applied to it."
 type MissedSnapshotGroupBy {
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: MissedSnapshotGroupByInfo!
-    "Paginated missed snapshot graphql."
+    "Paginated missed snapshot data."
     missedSnapshotConnection(
         after: String,
         first: Int,
@@ -7808,7 +8380,7 @@ type MissedSnapshotGroupBy {
         "sort order"
         sortOrder: SortOrderEnum
     ): MissedSnapshotCommonConnection!
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     missedSnapshotGroupBy(
         "group snapshots by field"
         groupBy: MissedSnapshotGroupByEnum!
@@ -7841,6 +8413,19 @@ type Mutation {
         clusterUuid: UUID!
     ): Boolean!
     activateUser(ids: [String!]!): [String!]!
+    "Add Certificate"
+    addCertificate(
+        "Certificate"
+        certificate: String!,
+        "CSR id"
+        csrId: Long,
+        "Certificate description"
+        description: String,
+        "Certificate name"
+        name: String!,
+        "Certificate private key"
+        privateKey: String
+    ): Long!
     "Add ldap config"
     addLdapConfig(adDomain: String!, clusterUuid: String!, ldapName: String!, password: String!, userName: String!): UpdateLdapConfigReply!
     addO365Org(exocomputeClusterId: String!, o365AppTypes: [String!]!, stateToken: String!, tenantId: String!): AddO365OrgResponse!
@@ -7853,6 +8438,22 @@ type Mutation {
         "Add a SAP HANA system to the Rubrik cluster. Contains parameters like username, list of hosts, password required while adding a SAP HANA system."
         sapHanaSystem: SapHanaSystemConfigInput!
     ): SapHanaAddSystemResponse!
+    addSyslogConfiguration(
+        "Host name for your SMTP configuration"
+        hostName: String!,
+        "Network type to use"
+        networkProtocolType: NetworkProtocolTypeEnum!,
+        "Port number for your SMTP configuration"
+        port: Int!,
+        "Syslog facility to filter for syslog"
+        syslogFacility: SyslogFacilityTypeEnum!,
+        "Syslog severity to filter for syslog"
+        syslogSeverity: SyslogSeverityTypeEnum!,
+        "Trusted certificate to use for your SMTP configuration"
+        trustedCerts: String!,
+        "Use TLS or not"
+        useTLS: Boolean!
+    ): Boolean!
     "Archive a crawl"
     archiveCrawl(crawlId: String!): String!
     assignRetentionSLAToSnappables(
@@ -8316,6 +8917,10 @@ type Mutation {
         "List of UUIDs of objects"
         objectIds: [UUID!]!
     ): RequestSuccess!
+    deleteSyslogConfiguration(
+        "Syslog ids to delete"
+        ids: [String!]!
+    ): Boolean!
     deleteTarget(
         "Corresponds to ID of target in Polaris"
         targetId: UUID!
@@ -8330,6 +8935,8 @@ type Mutation {
         "ID of snapshot"
         id: String!
     ): AsyncRequestStatus!
+    downloadReportCSVAsync(config: CustomReportCreate, id: Int!): AsyncDownloadReply!
+    downloadReportPDFAsync(config: CustomReportCreate, id: Int!): AsyncDownloadReply!
     "Download file results csv"
     downloadResultsCsv(crawlId: String!, downloadFilter: DownloadResultsCsvFiltersInput): DownloadResultsCsvReply!
     "Download snapshot policy results csv"
@@ -8702,6 +9309,29 @@ type Mutation {
         "UUID of snapshot"
         snapshotId: UUID!
     ): RestoreGCEInstanceReply!
+    "Generate CSR"
+    generateCSR(
+        "City for your CSR"
+        city: String,
+        "Country for your CSR"
+        country: String,
+        "Email for your CSR"
+        email: String,
+        "Hostnames for your CSR"
+        hostnames: [String!]!,
+        "Name for your CSR"
+        name: String!,
+        "Organization for your CSR"
+        organization: String,
+        "Organization unit for your CSR"
+        organizationUnit: String,
+        "State for your CSR"
+        state: String,
+        "Surname for your CSR"
+        surname: String,
+        "User id for your CSR"
+        userId: String
+    ): Long!
     insertCustomerO365App(o365AppClientId: String!, o365AppClientSecret: String!, o365AppType: String!, o365SubscriptionName: String!): RequestStatus!
     "List CIDRs for compute setting."
     listCidrsForComputeSetting(
@@ -8766,11 +9396,6 @@ type Mutation {
         targetId: UUID!
     ): TargetPauseResult!
     refreshAwsNativeAccounts(awsNativeAccountIds: [UUID!]!, awsNativeProtectionFeatures: [AwsNativeProtectionFeatureEnum!]!): RefreshAwsAccountsReply!
-    "Trigger Refresh for AWS Accounts"
-    refreshAwsSources(
-        "AWS Sources to Refresh"
-        awsSourceIds: [UUID!]!
-    ): RefreshAwsSourcesReply!
     "Trigger azure native refresh subscription job for the given subscription IDs"
     refreshAzureNativeSubscriptions(
         "List of Subscription IDs"
@@ -8865,6 +9490,31 @@ type Mutation {
     "DEPRECATED (use seedEnabledPolicies instead) Seed account with initial policies."
     seedInitialPolicies: SeedInitialPoliciesReply!
     sendScheduledReport(id: Int!, recipients: [String!]!): Boolean!
+    sendScheduledReportAsync(id: Int!, recipients: [String!]!): AsyncDownloadReply!
+    sendTestSMTPEmail(
+        "Email to use as from for your SMTP configuration"
+        defaultFromEmail: String,
+        "Host name for your SMTP configuration"
+        hostName: String,
+        "Password for your SMTP configuration"
+        password: String,
+        "Port number for your SMTP configuration"
+        port: Int,
+        "Recipient for test email"
+        recipient: String!,
+        "Security type to use "
+        securityType: SMTPSecurityTypeEnum,
+        "Trusted certificate to use for your SMTP configuration"
+        trustedCerts: String,
+        "Whether to use existing config or passed in config"
+        useExisting: Boolean!,
+        "User name for your SMTP configuration"
+        userName: String
+    ): Boolean!
+    sendTestSyslog(
+        "Syslog config to use"
+        config: SyslogConfigInputType
+    ): Boolean!
     setIdentityProvider(
         "Entity id of your IdP"
         entityId: String!,
@@ -8891,6 +9541,15 @@ type Mutation {
         "User name for your SMTP configuration"
         userName: String!
     ): Boolean!
+    "Enable/disable alerts for given snappable on given cluster"
+    setSnappableAlertSetting(
+        "The id of the cluster"
+        clusterUuid: UUID!,
+        "enable or disable lambda service"
+        enabled: Boolean!,
+        "the fid of the snappable"
+        snappableId: UUID!
+    ): SetSnappableAlertSettingReply!
     setupAzureO365Exocompute(exocomputeConfig: AzureO365ExocomputeConfig!, subscriptionId: UUID!, tenantId: String!): SetupAzureO365ExocomputeResp!
     "Start a crawl"
     startCrawl(analyzerGroups: [AnalyzerGroupInput!]!, extWhiteList: [String!], name: String!, resources: [ResourceInput!]!): StartCrawlReply!
@@ -9185,7 +9844,7 @@ type Mutation {
     "Retrieve a list of the datastores for a specified ESXi host"
     vsphereVMListESXiDatastores(clusterUuid: UUID!, ipAddress: String!, password: String!, username: String!): DatastoreListResponse!
     vsphereVMMountRelocate(datastoreId: UUID!, livemountId: UUID!): vSphereAsyncRequestStatus!
-    vsphereVMPowerOnOffLiveMount(livemountId: UUID!, powerStatus: Boolean!): RequestSuccess!
+    vsphereVMPowerOnOffLiveMount(livemountId: UUID!, powerStatus: Boolean!): VmwareVmMountDetailV1!
     vsphereVMRecoverFiles(
         "vm restore parameters"
         restoreConfig: RestoreConfig!,
@@ -9283,7 +9942,7 @@ type NasBaseConfig {
     """
 
     Supported in v5.0+
-    Name of the Isilon zone that graphql IP belongs to
+    Name of the Isilon zone that data IP belongs to
     """
     zoneName: String
 }
@@ -9755,8 +10414,6 @@ type O365Org implements HierarchyObject & PolarisHierarchyObject {
     status: OrgStatusEnum!
     "Number of O365 Users with no SLA assigned"
     unprotectedUsersCount: Int!
-    "List of Users with mailboxId"
-    userWithMailboxIdConnection(after: String, filter: [Filter!], first: Int, sortBy: HierarchySortByField, sortOrder: HierarchySortOrder): O365UserWithMailboxIdConnection!
 }
 
 type O365OrgConnection {
@@ -9809,10 +10466,12 @@ type O365SharepointDrive implements HierarchyObject & HierarchySnappable & O365O
     "object id"
     id: UUID!
     isRelic: Boolean!
+    listNaturalId: String!
     "A sequential list containing this object's logical ancestors."
     logicalPath: [PathNode!]!
     "The name of the hierarchy object."
     name: String!
+    naturalId: String!
     "the newest snapshot that is indexed and unexpired, and therefore restorable."
     newestIndexedSnapshot: PolarisSnapshot
     "the most recent snapshot of this snappable"
@@ -9924,6 +10583,7 @@ type O365Site implements HierarchyObject & HierarchySnappable & O365OrgDescendan
     effectiveSlaDomain: SlaDomain!
     "The path node of the effective SLA source"
     effectiveSlaSourceObject: PathNode
+    hierarchyLevel: Int!
     "object id"
     id: UUID!
     isRelic: Boolean!
@@ -10075,109 +10735,6 @@ type O365UserEdge {
     node: O365User!
 }
 
-type O365UserWithMailboxId implements HierarchyObject & HierarchySnappable & PolarisHierarchyObject & PolarisHierarchySnappable {
-    "The authorized operations on the object."
-    authorizedOperations: [OperationEnum!]!
-    "The configured SLA Domain of the hierarchy object."
-    configuredSlaDomain: SlaDomain!
-    "The Effective Retention SLA Domain of the hierarchy object."
-    effectiveRetentionSlaDomain: SlaDomain
-    "The Effective SLA Domain of the hierarchy object."
-    effectiveSlaDomain: SlaDomain!
-    "The path node of the effective SLA source"
-    effectiveSlaSourceObject: PathNode
-    emailAddress: String
-    "object id"
-    id: UUID!
-    isRelic: Boolean!
-    "A sequential list containing this object's logical ancestors."
-    logicalPath: [PathNode!]!
-    mailboxId: String
-    "The name of the hierarchy object."
-    name: String!
-    "the newest snapshot that is indexed and unexpired, and therefore restorable."
-    newestIndexedSnapshot: PolarisSnapshot
-    "the most recent snapshot of this snappable"
-    newestSnapshot: PolarisSnapshot
-    "The number of snappable descendants of this object"
-    numSnappableDescendants: Int!
-    "The object type of this object."
-    objectType: HierarchyObjectTypeEnum!
-    "the oldest snapshot of this snappable"
-    oldestSnapshot: PolarisSnapshot
-    "the number of on-demand snapshots"
-    onDemandSnapshotCount: Int!
-    "A sequential list containing this object's physical ancestors."
-    physicalPath: [PathNode!]!
-    "The assignmennt type for this object's SLA"
-    slaAssignment: SlaAssignmentTypeEnum!
-    "The list of snapshots taken for this snappable"
-    snapshotConnection(
-        after: String,
-        before: String,
-        "filter polaris snapshot connection"
-        filter: PolarisSnapshotFilterInput,
-        first: Int,
-        last: Int,
-        "sort polaris snapshots by field"
-        sortBy: PolarisSnapshotSortByEnum = Date,
-        "sort order"
-        sortOrder: SortOrderEnum
-    ): PolarisSnapshotConnection
-    "The distribution of the snapshots of the hierarchy object"
-    snapshotDistribution: SnapshotDistribution!
-    "GroupBy connection for this snappable's snapshots."
-    snapshotGroupByConnection(
-        after: String,
-        before: String,
-        "filter polaris snapshot connection"
-        filter: PolarisSnapshotFilterInput,
-        first: Int,
-        "group polaris snapshots by field"
-        groupBy: PolarisSnapshotGroupByEnum!,
-        last: Int,
-        timezoneOffset: Float = 0.0
-    ): PolarisSnapshotGroupByConnection
-    "GroupBy connection for this snappable's snapshots."
-    snapshotGroupByNewConnection(
-        after: String,
-        before: String,
-        first: Int,
-        last: Int,
-        "filter polaris snapshot connection"
-        snapshotFilter: [PolarisSnapshotFilterNewInput!]!,
-        "group polaris snapshots by field"
-        snapshotGroupBy: SnapshotGroupByTimeEnum!,
-        timezoneOffset: Float = 0.0
-    ): PolarisSnapshotGroupByNewConnection
-    "The list of snapshots taken for this snappable"
-    snapshotsOfSnappableConnection(
-        after: String,
-        before: String,
-        first: Int,
-        last: Int,
-        snappableId: String!,
-        "filter for snapshot connection"
-        snapshotFilter: [SnapshotQueryFilterInput!],
-        sortBy: SnapshotQuerySortByField,
-        "sort order"
-        sortOrder: SortOrderEnum,
-        timeRange: TimeRangeInput
-    ): GenericSnapshotConnection
-}
-
-type O365UserWithMailboxIdConnection {
-    count: Int!
-    edges: [O365UserWithMailboxIdEdge!]!
-    nodes: [O365UserWithMailboxId!]!
-    pageInfo: PageInfo!
-}
-
-type O365UserWithMailboxIdEdge {
-    cursor: String!
-    node: O365UserWithMailboxId!
-}
-
 type ObjectIdsForHierarchyType {
     objectIds: [String!]!
     snappableType: SnappableLevelHierarchyTypeEnum!
@@ -10313,7 +10870,7 @@ type PhysicalHost implements CdmHierarchyObject & HierarchyObject {
     ): PhysicalHostPhysicalChildTypeConnection!
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -10529,11 +11086,11 @@ type PolarisSnapshotEdge {
     node: PolarisSnapshot!
 }
 
-"Polaris Snapshot graphql with groupby info applied to it."
+"Polaris Snapshot data with groupby info applied to it."
 type PolarisSnapshotGroupBy {
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: PolarisSnapshotGroupByInfo!
-    "Paginated snapshot graphql."
+    "Paginated snapshot data."
     polarisSnapshotConnection(
         after: String,
         before: String,
@@ -10544,7 +11101,7 @@ type PolarisSnapshotGroupBy {
         "sort order"
         sortOrder: SortOrderEnum
     ): PolarisSnapshotConnection!
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     polarisSnapshotGroupBy(
         "group polaris snapshots by field"
         groupBy: PolarisSnapshotGroupByEnum!
@@ -10563,11 +11120,11 @@ type PolarisSnapshotGroupByEdge {
     node: PolarisSnapshotGroupBy!
 }
 
-"Polaris Snapshot graphql with groupby info applied to it."
+"Polaris Snapshot data with groupby info applied to it."
 type PolarisSnapshotGroupByNew {
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: PolarisSnapshotGroupByInfo!
-    "Paginated snapshot graphql."
+    "Paginated snapshot data."
     polarisSnapshotConnection: PolarisSnapshotConnection!
 }
 
@@ -11181,6 +11738,7 @@ type Query {
     ): BrowseResponseListResponse!
     browseFolder(after: String, first: Int, folderId: String!, orgId: UUID!, snappableFid: UUID!, snapshotFid: UUID!): O365ExchangeObjectConnection!
     browseOnedrive(after: String, first: Int, folderId: String, onedriveSearchFilter: OnedriveSearchFilter, orgId: UUID!, snappableFid: UUID!, snapshotFid: UUID!): O365OnedriveObjectConnection!
+    browseSharepointDrive(after: String, first: Int, folderId: String, orgId: UUID!, sharepointDriveSearchFilter: OnedriveSearchFilter, snappableFid: UUID!, snapshotFid: UUID!): O365OnedriveObjectConnection!
     "Returns a list files whose name is prefixed by the query in the given snapshot"
     browseSnapshotFileConnection(
         after: String,
@@ -11336,6 +11894,19 @@ type Query {
     crawl(crawlId: String!): Crawl!
     "Return crawls for an account"
     crawlConnection: CrawlConnection!
+    "Browse CSRs"
+    csrConnection(
+        after: String,
+        before: String,
+        first: Int,
+        last: Int,
+        "Search for a CSR"
+        searchTerm: String,
+        "Sort CSRs"
+        sortBy: CsrSortByEnum,
+        "sort order"
+        sortOrder: SortOrderEnum
+    ): CsrConnection!
     currentIpAddress: String!
     currentUser: User!
     customAnalyzer(analyzerId: String!): Analyzer!
@@ -11409,7 +11980,7 @@ type Query {
         "Begin time of the range (in milliseconds since epoch)"
         startTimeMs: Long!
     ): DatagovUserActivityConnection!
-    "Return timeline graphql for all policies of an account"
+    "Return timeline data for all policies of an account"
     discoveryTimeline(endDay: String!, getWhitelistedResults: Boolean!, startDay: String!, timezone: String!): GetPoliciesTimelineReply!
     "Download cdm upgrades table pdf"
     downloadCdmUpgradesPdf(
@@ -11421,9 +11992,7 @@ type Query {
         "Cluster uuid"
         clusterUuid: UUID!
     ): DownloadPackageStatusReply!
-    downloadReportCSVAsync(config: CustomReportCreate, id: Int!): AsyncDownloadReply!
     downloadReportLink(config: CustomReportCreate, id: Int!): DownloadLink!
-    downloadReportPDFAsync(config: CustomReportCreate, id: Int!): AsyncDownloadReply!
     downloadReportPDFLink(config: CustomReportCreate, id: Int!): DownloadLink!
     downloadedVersionList: [GroupCount!]!
     dummyFieldWithAdminOnlyTag: Boolean!
@@ -11813,8 +12382,10 @@ type Query {
     hierarchySnappableConnection(after: String, filter: [Filter!], first: Int, sortBy: HierarchySortByField, sortOrder: HierarchySortOrder): HierarchySnappableConnection!
     hostShare(fid: UUID!): HostShare!
     hostShareConnection(after: String, filter: [Filter!], first: Int, sortBy: HierarchySortByField, sortOrder: HierarchySortOrder): HostShareConnection!
+    hyperVTopLevelDescendantsConnection(after: String, filter: [Filter!], first: Int, sortBy: HierarchySortByField, sortOrder: HierarchySortOrder, typeFilter: [HierarchyObjectTypeEnum!]): CdmHierarchyObjectConnection!
+    hyperVVirtualMachineConnection(after: String, filter: [Filter!], first: Int, sortBy: HierarchySortByField, sortOrder: HierarchySortOrder): HyperVVirtualMachineConnection!
     identityProviders: [IdentityProvider!]!
-    installedVersionList: [GroupCount!]!
+    installedVersionList: [InstalledVersionGroupCount!]!
     "list the available Instance Types"
     instanceTypeConnection(
         after: String,
@@ -11931,6 +12502,7 @@ type Query {
     "List of Onedrives of O365Org"
     o365Onedrives(after: String, filter: [Filter!], first: Int, o365OrgId: UUID!, sortBy: HierarchySortByField, sortOrder: HierarchySortOrder): O365OnedriveConnection!
     o365Org(fid: UUID!): O365Org!
+    o365OrgAtSnappableLevel(fid: UUID!, snappableType: SnappableTypeEnum!): O365Org!
     o365Orgs(after: String, filter: [Filter!], first: Int, sortBy: HierarchySortByField, sortOrder: HierarchySortOrder): O365OrgConnection!
     o365ServiceAccount(orgId: UUID!): O365ServiceAccountStatusResp!
     o365SharepointDrive(snappableFid: UUID!): O365SharepointDrive!
@@ -12278,6 +12850,7 @@ type Query {
         timezoneOffset: Float = 0.0
     ): SnappableGroupByConnection!
     snappableOnedriveSearch(after: String, first: Int, onedriveSearchFilter: OnedriveSearchFilter, orgId: UUID!, snappableFid: UUID!): O365OnedriveObjectConnection!
+    snappableSharepointDriveSearch(after: String, first: Int, orgId: UUID!, sharepointDriveSearchFilter: OnedriveSearchFilter, snappableFid: UUID!): O365OnedriveObjectConnection!
     "Returns a single snapshot by id"
     snapshot(
         "Corresponds to snapshot forever UUID in Polaris tables"
@@ -12360,6 +12933,7 @@ type Query {
         "Begin time of the range (in milliseconds since epoch)"
         startTimeMs: Long!
     ): SnapshotResultConnection!
+    snapshotSharepointDriveSearch(after: String, first: Int, orgId: UUID!, sharepointDriveSearchFilter: OnedriveSearchFilter, snappableFid: UUID!, snapshotFid: UUID!): O365OnedriveObjectConnection!
     "Return groupBy results for SonarContentReport"
     sonarContentReportGroupByConnection(
         after: String,
@@ -12449,6 +13023,7 @@ type Query {
         "the fid of the vpc"
         vpcId: UUID!
     ): SnappableSubnetConnection!
+    syslogConfiguration: GetSyslogConfigurationReply!
     tableFilters: TableFilters!
     target(
         "Corresponds to ID of target in Polaris"
@@ -12690,11 +13265,11 @@ type RansomwareResultEdge {
     node: RansomwareResult!
 }
 
-"Ransomware analysis graphql with groupby info applied to it"
+"Ransomware analysis data with groupby info applied to it"
 type RansomwareResultGroupBy {
     "Groupby info."
     groupByInfo: RansomwareResultGroupByInfo!
-    "Paginated ransomware result graphql"
+    "Paginated ransomware result data"
     ransomwareResultConnection(
         after: String,
         before: String,
@@ -12703,7 +13278,7 @@ type RansomwareResultGroupBy {
         "sort ransomware results by field"
         sortBy: RansomwareResultSortByEnum
     ): RansomwareResultConnection!
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     ransomwareResultGroupBy(
         "group ransomware results by field"
         groupBy: RansomwareResultGroupByEnum!
@@ -12786,11 +13361,6 @@ type RefreshAwsNativeAccountError {
 type RefreshAwsNativeAccountTaskchainUuid {
     accountId: String!
     taskchainUuid: String!
-}
-
-"Taskchain information for refresh aws source job"
-type RefreshAwsSourcesReply {
-    taskchainUuids: [String!]!
 }
 
 "Subscription ID and the error encountered while scheduling refresh subscription job for the subscription"
@@ -13083,6 +13653,7 @@ type SDDLPermission {
     cn: String!
     dn: String!
     flags: [AceFlagsEnum!]!
+    resolutionType: ResolutionTypeEnum!
 }
 
 "Summary for the no. of objects protected by sla."
@@ -13128,7 +13699,7 @@ type SapHanaDataBackupFile {
     sourceType: String!
 }
 
-"Additional information about backup graphql path"
+"Additional information about backup data path"
 type SapHanaDataPathSpecObject {
     name: String!
 }
@@ -13212,7 +13783,7 @@ type SapHanaDatabase implements CdmHierarchyObject & CdmHierarchySnappableNew & 
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     primaryClusterUuid: UUID!
     recoverableRangeConnection(
@@ -13461,7 +14032,7 @@ type SapHanaSystem implements CdmHierarchyObject & HierarchyObject {
     ): SapHanaSystemPhysicalChildTypeConnection!
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     primaryClusterUuid: UUID!
     "The number of objects either replicated by this object or related by replication."
@@ -13647,6 +14218,11 @@ type SeedInitialPoliciesReply {
     policies: [ClassificationPolicyDetail!]!
 }
 
+"Enable or disable radar alerts for a snappable"
+type SetSnappableAlertSettingReply {
+    enabled: Boolean!
+}
+
 type SetupAzureO365ExocomputeResp {
     clusterId: String!
     taskchainId: String!
@@ -13720,7 +14296,7 @@ type ShareFileset implements CdmHierarchyObject & CdmHierarchySnappableNew & Fil
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -13898,7 +14474,7 @@ type Snappable {
     protectedOn: DateTime
     "The protection status of the snappable."
     protectionStatus: ProtectionStatusEnum!
-    "The time this snappable graphql was pulled from cdm."
+    "The time this snappable data was pulled from cdm."
     pullTime: DateTime!
     "The number of snapshots that have been replicated."
     replicaSnapshots: Int
@@ -13939,11 +14515,11 @@ type SnappableEdge {
     node: Snappable!
 }
 
-"Snappable graphql with groupby info applied to it."
+"Snappable data with groupby info applied to it."
 type SnappableGroupBy {
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: SnappableGroupByInfo!
-    "Paginated snappable graphql."
+    "Paginated snappable data."
     snappableConnection(
         after: String,
         before: String,
@@ -13954,7 +14530,7 @@ type SnappableGroupBy {
         "sort order"
         sortOrder: SortOrderEnum
     ): SnappableConnection!
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     snappableGroupBy(
         "group snappables by field"
         groupBy: SnappableGroupByEnum!
@@ -14503,6 +15079,17 @@ type SupportTunnelInfoResp {
     port: Long
 }
 
+type SyslogConfig {
+    id: Int!
+    notificationConf: CommonNotificationConfig
+    syslogConf: SyslogSetting
+}
+
+type SyslogSetting {
+    facility: SyslogFacilityTypeEnum!
+    severity: SyslogSeverityTypeEnum!
+}
+
 type TableFilters {
     ProtectionTaskDetailsTable: ProtectionTaskDetailsTableFilter!
     RecoveryTaskDetailsTable: RecoveryTaskDetailsTableFilter!
@@ -14642,9 +15229,9 @@ type TaskDetailEdge {
 
 "Task detail with groupby info applied to it."
 type TaskDetailGroupBy {
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: TaskDetailGroupByInfo!
-    "Paginated task detail graphql."
+    "Paginated task detail data."
     taskDetailConnection(
         after: String,
         before: String,
@@ -14739,9 +15326,9 @@ type TaskSummaryEdge {
 
 "Task summary with groupby info applied to it."
 type TaskSummaryGroupBy {
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: TaskSummaryGroupByInfo!
-    "Paginated task summary graphql."
+    "Paginated task summary data."
     taskSummaryConnection(
         after: String,
         before: String,
@@ -14866,9 +15453,9 @@ type UpdateLdapConfigReply {
     ldapConfig: LDAPConfig
 }
 
-"Cluster upgrade graphql with groupby info applied to it."
+"Cluster upgrade data with groupby info applied to it."
 type UpgradeInfoGroupBy {
-    "Paginated snappable graphql."
+    "Paginated snappable data."
     clusterConnection(
         after: String,
         before: String,
@@ -14879,7 +15466,7 @@ type UpgradeInfoGroupBy {
         "cluster sort order"
         sortOrder: SortOrderEnum = Desc
     ): ClusterConnection!
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     clusterGroupBy(
         after: String,
         before: String,
@@ -14888,7 +15475,7 @@ type UpgradeInfoGroupBy {
         groupBy: UpgradeInfoGroupByEnum!,
         last: Int
     ): [UpgradeGroupByInfo!]!
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: UpgradeGroupByInfo!
 }
 
@@ -14912,6 +15499,12 @@ type UpgradeJobReply {
 type UpgradeJobReplyWithUuid {
     UpgradeJobReply: UpgradeJobReply!
     uuid: String!
+}
+
+type UpgradeRecommendationInfo {
+    recommendation: String!
+    releaseNotesLink: String!
+    upgradability: [String!]!
 }
 
 type UpgradeStatus {
@@ -14982,11 +15575,11 @@ type UserAuditEdge {
     node: UserAudit!
 }
 
-"User audit graphql with groupby info applied to it"
+"User audit data with groupby info applied to it"
 type UserAuditGroupBy {
-    "The graphql group by info."
+    "The data group by info."
     groupByInfo: UserAuditGroupByInfo!
-    "Paginated audit graphql."
+    "Paginated audit data."
     userAuditConnection(
         after: String,
         before: String,
@@ -14995,7 +15588,7 @@ type UserAuditGroupBy {
         "sort user audit by field"
         sortBy: UserAuditSortByEnum = Time
     ): UserAuditConnection!
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     userAuditGroupBy(
         "group audits by a field"
         groupBy: UserAuditGroupByEnum!
@@ -15043,7 +15636,10 @@ type UserConnection {
 }
 
 type UserDownload {
+    completeTime: String!
+    createTime: String!
     id: Long!
+    identifier: DownloadIdentifierEnum!
     name: String!
     progress: Int!
     status: DownloadStatusEnum!
@@ -15155,13 +15751,13 @@ type VSphereBlueprint implements Blueprint & CdmHierarchyObject & CdmHierarchySn
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
-    "The recoverable ranges of the blueprint"
+    "The recovery ranges of the blueprint"
     recoveryInfo(
         "The id of the cluster"
         clusterUuid: UUID!
-    ): BlueprintRecoverableRanges
+    ): BlueprintRecoveryRanges
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
     "Objects either replicated by this object or related by replication"
@@ -15255,7 +15851,7 @@ type VSphereComputeCluster implements CdmHierarchyObject & HierarchyObject & VSp
     ): VSphereComputeClusterPhysicalChildTypeConnection!
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -15353,7 +15949,7 @@ type VSphereDatacenter implements CdmHierarchyObject & HierarchyObject & VSphere
     ): VSphereDatacenterPhysicalChildTypeConnection!
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -15432,7 +16028,7 @@ type VSphereDatastore implements CdmHierarchyObject & HierarchyObject & VSphereC
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -15507,7 +16103,7 @@ type VSphereFolder implements CdmHierarchyObject & HierarchyObject & VSphereData
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -15594,7 +16190,7 @@ type VSphereHost implements CdmHierarchyObject & HierarchyObject & VSphereComput
     ): VSphereHostPhysicalChildTypeConnection!
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -15704,7 +16300,7 @@ type VSphereNetwork implements CdmHierarchyObject & HierarchyObject & VSphereHos
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -15716,13 +16312,21 @@ type VSphereNetwork implements CdmHierarchyObject & HierarchyObject & VSphereHos
     snapshotDistribution: SnapshotDistribution!
 }
 
-type VSphereRecoverySpec implements RecoverySpec {
+type VSphereRecoveryComputeTarget {
+    computeClusterId: String!
+    computeClusterName: String!
     hostId: String!
     hostName: String!
-    memoryMbs: Int!
-    userData: String
+    resourcePoolId: String!
+    resourcePoolName: String!
     vCenterId: String!
     vCenterName: String!
+}
+
+type VSphereRecoverySpec implements RecoverySpec {
+    memoryMbs: Int!
+    target: VSphereRecoveryComputeTarget!
+    userData: String
     vCpus: Int!
     vSphereNicSpecs: [VSphereVMNicSpec!]!
     vSphereVolumeSpecs: [VSphereVMVolumeSpec!]!
@@ -15758,7 +16362,7 @@ type VSphereTag implements CdmHierarchyObject & HierarchyObject & VSphereTagCate
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -15812,7 +16416,7 @@ type VSphereTagCategory implements CdmHierarchyObject & HierarchyObject & VSpher
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -15928,7 +16532,7 @@ type VSphereVCenter implements CdmHierarchyObject & HierarchyObject {
     ): VSphereVCenterPhysicalChildTypeConnection!
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -16064,11 +16668,11 @@ type VSphereVmChild implements BlueprintChild {
     "failover instance of child snappable"
     failoverInstance: VSphereBlueprintChildFailoverInstance
     fid: UUID!
-    "The recoverable ranges of the child virtual machine"
+    "The recovery info of the child virtual machine"
     recoveryInfo(
         "The id of the cluster"
         clusterUuid: UUID!
-    ): VmwareVmRecoverableRanges
+    ): ChildVmRecoveryInfo
     "recoverySpec of child snappable"
     recoverySpec: RecoverySpec
     "resourceSpec of child snappable"
@@ -16158,7 +16762,7 @@ type VSphereVmNew implements CdmHierarchyObject & CdmHierarchySnappableNew & Hie
     powerStatus: VmPowerStatusEnum
     "preBackupScript"
     preBackupScript: PrePostScript
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "Date that effective SLA was assigned / inherited."
     protectionDate: DateTime
@@ -16307,7 +16911,7 @@ type VcdOrg implements CdmHierarchyObject {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -16364,7 +16968,7 @@ type VcdOrgVdc implements CdmHierarchyObject & VcdOrgDescendant {
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -16450,7 +17054,7 @@ type VcdVapp implements CdmHierarchyObject & CdmHierarchySnappableNew & VcdOrgDe
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -16602,6 +17206,17 @@ type VmwareRecoverableRange {
     endTime: DateTime
 }
 
+type VmwareRecoveryPoints {
+    localRecoveryPoint: DateTime
+    remoteRecoveryPoint: DateTime
+}
+
+type VmwareRecoveryState {
+    healthPercentage: Float!
+    localStatus: CdpLocalStatusEnum!
+    replicationStatus: CdpReplicationStatusEnum!
+}
+
 type VmwareResourceSpec implements ResourceSpec {
     isArchived: Boolean!
     memoryMbs: Int!
@@ -16641,6 +17256,103 @@ type VmwareVirtualMachineVolume {
 
 type VmwareVmConfig {
     logRetentionSeconds: Long!
+}
+
+"""
+
+Supported in v5.0+
+"""
+type VmwareVmMountDetailV1 {
+    """
+
+    Supported in v5.0+
+    The power status of the mounted VM(ON,OFF,SLEEP etc.)
+    """
+    powerStatus: String
+    vmwareVmMountSummaryV1: VmwareVmMountSummaryV1
+}
+
+"""
+
+Supported in v5.0+
+"""
+type VmwareVmMountSummaryV1 {
+    """
+
+    Supported in v5.0+
+    An integer value that identifies how many disks are attached.
+    """
+    attachingDiskCount: Int
+    """
+
+    Supported in v5.0+
+    This boolean value determines whether or not the mount is created as a datastore only. When 'true,' the mount is created with datastore and not the associated virtual machine. When 'false,' the mount is created with both the datastore and the associated virtual machine.
+    """
+    createDatastoreOnlyMount: Boolean
+    """
+
+    Supported in v5.0+
+    The name of the datastore that contains the mounted VMDK.
+    """
+    datastoreName: String
+    """
+
+    Supported in v5.0+
+    A boolean value that specifies whether the datastore is ready. When 'true,' the datastore is ready. When 'false,' the datastore is not ready.
+    """
+    datastoreReady: Boolean
+    """
+
+    Supported in v5.0+
+    A Boolean value that determines whether this job is an attaching disk mount job. When 'true,' this is an attaching disk mount job. When 'false,' this is not an attaching disk mount job.
+    """
+    hasAttachingDisk: Boolean
+    """
+
+    Supported in v5.0+
+    """
+    hostId: String
+    """
+
+    Required. Supported in v5.0+
+    """
+    id: String!
+    """
+
+    Supported in v5.0+
+    """
+    isReady: Boolean!
+    """
+
+    Supported in v5.0+
+    """
+    mountRequestId: String
+    """
+
+    Supported in v5.0+
+    Gives the timestamp at which the mount was created.
+    """
+    mountTimestamp: DateTime
+    """
+
+    Supported in v5.0+
+    """
+    mountedVmId: String
+    """
+
+    Supported in v5.0+
+    """
+    snapshotDate: DateTime
+    """
+
+    Supported in v5.0+
+    """
+    unmountRequestId: String
+    """
+
+    Supported in v5.0+
+    """
+    vmId: String!
 }
 
 type VmwareVmRecoverableRanges {
@@ -16759,7 +17471,7 @@ type WindowsFileset implements CdmHierarchyObject & CdmHierarchySnappableNew & F
     pendingSla: SlaDomain
     "A sequential list containing this object's physical ancestors."
     physicalPath: [PathNode!]!
-    "The source cluster of this object. Returned as a graphql location because there is no guarantee that Polaris has knowledge about the source cluster."
+    "The source cluster of this object. Returned as a data location because there is no guarantee that Polaris has knowledge about the source cluster."
     primaryClusterLocation: DataLocation!
     "The number of objects either replicated by this object or related by replication."
     replicatedObjectCount: Int!
@@ -16803,16 +17515,16 @@ type YearlySnapshotSchedule {
     yearStartMonth: MonthEnum!
 }
 
-"Snapshot graphql with groupby info applied to it."
+"Snapshot data with groupby info applied to it."
 type cdmSnapshotGroupBy {
-    "Further provide groupings for the graphql."
+    "Further provide groupings for the data."
     cdmSnapshotGroupBy(
         "group snapshots by field"
         groupBy: CdmSnapshotGroupByEnum!
     ): [cdmSnapshotGroupBy!]!
-    "The graphql groupby info."
+    "The data groupby info."
     groupByInfo: CdmSnapshotGroupByInfo!
-    "Paginated snapshot graphql."
+    "Paginated snapshot data."
     snapshotConnection(
         after: String,
         before: String,
@@ -16837,9 +17549,9 @@ type cdmSnapshotGroupByEdge {
     node: cdmSnapshotGroupBy!
 }
 
-"Cluster metric graphql grouped by a time unit."
+"Cluster metric data grouped by a time unit."
 type metricTimeSeries {
-    "cluster metric graphql for the given time interval."
+    "cluster metric data for the given time interval."
     metric: ClusterMetric!
     "The time groupby info."
     timeInfo: ClusterMetricGroupByInfo!
@@ -16926,6 +17638,7 @@ enum ActivityObjectTypeEnum {
     CloudNativeVirtualMachine
     CloudNativeVm
     Cluster
+    ComputeInstance
     DataLocation
     Ec2Instance
     Exocompute
@@ -16975,6 +17688,7 @@ enum ActivityObjectTypeEnum {
     SupportBundle
     UnknownObjectType
     Upgrade
+    User
     Vcd
     VcdVapp
     Vcenter
@@ -17056,8 +17770,10 @@ enum ActivityTypeEnum {
     CloudNativeVm
     Configuration
     Connection
+    Conversion
     Diagnostic
     Discovery
+    Download
     EmbeddedEvent
     Failover
     Fileset
@@ -17073,6 +17789,7 @@ enum ActivityTypeEnum {
     NutanixCluster
     Recovery
     Replication
+    ResourceOperations
     Storage
     StorageArray
     StormResource
@@ -17230,6 +17947,7 @@ enum AppFilterFieldEnum {
     APP_ID
     APP_TYPE
     SUBSCRIPTION
+    TENANT_ID
 }
 
 enum AppSortByFieldEnum {
@@ -18156,6 +18874,7 @@ enum CdmClusterStatusTypeEnum {
     UpgradeFailed
     UpgradeRecommended
     UpgradeScheduled
+    UpgradeScheduledWithWarning
     Upgrading
 }
 
@@ -18172,6 +18891,24 @@ enum CdmSnapshotSortByEnum {
     Date
     SnappableId
     SnapshotId
+}
+
+enum CdpLocalStatusEnum {
+    CDP_LOCAL_STATUS_ACTIVE
+    CDP_LOCAL_STATUS_EMPTY_VALUE
+    CDP_LOCAL_STATUS_FAILED
+    CDP_LOCAL_STATUS_NOT_ENABLED
+    CDP_LOCAL_STATUS_PENDING
+    CDP_LOCAL_STATUS_RESYNCING
+    CDP_LOCAL_STATUS_TAKING_SNAPSHOT
+}
+
+enum CdpReplicationStatusEnum {
+    CDP_REPLICATION_STATUS_EMPTY_VALUE
+    CDP_REPLICATION_STATUS_FAILED
+    CDP_REPLICATION_STATUS_HEALTHY
+    CDP_REPLICATION_STATUS_INITIALIZING
+    CDP_REPLICATION_STATUS_NOT_ENABLED
 }
 
 enum ChartType {
@@ -18422,6 +19159,10 @@ enum CrawlStatusEnum {
     IN_PROGRESS_WITH_FAIL
 }
 
+enum CsrSortByEnum {
+    NAME
+}
+
 enum CustomReportGroupByEnum {
     ReportFocus
 }
@@ -18493,7 +19234,11 @@ enum DataViewTypeEnum {
     MONITORING_COMPLETED
     MONITORING_FAILED
     MONITORING_IN_PROGRESS
+    MONITORING_RETRYABLE_CANCELED
+    MONITORING_RETRYABLE_FAILED
     MONITORING_SCHEDULED
+    OBJECT_AUDIT_DETAIL
+    OBJECT_AUDIT_LIST
 }
 
 enum DayOfMonthEnum {
@@ -18537,6 +19282,11 @@ enum DiskEncryptionType {
     CUSTOMER_MANAGED_KEY_RESOURCE_ID
     GOOGLE_MANAGED_KEY
     SOURCE_DISK_ENCRYPTION
+}
+
+enum DownloadIdentifierEnum {
+    REPORT
+    SEND_NOW_EMAIL
 }
 
 enum DownloadStatusEnum {
@@ -18652,6 +19402,7 @@ enum FeatureFlagNameEnum {
     AzureSnapshotIntegrityEnabled
     CapacityReportNativeSnappableEnabled
     CdmUpgradesEnabled
+    CertMgmtEnabled
     CloudAccountForAppFlowsEnabled
     CloudAccountListCombinedEnabled
     CloudAccountsAwsUpgradePermissionEnabled
@@ -18687,6 +19438,8 @@ enum FeatureFlagNameEnum {
     GcpNativeRestoreEncryptedInstances
     GcpNativeSnapshotStorageReport
     GlobalSLAGPSEnabled
+    HyperVHierarchyEnabled
+    HyperVInventoryViewEnabled
     JobMonitoringUIEnabled
     LambdaEnabled
     LdapEnabled
@@ -18694,10 +19447,12 @@ enum FeatureFlagNameEnum {
     MetadataSyncEnabled
     MetadataSyncQuickHashEnabled
     NasFilesetRbacEnabled
+    NewThemesEnabled
     O365CalendarEnabled
     O365InventoryEnabled
     O365OnedriveEnabled
     O365OnedriveGAEnabled
+    O365OnedriveGAOrgSlaAssigmnentEnabled
     O365SharePointEnabled
     O365SharedMailboxEnabled
     ObjectLevelRBACEnabled
@@ -18705,6 +19460,7 @@ enum FeatureFlagNameEnum {
     OnDemandCrawlEnabled
     OnDemandSnapshotExpirationEnabled
     OnPremNotificationEnabled
+    PreferDarkTheme
     RBACForGlobalSLAEnabled
     RBACRemoveCasbinEnabled
     RadarAnomalyModelBEnabled
@@ -18715,6 +19471,7 @@ enum FeatureFlagNameEnum {
     ReportForecasterEnabled
     ReportLastSyncedDateEnabled
     ReportPDFEnabled
+    RkTableEnabled
     RollbackOnSuccessEnabled
     SLAHierarchyEnabled
     SLASyncHighFreqEnabled
@@ -18747,6 +19504,7 @@ enum FeatureNameEnum {
 enum FieldEnum {
     ALL
     IS_COMPLETE
+    IS_CORRUPTED
     IS_DELETED_FROM_SOURCE
     IS_EXPIRED
     IS_HINT_SET
@@ -18773,8 +19531,13 @@ enum FileModeEnum {
 
 enum FileResultSortByEnum {
     DAILY_CHANGE
+    FILES_WITH_HITS
+    FILES_WITH_OPEN_ACCESS_HITS
     HITS
+    LAST_ACCESS_TIME
     NAME
+    OPEN_ACCESS_TYPE
+    STALE_FILES_WITH_HITS
 }
 
 enum FileVersionSourceEnum {
@@ -18965,6 +19728,7 @@ enum HierarchyFilterField {
     AZURE_VNET_NAME
     CLUSTER_ID
     CLUSTER_TYPE
+    DOES_PHYSICAL_HOST_HAVE_RELIC_FILESETS
     EBS_VOLUME_ID
     EBS_VOLUME_INDEXING_STATUS
     EBS_VOLUME_NAME
@@ -18995,7 +19759,6 @@ enum HierarchyFilterField {
     HAS_PARENT_SNAPPABLE
     IS_ARCHIVED
     IS_GHOST
-    IS_PHYSICAL_HOST_RELIC
     IS_PROTECTED
     IS_RELIC
     IS_REPLICATED
@@ -19033,6 +19796,7 @@ enum HierarchyObjectTypeEnum {
     GcpNativeDisk
     GcpNativeGCEInstance
     GcpNativeProject
+    Hdfs
     HostShare
     HypervVirtualMachine
     LinuxFileset
@@ -19041,6 +19805,7 @@ enum HierarchyObjectTypeEnum {
     MongoDb
     MongoSource
     Mssql
+    MssqlDatabaseBatchMaintenance
     NutanixVirtualMachine
     O365Calendar
     O365File
@@ -19071,6 +19836,7 @@ enum HierarchyObjectTypeEnum {
     VcdOrgVdc
     VcdVapp
     VmwareVirtualMachine
+    VolumeGroup
     WindowsFileset
     WindowsVolumeGroup
 }
@@ -19261,7 +20027,7 @@ enum LdapPrincipalFieldEnum {
     Name
 }
 
-"type of graphql location"
+"type of data location"
 enum LocationTypeEnum {
     Azure
     CLOUD_NATIVE_AWS
@@ -19307,10 +20073,16 @@ enum ManagedObjectType {
     GCP_NATIVE_GCE_INSTANCE
     GCP_NATIVE_PROJECT
     HOST_SHARE
+    HYPERV_CLUSTER
+    HYPERV_SCVMM
+    HYPERV_SERVER
+    HYPERV_VIRTUAL_MACHINE
     LINUX_FILESET
     MONGO_COLLECTION
     MONGO_DB
     MONGO_SOURCE
+    NUTANIX_CLUSTER
+    NUTANIX_VIRTUAL_MACHINE
     O365_CALENDAR
     O365_INDIVIDUAL_MAILBOX
     O365_INDIVIDUAL_USER
@@ -19394,6 +20166,11 @@ enum NetworkAdapterTypeEnum {
     VMXNET3
 }
 
+enum NetworkProtocolTypeEnum {
+    TCP
+    UDP
+}
+
 enum NetworkTypeEnum {
     DHCP
     STATIC
@@ -19422,10 +20199,12 @@ enum ObjectTypeEnum {
     Fileset
     GcpNativeDisk
     GcpNativeGCEInstance
+    Hdfs
     HypervVirtualMachine
     LinuxFileset
     ManagedVolume
     Mssql
+    MssqlDatabaseBatchMaintenance
     NutanixVirtualMachine
     O365Calendar
     O365File
@@ -19441,6 +20220,7 @@ enum ObjectTypeEnum {
     StorageArrayVolumeGroup
     VcdVapp
     VmwareVirtualMachine
+    VolumeGroup
     WindowsFileset
     WindowsVolumeGroup
 }
@@ -19823,6 +20603,13 @@ enum ReportTableColumnEnum {
     UserName
 }
 
+enum ResolutionTypeEnum {
+    RESOLVED_AD
+    RESOLVED_ON_HOST
+    UNRESOLVED
+    WELL_KNOWN
+}
+
 enum RetentionUnitEnum {
     DAYS
     HOURS
@@ -20039,6 +20826,13 @@ enum SnappableTableColumnEnum {
     TransferredBytes
 }
 
+enum SnappableTypeEnum {
+    CALENDAR
+    MAILBOX
+    ONEDRIVE
+    SHAREPOINT_DRIVE
+}
+
 enum SnapshotCloudStorageTierEnum {
     SNAPSHOT_CLOUD_STORAGE_TIER_AZURE_ARCHIVE
     SNAPSHOT_CLOUD_STORAGE_TIER_COLD
@@ -20244,6 +21038,23 @@ enum SortOrderEnum {
 enum StalenessTypeEnum {
     IS_STALE
     NOT_STALE
+}
+
+enum SyslogFacilityTypeEnum {
+    ALL_SYSLOG
+    AUTH
+    RUBRIK_CLI
+    RUBRIK_EVENT
+    RUBRIK_SSH
+    SECURITY
+    SYSLOG
+}
+
+enum SyslogSeverityTypeEnum {
+    ALL_SEVERITY
+    CRITICAL
+    INFORMATIONAL
+    WARNING
 }
 
 enum TagFilterType {
@@ -20476,6 +21287,7 @@ enum UserAuditObjectTypeEnum {
     O365Mailbox
     O365Onedrive
     O365Organization
+    O365SharepointDrive
     OracleDb
     OracleHost
     OracleRac
@@ -20635,7 +21447,7 @@ enum WhitelistModeEnum {
     LOCAL_USERS
 }
 
-"Filter Activity series graphql"
+"Filter Activity series data"
 input ActivitySeriesFilterInput {
     cluster: CommonClusterFilterInput
     lastActivityStatus: [ActivityStatusEnum!]
@@ -20667,7 +21479,7 @@ input AnalyzerInput {
     regex: String = ""
 }
 
-"Filter anomaly result graphql."
+"Filter anomaly result data."
 input AnomalyResultFilterInput {
     clusterUuid: [UUID!]
     endTime: DateTime
@@ -21530,10 +22342,18 @@ input ClusterLocationEdit {
     longitude: Float!
 }
 
-"Filter cluster graphql."
+"Filter cluster data."
 input CommonClusterFilterInput {
     id: [UUID!]
     type: [ClusterTypeEnum!]
+}
+
+input CommonNotificationSettingInputType {
+    hostname: String = ""
+    networkType: NetworkProtocolTypeEnum = UDP
+    port: Int = 0
+    securityType: SMTPSecurityTypeEnum = NONE
+    trustedCerts: String = ""
 }
 
 input ContextFilterInputField {
@@ -21544,7 +22364,7 @@ input ContextFilterInputField {
 input CustomReportCreate {
     "Chart configs for the report."
     charts: [ReportChartCreate!]
-    "Filters for the report graphql."
+    "Filters for the report data."
     filters: CustomReportFiltersConfig!
     focus: ReportFocusEnum!
     "True if report should be hidden from gallery view."
@@ -21557,7 +22377,7 @@ input CustomReportCreate {
     tables: [ReportTableCreate!]
 }
 
-"Filter custom reports graphql."
+"Filter custom reports data."
 input CustomReportFilterInput {
     creationTime_gt: DateTime
     creationTime_lt: DateTime
@@ -21583,7 +22403,7 @@ input CustomReportFiltersConfig {
     lastActivityStatus: [ActivityStatusEnum!]
     "List of activity types to filter on."
     lastActivityType: [ActivityTypeEnum!]
-    "List of managed ids to filter graphql on."
+    "List of managed ids to filter data on."
     managedId: [String!]
     "List of snappable types to filter on."
     objectType: [ObjectTypeEnum!]
@@ -21600,7 +22420,7 @@ input CustomReportFiltersConfig {
     taskCategory: [String!]
     taskStatus: [String!]
     taskType: [String!]
-    "Start and end time range to filter graphql on."
+    "Start and end time range to filter data on."
     timeRange: GenericTimeRangeInput
     "List of object types to filter on for Audits."
     userAuditObjectType: [UserAuditObjectTypeEnum!]
@@ -21661,7 +22481,7 @@ input EmailAddressFilter {
 input EventDigestConfig {
     activitySeverity: [ActivitySeverityEnum!]
     activityStatus: [ActivityStatusEnum!]
-    "Activity type to filter for emails. Valid types are Storage, Classification, LegalHold, HypervScvmm, Hdfs, VolumeGroup, Instantiate, HypervServer, Configuration, Upgrade, CloudNativeVm, StorageArray, Connection, AuthDomain, UnknownEventType, CloudNativeVirtualMachine, Discovery, Replication, Maintenance, Support, Fileset, System, Failover, StormResource, Diagnostic, Vcd, Anomaly, Archive, CloudNativeSource, HostEvent, AwsEvent, Backup, Sync, Hardware, TestFailover, Recovery, EmbeddedEvent, NutanixCluster, VCenter, Index, and OTHER_FILTER_ITEM"
+    "Activity type to filter for emails. Valid types are Storage, Classification, LegalHold, HypervScvmm, Hdfs, VolumeGroup, Instantiate, HypervServer, Configuration, Upgrade, CloudNativeVm, StorageArray, Connection, Conversion, AuthDomain, UnknownEventType, CloudNativeVirtualMachine, Discovery, Replication, Maintenance, Support, Fileset, System, Failover, StormResource, Diagnostic, Vcd, Anomaly, Archive, CloudNativeSource, HostEvent, AwsEvent, ResourceOperations, Backup, Sync, Hardware, TestFailover, Recovery, Download, EmbeddedEvent, NutanixCluster, VCenter, Index, and OTHER_FILTER_ITEM"
     activityType: [String!]
     clusters: [String!]
     objectType: [ActivityObjectTypeEnum!]
@@ -21747,6 +22567,7 @@ input FeatureFlagContextField {
 "Struct representing the Onedrive file to be restored"
 input FileInfo {
     FileID: String!
+    FileName: String!
     FileSnapshotsToRestore: [FileSnapshotInfo!]!
 }
 
@@ -22088,6 +22909,7 @@ input Filter {
 "Struct representing the Onedrive folder to be restored"
 input FolderInfo {
     FolderID: String!
+    FolderName: String!
     FolderSize: Long!
     SnapshotID: UUID!
     SnapshotNum: Int!
@@ -22510,8 +23332,8 @@ input LegalHoldDownloadConfigInput {
     """
 
     Supported in v5.2+
-    v5.2: Specifies whether the download action is in response to a Legal Hold. This download generates a SHA1 checksum of downloaded graphql that is used for integrity verification by external bodies.
-    v5.3: Specifies if the download action is in response to a Legal Hold. This download generates a SHA1 checksum of downloaded graphql that external bodies can use for integrity verification.
+    v5.2: Specifies whether the download action is in response to a Legal Hold. This download generates a SHA1 checksum of downloaded data that is used for integrity verification by external bodies.
+    v5.3: Specifies if the download action is in response to a Legal Hold. This download generates a SHA1 checksum of downloaded data that external bodies can use for integrity verification.
     """
     isLegalHoldDownload: Boolean = false
 }
@@ -22749,7 +23571,7 @@ input NasConfigInput {
     """
 
     Supported in v5.0+
-    Name of the Isilon zone that graphql IP belongs to
+    Name of the Isilon zone that data IP belongs to
     """
     zoneName: String
 }
@@ -22880,7 +23702,7 @@ input QuarterlySnapshotScheduleInput {
     quarterStartMonth: MonthEnum = JANUARY
 }
 
-"Filter ransomware result graphql."
+"Filter ransomware result data."
 input RansomwareResultFilterInput {
     clusterUuid: [UUID!]
     endTime: DateTime
@@ -22927,7 +23749,7 @@ input ReplicationToCloudRegionSpecInput {
     retentionUnit: RetentionUnitEnum = MINUTES
 }
 
-"Create configs for a snappable graphql chart."
+"Create configs for a snappable data chart."
 input ReportChartCreate {
     "The metrics focus of the chart."
     focus: ReportFocusEnum!
@@ -22954,7 +23776,7 @@ input ReportFilterInput {
     values: [String]!
 }
 
-"Create configs for an activity graphql table."
+"Create configs for an activity data table."
 input ReportTableCreate {
     focus: ReportFocusEnum!
     groupBy: [GroupByFieldEnum!]
@@ -22962,7 +23784,7 @@ input ReportTableCreate {
     name: String!
     selectedColumns: [ReportTableColumnEnum!]!
     sortBy: SortByFieldEnum
-    "The graphql sorting order for the table, Asc or Des."
+    "The data sorting order for the table, Asc or Des."
     sortOrder: SortOrderEnum
 }
 
@@ -23028,7 +23850,7 @@ input RestoreFilesJobConfigInput {
     """
 
     Supported in v5.1+
-    Boolean value that determines restore file settings for Linux systems and for Windows systems. For Linux, use 'true' to include the extended attributes of restored files. For Windows, use 'true' to include alternate graphql streams for restored files. For both, use 'false' to exclude this additional metadata.
+    Boolean value that determines restore file settings for Linux systems and for Windows systems. For Linux, use 'true' to include the extended attributes of restored files. For Windows, use 'true' to include alternate data streams for restored files. For both, use 'false' to exclude this additional metadata.
     """
     shouldRestoreXAttrs: Boolean
     """
@@ -23196,7 +24018,7 @@ input SnappableFailoverInfoType {
     snappableId: String!
 }
 
-"Filter snappable graphql."
+"Filter snappable data."
 input SnappableFilterInput {
     cluster: CommonClusterFilterInput
     complianceStatus: [ComplianceStatusEnum!]
@@ -23206,7 +24028,7 @@ input SnappableFilterInput {
     slaDomain: SnappableSlaDomainFilterInput
 }
 
-"Filter snappable graphql (including search capability)."
+"Filter snappable data (including search capability)."
 input SnappableFilterInputWithSearch {
     cluster: CommonClusterFilterInput
     complianceStatus: [ComplianceStatusEnum!]
@@ -23217,7 +24039,7 @@ input SnappableFilterInputWithSearch {
     timeRange: TimeRangeInput
 }
 
-"Filter snappable graphql in group by."
+"Filter snappable data in group by."
 input SnappableGroupByFilterInput {
     cluster: CommonClusterFilterInput
     complianceStatus: [ComplianceStatusEnum!]
@@ -23232,7 +24054,7 @@ input SnappablePathInput {
     stdPath: String = ""
 }
 
-"Filter snappable graphql based on properties of its Sla domain."
+"Filter snappable data based on properties of its Sla domain."
 input SnappableSlaDomainFilterInput {
     id: [String!]
 }
@@ -23266,6 +24088,17 @@ input StartTimeAttributesInput {
     dayOfWeek: DayOfWeekOptInput
     hour: Int = 0
     minute: Int = 0
+}
+
+input SyslogConfigInputType {
+    id: Int = 0
+    notificationConf: CommonNotificationSettingInputType
+    syslogConf: SyslogSettingInputType
+}
+
+input SyslogSettingInputType {
+    facility: SyslogFacilityTypeEnum = ALL_SYSLOG
+    severity: SyslogSeverityTypeEnum = ALL_SEVERITY
 }
 
 "TagFilterParams"
@@ -23350,7 +24183,7 @@ input UnidirectionalReplicationSpecInput {
     retentionUnit: RetentionUnitEnum = MINUTES
 }
 
-"Filter User Audit graphql"
+"Filter User Audit data"
 input UserAuditFilterInput {
     cluster: CommonClusterFilterInput
     clusterIds: [UUID!]
@@ -23366,6 +24199,21 @@ input UserAuditFilterInput {
 input UserGroupToRolesInput {
     roleIds: [String!] = []
     userGroupId: String = ""
+}
+
+input VSphereComputeTargetInputType {
+    computeClusterCdmId: String = ""
+    computeClusterId: String = ""
+    computeClusterName: String = ""
+    hostCdmId: String = ""
+    hostId: String = ""
+    hostName: String = ""
+    resourcePoolCdmId: String = ""
+    resourcePoolId: String = ""
+    resourcePoolName: String = ""
+    vcenterCdmId: String = ""
+    vcenterId: String = ""
+    vcenterName: String = ""
 }
 
 input VSphereMountFilter {
@@ -23390,15 +24238,10 @@ input VSphereVMNicSpecInputType {
 }
 
 input VSphereVMRecoverySpecInputType {
-    hostCdmId: String = ""
-    hostId: String = ""
-    hostName: String = ""
     memoryMbs: Int = 0
     nics: [VSphereVMNicSpecInputType!] = []
+    target: VSphereComputeTargetInputType
     userData: String = ""
-    vcenterCdmId: String = ""
-    vcenterId: String = ""
-    vcenterName: String = ""
     vcpus: Int = 0
     version: Long = 0
     volumes: [VSphereVMVolumeSpecInputType!] = []

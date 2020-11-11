@@ -24,7 +24,7 @@ Collection of functions that manipulate storage components.
 """
 
 
-def get_object_ids_ebs(self, match_all=True, **kwargs):
+def get_storage_object_ids_ebs(self, match_all=True, **kwargs):
     """Retrieves all AWS EBS object IDs that match query
 
     Arguments:

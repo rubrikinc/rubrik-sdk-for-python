@@ -41,9 +41,9 @@ def add_account_aws(self, regions=[], all=False, profiles=[], aws_access_key_id=
         self._add_account_aws(regions=regions, aws_id=aws_access_key_id, aws_secret=aws_secret_access_key)
     elif all or profiles:
         for profile in self._get_aws_profiles():
-            if profile in profiles or all:
+            if profile in profiles or (all and profile != 'default'):
                 self._add_account_aws(profile=profile, regions=regions)
-                # TODO: Should add above into a queue for threaded provisioning
+                #TODO: Should add above into a queque for threaded provisioning
 
 
 def _add_account_aws(self, regions=[], profile='', aws_id=None, aws_secret=None):
@@ -193,7 +193,7 @@ def get_accounts_azure(self, filter=""):
         raise
 
 
-def get_accounts_aws_detail(self, filter=""):
+def get_accounts_aws_detail(self, filter):
     """Retrieves deployment details for AWS from Polaris
 
     Arguments:
@@ -225,11 +225,13 @@ def get_account_aws_native_id(self, profile='', aws_id=None, aws_secret=None):
 
     try:
         if profile:
-            boto3.setup_default_session(profile_name = profile)
+            boto3.setup_default_session(profile_name=profile)
         elif aws_id and aws_secret:
             boto3.setup_default_session(aws_access_key_id=aws_id, aws_secret_access_key=aws_secret)
-
-        boto_account_id = boto3.client('sts').get_caller_identity().get('Account')
+        try:
+            boto_account_id = boto3.client('sts').get_caller_identity().get('Account')
+        except ClientError as e:
+            print("Boto Error: {}".format(e))
         boto_account_name = None
         try:
             boto_account_name = boto3.client('organizations').describe_account(AccountId=boto_account_id).get('Account').get('Name')
@@ -238,12 +240,9 @@ def get_account_aws_native_id(self, profile='', aws_id=None, aws_secret=None):
                 pass
             else:
                 raise PolarisException("Unexpected error: %s" % e)
-
         return boto_account_id, boto_account_name
     except PolarisException:
         raise
-    except Exception as e:
-        raise Exception("{} : {}".format(profile, e))
 
 
 def _disable_account_aws(self, polaris_account_id):
@@ -344,8 +343,8 @@ def delete_account_aws(self, profiles=[], all=False, aws_access_key_id=None, aws
         self._delete_account_aws(aws_id=aws_access_key_id, aws_secret=aws_secret_access_key)
     elif all or profiles:
         for profile in self._get_aws_profiles():
-            if profile in profiles or all:
-                self._delete_account_aws(profile=profile)
+            if profile in profiles or (all and profile != 'default'):
+                self._delete_account_aws(profile = profile)
 
 
 def _delete_account_aws(self, profile='', aws_id=None, aws_secret=None):
@@ -378,8 +377,53 @@ def _delete_account_aws(self, profile='', aws_id=None, aws_secret=None):
         raise Exception("{}: {}".format("_delete_account_aws", e))
 
 
-def update_account_aws(self):
-    """Update AWS account...
+def update_account_aws(self, regions=[], all=False, profiles=[], aws_access_key_id=None, aws_secret_access_key=None):
+    """Updates AWS account if configured in Polaris
+
+    Arguments:
+        all {bool} -- If true import all available profiles (Default: False)
+        profiles {list} -- List of explicit profiles to add
+        aws_access_key_id {str} -- AWS Access Key ID
+        aws_secret_access_key {str} -- AWS Access Key Secret
+
+    Returns:
+        bool -- `True` if the account was added successfully, otherwise `False`.
     """
-    polaris_account_info = self.get_accounts_aws_detail(self.get_account_aws_native_id())['awsCloudAccounts'][0]
-    self._pp.pprint(polaris_account_info)
+    if aws_access_key_id and aws_secret_access_key:
+        self._update_account_aws(aws_id=aws_access_key_id, aws_secret=aws_secret_access_key)
+    elif all or profiles:
+        for profile in self._get_aws_profiles():
+            if profile in profiles or (all and profile != 'default'):
+                self._update_account_aws(profile=profile)
+
+def _update_account_aws_initiate(self, _feature, _polaris_account_id):
+    try:
+        _query_name = "accounts_aws_update_initiate"
+        _variables = {
+            "polaris_account_id": _polaris_account_id,
+            "aws_native_protection_feature": [_feature]
+        }
+        self._pp.pprint(_variables)
+        _request = self._query(_query_name, _variables)
+        return self._dump_nodes(_request, _query_name)
+    except Exception as e:
+        print(e)
+
+def _update_account_aws(self, profile=None, aws_id=None, aws_secret=None,  _aws_account_id = '', _aws_account_name = None):
+    if profile:
+        _aws_account_id, _aws_account_name = self.get_account_aws_native_id(profile=profile)
+    elif aws_id and aws_secret:
+        _aws_account_id, _aws_account_name = self.get_account_aws_native_id(aws_id=aws_id, aws_secret=aws_secret)
+    if _aws_account_id  == '':
+        return
+    else:
+        _polaris_account_info = self.get_accounts_aws_detail(_aws_account_id)['awsCloudAccounts']
+        if not _polaris_account_info:
+            return
+        for _feature in _polaris_account_info[0]['featureDetails']:
+            if _feature['feature'] == "CLOUD_NATIVE_PROTECTION":
+                if _feature['status'] == 'MISSING_PERMISSIONS':
+                    _update_info = self._update_account_aws_initiate(_feature['feature'], _polaris_account_info[0]['awsCloudAccount']['id'])
+                    self._pp.pprint(_update_info)
+                if _feature['status'] == 'DISCONNECTED':
+                    print("account needs to be recreated")

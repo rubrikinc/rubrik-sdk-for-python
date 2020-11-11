@@ -8,4 +8,6 @@ password = 's3cr3tP_a55w0R)'
 
 client = PolarisClient(domain, username, password, insecure=True)
 
-print(client.get_object_ids_ebs(tags = {"Class": "Management"}))
+# Search for a set of objects and get their details
+for i in client.get_compute_object_ids_azure():
+    print(client.get_compute_azure(i))

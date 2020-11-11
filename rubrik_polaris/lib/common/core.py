@@ -44,9 +44,12 @@ def get_sla_domains(self, sla_domain_name=""):
                 "text": sla_domain_name
             }
         }
-        request = self._query(None, self._graphql_query[query_name], variables)
+        request = self._query(query_name, variables)
         request_nodes = self._dump_nodes(request)
-
+        if sla_domain_name:
+            for node in request_nodes:
+                if node['name'] == sla_domain_name:
+                    return node
         return request_nodes
     except Exception:
         raise
@@ -68,12 +71,12 @@ def submit_on_demand(self, object_ids, sla_id, wait=False):
     from rubrik_polaris.exceptions import RequestException
 
     try:
-        mutation_name = "core_on_demand"
+        mutation_name = "core_snappable_on_demand"
         variables = {
             "objectIds": object_ids,
             "slaId": sla_id
         }
-        request = self._query(None, self._graphql_query[mutation_name], variables)
+        request = self._query(mutation_name, variables)
         result = self._dump_nodes(request)
 
         results = []
@@ -132,7 +135,7 @@ def get_task_status(self, task_chain_id):
         variables = {
             "filter": task_chain_id
         }
-        request = self._query(None, self._graphql_query[query_name], variables)
+        request = self._query(query_name, variables)
         response = self._dump_nodes(request)
 
         return response['taskchain']['state']
