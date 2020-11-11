@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Generate Docs') {
             steps {
-                sh './create_docs.py'
+                sh 'chmod 755 createdocs.py; ./create_docs.py'
             }
         }
     }
