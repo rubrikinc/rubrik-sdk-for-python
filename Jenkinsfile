@@ -4,7 +4,7 @@ pipeline {
         stage('Generate Docs') {
             steps {
                 sh 'chmod -R 755 .'
-                sh 'pip3 install -y jinja'
+                sh 'pip3 install jinja'
                 sh 'python3 ./create_docs.py'
             }
         }
