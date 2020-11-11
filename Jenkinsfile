@@ -13,6 +13,18 @@ pipeline {
         always {
             cleanWs()
         }
+        success {
+            echo 'successful'
+        }
+        failure {
+            echo 'failed'
+        }
+        unstable {
+            echo 'unstable'
+        }
+        changed {
+            echo 'changed'
+        }
     }
 }
 
