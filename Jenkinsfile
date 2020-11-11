@@ -8,6 +8,7 @@ pipeline {
                 sh 'create_docs.py'
             }
         }
+    }
     post {
         always {
             cleanWs()
