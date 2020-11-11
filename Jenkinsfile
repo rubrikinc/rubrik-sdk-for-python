@@ -8,6 +8,11 @@ pipeline {
                 // sh 'python3 ./create_docs.py'
             }
         }
+        stage('Function Tests') {
+            steps {
+                echo 'Run Tests'
+            }
+        }
     }
     post {
         always {
