@@ -11,8 +11,10 @@ pipeline {
         stage('Commit Docs') {
             steps {
                 echo 'Commit Docs'
-                sh "git commit -a -m 'Documentation Update for Commit $GIT_COMMIT'"
-                sh 'git push origin $BRANCH_NAME'
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'jenkins', usernameVariable: 'GIT_AUTHOR_NAME', passwordVariable: 'GIT_PASSWORD']]) {
+                    sh "git commit -a -m 'Documentation Update for Commit $GIT_COMMIT'"
+                    sh('git push https://${GIT_AUTHOR_NAME}:${GIT_PASSWORD}@my-repo.git  --tags -f --no-verify')
+                }
             }
         }
         stage('Function Tests') {
