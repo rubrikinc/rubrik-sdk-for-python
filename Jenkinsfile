@@ -4,7 +4,7 @@ pipeline {
         stage('Generate Docs') {
             steps {
                 sh 'chmod -R 755 .'
-                sh 'sudo pip3 install jinja2 requests shutil'
+                sh 'sudo pip3.8 install jinja2 requests'
                 sh 'python3.8 --version'
                 sh 'python3.8 ./create_docs.py'
             }
