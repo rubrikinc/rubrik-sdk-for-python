@@ -11,13 +11,13 @@ pipeline {
         stage('Commit Docs') {
             steps {
                 echo 'Commit Docs'
-                sh 'git branch'
-                /**
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'github-user', usernameVariable: 'GIT_AUTHOR_NAME', passwordVariable: 'GIT_PASSWORD']]) {
-                    sh "git commit -a -m 'Documentation Update for Commit $GIT_COMMIT'"
-                    sh('git push origin $BRANCH_NAME https://${GIT_AUTHOR_NAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git --tags -f --no-verify')
+                withCredentials([usernamePassword(credentialsId: 'github-user', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh '''
+                        git config --global user.name ${GIT_AUTHOR_NAME}
+                        git commit -a -m 'Documentation Update for Commit ${GIT_COMMIT}'
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
+                   '''
                 }
-                **/
             }
         }
         stage('Function Tests') {
@@ -50,4 +50,3 @@ pipeline {
         }
     }
 }
-
