@@ -18,7 +18,7 @@ def test_add_physical_host_idempotence(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -56,7 +56,7 @@ def test_add_physical_host_list_idempotence(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -115,7 +115,7 @@ def test_add_physical_host(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -185,7 +185,7 @@ def test_add_physical_host_list(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -276,7 +276,7 @@ def test_delete_physical_host_idempotence(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -314,7 +314,7 @@ def test_delete_physical_host(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -441,7 +441,7 @@ def test_create_physical_fileset_idempotence(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -485,7 +485,7 @@ def test_create_physical_fileset(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [],
+            "data": [],
             "total": 1
         }
 
@@ -592,7 +592,7 @@ def test_create_nas_fileset_idempotence(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -637,7 +637,7 @@ def test_create_nas_fileset(rubrik, mocker, share):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [],
+            "data": [],
             "total": 1
         }
 
@@ -689,7 +689,7 @@ def test_add_nas_share_to_host_adds_new_share(rubrik, mocker, share_type):
     def mock_get_internal_host_share():
         return {
             "hasMore": False,
-            "graphql": [],
+            "data": [],
             "total": 1
         }
 
@@ -719,7 +719,7 @@ def test_add_nas_share_to_host_idempotence_with_existing_share(rubrik, mocker, s
     def mock_get_internal_host_share():
         return {
             'hasMore': False,
-            'graphql': [
+            'data': [
                 {
                     'id': 'HostShare:::00000000-1111-2222-3333-444444444444',
                     'hostId': 'Host:::aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
@@ -845,7 +845,7 @@ def test_assign_physical_host_fileset_invalid_hostname(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [],
+            "data": [],
             "total": 0
         }
 
@@ -865,7 +865,7 @@ def test_assign_physical_host_fileset_invalid_hostname_no_match(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [],
+            "data": [],
             "total": 0
         }
 
@@ -885,7 +885,7 @@ def test_assign_physical_host_fileset_invalid_hostname_close_match(rubrik, mocke
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -927,7 +927,7 @@ def test_assign_physical_host_fileset_invalid_fileset_name(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -956,7 +956,7 @@ def test_assign_physical_host_fileset_invalid_fileset_name(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [],
+            "data": [],
             "total": 0
         }
 
@@ -976,7 +976,7 @@ def test_assign_physical_host_fileset_invalid_fileset_name_multiple_matches_not_
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -1005,7 +1005,7 @@ def test_assign_physical_host_fileset_invalid_fileset_name_multiple_matches_not_
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1080,7 +1080,7 @@ def test_assign_physical_host_fileset_invalid_fileset_name_multiple_matches_spec
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -1109,7 +1109,7 @@ def test_assign_physical_host_fileset_invalid_fileset_name_multiple_matches_spec
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1184,7 +1184,7 @@ def test_assign_physical_host_fileset_patch_sla(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -1213,7 +1213,7 @@ def test_assign_physical_host_fileset_patch_sla(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1248,7 +1248,7 @@ def test_assign_physical_host_fileset_patch_sla(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_sla_id",
                     "primaryClusterId": "string",
@@ -1319,7 +1319,7 @@ def test_assign_physical_host_fileset_patch_sla(rubrik, mocker):
     def mock_get_v1_fileset():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1442,7 +1442,7 @@ def test_assign_physical_host_fileset_idempotence(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -1471,7 +1471,7 @@ def test_assign_physical_host_fileset_idempotence(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1506,7 +1506,7 @@ def test_assign_physical_host_fileset_idempotence(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_sla_id",
                     "primaryClusterId": "string",
@@ -1577,7 +1577,7 @@ def test_assign_physical_host_fileset_idempotence(rubrik, mocker):
     def mock_get_v1_fileset():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1631,7 +1631,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -1660,7 +1660,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1695,7 +1695,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_sla_id",
                     "primaryClusterId": "string",
@@ -1766,7 +1766,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
     def mock_get_v1_fileset():
         return {
             "hasMore": True,
-            "graphql": [],
+            "data": [],
             "total": 0
         }
 
@@ -2036,7 +2036,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2075,7 +2075,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2125,7 +2125,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2182,7 +2182,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2225,7 +2225,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2272,7 +2272,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2310,7 +2310,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2347,7 +2347,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2410,7 +2410,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2441,7 +2441,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2476,7 +2476,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2535,7 +2535,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_archive_object_store():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "polarisManagedId": "string",
@@ -2622,7 +2622,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_aws_account_name():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "name": "aws_account_name",
@@ -2825,7 +2825,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_aws_account_name():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "name": "aws_account_name",
@@ -2863,7 +2863,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_aws_account_name():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "name": "string",
@@ -2920,7 +2920,7 @@ def test_assign_physical_host_fileset_no_current_fileset(rubrik, mocker):
 #     def mock_get_internal_aws_account_name():
 #         return {
 #             "hasMore": True,
-#             "graphql": [
+#             "data": [
 #                 {
 #                     "id": "string",
 #                     "name": "string",

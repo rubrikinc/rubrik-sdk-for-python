@@ -27,7 +27,7 @@ def test_on_demand_snapshot_vmware_current_sla(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -338,7 +338,7 @@ def test_on_demand_snapshot_vmware_specific_sla(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -399,7 +399,7 @@ def test_on_demand_snapshot_vmware_specific_sla(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "primaryClusterId": "string",
@@ -504,7 +504,7 @@ def test_on_demand_snapshot_ahv_current_sla(rubrik, mocker):
     def mock_get_internal_nutanix_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -616,7 +616,7 @@ def test_on_demand_snapshot_ahv_specific_sla(rubrik, mocker):
     def mock_get_internal_nutanix_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -646,7 +646,7 @@ def test_on_demand_snapshot_ahv_specific_sla(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "primaryClusterId": "string",
@@ -752,7 +752,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "sql_host",
@@ -781,7 +781,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
     def mock_get_v1_mssql_instance():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "logBackupFrequencyInSeconds": 0,
                     "logRetentionHours": 0,
@@ -814,7 +814,7 @@ def test_on_demand_snapshot_mysql_db_current_sla(rubrik, mocker):
     def mock_get_v1_mysql_db():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "sql_db",
@@ -1001,7 +1001,7 @@ def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "sql_host",
@@ -1030,7 +1030,7 @@ def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
     def mock_get_v1_mssql_instance():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "logBackupFrequencyInSeconds": 0,
                     "logRetentionHours": 0,
@@ -1063,7 +1063,7 @@ def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
     def mock_get_v1_mysql_db():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "sql_db",
@@ -1129,7 +1129,7 @@ def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "primaryClusterId": "string",
@@ -1219,7 +1219,7 @@ def test_on_demand_snapshot_mysql_db_specific_sla(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "primaryClusterId": "string",
@@ -1332,7 +1332,7 @@ def test_on_demand_snapshot_physical_host_invalid_fileset(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -1361,7 +1361,7 @@ def test_on_demand_snapshot_physical_host_invalid_fileset(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1396,7 +1396,7 @@ def test_on_demand_snapshot_physical_host_invalid_fileset(rubrik, mocker):
     def mock_get_v1_fileset():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1459,7 +1459,7 @@ def test_on_demand_snapshot_physical_host_current_sla(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -1488,7 +1488,7 @@ def test_on_demand_snapshot_physical_host_current_sla(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1523,7 +1523,7 @@ def test_on_demand_snapshot_physical_host_current_sla(rubrik, mocker):
     def mock_get_v1_fileset():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1604,7 +1604,7 @@ def test_on_demand_snapshot_physical_host_specific_sla(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -1633,7 +1633,7 @@ def test_on_demand_snapshot_physical_host_specific_sla(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1668,7 +1668,7 @@ def test_on_demand_snapshot_physical_host_specific_sla(rubrik, mocker):
     def mock_get_v1_fileset():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -1783,7 +1783,7 @@ def test_object_id_not_found(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -1858,7 +1858,7 @@ def test_object_id_not_in_object_ids_list(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "string",
@@ -1933,7 +1933,7 @@ def test_object_id_multiple_objects_found(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -2061,7 +2061,7 @@ def test_object_id_vmware(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "string",
@@ -2131,7 +2131,7 @@ def test_object_id_sla(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "primaryClusterId": "string",
@@ -2211,7 +2211,7 @@ def test_object_id_vmware_host(rubrik, mocker):
     def mock_get_v1_vmware_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "string",
@@ -2252,7 +2252,7 @@ def test_object_id_fileset_template(rubrik, mocker):
     def mock_get_v1_fileset_template():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "allowBackupNetworkMounts": True,
                     "allowBackupHiddenFoldersInNetworkMounts": True,
@@ -2297,7 +2297,7 @@ def test_object_id_managed_volume(rubrik, mocker):
     def mock_get_internal_managed_volume():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "string",
@@ -2380,7 +2380,7 @@ def test_object_id_ahv(rubrik, mocker):
     def mock_get_internal_nutanix_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "string",
@@ -2419,7 +2419,7 @@ def test_object_id_mssql_db(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "demo-sql-host",
@@ -2447,7 +2447,7 @@ def test_object_id_mssql_db(rubrik, mocker):
     def mock_get_v1_mssql_instance():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "logBackupFrequencyInSeconds": 0,
                     "logRetentionHours": 0,
@@ -2479,7 +2479,7 @@ def test_object_id_mssql_db(rubrik, mocker):
     def mock_get_v1_mssql_db():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "string",
@@ -2562,7 +2562,7 @@ def test_object_id_mssql_instance(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "demo-sql-host",
@@ -2590,7 +2590,7 @@ def test_object_id_mssql_instance(rubrik, mocker):
     def mock_get_v1_mssql_instance():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "logBackupFrequencyInSeconds": 0,
                     "logRetentionHours": 0,
@@ -2639,7 +2639,7 @@ def test_object_id_aws_native(rubrik, mocker):
     def mock_get_internal_aws_account():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "string",
@@ -2662,7 +2662,7 @@ def test_object_id_vcenter(rubrik, mocker):
     def mock_get_v1_vmware_vcenter():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "caCerts": "string",
                     "configuredSlaDomainId": "string",
@@ -2691,7 +2691,7 @@ def test_object_id_physical_host_cdm_4_x(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "hostname": "string",
@@ -2732,7 +2732,7 @@ def test_object_id_physical_host_cdm_5_x(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "string",
@@ -2783,7 +2783,7 @@ def test_assign_sla_idempotence_specific_sla(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_sla_id",
                     "primaryClusterId": "string",
@@ -2854,7 +2854,7 @@ def test_assign_sla_idempotence_specific_sla(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "object_name",
@@ -3140,7 +3140,7 @@ def test_assign_sla_idempotence_do_not_protect_sla(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "object_name",
@@ -3426,7 +3426,7 @@ def test_assign_sla_idempotence_clear_sla(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "object_name",
@@ -3711,7 +3711,7 @@ def test_assign_sla(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "primaryClusterId": "string",
@@ -3782,7 +3782,7 @@ def test_assign_sla(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "object_name",
@@ -4113,7 +4113,7 @@ def test_vsphere_live_mount_latest(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "vm_name",
@@ -4423,7 +4423,7 @@ def test_vsphere_live_mount_specific_date_time(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "vm_name",
@@ -4739,7 +4739,7 @@ def test_vsphere_live_mount_specific_host(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "vm_name",
@@ -5015,7 +5015,7 @@ def test_vsphere_live_mount_specific_host(rubrik, mocker):
     def mock_get_v1_vmware_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "host",
@@ -5153,7 +5153,7 @@ def test_vsphere_instant_recovery_latest(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "vm_name",
@@ -5463,7 +5463,7 @@ def test_vsphere_instant_recovery_specific_date_time(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "vm_name",
@@ -5779,7 +5779,7 @@ def test_vsphere_instant_recovery_specific_host(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "vm_name",
@@ -6055,7 +6055,7 @@ def test_vsphere_instant_recovery_specific_host(rubrik, mocker):
     def mock_get_v1_vmware_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "host",
@@ -6160,7 +6160,7 @@ def test_pause_snapshots_idempotence(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -6447,7 +6447,7 @@ def test_pause_snapshots(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -6963,7 +6963,7 @@ def test_resume_snapshots_idempotence(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -7250,7 +7250,7 @@ def test_resume_snapshots(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -7757,7 +7757,7 @@ def test_begin_managed_volume_snapshot_idempotence(rubrik, mocker):
     def mock_get_internal_managed_volume():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "name",
@@ -7910,7 +7910,7 @@ def test_begin_managed_volume_snapshot(rubrik, mocker):
     def mock_get_internal_managed_volume():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "name",
@@ -8073,7 +8073,7 @@ def test_end_managed_volume_snapshot_idempotence(rubrik, mocker):
     def mock_get_internal_managed_volume():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "name",
@@ -8226,7 +8226,7 @@ def test_end_managed_volume_snapshot_invalid_current_sla_unassigned(rubrik, mock
     def mock_get_internal_managed_volume():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "name",
@@ -8383,7 +8383,7 @@ def test_end_managed_volume_snapshot_invalid_current_sla_unprotected(rubrik, moc
     def mock_get_internal_managed_volume():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "name",
@@ -8540,7 +8540,7 @@ def test_end_managed_volume_snapshot_current_sla(rubrik, mocker):
     def mock_get_internal_managed_volume():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "name",
@@ -8727,7 +8727,7 @@ def test_end_managed_volume_snapshot_specific_sla(rubrik, mocker):
     def mock_get_internal_managed_volume():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string_id",
                     "name": "name",
@@ -8869,7 +8869,7 @@ def test_end_managed_volume_snapshot_specific_sla(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "primaryClusterId": "string",
@@ -8996,7 +8996,7 @@ def test_get_sla_objects_not_protecting_objects(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "primaryClusterId": "string",
@@ -9067,7 +9067,7 @@ def test_get_sla_objects_not_protecting_objects(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": False,
-            "graphql": [],
+            "data": [],
             "total": 0
         }
 
@@ -9088,7 +9088,7 @@ def test_get_sla_objects(rubrik, mocker):
     def mock_get_v1_sla_domain():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "primaryClusterId": "string",
@@ -9159,7 +9159,7 @@ def test_get_sla_objects(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "sla_id",
                     "name": "object_name",
@@ -9239,7 +9239,7 @@ def test_get_all_hosts_return_object(rubrik, mocker):
     def mock_get_v1_host():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "all_hosts_return_value",
@@ -9271,7 +9271,7 @@ def test_get_all_hosts_return_object(rubrik, mocker):
                             autospec=True, spec_set=True)
     mock_get.side_effect = [mock_get_v1_host()]
 
-    assert (rubrik.get_all_hosts())['graphql'] == mock_get_v1_host()['graphql']
+    assert (rubrik.get_all_hosts())['data'] == mock_get_v1_host()['data']
 
 
 def test_register_vm_invalid_parameter(rubrik):
@@ -9288,7 +9288,7 @@ def test_register_vm_already_registered(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",
@@ -9575,7 +9575,7 @@ def test_register_vm_already_registered(rubrik, mocker):
     def mock_get_v1_vmware_vm():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "name": "object_name",

@@ -44,7 +44,7 @@ def test_cluster_node_ip(rubrik, mocker):
     def mock_internal_cluster_me_node():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "brikId": "string",
@@ -102,7 +102,7 @@ def test_cluster_node_name(rubrik, mocker):
     def mock_internal_cluster_me_node():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "RVM000A000001",
                     "brikId": "string",
@@ -204,7 +204,7 @@ def test_end_user_authorization_idempotence(rubrik, mocker):
     def mock_internal_authorization_role_end_user_principals():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "principal": "string",
                     "privileges": {
@@ -271,7 +271,7 @@ def test_end_user_authorization(rubrik, mocker):
     def mock_internal_authorization_role_end_user_principals():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "principal": "string",
                     "privileges": {
@@ -306,7 +306,7 @@ def test_end_user_authorization(rubrik, mocker):
     def mock_internal_authorization_role_end_user():
         return {
             "hasMore": False,
-            "graphql": [
+            "data": [
                 {
                     "principal": "User:::119283ae-22ea-13f3-bfe2-9387cdf1d4a",
                     "privileges": {
@@ -348,7 +348,7 @@ def test_add_vcenter_idempotence(rubrik, mocker):
     def mock_v1_vmware_vcenter_primary_cluster_id():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "caCerts": "string",
                     "configuredSlaDomainId": "string",
@@ -378,7 +378,7 @@ def test_add_vcenter(rubrik, mocker):
     def mock_v1_vmware_vcenter_primary_cluster_id():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "caCerts": "string",
                     "configuredSlaDomainId": "string",
@@ -521,7 +521,7 @@ def test_configure_syslog_invalid_idempotence(rubrik, mocker):
     def mock_get_internal_syslog():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "hostname": "syslog_ip",
                     "port": 514,
@@ -568,7 +568,7 @@ def test_configure_syslog(rubrik, mocker):
     def mock_get_internal_syslog():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "hostname": "syslog_ip",
                     "port": 514,
@@ -617,7 +617,7 @@ def test_configure_vlan_invalid_number_of_vlans(rubrik, mocker):
     def mock_internal_cluster_me_node():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "RVM000A000001",
                     "brikId": "string",
@@ -675,7 +675,7 @@ def test_configure_vlan(rubrik, mocker):
     def mock_internal_cluster_me_node():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "RVM000A000001",
                     "brikId": "string",
@@ -723,7 +723,7 @@ def test_configure_vlan(rubrik, mocker):
     def mock_internal_cluster_me_vlan():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "vlan": 0,
                     "netmask": "string",
@@ -853,7 +853,7 @@ def test_configure_smtp_settings_idempotence(rubrik, mocker):
     def mock_get_internal_smtp_instance():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "smtpHostname": "hostname",
@@ -879,7 +879,7 @@ def test_configure_smtp_settings_new(rubrik, mocker):
     def mock_get_internal_smtp_instance():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "smtpHostname": "string",
@@ -919,7 +919,7 @@ def test_configure_smtp_settings_update(rubrik, mocker):
     def mock_get_internal_smtp_instance():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "id": "string",
                     "smtpHostname": "string",
@@ -1122,7 +1122,7 @@ def test_read_only_authorization_idempotence(rubrik, mocker):
     def mock_get_internal_authorization_role_read_only_admin_principals():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "principal": "string",
                     "privileges": {
@@ -1168,7 +1168,7 @@ def test_read_only_authorization(rubrik, mocker):
     def mock_get_internal_authorization_role_read_only_admin_principals():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "principal": "string",
                     "privileges": {
@@ -1185,7 +1185,7 @@ def test_read_only_authorization(rubrik, mocker):
     def mock_post_internal_authorization_role_read_only_admin():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "principal": "string",
                     "privileges": {
@@ -1230,7 +1230,7 @@ def test_get_all_vcenters_return_object(rubrik, mocker):
     def mock_get_v1_vmware_vcenter():
         return {
             "hasMore": True,
-            "graphql": [
+            "data": [
                 {
                     "caCerts": "string",
                     "configuredSlaDomainId": "string",
@@ -1260,4 +1260,4 @@ def test_get_all_vcenters_return_object(rubrik, mocker):
     mock_get.side_effect = [mock_get_v1_vmware_vcenter()]
 
     assert (rubrik.get_all_vcenters())[
-        'graphql'] == mock_get_v1_vmware_vcenter()['graphql']
+        'data'] == mock_get_v1_vmware_vcenter()['data']
