@@ -366,7 +366,10 @@ def _delete_account_aws(self, profile='', aws_id=None, aws_secret=None):
         for feature_details in polaris_account_info['featureDetails']:
             if feature_details['feature'] == "CLOUD_NATIVE_PROTECTION":
                 stack_name = None
-                if match := re.search(r'/(.*)/', feature_details['stackArn']):
+                # Move to := post Py38
+                # if match := re.search(r'/(.*)/', feature_details['stackArn']):
+                if feature_details['stackArn']:
+                    match = re.search(r'/(.*)/', feature_details['stackArn'])
                     stack_name = match.group(1)
                 for stack_region in feature_details['awsRegions']:
                     stack_region = (re.sub('_', '-', stack_region)).lower()
