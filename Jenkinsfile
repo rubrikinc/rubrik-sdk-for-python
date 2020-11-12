@@ -13,6 +13,7 @@ pipeline {
                 echo 'Commit Docs'
                 sh 'git commit -a -m "Documentation Update for Commit $GIT_COMMIT"'
                 sh 'git status'
+                sh 'echo Pushing to $BRANCH_NAME'
                 // sh 'git push origin $BRANCH_NAME'
             }
         }
