@@ -12,7 +12,8 @@ pipeline {
             steps {
                 echo 'Commit Docs'
                 sh 'git commit -a -m "Documentation Update for Commit $GIT_COMMIT"'
-                sh 'git push'
+                sh 'git status'
+                // sh 'git push origin $BRANCH_NAME'
             }
         }
         stage('Function Tests') {
