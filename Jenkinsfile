@@ -11,6 +11,8 @@ pipeline {
         stage('Commit Docs') {
             steps {
                 echo 'Commit Docs'
+                sh 'git commit -a -m "Documentation Update for Commit $GIT_COMMIT"'
+                sh 'git push'
             }
         }
         stage('Function Tests') {
