@@ -13,7 +13,7 @@ pipeline {
                 echo 'Commit Docs'
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'jenkins', usernameVariable: 'GIT_AUTHOR_NAME', passwordVariable: 'GIT_PASSWORD']]) {
                     sh "git commit -a -m 'Documentation Update for Commit $GIT_COMMIT'"
-                    sh('git push https://${GIT_AUTHOR_NAME}:${GIT_PASSWORD}@my-repo.git  --tags -f --no-verify')
+                    sh('git push https://${GIT_AUTHOR_NAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git --tags -f --no-verify')
                 }
             }
         }
