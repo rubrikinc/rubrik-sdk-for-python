@@ -1,0 +1,12 @@
+query RubrikPolarisSDKRequest($filter: String!){
+    getKorgTaskchainStatus(taskchainId: $filter){
+        taskchain {
+            id
+            state
+            taskchainUuid
+            ... on Taskchain{
+                progressedAt
+            }
+        }
+    }
+}

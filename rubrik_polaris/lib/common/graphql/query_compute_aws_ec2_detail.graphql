@@ -1,0 +1,60 @@
+query RubrikPolarisSDKRequest($object_id: UUID!) {
+  awsNativeEc2Instance(fid: $object_id) {
+    id
+    instanceId
+    instanceName
+    isRelic
+    isExocomputeConfigured
+    isIndexingEnabled
+    isMarketplace
+    instanceType
+    effectiveSlaDomain {
+      name
+      ... on ClusterSlaDomain {
+        fid
+        cluster {
+          id
+          name
+          __typename
+        }
+        __typename
+      }
+      ... on GlobalSla {
+        id
+        __typename
+      }
+      __typename
+    }
+    authorizedOperations
+    availabilityZone
+    region
+    vpcId
+    tags {
+      key
+      value
+      __typename
+    }
+    awsNativeAccount {
+      id
+      name
+      status
+      __typename
+    }
+    attachmentSpecs {
+      awsNativeEbsVolumeId
+      isExcludedFromSnapshot
+      isRootVolume
+      devicePath
+      __typename
+    }
+    attachedEbsVolumes {
+      id
+      volumeId
+      volumeName
+      volumeType
+      sizeInGBs
+      __typename
+    }
+    __typename
+  }
+}

@@ -1,0 +1,12 @@
+mutation RubrikPolarisSDKRequest($slaId: String!, $objectIds: [UUID!]!) {
+  takeOnDemandSnapshot(slaId: $slaId, snappableIds: $objectIds) {
+    taskchainUuids {
+      snappableId
+      taskchainUuid
+    }
+    errors {
+      snappableId
+      error
+    }
+  }
+}

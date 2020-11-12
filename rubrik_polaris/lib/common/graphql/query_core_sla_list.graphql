@@ -1,0 +1,12 @@
+query RubrikPolarisSDKRequest($filter: [GlobalSlaFilterInput!]) {
+  globalSlaConnection(filter: $filter) {
+    edges {
+      node {
+        name
+        ... on GlobalSla {
+          id
+        }
+      }
+    }
+  }
+}

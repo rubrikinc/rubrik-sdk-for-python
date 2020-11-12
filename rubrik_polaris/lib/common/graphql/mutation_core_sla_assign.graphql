@@ -1,0 +1,5 @@
+mutation RubrikPolarisSDKRequest($slaId: UUID, $globalSlaAssignType: SlaAssignTypeEnum = protectWithSlaId, $objectIds: [UUID!]!, $shouldApplyToExistingSnapshots: Boolean = false) {
+  assignSla(globalSlaOptionalFid: $slaId, globalSlaAssignType: $globalSlaAssignType, objectIds: $objectIds, shouldApplyToExistingSnapshots: $shouldApplyToExistingSnapshots) {
+    success
+  }
+}

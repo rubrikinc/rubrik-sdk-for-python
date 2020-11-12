@@ -1,0 +1,49 @@
+query RubrikPolarisSDKRequest($filter: [Filter!]!) {
+  vSphereVmNewConnection(filter: $filter) {
+    edges {
+      node {
+        isRelic
+        id
+        name
+        cluster {
+          id
+          name
+          version
+          status
+        }
+        primaryClusterLocation {
+          id
+          name
+        }
+        effectiveSlaDomain {
+          ...EffectiveSLADomainFragment
+        }
+        slaAssignment
+        logicalPath {
+          fid
+          name
+        }
+        reportSnappable {
+          archiveStorage
+          physicalBytes
+        }
+        vmwareToolsInstalled
+        agentStatus {
+          agentStatus
+          disconnectReason
+        }
+      }
+    }
+  }
+}
+fragment EffectiveSLADomainFragment on SlaDomain {
+  id
+  name
+  ... on ClusterSlaDomain {
+    fid
+    cluster {
+      id
+      name
+    }
+  }
+}

@@ -1,0 +1,56 @@
+query RubrikPolarisSDKRequest($first: Int, $after: String, $filters: AwsNativeEc2InstanceFilters) {
+  awsNativeEc2InstanceConnection(first: $first, after: $after, ec2InstanceFilters: $filters) {
+    edges {
+      cursor
+      node {
+        id
+        instanceId
+        instanceName
+        vpcName
+        region
+        vpcId
+        isRelic
+        instanceType
+        isExocomputeConfigured
+        isIndexingEnabled
+        isMarketplace
+        tags {
+            key
+            value
+        }
+        effectiveSlaDomain {
+          name
+          ... on ClusterSlaDomain {
+            fid
+            cluster {
+              id
+              name
+            }
+            __typename
+          }
+          ... on GlobalSla {
+            id
+            name
+          }
+        }
+        awsNativeAccount {
+          id
+          name
+          status
+        }
+        slaAssignment
+        authorizedOperations
+        effectiveSlaSourceObject {
+          fid
+          name
+          objectType
+        }
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}

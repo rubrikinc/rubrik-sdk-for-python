@@ -1,0 +1,15 @@
+query RubrikPolarisSDKRequest($filter: String = "") {
+    gcpNativeProjectConnection(projectFilters: {nameOrNumberSubstringFilter: {nameOrNumberSubstring: $filter}}){
+        edges {
+            node {
+                id:id
+                name: name
+                sla_assignment: slaAssignment
+                configured_sla_domain_name: configuredSlaDomain{name}
+                configured_sla_domain_id: configuredSlaDomain{id}
+                effective_sla_domain_name: effectiveSlaDomain{name}
+                effective_sla_domain_id: effectiveSlaDomain{id}
+            }
+        }
+    }
+}

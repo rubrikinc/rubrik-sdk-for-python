@@ -1,4 +1,5 @@
-#! /usr/bin/env python
+#!/usr/bin/env python3
+from glob import glob
 
 import setuptools
 
@@ -76,10 +77,17 @@ setuptools.setup(
     install_requires=[
         'requests >= 2.18.4, != 2.22.0',
         'python-dateutil',
-        'pytz'
+        'pytz',
+        'zulu',
+        'boto3',
+        'botocore'
+    ],
+    include_package_data=True,
+    data_files = [
+        ('rubrik_polaris/graphql', glob('rubrik_polaris/lib/common/graphql/*'))
     ],
     tests_require=[
         'pytest'
     ],
-    zip_safe=True,
+    zip_safe=False,
 )

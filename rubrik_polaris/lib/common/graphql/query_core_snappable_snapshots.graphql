@@ -1,0 +1,24 @@
+query RubrikPolarisSDKRequest($first: Int, $snappable_id : String!){
+    snapshotOfASnappableConnection
+    (
+        first: $first
+        snappableId: $snappable_id,
+        sortOrder: Desc
+    ){
+        edges {
+            node {
+                id
+                expirationDate
+                date
+                isOnDemandSnapshot
+                snappableId
+                ... on PolarisSnapshot{
+                    slaDomain {
+                        name
+                        id
+                    }
+                }
+            }
+        }
+    }
+}
