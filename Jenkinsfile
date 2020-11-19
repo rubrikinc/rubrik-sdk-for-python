@@ -31,7 +31,7 @@ pipeline {
                     stage('Git - Perform Commit') {
                         steps {
                             sh '''
-                                NO_PUSH=`cat .PUSH`
+                                PUSH=`cat .PUSH`
                                 if [ "$PUSH" = true ]
                                 then
                                     git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}"
@@ -44,7 +44,7 @@ pipeline {
                     stage('Git - Perform Push') {
                         steps {
                             sh '''
-                                NO_PUSH=`cat .PUSH`
+                                PUSH=`cat .PUSH`
                                 if [ "$PUSH" = true ]
                                 then
                                     echo 'Code changed, pushing...'
