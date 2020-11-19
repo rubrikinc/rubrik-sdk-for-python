@@ -12,20 +12,22 @@ pipeline {
             }
         }
         stage('Commit Docs') {
-                steps {
-                    sh '''
-                        git config --global user.name ${GIT_AUTHOR_NAME}
-                        git add -A ./docs/
-                        if [ `git diff --cached --exit-code` ]
-                        then
-                            PUSH=true
-                        else
-                            PUSH=false
-                        fi
-                        echo $PUSH > .PUSH
-                    '''
-                }
                 stages {
+                    stage('Git - Setup') {
+                        steps {
+                            sh '''
+                                git config --global user.name ${GIT_AUTHOR_NAME}
+                                git add -A ./docs/
+                                if [ `git diff --cached --exit-code` ]
+                                then
+                                    PUSH=true
+                                else
+                                    PUSH=false
+                                fi
+                                echo $PUSH > .PUSH
+                            '''
+                        }
+                    }
                     stage('Git - Perform Commit') {
                         steps {
                             sh '''
