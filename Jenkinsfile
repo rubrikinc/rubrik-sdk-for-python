@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+    GIT_CREDS = credentials('github-user')
+    }
     stages {
         stage('Generate Docs') {
             steps {
@@ -11,7 +14,6 @@ pipeline {
         stage('Commit Docs') {
             echo "Commit Docs"
                 stages {
-            withCredentials([usernamePassword(credentialsId: 'github-user', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     stage('Git - Set Author') {
                         steps {
                             sh '''
@@ -40,7 +42,7 @@ pipeline {
                                 if [ ${NO_PUSH} = false ]
                                 then
                                     echo 'Code changed, pushing...'
-                                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
+                                    git push https://${GIT_CREDS_USR}:${GIT_CREDS_PSW}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
                                     export PUSH=true
                                 else
                                     echo 'No code change required, skipping push'
@@ -50,7 +52,6 @@ pipeline {
                     }
                 }
             }
-        }
         stage('Function Tests') {
             steps {
                 echo 'Run Tests'
