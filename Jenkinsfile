@@ -16,16 +16,18 @@ pipeline {
                         echo 'Set Author'
                         git config --global user.name ${GIT_AUTHOR_NAME}
                         echo 'Test for adding files'
-                        git add -A ./docs/ || echo 'No new files to add to commit'
+                        git add -A ./docs/
                         echo 'Test for commit'
-                        git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || PUSH=1
+                        PUSH=1
+                        git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || PUSH=0
                         echo 'If commit then push'
                         if [ $PUSH ]
                         then
-                            echo 'Push back up to github'
+                            echo 'Code changed, pushing...'
                             git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
-                            echo 'Reset push flag'
                             export PUSH=0
+                        else
+                            echo 'No code change required, skipping push'
                         fi
                     '''
                 }
