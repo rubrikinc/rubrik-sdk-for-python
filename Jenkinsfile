@@ -30,7 +30,7 @@ pipeline {
                             '''
                         }
                     }
-                    stage('Git - Perform Commit') {
+                    stage('Git - Commit') {
                         steps {
                             sh '''
                                 PUSH=`cat .PUSH`
@@ -43,7 +43,7 @@ pipeline {
                             '''
                         }
                     }
-                    stage('Git - Perform Push') {
+                    stage('Git - Push') {
                         steps {
                             sh '''
                                 PUSH=`cat .PUSH`
