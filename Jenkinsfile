@@ -30,8 +30,8 @@ pipeline {
                     stage('Git - Perform Commit') {
                         steps {
                             sh '''
-                                NO_PUSH=true
-                                git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || NO_PUSH=false
+                                NO_PUSH=false
+                                git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || NO_PUSH=true
                                 echo $NO_PUSH > .nopush
                             '''
                         }
