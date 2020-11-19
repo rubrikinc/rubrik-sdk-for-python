@@ -38,6 +38,7 @@ pipeline {
                     stage('Git - Perform Push') {
                         steps {
                             sh '''
+                                set -x
                                 if [ ${NO_PUSH} = false ]
                                 then
                                     echo 'Code changed, pushing...'
