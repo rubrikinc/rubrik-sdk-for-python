@@ -2,6 +2,8 @@ pipeline {
     agent any
     environment {
     GIT_CREDS = credentials('github-user')
+    POLARIS_BETA = credentials('polaris_beta')
+    POLARIS_PROD = credentials('polaris_prod')
     }
     stages {
         stage('Generate Docs') {
@@ -60,12 +62,7 @@ pipeline {
         stage('Function Tests') {
             steps {
                 echo 'Run Tests'
-                withCredentials([
-                    usernamePassword(credentialsId: 'polaris_beta', usernameVariable: 'POLARIS_BETA_USR', passwordVariable: 'POLARIS_BETA_PWD'),
-                    usernamePassword(credentialsId: 'polaris_prod', usernameVariable: 'POLARIS_PROD_USR', passwordVariable: 'POLARIS_PROD_PWD')
-                ]) {
-                    sh 'printenv'
-                }
+                sh 'printenv'
             }
         }
     }
