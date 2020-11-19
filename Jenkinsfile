@@ -10,7 +10,6 @@ pipeline {
         }
         stage('Commit Docs') {
             steps {
-                echo 'Commit Docs'
                 withCredentials([usernamePassword(credentialsId: 'github-user', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh """
                         echo 'Set Author'
