@@ -10,6 +10,7 @@ pipeline {
         }
         stage('Commit Docs') {
             echo "Commit Docs"
+            steps {
             withCredentials([usernamePassword(credentialsId: 'github-user', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                 stages {
                     stage('Git - Set Author') {
@@ -46,6 +47,7 @@ pipeline {
                                     echo 'No code change required, skipping push'
                                 fi
                             '''
+                            }
                         }
                     }
                 }
