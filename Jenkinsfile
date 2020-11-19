@@ -17,7 +17,7 @@ pipeline {
                         steps {
                             sh '''
                                 git config --global user.name ${GIT_AUTHOR_NAME}
-                                git add -a ./docs/
+                                git add -A ./docs/
                                 git diff --cached --exit-code
                             '''
                         }
