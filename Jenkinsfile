@@ -13,13 +13,20 @@ pipeline {
                 echo 'Commit Docs'
                 withCredentials([usernamePassword(credentialsId: 'github-user', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh """
-                        git config --global user.name ${GIT_AUTHOR_NAME}
-                        git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || PUSH=1
-                        if [${PUSH}]
-                        then
-                            git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
-                            export PUSH=0
-                        fi
+                    echo "Set Author"
+                    git config --global user.name ${GIT_AUTHOR_NAME}
+                    echo "Test for adding files"
+                    git add -A ./docs/ || echo "No new files to add to commit"
+                    echo "Test for commit"
+                    git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || PUSH=1
+                    echo "If commit then push"
+                    if [ $PUSH ]
+                    then
+                        echo "Push back up to github"
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
+                        echo "Reset push flag"
+                        export PUSH=0
+                    fi
                     """
                 }
             }
