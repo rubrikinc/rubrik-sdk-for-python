@@ -38,6 +38,7 @@ pipeline {
     }
     post {
         always {
+            echo 'always'
             // cleanWs()
         }
         success {
