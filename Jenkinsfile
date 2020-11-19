@@ -9,27 +9,45 @@ pipeline {
             }
         }
         stage('Commit Docs') {
-            steps {
-                echo "Commit Docs"
-                withCredentials([usernamePassword(credentialsId: 'github-user', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    sh '''
-                        echo 'Set Author'
-                        git config --global user.name ${GIT_AUTHOR_NAME}
-                        echo 'Test for adding files'
-                        git add -A ./docs/
-                        echo 'Test for commit'
-                        NO_PUSH=true
-                        git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || PUSH=false
-                        echo 'If commit then push'
-                        if [ ${NO_PUSH} = false ]
-                        then
-                            echo 'Code changed, pushing...'
-                            git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
-                            export PUSH=true
-                        else
-                            echo 'No code change required, skipping push'
-                        fi
-                    '''
+            echo "Commit Docs"
+            withCredentials([usernamePassword(credentialsId: 'github-user', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                stages {
+                    stage('Git - Set Author') {
+                        steps {
+                            sh '''
+                                git config --global user.name ${GIT_AUTHOR_NAME}
+                            '''
+                        }
+                    }
+                    stage('Git - Add new files') {
+                        steps {
+                            sh '''
+                                git config --global user.name ${GIT_AUTHOR_NAME}
+                            '''
+                        }
+                    }
+                    stage('Git - Perform Commit') {
+                        steps {
+                            sh '''
+                                NO_PUSH=true
+                                git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || PUSH=false
+                            '''
+                        }
+                    }
+                    stage('Git - Perform Push') {
+                        steps {
+                            sh '''
+                                if [ ${NO_PUSH} = false ]
+                                then
+                                    echo 'Code changed, pushing...'
+                                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
+                                    export PUSH=true
+                                else
+                                    echo 'No code change required, skipping push'
+                                fi
+                            '''
+                        }
+                    }
                 }
             }
         }
