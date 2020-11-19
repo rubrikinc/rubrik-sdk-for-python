@@ -38,8 +38,7 @@ pipeline {
                     stage('Git - Perform Push') {
                         steps {
                             sh '''
-                                set -x
-                                if [ ${NO_PUSH} = false ]
+                                if [ "$NO_PUSH" = false ]
                                 then
                                     echo 'Code changed, pushing...'
                                     git push https://${GIT_CREDS_USR}:${GIT_CREDS_PSW}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
