@@ -13,17 +13,12 @@ pipeline {
         }
         stage('Commit Docs') {
                 stages {
-                    stage('Git - Set Author') {
+                    stage('Git - Setup') {
                         steps {
                             sh '''
                                 git config --global user.name ${GIT_AUTHOR_NAME}
-                            '''
-                        }
-                    }
-                    stage('Git - Add new files') {
-                        steps {
-                            sh '''
-                                git config --global user.name ${GIT_AUTHOR_NAME}
+                                git add -a ./docs/
+                                git diff --cached --exit-code
                             '''
                         }
                     }
