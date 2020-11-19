@@ -12,7 +12,6 @@ pipeline {
             }
         }
         stage('Commit Docs') {
-            echo "Commit Docs"
                 stages {
                     stage('Git - Set Author') {
                         steps {
