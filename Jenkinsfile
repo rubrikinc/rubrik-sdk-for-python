@@ -18,28 +18,37 @@ pipeline {
                             sh '''
                                 git config --global user.name ${GIT_AUTHOR_NAME}
                                 git add -A ./docs/
-                                git diff --cached --exit-code
+                                if [ `git diff --cached --exit-code` ]
+                                then
+                                    PUSH=true
+                                else
+                                    PUSH=false
+                                fi
+                                echo $PUSH > .PUSH
                             '''
                         }
                     }
                     stage('Git - Perform Commit') {
                         steps {
                             sh '''
-                                NO_PUSH=false
-                                git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || NO_PUSH=true
-                                echo $NO_PUSH > .nopush
+                                NO_PUSH=`cat .PUSH`
+                                if [ "$PUSH" = true ]
+                                then
+                                    git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}"
+                                else
+                                    echo "No code change required, skipping commit"
+                                fi
                             '''
                         }
                     }
                     stage('Git - Perform Push') {
                         steps {
                             sh '''
-                            NO_PUSH=`cat .nopush`
-                                if [ "$NO_PUSH" = false ]
+                                NO_PUSH=`cat .PUSH`
+                                if [ "$PUSH" = true ]
                                 then
                                     echo 'Code changed, pushing...'
                                     git push https://${GIT_CREDS_USR}:${GIT_CREDS_PSW}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
-                                    NO_PUSH=true
                                 else
                                     echo 'No code change required, skipping push'
                                 fi
