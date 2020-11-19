@@ -30,19 +30,19 @@ pipeline {
                     stage('Git - Perform Commit') {
                         steps {
                             sh '''
-                                export NO_PUSH=true
-                                git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || export PUSH=false
+                                env.NO_PUSH=true
+                                git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || env.NO_PUSH=false
                             '''
                         }
                     }
                     stage('Git - Perform Push') {
                         steps {
                             sh '''
-                                if [ "$NO_PUSH" = false ]
+                                if [ "${env.NO_PUSH)" = false ]
                                 then
                                     echo 'Code changed, pushing...'
                                     git push https://${GIT_CREDS_USR}:${GIT_CREDS_PSW}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
-                                    export PUSH=true
+                                    env.NO_PUSH=true
                                 else
                                     echo 'No code change required, skipping push'
                                 fi
