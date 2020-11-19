@@ -12,8 +12,6 @@ pipeline {
             }
         }
         stage('Commit Docs') {
-                stages {
-                    stage('Git - Setup') {
                         steps {
                             sh '''
                                 git config --global user.name ${GIT_AUTHOR_NAME}
@@ -27,7 +25,8 @@ pipeline {
                                 echo $PUSH > .PUSH
                             '''
                         }
-                    }
+
+                stages {
                     stage('Git - Perform Commit') {
                         steps {
                             sh '''
