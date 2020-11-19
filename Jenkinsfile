@@ -14,7 +14,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'github-user', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh '''
                         git config --global user.name ${GIT_AUTHOR_NAME}
-                        git commit -a -m 'Documentation Update for Commit ${GIT_COMMIT}'
+                        git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}"
                         git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
                    '''
                 }
