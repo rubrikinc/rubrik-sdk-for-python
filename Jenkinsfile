@@ -10,8 +10,9 @@ pipeline {
         }
         stage('Commit Docs') {
             steps {
+                echo "Commit Docs"
                 withCredentials([usernamePassword(credentialsId: 'github-user', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    sh """
+                    sh '''
                         echo 'Set Author'
                         git config --global user.name ${GIT_AUTHOR_NAME}
                         echo 'Test for adding files'
@@ -26,7 +27,7 @@ pipeline {
                             echo 'Reset push flag'
                             export PUSH=0
                         fi
-                    """
+                    '''
                 }
             }
         }
