@@ -21,7 +21,7 @@ pipeline {
                         PUSH=0
                         git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || PUSH=1
                         echo 'If commit then push'
-                        if [ $PUSH ]
+                        if [ ${PUSH} ]
                         then
                             echo 'Code changed, pushing...'
                             git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
