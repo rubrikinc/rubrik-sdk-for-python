@@ -18,14 +18,14 @@ pipeline {
                         echo 'Test for adding files'
                         git add -A ./docs/
                         echo 'Test for commit'
-                        PUSH=1
-                        git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || PUSH=0
+                        PUSH=0
+                        git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}" || PUSH=1
                         echo 'If commit then push'
                         if [ $PUSH ]
                         then
                             echo 'Code changed, pushing...'
                             git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
-                            export PUSH=0
+                            export PUSH=1
                         else
                             echo 'No code change required, skipping push'
                         fi
