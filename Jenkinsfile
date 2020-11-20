@@ -1,5 +1,10 @@
 pipeline {
     agent any
+    environment {
+    GIT_CREDS = credentials('github-user')
+    POLARIS_BETA = credentials('polaris_beta')
+    POLARIS_PROD = credentials('polaris_prod')
+    }
     stages {
         stage('Generate Docs') {
             steps {
@@ -9,32 +14,62 @@ pipeline {
             }
         }
         stage('Commit Docs') {
-            steps {
-                echo 'Commit Docs'
-                sh 'git branch'
-                /**
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'github-user', usernameVariable: 'GIT_AUTHOR_NAME', passwordVariable: 'GIT_PASSWORD']]) {
-                    sh "git commit -a -m 'Documentation Update for Commit $GIT_COMMIT'"
-                    sh('git push origin $BRANCH_NAME https://${GIT_AUTHOR_NAME}:${GIT_PASSWORD}@github.com/trinity-team/rubrik-sdk-for-python.git --tags -f --no-verify')
+                stages {
+                    stage('Git - Setup') {
+                        steps {
+                            sh '''
+                                git config --global user.name ${GIT_AUTHOR_NAME}
+                                git add -A ./docs/
+                                if [ `git diff --cached --exit-code` ]
+                                then
+                                    PUSH=true
+                                else
+                                    PUSH=false
+                                fi
+                                echo $PUSH > .PUSH
+                            '''
+                        }
+                    }
+                    stage('Git - Commit') {
+                        steps {
+                            sh '''
+                                PUSH=`cat .PUSH`
+                                if [ "$PUSH" = true ]
+                                then
+                                    git commit -a -m "Documentation Update for Commit ${GIT_COMMIT}"
+                                else
+                                    echo "No code change required, skipping commit"
+                                fi
+                            '''
+                        }
+                    }
+                    stage('Git - Push') {
+                        steps {
+                            sh '''
+                                PUSH=`cat .PUSH`
+                                if [ "$PUSH" = true ]
+                                then
+                                    echo 'Code changed, pushing...'
+                                    git push https://${GIT_CREDS_USR}:${GIT_CREDS_PSW}@github.com/trinity-team/rubrik-sdk-for-python.git HEAD:${BRANCH_NAME}
+                                else
+                                    echo 'No code change required, skipping push'
+                                fi
+                            '''
+                        }
+                    }
                 }
-                **/
             }
-        }
         stage('Function Tests') {
             steps {
                 echo 'Run Tests'
-                withCredentials([
-                    usernamePassword(credentialsId: 'polaris_beta', usernameVariable: 'POLARIS_BETA_USR', passwordVariable: 'POLARIS_BETA_PWD'),
-                    usernamePassword(credentialsId: 'polaris_prod', usernameVariable: 'POLARIS_PROD_USR', passwordVariable: 'POLARIS_PROD_PWD')
-                ]) {
-                    sh 'printenv'
-                }
+                sh 'printenv'
             }
         }
     }
     post {
         always {
-            cleanWs()
+            echo 'always'
+            // cleanWs()
         }
         success {
             echo 'successful'
@@ -50,4 +85,3 @@ pipeline {
         }
     }
 }
-
