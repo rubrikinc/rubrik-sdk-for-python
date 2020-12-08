@@ -30,18 +30,19 @@ except Exception as err:
 # pp.pprint(rubrik.submit_on_demand(rubrik.get_object_ids_ebs(volumeId = "vol-077d1df3538afe5dd"), bronze_sla_domain_id, wait=True))
 
 ### Add AWS Acct (local profile must be configured, specify list of profiles _or_ set all=True.
-rubrik.add_account_aws(regions = ["us-east-1"], profiles = ["peterm-profile"])
+# rubrik.add_account_aws(regions = ["us-east-1"], profiles = ["peterm-profile"])
 # rubrik.add_account_aws(regions = ["us-east-1"], aws_access_key_id='blah', aws_secret_access_key='blah')
 # rubrik.add_account_aws(regions = ["us-west-2"], all = True )
 
 ### Remove AWS Acct (local profile must be configured, specify list of profiles _or_ set all=True.
-rubrik.delete_account_aws(profiles = ['peterm-profile'])
+# rubrik.delete_account_aws(profiles = ['peterm-profile'])
 # rubrik.delete_account_aws(aws_access_key_id='blah', aws_secret_access_key='blah')
 # rubrik.delete_account_aws(all = True )
 
-### Run ODS for machines in a region using Bronze retention, monitor to complete via threads
-# bronze_sla_domain_id = rubrik.get_sla_domains("Bronze")[0]['id']
+### Run ODS for machines in a region using Bronze retention, monitor to complete via threads # *******3
+# bronze_sla_domain_id = rubrik.get_sla_domains("Bronze")
 # pp.pprint(rubrik.submit_on_demand(rubrik.get_compute_object_ids_azure(region="EastUS2"), bronze_sla_domain_id, wait=True))
+# pp.pprint(rubrik.submit_on_demand(rubrik.get_compute_object_ids_gce(), bronze_sla_domain_id, wait=True))
 
 ### Returns all objectIDs matching arbitrary available inputs. ec2 tags have special treatment
 # pp.pprint(rubrik.get_compute_object_ids_ec2(tags = {"Name": "Puppet Master"}))
