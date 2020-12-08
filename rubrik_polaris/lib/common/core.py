@@ -49,7 +49,7 @@ def get_sla_domains(self, sla_domain_name=""):
         if sla_domain_name:
             for node in request_nodes:
                 if node['name'] == sla_domain_name:
-                    return node
+                    return node['id']
         return request_nodes
     except Exception:
         raise
@@ -113,7 +113,7 @@ def submit_assign_sla(self, object_ids, sla_id):
             "objectIds": object_ids,
             "slaId": sla_id
         }
-        request = self._query(None, self._graphql_query[mutation_name], variables)
+        request = self._query(mutation_name, variables)
         return self._dump_nodes(request)
     except Exception:
         raise
