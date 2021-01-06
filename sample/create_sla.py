@@ -18,7 +18,7 @@ starttime_hour = 0
 starttime_min = 19
 duration_hours = 12
 replication_target = "REPLCLUSTER"
-replication_retention_in_days =  30
+replication_retention_in_days = 30
 
 create_sla = rubrik.create_sla(
     sla_name,
