@@ -40,7 +40,7 @@ except Exception as err:
 # rubrik.delete_account_aws(all = True )
 
 ### Run ODS for machines in a region using Bronze retention, monitor to complete via threads
-# bronze_sla_domain_id = rubrik.get_sla_domains("Bronze")[0]['id']
+# bronze_sla_domain_id = rubrik.get_sla_domains("Bronze")['id']
 # pp.pprint(rubrik.submit_on_demand(rubrik.get_compute_object_ids_azure(region="EastUS2"), bronze_sla_domain_id, wait=True))
 
 ### Returns all objectIDs matching arbitrary available inputs. ec2 tags have special treatment
@@ -52,10 +52,8 @@ except Exception as err:
 # snappables = rubrik.get_compute_object_ids_ec2(tags = {"Name": "gurlingwinjb"})
 # snappables = rubrik.get_compute_object_ids_azure(name = "tpm1-lin1")
 # snappables = rubrik.get_compute_object_ids_gce(nativeName = "ubuntu-fdse-shared-1")
-# snappables = ['af7e69b7-b836-4ab5-9a6c-66a23ff94de8']
 # for snappable in snappables:
-#     snapshot_id = (rubrik.get_snapshots(snappable, recovery_point='2020-09-19 04:20')) # can include anything up to this. 2020 is ok, 2020-09, 2020-09-19, ...
-#     pp.pprint(snappable)
+#     snapshot_id = (rubrik.get_snapshots(snappable, recovery_point='latest')['id']) # can include anything up to this. 2020 is ok, 2020-09, 2020-09-19, ...
 #     snapshot_id = rubrik.get_snapshots(snappable, recovery_point='latest')
 #     pp.pprint(rubrik.get_snapshots(snappable)) # Get all snapshots
 #     pp.pprint(snapshot_id)
@@ -94,7 +92,34 @@ except Exception as err:
 # pp.pprint(gold_sla_domain_id)
 # pp.pprint(rubrik.submit_assign_sla( rubrik.get_compute_object_ids_ec2(region = "US_WEST_2"), gold_sla_domain_id))
 
-(rubrik.get_event_series_list())
+### Event interface
+# todays_failed_events = rubrik.get_event_series_list(cluster_ids=['603109f2-eb30-4da8-9389-911d66abb524'], status=["Failure"], start_date='2020-12-31', end_date='2021-01-02')
+# print("Returned events : {}".format(len(todays_failed_events)))
+
+### Basic event summaries
+# summary = {}
+# for event in todays_failed_events:
+#     if event['lastActivityType'] in summary:
+#         summary[event['lastActivityType']] += 1
+#     else:
+#         summary[event['lastActivityType']] = 1
+# pp.pprint(summary)
+
+# Summarize further
+# summary = {}
+# for event in todays_failed_events:
+#     if event['objectType'] in summary:
+#         if event['location']:
+#             second_level = "{} : {}".format(event['location'], event['objectName'])
+#         else:
+#             second_level = event['objectName']
+#         if second_level in summary[event['objectType']]:
+#             summary[event['objectType']][second_level] += 1
+#         else:
+#             summary[event['objectType']][second_level] = 1
+#     else:
+#         summary[event['objectType']] = {}
+# pp.pprint(summary)
 
 # pp.pprint(rubrik.update_account_aws(all=True))
 
