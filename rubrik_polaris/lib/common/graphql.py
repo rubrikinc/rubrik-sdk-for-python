@@ -73,5 +73,7 @@ def _dump_nodes(self, request):
                 nodes.append(edge['node'])
         else:
             return query_result
+    else:
+        return request
 
     return nodes

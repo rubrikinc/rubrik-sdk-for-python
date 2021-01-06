@@ -141,11 +141,10 @@ def get_compute_ec2(self, object_id=None):
             variables = {
                 "object_id": object_id
             }
-            request = self._query(query_name, variables)
+            return self._query(query_name, variables)
         else:
             query_name = "compute_aws_ec2"
-            request = self._query(query_name, None)
-        return self._dump_nodes(request)
+            return self._query(query_name, None)
     except Exception:
         raise
 
@@ -158,8 +157,7 @@ def get_compute_azure(self):
     """
     try:
         query_name = "compute_azure_iaas"
-        request = self._query(query_name, None)
-        return self._dump_nodes(request)
+        return self._query(query_name, None)
     except Exception:
         raise
 
@@ -172,8 +170,7 @@ def get_compute_gce(self):
     """
     try:
         query_name = "compute_gcp_gce"
-        request = self._query(query_name, None)
-        return self._dump_nodes(request)
+        return self._query(query_name, None)
     except Exception:
         raise
 
@@ -183,9 +180,7 @@ def _get_compute_vsphere(self):
     try:
         query_name = "compute_vmware_vsphere"
         variables = {"filter": []}
-        request = self._query(query_name, variables)
-        self._pp.pprint(request)
-        return self._dump_nodes(request)
+        return self._query(query_name, variables)
     except Exception:
         raise
 
@@ -220,10 +215,9 @@ def _submit_compute_restore(self, snapshot_id, **kwargs):
         if mutation_name not in self._graphql_query:
             raise Exception("Mutation not found : {}".format(mutation_name))
 
-        request = self._query(mutation_name, variables)
-        if 'errors' in request and request['errors']:
-            return {'errors': request['errors'][0]['message']}
-        result = self._dump_nodes(request)
+        result = self._query(mutation_name, variables)
+        if 'errors' in result and result['errors']:
+            return {'errors': result['errors'][0]['message']}
 
         results = []
         if 'wait' in kwargs:

@@ -73,18 +73,17 @@ def _add_account_aws(self, regions=[], profile='', aws_id=None, aws_secret=None)
             "account_name": " : ".join(account_name_list),
             "regions": regions
         }
-        request = self._query(query_name, variables)
-        nodes = self._dump_nodes(request)
-        if nodes['errorMessage']:
+        result = self._query(query_name, variables)
+        if result['errorMessage']:
             raise Exception("Account {} already added".format(aws_account_id))
     except Exception:
         raise
 
     else:
         if profile:
-            _invoke_aws_stack(self, nodes, aws_account_id, regions=regions, profile=profile)
+            _invoke_aws_stack(self, result, aws_account_id, regions=regions, profile=profile)
         elif aws_id and aws_secret:
-            _invoke_aws_stack(self, nodes, aws_account_id, regions=regions, aws_id=aws_id, aws_secret=aws_secret)
+            _invoke_aws_stack(self, result, aws_account_id, regions=regions, aws_id=aws_id, aws_secret=aws_secret)
 
 
 def _get_aws_profiles(self):
@@ -147,8 +146,7 @@ def get_accounts_aws(self, filter=""):
         variables = {
             "filter": filter
         }
-        request = self._query(query_name, variables)
-        return self._dump_nodes(request)
+        return self._query(query_name, variables)
     except Exception:
         raise
 
@@ -167,8 +165,7 @@ def get_accounts_gcp(self, filter=""):
         variables = {
             "filter": filter
         }
-        request = self._query(query_name, variables)
-        return self._dump_nodes(request)
+        return self._query(query_name, variables)
     except Exception:
         raise
 
@@ -187,8 +184,7 @@ def get_accounts_azure(self, filter=""):
         variables = {
             "filter": filter
         }
-        request = self._query(query_name, variables)
-        return self._dump_nodes(request)
+        return self._query(query_name, variables)
     except Exception:
         raise
 
@@ -207,8 +203,7 @@ def get_accounts_aws_detail(self, filter):
         variables = {
             "filter": filter
         }
-        request = self._query(query_name, variables)
-        return self._dump_nodes(request)
+        return self._query(query_name, variables)
     except Exception:
         raise
 
@@ -256,9 +251,8 @@ def _disable_account_aws(self, polaris_account_id):
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(query_name, variables)
-
-        monitor = self._monitor_task(self._dump_nodes(request))
+        result = self._query(query_name, variables)
+        monitor = self._monitor_task(result)
         if monitor['status'] != 'SUCCEEDED':
             raise Exception("Failed to disable account")
     except Exception:
@@ -276,8 +270,7 @@ def _invoke_account_delete_aws(self, polaris_account_id):
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(query_name, variables)
-        return self._dump_nodes(request)
+        return self._query(query_name, variables)
     except Exception:
         raise
 
@@ -293,8 +286,7 @@ def _commit_account_delete_aws(self, polaris_account_id):
         variables = {
             "polaris_account_id": polaris_account_id
         }
-        request = self._query(query_name, variables)
-        return self._dump_nodes(request)
+        return self._query(query_name, variables)
     except Exception:
         raise
 
@@ -407,8 +399,7 @@ def _update_account_aws_initiate(self, _feature, _polaris_account_id):
             "aws_native_protection_feature": [_feature]
         }
         self._pp.pprint(_variables)
-        _request = self._query(_query_name, _variables)
-        return self._dump_nodes(_request, _query_name)
+        return self._query(_query_name, _variables)
     except Exception as e:
         print(e)
 

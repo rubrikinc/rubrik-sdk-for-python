@@ -44,13 +44,12 @@ def get_sla_domains(self, sla_domain_name=""):
                 "text": sla_domain_name
             }
         }
-        request = self._query(query_name, variables)
-        request_nodes = self._dump_nodes(request)
+        response = self._query(query_name, variables)
         if sla_domain_name:
-            for node in request_nodes:
+            for node in response:
                 if node['name'] == sla_domain_name:
                     return node
-        return request_nodes
+        return response
     except Exception:
         raise
 
@@ -69,24 +68,23 @@ def submit_on_demand(self, object_ids, sla_id, wait=False):
         list -- List of errors if any occurred
     """
     from rubrik_polaris.exceptions import RequestException
-
+    print(object_ids)
     try:
         mutation_name = "core_snappable_on_demand"
         variables = {
             "objectIds": object_ids,
             "slaId": sla_id
         }
-        request = self._query(mutation_name, variables)
-        result = self._dump_nodes(request)
+        response = self._query(mutation_name, variables)
 
         results = []
 
-        if result['errors']:
-            for error_object in result['errors']:
+        if response['errors']:
+            for error_object in response['errors']:
                 results.append(error_object)
 
         if wait:
-            results = self._monitor_task(result['taskchainUuids'])
+            results = self._monitor_task(response['taskchainUuids'])
 
         # TODO: find a better way to report errors per uuid
 
@@ -113,8 +111,8 @@ def submit_assign_sla(self, object_ids, sla_id):
             "objectIds": object_ids,
             "slaId": sla_id
         }
-        request = self._query(None, self._graphql_query[mutation_name], variables)
-        return self._dump_nodes(request)
+        response = self._query(None, self._graphql_query[mutation_name], variables)
+        return response
     except Exception:
         raise
 
@@ -135,9 +133,7 @@ def get_task_status(self, task_chain_id):
         variables = {
             "filter": task_chain_id
         }
-        request = self._query(query_name, variables)
-        response = self._dump_nodes(request)
-
+        response = self._query(query_name, variables)
         return response['taskchain']['state']
     except Exception:
         raise
@@ -164,8 +160,7 @@ def get_snapshots(self, snappable_id, **kwargs):
         if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] == 'latest':
             variables['first'] = 1
 
-        request = self._query(None, self._graphql_query[query_name], variables)
-        response = self._dump_nodes(request)
+        response = self._query(query_name, variables)
 
         if len(response) == 0:
             return {}
@@ -181,17 +176,23 @@ def get_snapshots(self, snappable_id, **kwargs):
                     snapshot_comparison[abs(parsed_recovery_point - parsed_snapshot_date)] = snapshot
 
         if kwargs and 'recovery_point' in kwargs and kwargs['recovery_point'] != 'latest':
-            return snapshot_comparison[min(snapshot_comparison)]
-
-        return response
+            return snapshot_comparison[min(snapshot_comparison)][0]
+        return response[0]
     except Exception:
         raise
 
-def get_event_series_list(self):
+
+def get_event_series_list(self, object_type=[], status=[], activity_type=[], severity=[], cluster_ids=[], start_date=None, end_date = None):
     """Retrieve Events from Polaris
 
     Arguments:
-        object_type {str} -- Object Type
+        object_type {[str]} -- Array of Object Types
+        status {[str]} -- Array of Event Status
+        activity_type {[str]} -- Array of Activity Types
+        severity {[str]} -- Array of severities
+        cluster_ids {[UUID]} -- Array of Cluster IDs
+        start_date {datetime} -- Timestamp to start return set from
+        end_date {datetime} -- Timestamp to end return set from
 
     Returns:
         arr of dict -- An array of dictionaries of Event Data
@@ -200,20 +201,20 @@ def get_event_series_list(self):
         query_name = "core_event_series_list"
         variables = {
             "filters": {
-                "objectType": [],
-                "lastActivityStatus": [],
-                "lastActivityType": [],
-                "severity": [],
+                "objectType": object_type,
+                "lastActivityStatus": status,
+                "lastActivityType": activity_type,
+                "severity": severity,
                 "cluster": {
-                    "id": [],
+                    "id": cluster_ids,
                 },
-                "lastUpdated_gt": "2021-01-06",
+                "lastUpdated_gt": start_date,
+                "lastUpdated_lt": end_date,
                 "objectName": ""
-            },
+            }
         }
-        request = self._query(query_name, variables)
-        print("Returned Objects: {}".format(len(request)))
-        return request
+        response = self._query(query_name, variables)
+        return response
     except Exception:
         raise
 

@@ -52,12 +52,10 @@ def get_storage_object_ids_ebs(self, match_all=True, **kwargs):
                             num_unmatched_criteria -= 1
                 elif key in volume and volume[key] == kwargs[key]:
                     num_unmatched_criteria -= 1
-
             if match_all and num_unmatched_criteria == 0:
                 object_ids.append(volume['id'])
             elif not match_all and num_criteria > num_unmatched_criteria >= 1:
                 object_ids.append(volume['id'])
-
         return object_ids
     except Exception:
         raise
@@ -71,7 +69,6 @@ def get_storage_ebs(self):
     """
     try:
         query_name = "storage_aws_ebs"
-        request = self._query(query_name, None)
-        return self._dump_nodes(request)
+        return self._query(query_name, None)
     except Exception:
         raise

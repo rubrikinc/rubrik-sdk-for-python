@@ -33,14 +33,10 @@ def _query(self, query_name=None, variables=None, timeout=60):
         operation_name = "SdkPython" + ''.join(w[:1].upper() + w[1:] for w in query_name.split('_'))
         query = re.sub("RubrikPolarisSDKRequest", operation_name, self._graphql_query[query_name])
         gql_query_name = (self._graphql_file_type_map[query_name])[1]
-        out_data = []
         start = True
-        while start or api_response['data'][gql_query_name]['pageInfo']['hasNextPage']:
-            if start:
-                start = False
-            else:
+        while start or ('pageInfo' in api_response['data'][gql_query_name] and api_response['data'][gql_query_name]['pageInfo']['hasNextPage']):
+            if not start:
                 variables['after'] = api_response['data'][gql_query_name]['pageInfo']['endCursor']
-                print("Next Page {}".format(variables['after']))
             api_request = requests.post(
                 "{}/graphql".format(self._baseurl),
                 verify=False,
@@ -58,9 +54,13 @@ def _query(self, query_name=None, variables=None, timeout=60):
                 raise RequestException(api_response['message'])
             else:
                 api_request.raise_for_status()
-            # self._pp.pprint(self._dump_nodes(api_response))
-            out_data += self._dump_nodes(api_response)
-            print(len(out_data))
+
+            if start:
+                out_data = self._dump_nodes(api_response)
+                start = False
+            else:
+                out_data += self._dump_nodes(api_response)
+
         return out_data
 
     except requests.exceptions.RequestException as request_err:
