@@ -32,26 +32,36 @@ def _query(self, query_name=None, variables=None, timeout=60):
     try:
         operation_name = "SdkPython" + ''.join(w[:1].upper() + w[1:] for w in query_name.split('_'))
         query = re.sub("RubrikPolarisSDKRequest", operation_name, self._graphql_query[query_name])
+        gql_query_name = (self._graphql_file_type_map[query_name])[1]
+        out_data = []
+        start = True
+        while start or api_response['data'][gql_query_name]['pageInfo']['hasNextPage']:
+            if start:
+                start = False
+            else:
+                variables['after'] = api_response['data'][gql_query_name]['pageInfo']['endCursor']
+                print("Next Page {}".format(variables['after']))
+            api_request = requests.post(
+                "{}/graphql".format(self._baseurl),
+                verify=False,
+                headers=self._headers,
+                json={
+                    "operationName": operation_name,
+                    "variables": variables,
+                    "query": "{}".format(query)
+                },
+                timeout=timeout
+            )
+            api_response = api_request.json()
 
-        api_request = requests.post(
-            "{}/graphql".format(self._baseurl),
-            verify=False,
-            headers=self._headers,
-            json={
-                "operationName": operation_name,
-                "variables": variables,
-                "query": "{}".format(query)
-            },
-            timeout=timeout
-        )
-
-        api_response = api_request.json()
-        if 'code' in api_response and 'message' in api_response and api_response['code'] >= 400:
-            raise RequestException(api_response['message'])
-        else:
-            api_request.raise_for_status()
-
-        return api_response
+            if 'code' in api_response and 'message' in api_response and api_response['code'] >= 400:
+                raise RequestException(api_response['message'])
+            else:
+                api_request.raise_for_status()
+            # self._pp.pprint(self._dump_nodes(api_response))
+            out_data += self._dump_nodes(api_response)
+            print(len(out_data))
+        return out_data
 
     except requests.exceptions.RequestException as request_err:
         raise RequestException(request_err)

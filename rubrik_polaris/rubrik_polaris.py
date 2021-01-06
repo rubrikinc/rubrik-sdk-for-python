@@ -28,7 +28,7 @@ from .exceptions import RequestException
 class PolarisClient:
     # Public
     from .lib.common.core import get_sla_domains, submit_on_demand, submit_assign_sla, get_task_status
-    from .lib.common.core import get_snapshots
+    from .lib.common.core import get_snapshots, get_event_series_list
     from .lib.accounts import get_accounts_azure, get_accounts_gcp
     from .lib.accounts import get_accounts_aws, get_accounts_aws_detail, get_account_aws_native_id
     from .lib.accounts import add_account_aws, delete_account_aws

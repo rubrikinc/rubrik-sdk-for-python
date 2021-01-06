@@ -1,0 +1,30 @@
+query RubrikPolarisSDKRequest($after: String, $filters: ActivitySeriesFilterInput, $first: Int, $sortBy: ActivitySeriesSortByEnum, $sortOrder: SortOrderEnum) {
+    activitySeriesConnection(after: $after, first: $first, filters: $filters, sortBy: $sortBy, sortOrder: $sortOrder) {
+        edges {
+            node {
+                cluster {
+                    id
+                    name
+                    __typename
+                }
+                activityConnection(first: 1) {
+                    nodes {
+                        id
+                        message
+                        __typename
+                    }
+                    __typename
+                }
+                __typename
+            }
+            __typename
+        }
+        pageInfo {
+            endCursor
+            hasNextPage
+            hasPreviousPage
+            __typename
+        }
+        __typename
+    }
+}

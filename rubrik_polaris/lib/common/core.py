@@ -186,3 +186,34 @@ def get_snapshots(self, snappable_id, **kwargs):
         return response
     except Exception:
         raise
+
+def get_event_series_list(self):
+    """Retrieve Events from Polaris
+
+    Arguments:
+        object_type {str} -- Object Type
+
+    Returns:
+        arr of dict -- An array of dictionaries of Event Data
+    """
+    try:
+        query_name = "core_event_series_list"
+        variables = {
+            "filters": {
+                "objectType": [],
+                "lastActivityStatus": [],
+                "lastActivityType": [],
+                "severity": [],
+                "cluster": {
+                    "id": [],
+                },
+                "lastUpdated_gt": "2021-01-06",
+                "objectName": ""
+            },
+        }
+        request = self._query(query_name, variables)
+        print("Returned Objects: {}".format(len(request)))
+        return request
+    except Exception:
+        raise
+
