@@ -51,6 +51,10 @@ def _query(self, query_name=None, variables=None, timeout=60):
         else:
             api_request.raise_for_status()
 
+        # See if we need to page, and allow for a true returned limit defined by the user.
+        if api_response['data'][(self._graphql_file_type_map[query_name])[1]]['pageInfo']['hasNextPage']:
+            print(api_response['data'][(self._graphql_file_type_map[query_name])[1]]['pageInfo']['endCursor'])
+
         return api_response
 
     except requests.exceptions.RequestException as request_err:
