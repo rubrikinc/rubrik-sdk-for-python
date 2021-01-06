@@ -30,6 +30,8 @@ def create_sla(self, name, hourly_frequency=None, hourly_retention=None, daily_f
 | starttime_hour  | int | (CDM 5.0+) Starting hour of allowed backup window.  |  | None |
 | starttime_min  | int | (CDM 5.0+) Starting minute of allowed backup window. When populated, you must also provide a `starttime_min`.  |  | None |
 | duration_hours  | int | (CDM 5.0+) Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`.  |  | None |
+| replication_target  | str  | (CDM 5.0+) Name of the replication target cluster. When populated, you must also provide `replication_retention_in_days`.  |  | None |
+| replication_retention_in_days  | int  | (CDM 5.0+) Number of days to retain backup on target cluster. When populated, you must also provide `replication_target`.  |  | None |
 | timeout  | str | The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error.  |  | 15 |
 
 ## Returns
