@@ -93,17 +93,17 @@ except Exception as err:
 # pp.pprint(rubrik.submit_assign_sla( rubrik.get_compute_object_ids_ec2(region = "US_WEST_2"), gold_sla_domain_id))
 
 ### Event interface
-# todays_failed_events = rubrik.get_event_series_list(cluster_ids=['603109f2-eb30-4da8-9389-911d66abb524'], status=["Failure"], start_date='2020-12-31', end_date='2021-01-02')
-# print("Returned events : {}".format(len(todays_failed_events)))
+todays_failed_events = rubrik.get_event_series_list(cluster_ids=['603109f2-eb30-4da8-9389-911d66abb524'], status=["Failure"], start_date='2021-01-01', end_date='2021-01-02')
+print("Returned events : {}".format(len(todays_failed_events)))
 
 ### Basic event summaries
-# summary = {}
-# for event in todays_failed_events:
-#     if event['lastActivityType'] in summary:
-#         summary[event['lastActivityType']] += 1
-#     else:
-#         summary[event['lastActivityType']] = 1
-# pp.pprint(summary)
+summary = {}
+for event in todays_failed_events:
+    if event['lastActivityType'] in summary:
+        summary[event['lastActivityType']] += 1
+    else:
+        summary[event['lastActivityType']] = 1
+pp.pprint(summary)
 
 # Summarize further
 # summary = {}
