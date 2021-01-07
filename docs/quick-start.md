@@ -52,7 +52,7 @@ Once set, the `rubrik_cdm.Connect()` function will automatically utilize the dat
 
 Although the use of environment variables are recommended, there may be scenarios where directly sending credentials to the `rubrik_cdm.Connect()` function as parameters makes sense. When arguments are provided, any environment variable information, populated or unpopulated, is ignored. To pass connection and credential information, simply call the `rubrik_cdm.connect()` function, passing the node IP, username, and password as follows:
 
-```
+```python
 node_ip = "192.168.0.100"
 username = "user@domain.com"
 password = "SecretPassword"
@@ -62,7 +62,7 @@ rubrik = rubrik_cdm.Connect(node_ip, username, password)
 
 Or by passing the node IP and API Token as follows:
 
-```
+```python
 node_ip = "192.168.0.100"
 api_token = "jf2jma02k3anms0"
 
@@ -79,7 +79,7 @@ Mixing the usage of both environment and hard coded variables is supported. The 
 
 The Rubrik SDK for Python utilizes the `rubrik_cdm.Connect()`function as a mechanism to provide credentials to  Rubrik CDM. `rubrik_cdm.Connect()` only needs to be called once, assigning the response to a variable to be used for subsequent calls throughout the remainder of the Python session. To initiate the function, first import the `rubrik_cdm` package and assign the response of `rubrik_cdm.Connect()` to a variable as follows:
 
-```
+```python
 import rubrik_cdm
 rubrik = rubrik_cdm.Connect()
 ```
@@ -89,7 +89,7 @@ rubrik = rubrik_cdm.Connect()
 
 Any subsequent calls to methods or functions within the rubrik_cdm package are now executed through the context of the variable used to store the response from the Connect() method. For example, to retrieve the VMware VMs within the Gold SLA Domain the following code is used:
 
-```
+```python
 import rubrik_cdm
 rubrik = rubrik_cdm.Connect()
 print rubrik.get_sla_objects("Gold","VMware")
@@ -111,7 +111,7 @@ https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warningsInsecur
 
 This warning may be suppressed utilizing the `urllib3` library and inserting the following code within your script:
 
-```
+```python
 import rubrik_cdm
 import urllib3
 
@@ -175,7 +175,7 @@ The following code will walk through a number of real-world examples of protecti
 
 Create a file named `vmwarevms.py` in your working directory and copy in the following code:
 
-```
+```python
 import rubrik_cdm
 import urllib3
 
@@ -251,19 +251,6 @@ Once `vmwarevms.py` is saved within the working directory execute the code with 
 python vmwarevms.py
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### Sample Syntax - Physical Host Operations
 
 The following code will walk through a number of real-world examples of protecting physical Windows and Linux hosts. For a complete listing of available functionality see the complete Rubrik SDK for Python documentation.
@@ -271,7 +258,7 @@ Setting up the Sample Workflow
 
 Create a file named `physicalhosts.py` in your working directory and copy in the following code:
 
-```
+```python
 import rubrik_cdm
 import urllib3
 
@@ -337,49 +324,6 @@ Once `physicalhosts.py` is saved within the working directory execute the code w
 python physicalhosts.py
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #### Accessing the Built-in Sample Code
 
 To help accelerate development the Rubrik SDK for Python source contains many files containing common activities often performed against a Rubrik cluster. Sample files may be found on the [Rubrik SDK for Python GitHub page](https://github.com/rubrikinc/rubrik-sdk-for-python/tree/master/sample).
@@ -398,7 +342,7 @@ This guide acts only as a quick start to get up and running with the Rubrik SDK 
 
 The Rubrik SDK for Python supports the majority of the functionality available within the Rubrik CDM. That said, the release cycles between the SDK and Rubrik CDM are not simultaneous. This means there may be times when new features or enhancements are added to the product but methods and functions to utilize them may be missing from the SDK. In these situations Python may be used to make native calls to Rubrik’s RESTful API. The following syntax outlines a common piece of Rubrik functionality, assigning a VM to an SLA Domain, however, it does so by creating raw API requests to Rubrik CDM utilizing the Python requests library:
 
-```
+```python
 import requests
 import json
 import base64
@@ -426,19 +370,19 @@ The Rubrik SDK for Python contains built-in functions and configurations to help
 
 The `rubrik_cdm.Connect()` function contains a built-in, verbose logging mechanism which is disabled by default. To enable the logging mechanism, set the `enable_logging` argument to true when connecting to the Rubrik cluster as follows:
 
-```
+```python
 rubrik = rubrik_cdm.Connect(enable_logging=True)
 ```
 
 The `logging_level` argument can then be used to set the specific logging level you wish to use. The following levels are valid choices:
 
 * `debug` (default value)
-* `critical` 
-* `error` 
-* `warning` 
+* `critical`
+* `error`
+* `warning`
 * `info`
 
-```
+```python
 rubrik = rubrik_cdm.Connect(enable_logging=True, logging_level="info")
 ```
 
