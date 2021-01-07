@@ -66,7 +66,7 @@ Or by passing the node IP and API Token as follows:
 node_ip = "192.168.0.100"
 api_token = "jf2jma02k3anms0"
 
-rubrik = rubrik_cdm.Connect(node_ip, api_token)
+rubrik = rubrik_cdm.Connect(node_ip, api_token=api_token)
 ```
 
 
