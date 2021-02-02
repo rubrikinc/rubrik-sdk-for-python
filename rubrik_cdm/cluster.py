@@ -771,7 +771,7 @@ class Cluster(Api):
 
         self.log(
             "refresh_ahv: Searching the Rubrik cluster for the provided AHV cluster.")
-        ahv_id = self.object_id(nutanix_ahv_ip, "ahv", timeout=timeout)
+        ahv_id = self.object_id(nutanix_ahv_ip, "ahv_cluster", timeout=timeout)
 
         self.log("refresh_ahv: Refresh AHV cluster.")
         api_request = self.post(
