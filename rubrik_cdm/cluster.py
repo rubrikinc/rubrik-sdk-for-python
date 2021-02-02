@@ -763,7 +763,7 @@ class Cluster(Api):
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
 
         Returns:
-            dict -- When wait_for_completion is False, the full API response for `POST /internal/ahv/cluster/{id}/refresh`
+            dict -- When wait_for_completion is False, the full API response for `POST /internal/nutanix/cluster/{id}/refresh`
             dict -- When wait_for_completion is True, the full API response of the job status
         """
 
