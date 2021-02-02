@@ -751,11 +751,11 @@ class Cluster(Api):
 
         return api_request
 
-    def refresh_ahv(self, nutanix_ahv_ip, wait_for_completion=True, timeout=15):
+    def refresh_ahv(self, nutanix_ahv_cluster, wait_for_completion=True, timeout=15):
         """Refresh the metadata for the specified Nutanix AHV cluster.
 
         Arguments:
-            nutanix_ahv_ip {str} -- The IP address or FQDN of the AHV cluster you wish to refesh.
+            nutanix_ahv_cluster {str} -- The name of the AHV cluster you wish to refresh.
 
 
         Keyword Arguments:
@@ -771,7 +771,7 @@ class Cluster(Api):
 
         self.log(
             "refresh_ahv: Searching the Rubrik cluster for the provided AHV cluster.")
-        ahv_id = self.object_id(nutanix_ahv_ip, "ahv_cluster", timeout=timeout)
+        ahv_id = self.object_id(nutanix_ahv_cluster, "ahv_cluster", timeout=timeout)
 
         self.log("refresh_ahv: Refresh AHV cluster.")
         api_request = self.post(
