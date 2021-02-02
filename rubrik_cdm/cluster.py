@@ -775,7 +775,7 @@ class Cluster(Api):
 
         self.log("refresh_ahv: Refresh AHV cluster.")
         api_request = self.post(
-            "internal", "/ahv/cluster/{}/refresh".format(ahv_id), timeout)
+            "internal", "/nutanix/cluster/{}/refresh".format(ahv_id), timeout)
 
         if wait_for_completion:
             return self.job_status(api_request["links"][0]["href"])
