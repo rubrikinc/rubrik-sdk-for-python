@@ -337,6 +337,7 @@ class Data_Management(Api):
             'mssql_availability_group',
             'vcenter',
             'ahv',
+            'ahv_cluster',
             'aws_native',
             'oracle_db',
             'oracle_host',
@@ -417,6 +418,10 @@ class Data_Management(Api):
             "ahv": {
                 "api_version": "internal",
                 "api_endpoint": "/nutanix/vm?primary_cluster_id=local&is_relic=false&name={}".format(object_name)
+            },
+            "ahv_cluster": {
+                "api_version": "internal",
+                "api_endpoint": "/nutanix/cluster?primary_cluster_id=local".format(object_name)
             },
             "aws_native": {
                 "api_version": "internal",
@@ -1691,7 +1696,7 @@ class Data_Management(Api):
         if replication_target is not None:
             replication_target_id = self.object_id(
                 replication_target, "replication_location", timeout=timeout)
-            
+
             # convert remote retention in days to seconds
             replication_retention_in_seconds = replication_retention_in_days * 86400
             config["replicationSpecs"] = [{
@@ -1740,7 +1745,7 @@ class Data_Management(Api):
             if archive_name is not None:
                 keys_to_delete.remove("archivalSpecs")
                 current_sla_details["localRetentionLimit"] = archival_threshold
-            
+
             if starttime_hour is not None:
                 keys_to_delete.remove("allowedBackupWindows")
 
