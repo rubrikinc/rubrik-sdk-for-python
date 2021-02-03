@@ -751,6 +751,37 @@ class Cluster(Api):
 
         return api_request
 
+    def refresh_ahv(self, nutanix_ahv_cluster, wait_for_completion=True, timeout=15):
+        """Refresh the metadata for the specified Nutanix AHV cluster.
+
+        Arguments:
+            nutanix_ahv_cluster {str} -- The name of the AHV cluster you wish to refresh.
+
+
+        Keyword Arguments:
+            wait_for_completion {bool} -- Flag to determine if the function should wait for the refresh to complete before completing. (default: {True})
+            timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+
+        Returns:
+            dict -- When wait_for_completion is False, the full API response for `POST /internal/nutanix/cluster/{id}/refresh`
+            dict -- When wait_for_completion is True, the full API response of the job status
+        """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
+        self.log(
+            "refresh_ahv: Searching the Rubrik cluster for the provided AHV cluster.")
+        ahv_id = self.object_id(nutanix_ahv_cluster, "ahv_cluster", timeout=timeout)
+
+        self.log("refresh_ahv: Refresh AHV cluster.")
+        api_request = self.post(
+            "internal", "/nutanix/cluster/{}/refresh".format(ahv_id), timeout)
+
+        if wait_for_completion:
+            return self.job_status(api_request["links"][0]["href"])
+
+        return api_request
+
     def update_proxy(self, host, protocol, port, username=None, password=None, timeout=15):
         """Update the proxy configuration on the Rubrik cluster.
 
