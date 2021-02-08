@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The `object_id()` function now returns the correct the MSSQL DB and MSSQL Instance. When the object_type is `mssql_instance` the `mssql_host` keyword argument is now required. When the `object_type` is `mssql_db`, both the `mssql_instance` the `mssql_host` keyword arguments are required. 
 - Added all examples to the `object_id()` documentation.
 - Prevent an error from being thrown when passing in an integer value into the `params` keyword argument in the `get()` function ([Issue 239](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/236))
+- Fix MSSQL Recovery Point timestamp validation on Windows OS Python 2 & 3 ([Issue 268](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/268))
 
 ## v2.0.9
 
