@@ -2088,7 +2088,8 @@ class Data_Management(Api):
         Returns:
             dict -- A dictionary with values {'is_recovery_point': bool, 'recovery_timestamp': datetime}.
         """
-
+        epoch = datetime(1970,1,1,0,0,0)
+        
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
 
@@ -2113,7 +2114,7 @@ class Data_Management(Api):
             recovery_date_time = datetime.strptime(
                 recovery_date_time, '%Y-%m-%dT%H:%M')
             # Create recovery timestamp in (ms) as integer from datetime object
-            recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
+            recovery_timestamp = (recovery_date_time - epoch).total_seconds() * 1000
             is_recovery_point = True
         else:
             self.log(
@@ -2129,7 +2130,7 @@ class Data_Management(Api):
             recovery_date_time = datetime.strptime(
                 recovery_date_time, '%Y-%m-%dT%H:%M')
             # Create recovery timestamp in (ms) as integer from datetime object
-            recovery_timestamp = int(recovery_date_time.strftime('%s')) * 1000
+            recovery_timestamp = (recovery_date_time - epoch).total_seconds() * 1000
 
             for range in range_summary['data']:
                 start_str, end_str = [range['beginTime'], range['endTime']]

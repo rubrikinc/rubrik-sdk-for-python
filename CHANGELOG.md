@@ -14,9 +14,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - **Fixed** for any bug fixes.
 - **Security** in case of vulnerabilities.
 
+## Unreleased
+
+### Added
+
+### Changed
+
+### Fixed
+- Fix MSSQL Recovery Point timestamp validation on Windows OS Python 2 & 3 ([Issue 268](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/268))
+
 ## v2.0.10
 
-## Added
+### Added
 
 - `get_sla_objects()` now also supports the following object types: hyper-v, mssql_db, ec2_instance, oracle_db, vcd, managed_volume, ahv, nas_share, linux_and_unix_host, windows_host ([Issue 226](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/226))
 - `object_id()` now supports the `organization`, `organization_role_id`, `organization_admin_role`, and `mssql_availability_group` `object_type`
@@ -24,11 +33,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added `add_organization_protectable_object_sql_server_db()` ([Issue 234](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/234))
 - Added `add_organization_protectable_object_sql_server_availability_group()` ([Issue 234](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/234))
 
-## Changed
+### Changed
 
 - The `create_sla()` function will return a more clear error message when the SLA was found on the Rubrik cluster but with a different configuraiton than the one provided. ([Issue 236](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/236))
 
-## Fixed
+### Fixed
 
 - When calling create_sla() an error will not longer be thrown for frequencies and retentions that have a default None value provided ([Issue 232](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/232))
 - The `object_id()` function now returns the correct the MSSQL DB and MSSQL Instance. When the object_type is `mssql_instance` the `mssql_host` keyword argument is now required. When the `object_type` is `mssql_db`, both the `mssql_instance` the `mssql_host` keyword arguments are required. 
