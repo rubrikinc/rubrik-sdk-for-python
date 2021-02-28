@@ -700,6 +700,7 @@ def test_azure_cloudon_idempotence(rubrik, mocker):
         "application_key",
         "tenant_id",
         "westus",
+        "resource_group"
         "/subscriptions/89b90dec-a6e1-4q9e-bc12-23138bb3cee4/resourceGroups/PythonSDK/providers/Microsoft.Network/virtualNetworks/pythonsdk",
         "subnet_name",
         "security_group_id") == "No change required. The 'archive_name' archival location is already configured for CloudOn."
