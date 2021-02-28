@@ -378,7 +378,7 @@ class Cloud(Api):
         self.log("azure_cloudout: Creating the Azure archive location.")
         return self.post('internal', '/archive/object_store', config)
 
-    def azure_cloudon(self, archive_name, container, storage_account_name, application_id, application_key, tenant_id, region, virtual_network_id, subnet_name, security_group_id, timeout=30):  # pylint: ignore
+    def azure_cloudon(self, archive_name, container, storage_account_name, application_id, application_key, tenant_id, region, resource_group, virtual_network_id, subnet_name, security_group_id, timeout=30):  # pylint: ignore
         """Enable CloudOn for an existing Azure archival location.
 
         Arguments:
@@ -389,6 +389,7 @@ class Cloud(Api):
             application_key {str} -- The key of the application registered in Azure Active Directory.
             tenant_id {str} -- The tenant ID, also known as the directory ID, found under the Azure Active Directory properties.
             region {str} -- The name of the Azure region where the `container` is located. (choices: {westus, westus2, centralus, eastus, eastus2, northcentralus, southcentralus, westcentralus, canadacentral, canadaeast, brazilsouth, northeurope, westeurope, uksouth, ukwest, eastasia, southeastasia, japaneast, japanwest, australiaeast australiasoutheast, centralindia, southindia, westindia, koreacentral, koreasouth})
+            resource_group {str} -- The Azure resource group used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation.
             virtual_network_id {str} -- The Azure virtual network ID used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation.
             subnet_name {str} -- The Azure subnet name used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation.
             security_group_id {str} -- The Azure Security Group ID used by Rubrik cluster to launch a temporary Rubrik instance in Azure for instantiation.
@@ -439,7 +440,7 @@ class Cloud(Api):
 
         config = {}
         config['name'] = archive_name
-        config['objectStoreType'] = 'Azure'
+        # config['objectStoreType'] = 'Azure'
         config['isComputeEnabled'] = True
 
         config['azureComputeSummary'] = {}
@@ -449,6 +450,7 @@ class Cloud(Api):
         config['azureComputeSummary']["region"] = region
         config['azureComputeSummary']["generalPurposeStorageAccountName"] = storage_account_name
         config['azureComputeSummary']["containerName"] = container
+        config['azureComputeSummary']["environment"] = 'AZURE'
 
         config['azureComputeSecret'] = {}
         config['azureComputeSecret']["clientSecret"] = application_key
@@ -456,6 +458,7 @@ class Cloud(Api):
         config['defaultComputeNetworkConfig']['subnetId'] = subnet_name
         config['defaultComputeNetworkConfig']['vNetId'] = virtual_network_id
         config['defaultComputeNetworkConfig']['securityGroupId'] = security_group_id
+        config['defaultComputeNetworkConfig']['resourceGroupId'] = resource_group
 
         redacted_archive_definition = {}
         redacted_archive_definition['name'] = archive_name
