@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added `add_organization_protectable_object_mssql_server_host()` ([Issue 234](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/234))
 - Added `add_organization_protectable_object_sql_server_db()` ([Issue 234](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/234))
 - Added `add_organization_protectable_object_sql_server_availability_group()` ([Issue 234](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/234))
+- Added additional regions to valid_(aws|azure) enums ([Issue 271](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/271))
 
 ### Changed
 
@@ -43,6 +44,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - The `object_id()` function now returns the correct the MSSQL DB and MSSQL Instance. When the object_type is `mssql_instance` the `mssql_host` keyword argument is now required. When the `object_type` is `mssql_db`, both the `mssql_instance` the `mssql_host` keyword arguments are required. 
 - Added all examples to the `object_id()` documentation.
 - Prevent an error from being thrown when passing in an integer value into the `params` keyword argument in the `get()` function ([Issue 239](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/236))
+- Fix Azure CloudOn api failure by adding resource_id
 
 ## v2.0.9
 

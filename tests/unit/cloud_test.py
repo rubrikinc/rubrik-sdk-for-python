@@ -16,7 +16,7 @@ def test_aws_s3_cloudout_invalid_aws_region(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The `aws_region` must be one of the following: ['ap-south-1', 'ap-northeast-2', 'ap-southeast-1', 'ap-southeast-2', 'ap-northeast-1', 'ca-central-1', 'cn-north-1', 'cn-northwest-1', 'eu-central-1', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'sa-east-1', 'us-gov-west-1', 'us-west-1', 'us-east-1', 'us-east-2', 'us-west-2']"
+    assert error_message == "The `aws_region` must be one of the following: ['us-gov-east-1', 'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'eu-central-1', 'eu-north-1', 'eu-south-1', 'ap-east-1', 'ap-south-1', 'ap-southeast-1', 'ap-southeast-2', 'ap-northeast-1', 'ap-northeast-2', 'sa-east-1', 'cn-north-1', 'cn-northwest-1', 'ca-central-1', 'af-south-1', 'me-south-1']"
 
 
 def test_aws_s3_cloudout_invalid_storage_class(rubrik):
@@ -647,7 +647,7 @@ def test_azure_cloudon_invalid_region(rubrik):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The `region` must be one of the following: ['westus', 'westus2', 'centralus', 'eastus', 'eastus2', 'northcentralus', 'southcentralus', 'westcentralus', 'canadacentral', 'canadaeast', 'brazilsouth', 'northeurope', 'westeurope', 'uksouth', 'ukwest', 'eastasia', 'southeastasia', 'japaneast', 'japanwest', 'australiaeast', 'australiasoutheast', 'centralindia', 'southindia', 'westindia', 'koreacentral', 'koreasouth']"
+    assert error_message == "The `region` must be one of the following: ['westus', 'westus2', 'centralus', 'eastus', 'eastus2', 'northcentralus', 'southcentralus', 'westcentralus', 'canadacentral', 'canadaeast', 'brazilsouth', 'northeurope', 'westeurope', 'uksouth', 'ukwest', 'francecentral', 'francesouth', 'eastasia', 'southeastasia', 'japaneast', 'japanwest', 'australiaeast', 'australiasoutheast', 'australiacentral', 'australiacentral2', 'centralindia', 'southindia', 'westindia', 'koreacentral', 'koreasouth', 'chinanorth', 'chinaeast', 'chinanorth2', 'chinaeast2', 'germanycentral', 'germanynortheast', 'usgovvirginia', 'usgoviowa', 'usgovarizona', 'usgovtexas', 'usdodeast', 'usdodcentral']"
 
 
 def test_azure_cloudon_idempotence(rubrik, mocker):
@@ -872,7 +872,7 @@ def test_add_aws_native_account_invalid_aws_regionss(rubrik, mocker):
 
     error_message = error.value.args[0]
 
-    assert error_message == "The list `aws_regions` may only contain the following values: ['ap-south-1', 'ap-northeast-3', 'ap-northeast-2', 'ap-southeast-1', 'ap-southeast-2', 'ap-northeast-1', 'ca-central-1', 'cn-north-1', 'cn-northwest-1', 'eu-central-1', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'us-west-1', 'us-east-1', 'us-east-2', 'us-west-2']"
+    assert error_message == "The list `aws_regions` may only contain the following values: ['us-gov-east-1', 'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2', 'eu-west-1', 'eu-west-2', 'eu-west-3', 'eu-central-1', 'eu-north-1', 'eu-south-1', 'ap-east-1', 'ap-south-1', 'ap-southeast-1', 'ap-southeast-2', 'ap-northeast-1', 'ap-northeast-2', 'sa-east-1', 'cn-north-1', 'cn-northwest-1', 'ca-central-1', 'af-south-1', 'me-south-1']"
 
 
 def test_add_aws_native_account_invalid_regional_bolt_network_configs_list(rubrik, mocker):
