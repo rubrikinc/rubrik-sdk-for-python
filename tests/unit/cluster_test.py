@@ -1053,7 +1053,16 @@ def test_create_user(rubrik, mocker):
 
     def mock_post_internal_user():
         return {
-            "data": ""
+            "id": "string",
+            "authDomainId": "string",
+            "username": "username",
+            "firstName": "string",
+            "lastName": "string",
+            "emailAddress": "string",
+            "contactNumber": "string",
+            "createdById": "string",
+            "createTime": "string",
+            "mfaServerId": "string"
         }
 
     mock_get = mocker.patch('rubrik_cdm.Connect.get',
