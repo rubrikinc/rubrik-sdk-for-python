@@ -874,8 +874,8 @@ class Cluster(Api):
 
         self.log("create_user: Searching for the current users on the Rubrik cluster")
         current_users = self.get(
-            "internal", "/user?username={}".format(username), timeout=timeout)
-        if len(current_users) > 0:
+            "v1", "/principal?name={}".format(username), timeout=timeout)
+        if len(current_users["data"]) > 0:
             return "No change required. The user '{}' already exists on the Rubrik cluster.".format(username)
 
         config = {}
