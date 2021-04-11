@@ -1055,6 +1055,7 @@ def test_create_user(rubrik, mocker):
         return {
             "id": "string",
             "authDomainId": "string",
+            "data": "",
             "username": "username",
             "firstName": "string",
             "lastName": "string",
