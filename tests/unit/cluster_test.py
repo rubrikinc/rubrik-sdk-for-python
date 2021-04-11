@@ -1024,18 +1024,17 @@ def test_refresh_vcenter_wait_for_completion(rubrik, mocker):
 def test_create_user_idempotence(rubrik, mocker):
 
     def mock_get_internal_user():
-        return [
-            {
-                "id": "string",
-                "authDomainId": "string",
-                "username": "string",
-                "firstName": "string",
-                "lastName": "string",
-                "emailAddress": "string",
-                "contactNumber": "string",
-                "mfaServerId": "string"
-            }
-        ]
+        return {
+            "id": "string",
+            "authDomainId": "string",
+            "data": "blah"
+            "username": "string",
+            "firstName": "string",
+            "lastName": "string",
+            "emailAddress": "string",
+            "contactNumber": "string",
+            "mfaServerId": "string"
+        }
 
     mock_get = mocker.patch('rubrik_cdm.Connect.get',
                             autospec=True, spec_set=True)
@@ -1048,14 +1047,9 @@ def test_create_user_idempotence(rubrik, mocker):
 def test_create_user(rubrik, mocker):
 
     def mock_get_internal_user():
-        return [
-            {
+        return {
                 "data": "string"
-            },
-            {
-                "data": "string"
-            }
-        ]
+        }
 
     def mock_post_internal_user():
         return {
@@ -1079,8 +1073,8 @@ def test_create_user(rubrik, mocker):
                              autospec=True, spec_set=True)
     mock_post.return_value = mock_post_internal_user()
 
-    #assert rubrik.create_user(
-    #    "username", "password") == mock_post_internal_user()
+    assert rubrik.create_user(
+        "username", "password") == mock_post_internal_user()
 
 
 def test_read_only_authorization_minimum_installed_cdm_version(rubrik, mocker):
