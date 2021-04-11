@@ -1049,9 +1049,7 @@ def test_create_user(rubrik, mocker):
 
     def mock_get_internal_user():
         return {
-            "hasMore": false,
-            "data": [],
-            "total": 0
+            "data": ""
         }
 
     def mock_post_internal_user():
