@@ -1048,12 +1048,12 @@ def test_create_user(rubrik, mocker):
 
     def mock_get_internal_user():
         return {
-            "data": None
+            "data": ""
         }
 
     def mock_post_internal_user():
         return {
-            "data": None
+            "data": ""
         }
 
     mock_get = mocker.patch('rubrik_cdm.Connect.get',
