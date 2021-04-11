@@ -1048,7 +1048,7 @@ def test_create_user(rubrik, mocker):
 
     def mock_get_internal_user():
         return {
-                "data": "string"
+            "data": None
         }
 
     def mock_post_internal_user():
