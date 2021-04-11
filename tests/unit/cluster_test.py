@@ -1027,7 +1027,7 @@ def test_create_user_idempotence(rubrik, mocker):
         return {
             "id": "string",
             "authDomainId": "string",
-            "data": "blah"
+            "data": "blah",
             "username": "string",
             "firstName": "string",
             "lastName": "string",
