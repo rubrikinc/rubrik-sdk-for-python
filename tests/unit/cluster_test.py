@@ -1048,13 +1048,16 @@ def test_create_user_idempotence(rubrik, mocker):
 def test_create_user(rubrik, mocker):
 
     def mock_get_internal_user():
-        return []
+        return {
+            "hasMore": false,
+            "data": [],
+            "total": 0
+        }
 
     def mock_post_internal_user():
         return {
             "id": "string",
             "authDomainId": "string",
-            "data": 'string',
             "username": "username",
             "firstName": "string",
             "lastName": "string",
