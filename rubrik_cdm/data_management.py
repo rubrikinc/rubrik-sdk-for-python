@@ -2103,16 +2103,8 @@ class Data_Management(Api):
                 raise InvalidParameterException(
                     "The database with ID {} does not have any existing snapshots.".format(mssql_id))
             # Parsing latest snapshot time string value to a datetime object as YYYY-MM-DDTHH:MM
-            data_str = datetime.strptime(
-                latest_date_time[:16], '%Y-%m-%dT%H:%M')
-            # Create date & time strings from datetime object as MM-DD-YYYY & HH:MM AM/PM
-            date_str, time_str = [data_str.strftime(
-                '%m-%d-%Y'), data_str.strftime('%I:%M %p')]
-            # Convert the date & time to cluster timezone, see _date_time_conversion function for details
-            recovery_date_time = self._date_time_conversion(date_str, time_str)
-            # Parse again to datetime object
             recovery_date_time = datetime.strptime(
-                recovery_date_time, '%Y-%m-%dT%H:%M')
+                latest_date_time[:16], '%Y-%m-%dT%H:%M')
             # Create recovery timestamp in (ms) as integer from datetime object
             recovery_timestamp = (recovery_date_time - epoch).total_seconds() * 1000
             is_recovery_point = True
