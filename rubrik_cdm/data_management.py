@@ -1037,7 +1037,7 @@ class Data_Management(Api):
             self.log(
                 "vsphere_live_mount: Converting the provided date/time into UTC.")
             snapshot_date_time = self._date_time_conversion(date, time)
-            print(f'LOOOOOOOK: {snapshot_date_time}')
+
             current_snapshots = {}
 
             for snapshot in vm_summary['snapshots']:
