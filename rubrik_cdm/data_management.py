@@ -1174,7 +1174,7 @@ class Data_Management(Api):
             date {str} -- A date value formated as `Month-Day-Year` (ex: 1/15/2014).
             time {str} -- A time value formated as `Hour:Minute:Second AM/PM` (ex: 1:30:01 AM).
         Returns:
-            str -- A combined date/time value formated as `Year-Month-DayTHour:Minute` where Hour:Minute is on the 24-hour clock (ex : 2014-1-15T01:30).
+            str -- A combined date/time value formated as `Year-Month-DayTHour:Minute:Second` where Hour:Minute:Second is on the 24-hour clock (ex : 2014-1-15T01:30:01).
         """
 
         if self.function_name == "":
