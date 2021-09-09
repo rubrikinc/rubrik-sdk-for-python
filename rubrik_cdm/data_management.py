@@ -1000,7 +1000,7 @@ class Data_Management(Api):
             vm_name {str} -- The name of the vSphere VM to Live Mount.
         Keyword Arguments:
             date {str} -- The date of the snapshot you wish to Live Mount formated as `Month-Day-Year` (ex: 1-15-2014). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
-            time {str} -- The time of the snapshot you wish to Live Mount formated as `Hour:Minute:Second AM/PM` (ex: 1:30:01 AM). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
+            time {str} -- The time of the snapshot you wish to Live Mount formated as `Hour:Minute AM/PM` (ex: 1:30 AM). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
             host {str} -- The hostname or IP address of the ESXi host to Live Mount the VM on. By default, the current host will be used. (default: {'current'})
             remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Live Mounted VM. Set to `True` to remove all network interfaces. (default: {False})
             power_on {bool} -- Flag that determines whether the VM should be powered on after the Live Mount. Set to `True` to power on the VM. Set to `False` to mount the VM but not power it on. (default: {True})
@@ -1037,7 +1037,7 @@ class Data_Management(Api):
             self.log(
                 "vsphere_live_mount: Converting the provided date/time into UTC.")
             snapshot_date_time = self._date_time_conversion(date, time)
-
+            print(f'LOOOOOOOK: {snapshot_date_time}')
             current_snapshots = {}
 
             for snapshot in vm_summary['snapshots']:
@@ -1078,7 +1078,7 @@ class Data_Management(Api):
             vm_name {str} -- The name of the VM to Instantly Recover.
         Keyword Arguments:
             date {str} -- The date of the snapshot you wish to Instantly Recover formated as `Month-Day-Year` (ex: 1-15-2014). If 'latest' is specified, the last snapshot taken will used. (default: {'latest'})
-            time {str} -- The time of the snapshot you wish to Instantly Recover formated as `Hour:Minute:Second AM/PM`  (ex: 1:30:01 AM). If 'latest' is specified, the last snapshot taken will be used. (default: {'latest'})
+            time {str} -- The time of the snapshot you wish to Instantly Recover formated as `Hour:Minute AM/PM`  (ex: 1:30 AM). If 'latest' is specified, the last snapshot taken will be used. (default: {'latest'})
             host {str} -- The hostname or IP address of the ESXi host to Instantly Recover the VM on. By default, the current host will be used. (default: {'current'})
             remove_network_devices {bool} -- Flag that determines whether to remove the network interfaces from the Instantly Recovered VM. Set to `True` to remove all network interfaces. (default: {False})
             power_on {bool} -- Flag that determines whether the VM should be powered on after Instant Recovery. Set to `True` to power on the VM. Set to `False` to instantly recover the VM but not power it on. (default: {True})
@@ -1183,6 +1183,8 @@ class Data_Management(Api):
         from datetime import datetime
         import pytz
 
+        time_out_seconds = True
+
         # Validate the Date formating
         try:
             datetime.strptime(date, '%m-%d-%Y')
@@ -1193,8 +1195,12 @@ class Data_Management(Api):
         try:
             snapshot_time = datetime.strptime(time, '%I:%M:%S %p')
         except ValueError:
-            raise InvalidParameterException(
-                "The time argument '{}' must be formatd as 'Hour:Minute:Second AM/PM' (ex: 2:57:01 AM).".format(time))
+            try: 
+                snapshot_time = datetime.strptime(time, '%I:%M %p')
+                time_out_seconds = False
+            except ValueError:
+                raise InvalidParameterException(
+                    "The time argument '{}' must be formatd as 'Hour:Minute:Second AM/PM' (ex: 2:57:01 AM) or 'Hour:Minute AM/PM' (ex: 2:57 AM).".format(time))
 
         self.log("_date_time_conversion: Getting the Rubrik cluster timezone.")
         cluster_summary = self.get('v1', '/cluster/me', timeout=timeout)
@@ -1216,7 +1222,10 @@ class Data_Management(Api):
         utc_timezone = pytz.UTC
         snapshot_datetime = snapshot_datetime.astimezone(utc_timezone)
 
-        return snapshot_datetime.strftime('%Y-%m-%dT%H:%M:%S')
+        if time_out_seconds:
+            return snapshot_datetime.strftime('%Y-%m-%dT%H:%M:%S')
+        else:
+            return snapshot_datetime.strftime('%Y-%m-%dT%H:%M')
 
     def pause_snapshots(self, object_name, object_type, timeout=180):
         """Pause all snapshot activity for the provided object.
