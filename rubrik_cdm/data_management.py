@@ -2101,7 +2101,7 @@ class Data_Management(Api):
             except:
                 raise InvalidParameterException(
                     "The database with ID {} does not have any existing snapshots.".format(mssql_id))
-            # Parsing latest snapshot time string value to a datetime object as YYYY-MM-DDTHH:MM
+            # Parsing latest snapshot time string value to a datetime object as YYYY-MM-DDTHH:MM:SS
             recovery_date_time = datetime.strptime(
                 latest_date_time[:19], '%Y-%m-%dT%H:%M:%S')
             # Create recovery timestamp in ISO8601 format from datetime object
@@ -2125,7 +2125,7 @@ class Data_Management(Api):
 
             for range in range_summary['data']:
                 start_str, end_str = [range['beginTime'], range['endTime']]
-                # Parsing the range beginTime and endTime values to a datetime object as YYYY-MM-DDTHH:MM
+                # Parsing the range beginTime and endTime values to a datetime object as YYYY-MM-DDTHH:MM:SS
                 start, end = [datetime.strptime(start_str[:19], '%Y-%m-%dT%H:%M:%S'),
                               datetime.strptime(end_str[:19], '%Y-%m-%dT%H:%M:%S')]
 
