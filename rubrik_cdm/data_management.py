@@ -2691,3 +2691,4 @@ class Data_Management(Api):
 
         self.log('register_vm: Registering the RBS agent.')
         return self.post('v1', '/vmware/vm/{}/register_agent'.format(vm_id), {}, timeout=timeout)
+        
