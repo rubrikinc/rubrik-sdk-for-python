@@ -2104,9 +2104,9 @@ class Data_Management(Api):
                     "The database with ID {} does not have any existing snapshots.".format(mssql_id))
             # Parsing latest snapshot time string value to a datetime object as YYYY-MM-DDTHH:MM
             recovery_date_time = datetime.strptime(
-                latest_date_time[:16], '%Y-%m-%dT%H:%M')
+                latest_date_time[:16], '%Y-%m-%dT%H:%M:%S.%f')
             # Create recovery timestamp in (ms) as integer from datetime object
-            recovery_timestamp = (recovery_date_time - epoch).total_seconds() * 1000
+            recovery_timestamp = recovery_date_time.isoformat(timespec='milliseconds')
             is_recovery_point = True
         else:
             self.log(
@@ -2585,7 +2585,7 @@ class Data_Management(Api):
         else:
             config = {}
             config['recoveryPoint'] = {
-                'timestampMs': recovery_point['recovery_timestamp']}
+                'date': recovery_point['recovery_timestamp']}
             config['targetInstanceId'] = target_instance_id
             config['targetDatabaseName'] = target_database_name
             if target_file_paths is not None:
