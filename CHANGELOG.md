@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 ### Fixed
+- Fix time zone issue when using latest for time/date on sql operations ([Issue 274](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/274))
+- Fix time granularity issue for sql exports ([Issue 278](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/278))
 - Fix MSSQL Recovery Point timestamp validation on Windows OS Python 2 & 3 ([Issue 268](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/268))
 
 ## v2.0.10
