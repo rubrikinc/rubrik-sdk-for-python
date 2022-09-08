@@ -1772,12 +1772,12 @@ class Data_Management(Api):
         else:
             return self.post("v1", "/sla_domain", config, timeout=timeout)
 
-    def update_sla(self, name, should_apply_to_existing_snapshots, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, starttime_hour=None, starttime_min=None, duration_hours=None, replication_target=None, replication_retention_in_days=None, timeout=15):  # pylint: ignore
+    def update_sla(self, name, should_apply_to_existing_snapshots=None, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, starttime_hour=None, starttime_min=None, duration_hours=None, replication_target=None, replication_retention_in_days=None, timeout=15):  # pylint: ignore
         """Update an SLA Domain.
         Arguments:
             name {str} -- The name of the new SLA Domain.
-            should_apply_to_existing_snapshots {bool} -- Determines whether the new configuration retains existing snapshots of data sources that are currently retained by this SLA Domain.
         Keyword Arguments:
+            should_apply_to_existing_snapshots {bool} -- Determines whether the new configuration retains existing snapshots of data sources that are currently retained by this SLA Domain. (default: {None})
             hourly_frequency {int} -- Hourly frequency to take backups. (default: {None})
             hourly_retention {int} -- Number of hours to retain the hourly backups. (default: {None})
             daily_frequency {int} -- Daily frequency to take backups. (default: {None})
@@ -1861,9 +1861,10 @@ class Data_Management(Api):
             raise InvalidParameterException(
                 "The 'replication_target' and 'replication_retention_in_days' parameters must be populated together.")
 
-        if not isinstance(should_apply_to_existing_snapshots, bool):
-            raise InvalidParameterException(
-                "The 'should_apply_to_existing_snapshots' parameter must be boolean.")
+        if v3_sla is True:
+            if not isinstance(should_apply_to_existing_snapshots, bool):
+                raise InvalidParameterException(
+                    "When using CDM version 5.2 or higher, the 'should_apply_to_existing_snapshots' parameter is required and it must be boolean.")
 
         try:
             # object_id() will set sla_already_present to something besides False if the SLA is already on the cluter
