@@ -1772,6 +1772,287 @@ class Data_Management(Api):
         else:
             return self.post("v1", "/sla_domain", config, timeout=timeout)
 
+    def update_sla(self, name, should_apply_to_existing_snapshots=None, hourly_frequency=None, hourly_retention=None, daily_frequency=None, daily_retention=None, monthly_frequency=None, monthly_retention=None, yearly_frequency=None, yearly_retention=None, archive_name=None, retention_on_brik_in_days=None, instant_archive=False, starttime_hour=None, starttime_min=None, duration_hours=None, replication_target=None, replication_retention_in_days=None, timeout=15):  # pylint: ignore
+        """Update an SLA Domain.
+        Arguments:
+            name {str} -- The name of the new SLA Domain.
+        Keyword Arguments:
+            should_apply_to_existing_snapshots {bool} -- Determines whether the new configuration retains existing snapshots of data sources that are currently retained by this SLA Domain. (default: {None})
+            hourly_frequency {int} -- Hourly frequency to take backups. (default: {None})
+            hourly_retention {int} -- Number of hours to retain the hourly backups. (default: {None})
+            daily_frequency {int} -- Daily frequency to take backups. (default: {None})
+            daily_retention {int} -- Number of hours to retain the daily backups. (default: {None})
+            monthly_frequency {int} -- Monthly frequency to take backups. (default: {None})
+            monthly_retention {int} -- Number of hours to retain the monthly backups. (default: {None})
+            yearly_frequency {int} -- Yearly frequency to take backups. (default: {None})
+            yearly_retention {int} -- Number of hours to retain the yearly backups. (default: {None})
+            archive_name {str} -- The optional archive location you wish to configure on the SLA Domain. When populated, you must also provide a `retention_on_brik_in_days`. (default: {None})
+            retention_on_brik_in_days {int} -- The number of days you wish to keep the backups on the Rubrik cluster. When populated, you must also provide a `archive_name`. (default: {None})
+            instant_archive {bool} -- Flag that determines whether or not to enable instant archive. Set to true to enable. (default: {False})
+            starttime_hour {int} -- (CDM 5.0+) Starting hour of allowed backup window. (default: {None})
+            starttime_min {int} -- (CDM 5.0+) Starting minute of allowed backup window. When populated, you must also provide a `starttime_min`. (default: {None})
+            duration_hours {int} -- (CDM 5.0+) Length of allowed backup window. When populated, you must also provide both `startime_min` and `starttime_hour`. (default: {None})
+            replication_target {str} -- (CDM 5.0+) Name of the replication target cluster. When populated, you must also provide `replication_retention_in_days`. (default: {None})
+            replication_retention_in_days {int} -- (CDM 5.0+) Number of days to retain backup on target cluster. When populated, you must also provide `replication_target`. (default: {None})
+            replication_target {str} -- (CDM 5.0+) Name of the replication target cluster. When populated, you must also provide `replication_retention_in_days`. (default: {None})
+            replication_retention_in_days {int} -- (CDM 5.0+) Number of days to retain backup on target cluster. When populated, you must also provide `replication_target`. (default: {None})
+            timeout {str} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {15})
+        Returns:
+            str -- No change required. The 'name' SLA Domain is already configured with the provided configuration.
+            dict -- The full API response for `PATCH /v3/sla_domain/{id}`.
+            dict -- The full API response for `PUT /v1/sla_domain/{id}`.
+        """
+
+        self.function_name = inspect.currentframe().f_code.co_name
+
+        v3_sla = self.minimum_installed_cdm_version("5.2", timeout=timeout)
+
+        all_params = [
+            hourly_frequency,
+            hourly_retention,
+            daily_frequency,
+            daily_retention,
+            monthly_frequency,
+            monthly_retention,
+            yearly_frequency,
+            yearly_retention]
+
+        # Validate all values besides name are ints
+        for param in all_params:
+            if not isinstance(param, int) and param is not None:
+                raise InvalidParameterException(
+                    "All 'frequency' and 'retention' parameters must be integers.")
+
+        if not isinstance(retention_on_brik_in_days, int) and retention_on_brik_in_days is not None:
+            raise InvalidParameterException(
+                "The 'retention_on_brik_in_days' parameter must be integer.")
+
+        # Make sure at least one frequency and retention is populated
+        if all(value is None for value in all_params):
+            raise InvalidParameterException(
+                "You must populate at least one frequency and retention.")
+
+        # Make sure the "time unit" frequency and retention are used together
+        if hourly_frequency is not None and hourly_retention is None or hourly_frequency is None and hourly_retention is not None:
+            raise InvalidParameterException(
+                "The 'hourly_frequency' and 'hourly_retention' parameters must be populated together.")
+
+        if daily_frequency is not None and daily_retention is None or daily_frequency is None and daily_retention is not None:
+            raise InvalidParameterException(
+                "The 'daily_frequency' and 'daily_retention' parameters must be populated together.")
+
+        if monthly_frequency is not None and monthly_retention is None or monthly_frequency is None and monthly_retention is not None:
+            raise InvalidParameterException(
+                "The 'monthly_frequency' and 'monthly_retention' parameters must be populated together.")
+
+        if yearly_frequency is not None and yearly_retention is None or yearly_frequency is None and yearly_retention is not None:
+            raise InvalidParameterException(
+                "The 'yearly_frequency' and 'yearly_retention' parameters must be populated together.")
+
+        if archive_name is not None and retention_on_brik_in_days is None or archive_name is None and retention_on_brik_in_days is not None:
+            raise InvalidParameterException(
+                "The 'archive_name' and 'retention_on_brik_in_days' parameters must be populated together.")
+
+        if starttime_hour is not None and starttime_min is None or duration_hours is None:
+            raise InvalidParameterException(
+                "The 'starttime_hour', 'starttime_min' and 'duration_hours' must be populated together.")
+
+        if replication_target is not None and replication_retention_in_days is None:
+            raise InvalidParameterException(
+                "The 'replication_target' and 'replication_retention_in_days' parameters must be populated together.")
+
+        if v3_sla is True:
+            if not isinstance(should_apply_to_existing_snapshots, bool):
+                raise InvalidParameterException(
+                    "When using CDM version 5.2 or higher, the 'should_apply_to_existing_snapshots' parameter is required and it must be boolean.")
+
+        try:
+            # object_id() will set sla_already_present to something besides False if the SLA is already on the cluter
+            sla_id = self.object_id(name, "sla", timeout=timeout)
+        except InvalidParameterException:
+            sla_id = False
+
+        config = {}
+
+        config["name"] = name
+
+        if v3_sla is True:
+            # create the config for the v3 API
+            config["frequencies"] = {}
+            if hourly_frequency is not None:
+                config["frequencies"]["hourly"] = {}
+                config["frequencies"]["hourly"]["frequency"] = hourly_frequency
+                config["frequencies"]["hourly"]["retention"] = hourly_retention
+
+            if daily_frequency is not None:
+                config["frequencies"]["daily"] = {}
+                config["frequencies"]["daily"]["frequency"] = daily_frequency
+                config["frequencies"]["daily"]["retention"] = daily_retention
+
+            if monthly_frequency is not None:
+                config["frequencies"]["monthly"] = {}
+                config["frequencies"]["monthly"]["dayOfMonth"] = "LastDay"
+                config["frequencies"]["monthly"]["frequency"] = monthly_frequency
+                config["frequencies"]["monthly"]["retention"] = monthly_retention
+
+            if yearly_frequency is not None:
+                config["frequencies"]["yearly"] = {}
+                config["frequencies"]["yearly"]["yearStartMonth"] = "January"
+                config["frequencies"]["yearly"]["dayOfYear"] = "LastDay"
+                config["frequencies"]["yearly"]["frequency"] = yearly_frequency
+                config["frequencies"]["yearly"]["retention"] = yearly_retention
+
+            if starttime_hour is not None:
+                config["allowedBackupWindows"] = []
+                backupWindow = {}
+                backupWindow["startTimeAttributes"] = {}
+                backupWindow["startTimeAttributes"]["minutes"] = starttime_min
+                backupWindow["startTimeAttributes"]["hour"] = starttime_hour
+                backupWindow["durationInHours"] = duration_hours
+                config["allowedBackupWindows"].append(backupWindow)
+
+        else:
+            # Create the config for v1 endpoint
+            frequencies = []
+            if hourly_frequency is not None:
+                frequencies.append({
+                    "timeUnit": "Hourly",
+                    "frequency": hourly_frequency,
+                    "retention": hourly_retention
+                })
+            if daily_frequency is not None:
+                frequencies.append({
+                    "timeUnit": "Daily",
+                    "frequency": daily_frequency,
+                    "retention": daily_retention
+                })
+            if monthly_frequency is not None:
+                frequencies.append({
+                    "timeUnit": "Monthly",
+                    "frequency": monthly_frequency,
+                    "retention": monthly_retention
+                })
+            if yearly_frequency is not None:
+                frequencies.append({
+                    "timeUnit": "Yearly",
+                    "frequency": yearly_frequency,
+                    "retention": yearly_retention
+                })
+            config["frequencies"] = frequencies
+            firstFullAllowedBackupWindows = []
+            firstFullAllowedBackupWindows.append({})
+            if duration_hours is not None:
+                firstFullAllowedBackupWindows[0]["durationInHours"] = duration_hours
+                firstFullAllowedBackupWindows[0]["startTimeAttributes"] = {}
+                firstFullAllowedBackupWindows[0]["startTimeAttributes"]["minutes"] = starttime_min
+                firstFullAllowedBackupWindows[0]["startTimeAttributes"]["hour"] = starttime_hour
+            config["firstFullAllowedBackupWindows"] = firstFullAllowedBackupWindows
+
+        if archive_name is not None:
+            archival_location_id = self.object_id(
+                archive_name, "archival_location", timeout=timeout)
+
+            # convert retention in days to seconds
+            retention_on_brik_in_seconds = retention_on_brik_in_days * 86400
+            if instant_archive is False:
+                archival_threshold = retention_on_brik_in_seconds
+            else:
+                archival_threshold = 1
+
+            config["localRetentionLimit"] = retention_on_brik_in_seconds
+
+            config["archivalSpecs"] = [{
+                "locationId": archival_location_id,
+                "archivalThreshold": archival_threshold
+            }]
+
+        if replication_target is not None:
+            replication_target_id = self.object_id(
+                replication_target, "replication_location", timeout=timeout)
+
+            # convert remote retention in days to seconds
+            replication_retention_in_seconds = replication_retention_in_days * 86400
+            config["replicationSpecs"] = [{
+                "locationId": replication_target_id,
+                "retentionLimit": replication_retention_in_seconds
+            }]
+
+        if sla_id is not False:
+            self.log(
+                "create_sla: Getting the configuration details for the SLA Domain {} already on the Rubrik cluster.".format(name))
+            if v3_sla is True:
+                current_sla_details = self.get(
+                    "v2", "/sla_domain/{}".format(sla_id), timeout=timeout)
+            else:
+                current_sla_details = self.get(
+                    "v1", "/sla_domain/{}".format(sla_id), timeout=timeout)
+
+            keys_to_delete = [
+                "id",
+                "primaryClusterId",
+                "allowedBackupWindows",
+                "archivalSpecs",
+                "replicationSpecs",
+                "numDbs",
+                "numOracleDbs",
+                "numFilesets",
+                "numHypervVms",
+                "numNutanixVms",
+                "numManagedVolumes",
+                "numStorageArrayVolumeGroups",
+                "numWindowsVolumeGroups",
+                "numLinuxHosts",
+                "numShares",
+                "numWindowsHosts",
+                "numVms",
+                "numEc2Instances",
+                "numVcdVapps",
+                "numProtectedObjects",
+                "isDefault",
+                "uiColor",
+                "maxLocalRetentionLimit",
+                "showAdvancedUi",
+                "advancedUiConfig"]
+
+            if archive_name is not None:
+                keys_to_delete.remove("archivalSpecs")
+                current_sla_details["localRetentionLimit"] = archival_threshold
+
+            if starttime_hour is not None:
+                keys_to_delete.remove("allowedBackupWindows")
+
+            if replication_target is not None:
+                keys_to_delete.remove("replicationSpecs")
+
+            for key in keys_to_delete:
+
+                try:
+                    del current_sla_details[key]
+                except KeyError:
+                    pass
+
+            if v3_sla is False:
+                if config == current_sla_details:
+                    return "No change required. The {} SLA Domain is already configured with the provided configuration.".format(
+                        name)
+            else:
+                try:
+                    del current_sla_details["firstFullAllowedBackupWindows"]
+                except KeyError:
+                    pass
+                if config == current_sla_details:
+                    return "No change required. The {} SLA Domain is already configured with the provided configuration.".format(
+                        name)
+        else:
+            raise InvalidParameterException(
+                "The Rubrik cluster doesn't have an SLA Domain named '{}'.".format(name))
+
+        self.log("update_sla: Updating the SLA")
+        if v3_sla is True:
+            return self.patch("v3", "/sla_domain/{}?should_apply_to_existing_snapshots={}".format(sla_id, should_apply_to_existing_snapshots), config, timeout=timeout)
+        else:
+            return self.put("v1", "/sla_domain/{}".format(sla_id), config, timeout=timeout)
+
     def delete_sla(self, name, timeout=15):
         """Delete an SLA from the Rubrik Cluster
         Arguments:
