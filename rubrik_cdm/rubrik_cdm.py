@@ -281,7 +281,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud, Organization):
             api_endpoint {str} -- The endpoint of the Rubrik CDM API to call (ex. /cluster/me).
         """
 
-        valid_api_versions = ['v1', 'v2', 'internal']
+        valid_api_versions = ['v1', 'v2', 'internal', 'v3']
 
         # Validate the API Version
         if api_version not in valid_api_versions:
