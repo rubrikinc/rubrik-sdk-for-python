@@ -99,6 +99,13 @@ For a full list of functions, methods, and their associated arguments see the of
 
 ### Certificate Validation
 
+Certificate validation can be turned on by setting verify=True when connecting the cluster:
+
+````
+import rubrik_cmd
+rubrik = rubrik_cdm.Connect(verify=True)
+```
+
 When connecting to a Rubrik cluster without certificate validation enabled you will receive the following warning message:
 
 ```
