@@ -76,14 +76,14 @@ class Api():
                                                                for (key, val) in params.items())
                 self.log('GET {}'.format(request_url))
                 api_request = requests.get(
-                    request_url, verify=False, headers=header, timeout=timeout)
+                    request_url, verify=self.verify, headers=header, timeout=timeout)
             elif call_type == 'POST':
                 config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(
                     self.node_ip, api_version, api_endpoint)
                 self.log('POST {}'.format(request_url))
                 self.log('Config: {}'.format(config))
-                api_request = requests.post(request_url, verify=False, headers=header, data=config, timeout=timeout)
+                api_request = requests.post(request_url, verify=self.verify, headers=header, data=config, timeout=timeout)
                 self.log('Response: {}'.format(api_request.text))
             elif call_type == 'PATCH':
                 config = json.dumps(config)
@@ -91,14 +91,14 @@ class Api():
                     self.node_ip, api_version, api_endpoint)
                 self.log('PATCH {}'.format(request_url))
                 self.log('Config: {}'.format(config))
-                api_request = requests.patch(request_url, verify=False, headers=header, data=config, timeout=timeout)
+                api_request = requests.patch(request_url, verify=self.verify, headers=header, data=config, timeout=timeout)
             elif call_type == 'PUT':
                 config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(
                     self.node_ip, api_version, api_endpoint)
                 self.log('PUT {}'.format(request_url))
                 self.log('Config: {}'.format(config))
-                api_request = requests.put(request_url, verify=False, headers=header, data=config, timeout=timeout)
+                api_request = requests.put(request_url, verify=self.verify, headers=header, data=config, timeout=timeout)
             elif call_type == 'DELETE':
                 config = json.dumps(config)
                 request_url = "https://{}/api/{}{}".format(
@@ -107,10 +107,10 @@ class Api():
                     request_url = request_url + "?" + '&'.join("{}={}".format(key, val)
                                                                for (key, val) in params.items())
                 self.log('DELETE {}'.format(request_url))
-                api_request = requests.delete(request_url, verify=False, headers=header, data=config, timeout=timeout)
+                api_request = requests.delete(request_url, verify=self.verify, headers=header, data=config, timeout=timeout)
             elif call_type == 'JOB_STATUS':
                 self.log('JOB STATUS for {}'.format(job_status_url))
-                api_request = requests.get(job_status_url, verify=False, headers=header, timeout=timeout)
+                api_request = requests.get(job_status_url, verify=self.verify, headers=header, timeout=timeout)
             elif call_type == 'QUERY':
                 config = json.dumps(config)
                 request_url = "https://{}/api/internal/graphql".format(self.node_ip)
@@ -122,7 +122,7 @@ class Api():
                     self.log('Variables: {}'.format(gql_variables))
                 api_request = requests.post(
                     request_url,
-                    verify=False,
+                    verify=self.verify,
                     headers=header,
                     json={
                         "operationName": gql_operation_name,

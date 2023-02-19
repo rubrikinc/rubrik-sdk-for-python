@@ -52,7 +52,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud, Organization):
         Cloud {class} - This class contains methods for the managment of Cloud related functionality on the Rubrik cluster.
     """
 
-    def __init__(self, node_ip=None, username=None, password=None, api_token=None, enable_logging=False, logging_level="debug"):
+    def __init__(self, node_ip=None, username=None, password=None, api_token=None, enable_logging=False, logging_level="debug", verify=False):
         """Constructor for the Connect class which is used to initialize the class variables.
 
         Keyword Arguments:
@@ -62,6 +62,7 @@ class Connect(Cluster, Data_Management, Physical, Cloud, Organization):
             api_token {str} -- The API Token you wish to use to connect to the Rubrik cluster. If populated, the `username` and `password` fields will be ignored. If a value is not provided we will check for a `rubrik_cdm_token` environment variable.  (default: {None})
             enable_logging {bool} -- Flag to determine if logging will be enabled for the SDK. (default: {False})
             logging_level {str} -- Sets the threshold for logging to the provided to level. Logging messages which are less severe than level will be ignored. (default: {debug}) (choices: {debug, critical, error, warning, info})
+            verify {bool} -- Verify SSL certificates when making API calls. (default: {False})
         """
 
         set_logging = {
@@ -92,6 +93,9 @@ class Connect(Cluster, Data_Management, Physical, Cloud, Organization):
             self.node_ip = node_ip
 
         self.log("Node IP: {}".format(self.node_ip))
+
+        # Verify SSL certificates
+        self.verify = verify
 
         # Initialize empty variable as a placeholder until full IPv6 support is added to Connect()
         self.ipv6_addr = ""
