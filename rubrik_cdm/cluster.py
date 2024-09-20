@@ -22,6 +22,7 @@
 This module contains the Rubrik SDK Cluster class.
 """
 
+import sys
 from .api import Api
 from .exceptions import InvalidParameterException, CDMVersionException, InvalidTypeException
 import inspect
@@ -156,7 +157,7 @@ class Cluster(Api):
             config["caCerts"] = ca_certificate
 
         self.log("configure_replication: Adding cluster behind '{}' as NAT replication target.".format(
-            tgt_gateway))
+            target_gateway))
 
         return self.post("internal", "/replication/target", config, timeout)
 
