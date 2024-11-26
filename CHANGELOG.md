@@ -20,7 +20,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Changed API endpoint and logic for create_user ([Issue 273](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/273))
+
 ### Fixed
+
 - Fix MSSQL Recovery Point timestamp validation on Windows OS Python 2 & 3 ([Issue 268](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/268))
 
 ## v2.0.10
