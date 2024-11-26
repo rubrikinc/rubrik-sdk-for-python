@@ -1172,9 +1172,9 @@ class Data_Management(Api):
         conversion process.
         Arguments:
             date {str} -- A date value formated as `Month-Day-Year` (ex: 1/15/2014).
-            time {str} -- A time value formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+            time {str} -- A time value formated as `Hour:Minute:Second AM/PM` (ex: 1:30:01 AM).
         Returns:
-            str -- A combined date/time value formated as `Year-Month-DayTHour:Minute` where Hour:Minute is on the 24-hour clock (ex : 2014-1-15T01:30).
+            str -- A combined date/time value formated as `Year-Month-DayTHour:Minute:Second` where Hour:Minute:Second is on the 24-hour clock (ex : 2014-1-15T01:30:01).
         """
 
         if self.function_name == "":
@@ -1182,6 +1182,8 @@ class Data_Management(Api):
 
         from datetime import datetime
         import pytz
+
+        time_out_seconds = True
 
         # Validate the Date formating
         try:
@@ -1191,10 +1193,14 @@ class Data_Management(Api):
                 "The date argument '{}' must be formatd as 'Month-Date-Year' (ex: 8-9-2018).".format(date))
         # Validate the Time formating
         try:
-            snapshot_time = datetime.strptime(time, '%I:%M %p')
+            snapshot_time = datetime.strptime(time, '%I:%M:%S %p')
         except ValueError:
-            raise InvalidParameterException(
-                "The time argument '{}' must be formatd as 'Hour:Minute AM/PM' (ex: 2:57 AM).".format(time))
+            try: 
+                snapshot_time = datetime.strptime(time, '%I:%M %p')
+                time_out_seconds = False
+            except ValueError:
+                raise InvalidParameterException(
+                    "The time argument '{}' must be formatd as 'Hour:Minute:Second AM/PM' (ex: 2:57:01 AM) or 'Hour:Minute AM/PM' (ex: 2:57 AM).".format(time))
 
         self.log("_date_time_conversion: Getting the Rubrik cluster timezone.")
         cluster_summary = self.get('v1', '/cluster/me', timeout=timeout)
@@ -1202,11 +1208,11 @@ class Data_Management(Api):
 
         self.log(
             "_date_time_conversion: Converting the provided time to the 24-hour clock.")
-        snapshot_time_24_hour_clock = datetime.strftime(snapshot_time, "%H:%M")
+        snapshot_time_24_hour_clock = datetime.strftime(snapshot_time, "%H:%M:%S")
 
         self.log("_date_time_conversion: Creating a combined date/time variable.")
         snapshot_datetime = datetime.strptime('{} {}'.format(
-            date, snapshot_time_24_hour_clock), '%m-%d-%Y %H:%M')
+            date, snapshot_time_24_hour_clock), '%m-%d-%Y %H:%M:%S')
 
         # Add Timezone to snapshot_datetime Variable
         timezone = pytz.timezone(cluster_timezone)
@@ -1216,7 +1222,10 @@ class Data_Management(Api):
         utc_timezone = pytz.UTC
         snapshot_datetime = snapshot_datetime.astimezone(utc_timezone)
 
-        return snapshot_datetime.strftime('%Y-%m-%dT%H:%M')
+        if time_out_seconds:
+            return snapshot_datetime.strftime('%Y-%m-%dT%H:%M:%S')
+        else:
+            return snapshot_datetime.strftime('%Y-%m-%dT%H:%M')
 
     def pause_snapshots(self, object_name, object_type, timeout=180):
         """Pause all snapshot activity for the provided object.
@@ -1831,7 +1840,7 @@ class Data_Management(Api):
             mount_name {str} -- The name given to the Live Mounted database i.e. AdventureWorks_Clone.
         Keyword Arguments:
             date {str} -- The recovery_point date to recovery to formated as `Month-Day-Year` (ex: 1-15-2014). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
-            time {str} -- The recovery_point time to recovery to formated as `Hour:Minute AM/PM` (ex: 1:30 AM). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
+            time {str} -- The recovery_point time to recovery to formated as `Hour:Minute:Second AM/PM` (ex: 1:30:01 AM). If `latest` is specified, the last snapshot taken will be used. (default: {'latest'})
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             dict -- The full response of `POST /v1/mssql/db/{id}/mount`.
@@ -2082,13 +2091,12 @@ class Data_Management(Api):
         Arguments:
             mssql_id {str} -- The ID of the database.
             date {str} -- The recovery_point date formated as `Month-Day-Year` (ex: 1-15-2014).
-            time {str} -- The recovery_point time  formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+            time {str} -- The recovery_point time  formated as `Hour:Minute:Second AM/PM` (ex: 1:30:01 AM).
         Keyword Arguments:
             timeout {int} -- The number of seconds to wait to establish a connection the Rubrik cluster before returning a timeout error. (default: {30})
         Returns:
             dict -- A dictionary with values {'is_recovery_point': bool, 'recovery_timestamp': datetime}.
         """
-        epoch = datetime(1970,1,1,0,0,0)
         
         if self.function_name == "":
             self.function_name = inspect.currentframe().f_code.co_name
@@ -2102,19 +2110,11 @@ class Data_Management(Api):
             except:
                 raise InvalidParameterException(
                     "The database with ID {} does not have any existing snapshots.".format(mssql_id))
-            # Parsing latest snapshot time string value to a datetime object as YYYY-MM-DDTHH:MM
-            data_str = datetime.strptime(
-                latest_date_time[:16], '%Y-%m-%dT%H:%M')
-            # Create date & time strings from datetime object as MM-DD-YYYY & HH:MM AM/PM
-            date_str, time_str = [data_str.strftime(
-                '%m-%d-%Y'), data_str.strftime('%I:%M %p')]
-            # Convert the date & time to cluster timezone, see _date_time_conversion function for details
-            recovery_date_time = self._date_time_conversion(date_str, time_str)
-            # Parse again to datetime object
+            # Parsing latest snapshot time string value to a datetime object as YYYY-MM-DDTHH:MM:SS
             recovery_date_time = datetime.strptime(
-                recovery_date_time, '%Y-%m-%dT%H:%M')
-            # Create recovery timestamp in (ms) as integer from datetime object
-            recovery_timestamp = (recovery_date_time - epoch).total_seconds() * 1000
+                latest_date_time[:19], '%Y-%m-%dT%H:%M:%S')
+            # Create recovery timestamp in ISO8601 format from datetime object
+            recovery_timestamp = recovery_date_time.isoformat(timespec='milliseconds')
             is_recovery_point = True
         else:
             self.log(
@@ -2128,15 +2128,15 @@ class Data_Management(Api):
             recovery_date_time = self._date_time_conversion(date, time)
             # Parse to datetime object
             recovery_date_time = datetime.strptime(
-                recovery_date_time, '%Y-%m-%dT%H:%M')
-            # Create recovery timestamp in (ms) as integer from datetime object
-            recovery_timestamp = (recovery_date_time - epoch).total_seconds() * 1000
+                recovery_date_time, '%Y-%m-%dT%H:%M:%S')
+            # Create recovery timestamp in ISO8601 format from datetime object
+            recovery_timestamp = recovery_date_time.isoformat(timespec='milliseconds')
 
             for range in range_summary['data']:
                 start_str, end_str = [range['beginTime'], range['endTime']]
-                # Parsing the range beginTime and endTime values to a datetime object as YYYY-MM-DDTHH:MM
-                start, end = [datetime.strptime(start_str[:16], '%Y-%m-%dT%H:%M'),
-                              datetime.strptime(end_str[:16], '%Y-%m-%dT%H:%M')]
+                # Parsing the range beginTime and endTime values to a datetime object as YYYY-MM-DDTHH:MM:SS
+                start, end = [datetime.strptime(start_str[:19], '%Y-%m-%dT%H:%M:%S'),
+                              datetime.strptime(end_str[:19], '%Y-%m-%dT%H:%M:%S')]
 
                 self.log(
                     "_validate_sql_recovery_point: Searching for the provided recovery_point.")
@@ -2157,7 +2157,7 @@ class Data_Management(Api):
         Arguments:
             db_name {str} -- The name of the database to instantly recover.
             date {str} -- The recovery_point date to recover to formated as `Month-Day-Year` (ex: 1-15-2014).
-            time {str} -- The recovery_point time to recover to formated as `Hour:Minute AM/PM` (ex: 1:30 AM).
+            time {str} -- The recovery_point time to recover to formated as `Hour:Minute:Second AM/PM` (ex: 1:30:01 AM).
         Keyword Arguments:
             sql_instance {str} -- The SQL instance name with the database to instantly recover.
             sql_host {str} -- The SQL Host of the database/instance to instantly recover.
@@ -2498,7 +2498,7 @@ class Data_Management(Api):
         Arguments:
             db_name {str} -- The name of the database.
             date {str} -- The recovery_point date formated as 'Month-Date-Year' (ex: 8-9-2018).
-            time {str} -- The recovery_point time formated as `Hour:Minute` (ex: 3:30 AM).
+            time {str} -- The recovery_point time formated as `Hour:Minute:Second` (ex: 3:30:01 AM).
         Keyword Arguments:
             sql_instance {str} -- The SQL instance name with the database.
             sql_host {str} -- The SQL Host of the database/instance.
@@ -2514,7 +2514,7 @@ class Data_Management(Api):
 
         recovery_date_time = self._date_time_conversion(date, time)
         recovery_point = datetime.strptime(
-            recovery_date_time, '%Y-%m-%dT%H:%M').isoformat()
+            recovery_date_time, '%Y-%m-%dT%H:%M:%S').isoformat()
         valid_recovery_point = self._validate_sql_recovery_point(
             mssql_id, date, time)
 
@@ -2538,7 +2538,7 @@ class Data_Management(Api):
         Arguments:
             db_name {str} -- The name of the database to be exported.
             date {str} -- The recovery_point date formated as 'Month-Date-Year' (ex: 8-9-2018).
-            time {str} -- The recovery_point time formated as `Hour:Minute` (ex: 3:30 AM).
+            time {str} -- The recovery_point time formated as `Hour:Minute:Second` (ex: 3:30:01 AM).
         Keyword Arguments:
             sql_instance {str} -- The SQL instance name with the database to be exported.
             sql_host {str} -- The SQL Host of the database/instance to be exported.
@@ -2593,7 +2593,7 @@ class Data_Management(Api):
         else:
             config = {}
             config['recoveryPoint'] = {
-                'timestampMs': recovery_point['recovery_timestamp']}
+                'date': recovery_point['recovery_timestamp']}
             config['targetInstanceId'] = target_instance_id
             config['targetDatabaseName'] = target_database_name
             if target_file_paths is not None:
@@ -2691,3 +2691,4 @@ class Data_Management(Api):
 
         self.log('register_vm: Registering the RBS agent.')
         return self.post('v1', '/vmware/vm/{}/register_agent'.format(vm_id), {}, timeout=timeout)
+        

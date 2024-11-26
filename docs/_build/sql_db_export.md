@@ -12,7 +12,7 @@ def sql_db_export(self, db_name, date, time, sql_instance=None, sql_host=None, t
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | db_name  | str | The name of the database to be exported. |  |
 | date  | str | The recovery_point date formated as 'Month-Date-Year' (ex: 8-9-2018). |  |
-| time  | str | The recovery_point time formated as `Hour:Minute` (ex: 3:30 AM). |  |
+| time  | str | The recovery_point time formated as `Hour:Minute:Second` (ex: 3:30:01 AM). |  |
 
 ## Keyword Arguments
 
@@ -48,7 +48,7 @@ rubrik = rubrik_cdm.Connect()
 
 db_name = "python-sdk-demo"
 date = '10-21-2019'
-time = '3:00 PM'
+time = '3:00:00 PM'
 sql_instance = 'MSSQLSERVER'
 sql_host = 'sql.rubrikdemo.com'
 target_instance_name = sql_instance

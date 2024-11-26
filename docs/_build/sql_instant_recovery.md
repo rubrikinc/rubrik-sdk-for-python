@@ -12,7 +12,7 @@ def sql_instant_recovery(self, db_name, date, time, sql_instance=None, sql_host=
 |-------------|------|-----------------------------------------------------------------------------|---------|
 | db_name  | str | The name of the database to instantly recover. |  |
 | date  | str | The recovery_point date to recover to formated as `Month-Day-Year` (ex: 1-15-2014). |  |
-| time  | str | The recovery_point time to recover to formated as `Hour:Minute AM/PM` (ex: 1:30 AM). |  |
+| time  | str | The recovery_point time to recover to formated as `Hour:Minute:Second AM/PM` (ex: 1:30 AM). |  |
 
 ## Keyword Arguments
 
@@ -41,7 +41,7 @@ rubrik = rubrik_cdm.Connect()
 
 db_name = "python-sdk-demo"
 date = "08-26-2018"
-time = "12:11 AM"
+time = "12:11:00 AM"
 sql_instance = 'MSSQLSERVER'
 sql_host = 'sql.rubrikdemo.com'
 mount_name = 'AdventureWorksClone'
