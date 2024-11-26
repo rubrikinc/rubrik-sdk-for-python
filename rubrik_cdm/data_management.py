@@ -440,7 +440,7 @@ class Data_Management(Api):
                 "api_endpoint": "/oracle/hierarchy/root/children?name={}".format(object_name)
             },
             "volume_group": {
-                "api_version": "internal",
+                "api_version": "v1",
                 "api_endpoint": "/volume_group?is_relic=false"
             },
             "archival_location": {
@@ -940,7 +940,7 @@ class Data_Management(Api):
             self.log("assign_sla: Getting a list of all volumes on the '{}' Windows host.".format(
                 windows_host))
             host_volumes = self.get(
-                "internal", "/host/{}/volume".format(physical_host_id), timeout=timeout)
+                "v1", "/host/{}/volume".format(physical_host_id), timeout=timeout)
 
             # If the object_name (volumes to assign to the SLA) is a string, create a list for processing
             if not isinstance(object_name, list):
@@ -966,7 +966,7 @@ class Data_Management(Api):
             self.log(
                 "assign_sla: Getting details of the current volume group on the Windows host.")
             volume_group_details = self.get(
-                "internal", "/volume_group/{}".format(volume_group_id), timeout=timeout)
+                "v1", "/volume_group/{}".format(volume_group_id), timeout=timeout)
 
             # Create a config of the current volume sla settings
             current_volumes_included_in_snapshot = []
@@ -992,7 +992,7 @@ class Data_Management(Api):
             else:
                 self.log("assign_sla: Assigning the vSphere VM '{}' to the '{}' SLA Domain.".format(
                     object_name, sla_name))
-                return self.patch("internal", "/volume_group/{}".format(volume_group_id), config, timeout=timeout)
+                return self.patch("v1", "/volume_group/{}".format(volume_group_id), config, timeout=timeout)
 
     def vsphere_live_mount(self, vm_name, date='latest', time='latest', host='current', remove_network_devices=False, power_on=True, timeout=15):  # pylint: ignore
         """Live Mount a vSphere VM from a specified snapshot. If a specific date and time is not provided, the last snapshot taken will be used.

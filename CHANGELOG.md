@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Fix MSSQL Recovery Point timestamp validation on Windows OS Python 2 & 3 ([Issue 268](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/268))
+- Fix Undefined API when calling volume_group/hosts apis ([Issue 286](https://github.com/rubrikinc/rubrik-sdk-for-python/issues/286))
 
 ## v2.0.10
 
